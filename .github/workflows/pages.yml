@@ -1,0 +1,56 @@
+name: Deploy homepage to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/pages.yml
+      - code/tools/export-homepage.mjs
+      - web/index.html
+      - web/index.css
+      - web/branding/sprout.svg
+      - web/branding/waajacu-favicon.png
+      - web/branding/individual/01-sprout.png
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - uses: actions/configure-pages@v5
+      - name: Export homepage
+        run: node code/tools/export-homepage.mjs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: code/artifacts/pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy homepage
+        id: deployment
+        uses: actions/deploy-pages@v5
