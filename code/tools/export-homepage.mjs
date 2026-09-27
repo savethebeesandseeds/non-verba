@@ -9,6 +9,7 @@ const output = path.join(artifacts, 'pages');
 const assets = [
   'index.html',
   'index.css',
+  'index.js',
   'branding/sprout.svg',
   'branding/waajacu-favicon.png',
   'branding/individual/01-sprout.png',

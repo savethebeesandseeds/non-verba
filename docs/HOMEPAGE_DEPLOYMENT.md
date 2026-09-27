@@ -18,6 +18,7 @@ these files:
 ```text
 index.html
 index.css
+index.js
 branding/sprout.svg
 branding/waajacu-favicon.png
 branding/individual/01-sprout.png
@@ -30,12 +31,29 @@ review page, simulator, original branding sheet, concept images, other character
 images, documentation, or private application files. No package installation or
 Rust/WASM build is needed.
 
-Set `non-verba.com` as the custom domain in the repository's Pages settings and
-configure its DNS in Cloudflare to point to GitHub Pages. The generated `CNAME`
-also records this domain; an Actions deployment still requires the custom-domain
-setting in GitHub. Once DNS verification and certificate provisioning complete,
-enable **Enforce HTTPS** in GitHub Pages. These account settings are separate from
-the workflow and cannot be enabled by its static files.
+GitHub Pages is configured with `non-verba.com` as its custom domain and **Enforce
+HTTPS** enabled. The certificate covers both `non-verba.com` and
+`www.non-verba.com`. HTTP and the `www` variant redirect to
+`https://non-verba.com/`.
+
+Cloudflare provides DNS only, with these records (proxy disabled):
+
+| Name | Type | Target |
+| --- | --- | --- |
+| `@` | A | `185.199.108.153` |
+| `@` | A | `185.199.109.153` |
+| `@` | A | `185.199.110.153` |
+| `@` | A | `185.199.111.153` |
+| `@` | AAAA | `2606:50c0:8000::153` |
+| `@` | AAAA | `2606:50c0:8001::153` |
+| `@` | AAAA | `2606:50c0:8002::153` |
+| `@` | AAAA | `2606:50c0:8003::153` |
+| `www` | CNAME | `savethebeesandseeds.github.io` |
+
+The generated `CNAME` also records the custom domain; an Actions deployment
+still requires the custom-domain setting in GitHub. Hosting and certificate
+renewal are handled by GitHub Pages; no Cloudflare Tunnel or local server is
+needed for the public site.
 
 References: [GitHub Pages custom domains](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site),
 [securing a Pages site with HTTPS](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https),

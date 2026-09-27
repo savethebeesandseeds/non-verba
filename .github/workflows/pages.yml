@@ -8,6 +8,7 @@ on:
       - code/tools/export-homepage.mjs
       - web/index.html
       - web/index.css
+      - web/index.js
       - web/branding/sprout.svg
       - web/branding/waajacu-favicon.png
       - web/branding/individual/01-sprout.png
