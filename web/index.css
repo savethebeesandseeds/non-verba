@@ -26,16 +26,28 @@ body {
 }
 
 .page {
-  width: min(100%, 1024px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(6px, 1.5svh, 14px);
+  width: min(100%, 560px);
+  height: 100svh;
+  min-height: 35rem;
   margin-inline: auto;
-  padding: 38px 48px 24px;
+  padding: clamp(8px, 1.8svh, 20px) 20px;
   text-align: center;
+}
+
+.page > main {
+  display: grid;
+  grid-template-rows: auto auto minmax(96px, 1fr) auto;
+  gap: clamp(6px, 1.5svh, 14px);
+  min-height: 0;
 }
 
 .masthead {
   display: flex;
   justify-content: center;
-  padding-bottom: 24px;
+  padding-bottom: clamp(6px, 1.3svh, 12px);
   border-bottom: 1px solid var(--line);
 }
 
@@ -44,19 +56,19 @@ body {
 .wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   color: var(--green);
-  font: 650 clamp(.85rem, 2.1vw, 1.05rem)/1.4 var(--mono);
+  font: 650 .85rem/1.4 var(--mono);
   letter-spacing: .12em;
 }
 
-.wordmark img { width: 2em; height: 2em; }
+.wordmark img { width: 1.5em; height: 1.5em; }
 
 .headline {
-  margin: 38px 0 32px;
+  margin: 0;
   color: var(--green);
   font-family: var(--sans);
-  font-size: clamp(4.25rem, 16.8vw, 10rem);
+  font-size: clamp(2.5rem, min(14vw, 8.5svh), 4.75rem);
   font-weight: 520;
   line-height: .96;
   letter-spacing: -.055em;
@@ -75,8 +87,8 @@ body {
 .description {
   margin: 0;
   font-family: var(--mono);
-  font-size: clamp(1.05rem, 2.65vw, 1.75rem);
-  line-height: 1.55;
+  font-size: clamp(.8125rem, 1.75svh, 1rem);
+  line-height: 1.45;
   letter-spacing: -.025em;
   text-wrap: balance;
 }
@@ -84,46 +96,44 @@ body {
 .illustration {
   position: relative;
   isolation: isolate;
-  width: min(100%, 672px);
-  margin: 8px auto -10px;
+  width: min(100%, 360px);
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
 }
 
 .illustration::before {
   content: "";
   position: absolute;
   z-index: -1;
-  top: 7.5%;
-  left: 8%;
-  width: 84%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 1px solid rgba(35, 107, 96, .12);
-  background: radial-gradient(circle at 38% 30%, #e5ebdf, #dfe9dd);
+  inset: 0;
+  background: radial-gradient(circle closest-side, #e5ebdf 0%, #dfe9dd 83.5%, rgba(35, 107, 96, .15) 84%, transparent 84.5%);
 }
 
 .character {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
   /* The character sits slightly right of center in the original transparent PNG. */
   transform: translateX(-2%);
 }
 
-.source { display: grid; justify-items: center; gap: 14px; }
+.source { display: grid; justify-items: center; gap: 8px; }
 
 .source-link, .app-button {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  gap: 14px;
-  width: min(100%, 590px);
-  min-height: 76px;
-  padding: 18px 28px;
+  gap: 10px;
+  width: min(100%, 420px);
+  min-height: 44px;
+  padding: 10px 16px;
   border: 1px solid var(--teal);
   border-radius: 0;
   background: transparent;
   color: var(--teal);
-  font: 650 clamp(.85rem, 2.3vw, 1.1rem)/1.5 var(--mono);
+  font: 650 clamp(.75rem, 1.55svh, .875rem)/1.45 var(--mono);
   letter-spacing: .025em;
   text-decoration: none;
   transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
@@ -145,12 +155,11 @@ body {
 .github-icon { flex: 0 0 auto; width: 1em; height: 1em; }
 
 .footer {
-  margin-top: 38px;
-  padding-top: 23px;
+  padding-top: clamp(6px, 1.1svh, 10px);
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: .8rem;
+  font-size: .75rem;
   line-height: 1.5;
 }
 
@@ -165,7 +174,7 @@ body {
   text-decoration-thickness: 1px;
   text-underline-offset: .2em;
 }
-.credit > img { width: 24px; height: 24px; object-fit: contain; }
+.credit > img { width: 20px; height: 20px; object-fit: contain; }
 .credit-link:hover { color: var(--gold-dark); }
 .credit-link:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 4px; }
 
@@ -202,15 +211,7 @@ body {
 .dialog-close:hover { background: var(--paper-deep); border-color: var(--gold-dark); }
 
 @media (max-width: 600px) {
-  .page { padding: 27px 22px 22px; }
-  .masthead { padding-bottom: 20px; }
-  .wordmark { gap: 9px; }
-  .headline { margin-top: 34px; margin-bottom: 25px; font-size: clamp(3.75rem, 17.4vw, 6.5rem); }
-  .description { font-size: clamp(1rem, 4vw, 1.35rem); }
   .wide-break { display: none; }
-  .illustration { margin-top: 12px; margin-bottom: 0; }
-  .source-link, .app-button { min-height: 60px; gap: 10px; padding: 15px 17px; }
-  .footer { margin-top: 29px; padding-top: 19px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
