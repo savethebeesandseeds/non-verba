@@ -1,0 +1,218 @@
+{
+  "tool": "built-in ImageGen",
+  "date": "2026-09-26",
+  "reference": "../base_logos.png",
+  "originalSHA256": "23d1665f0cb1c9240ac14c4cea94c24ba3fb5e34dfb669331aec4f6e41be917f",
+  "format": "PNG RGBA",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "constraints": [
+    "one character per image",
+    "transparent background",
+    "no lettering or numbered labels",
+    "preserve original reference file"
+  ],
+  "assets": [
+    {
+      "file": "01-sprout.png",
+      "referencePosition": {
+        "row": 1,
+        "column": 1
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual transparent branding logo. Input image is the original contact sheet and the edit reference. Regenerate ONLY the specified single first-row character as a standalone high-quality image, faithfully following its original appearance; do not reproduce the sheet or its label. Preserve the blank peach oval head with no facial features, near-black bold hand-drawn outlines, softly textured watercolor earth-tone robe, tied cord belt, closed book in viewer-left hand and plant in viewer-right hand, original waist-up shape and horizontal straight bottom crop. The character should be centered with ample clear margin in a 1024x1024 PNG with a genuine transparent alpha background. Keep the original proportions and polished simple watercolor-logo style. NO background color, white rectangle, paper, checkerboard pixels, lettering, numbers, labels, words, watermark, extra characters, extra anatomy or scenery. Book decorative nonletter motifs are allowed only as in the reference. Target first row, first column: SPROUT. Light warm tan/beige robe with folded collar and tan cord belt; plain reddish-brown closed book with light page edge; simple upright brown plant stem with exactly two broad green leaves.",
+      "refinementPrompt": "Use case: precise-object-edit. Edit this single transparent logo asset. Keep the entire character, proportions, blank face, plant, book, muted watercolor colors and bold black outlines exactly the same. Remove the tiny unwanted bright colored fringe along the horizontal bottom crop of the robe, and finish that horizontal bottom edge cleanly with a solid near-black outline just like the outer contour. Preserve actual transparency in all surrounding space, including every pixel below the horizontal bottom edge, and preserve antialiasing on character edges. Nothing else changes. Single character, transparent PNG, no added text or background."
+    },
+    {
+      "file": "02-leafy.png",
+      "referencePosition": {
+        "row": 1,
+        "column": 2
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual transparent branding logo. Input image is the original contact sheet and the edit reference. Regenerate ONLY the specified single first-row character as a standalone high-quality image, faithfully following its original appearance; do not reproduce the sheet or its label. Preserve the blank peach oval head with no facial features, near-black bold hand-drawn outlines, softly textured watercolor earth-tone robe, tied cord belt, closed book in viewer-left hand and plant in viewer-right hand, original waist-up shape and horizontal straight bottom crop. The character should be centered with ample clear margin in a 1024x1024 PNG with a genuine transparent alpha background. Keep the original proportions and polished simple watercolor-logo style. NO background color, white rectangle, paper, checkerboard pixels, lettering, numbers, labels, words, watermark, extra characters, extra anatomy or scenery. Book decorative nonletter motifs are allowed only as in the reference. Target first row, second column: LEAFY. Warm medium brown robe with folded dark collar and tan cord belt; deep dark green closed book with light page edge and subtle gold spine details; upright leafy twig with multiple pointed oval dark green leaves, matching the original branch shape.",
+      "refinementPrompt": "Use case: precise-object-edit. Edit this single transparent logo asset. Keep the entire character, proportions, blank face, plant, book, muted watercolor colors and bold black outlines exactly the same. Remove the tiny unwanted bright colored fringe along the horizontal bottom crop of the robe, and finish that horizontal bottom edge cleanly with a solid near-black outline just like the outer contour. Preserve actual transparency in all surrounding space, including every pixel below the horizontal bottom edge, and preserve antialiasing on character edges. Nothing else changes. Single character, transparent PNG, no added text or background."
+    },
+    {
+      "file": "03-flower.png",
+      "referencePosition": {
+        "row": 1,
+        "column": 3
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual transparent branding logo. Input image is the original contact sheet and the edit reference. Regenerate ONLY the specified single first-row character as a standalone high-quality image, faithfully following its original appearance; do not reproduce the sheet or its label. Preserve the blank peach oval head with no facial features, near-black bold hand-drawn outlines, softly textured watercolor earth-tone robe, tied cord belt, closed book in viewer-left hand and plant in viewer-right hand, original waist-up shape and horizontal straight bottom crop. The character should be centered with ample clear margin in a 1024x1024 PNG with a genuine transparent alpha background. Keep the original proportions and polished simple watercolor-logo style. NO background color, white rectangle, paper, checkerboard pixels, lettering, numbers, labels, words, watermark, extra characters, extra anatomy or scenery. Book decorative nonletter motifs are allowed only as in the reference. Target first row, third column: FLOWER. Pale warm gray-beige robe with folded collar and tan cord belt; deep slate-blue closed book with light page edges and subtle gold leaf/feather-like cover emblem; single upright daisy flower with cream/off-white petals, golden yellow center, green stem and two green leaves.",
+      "refinementPrompt": "Use case: precise-object-edit. Edit this single transparent logo asset. Keep the entire character, proportions, blank face, plant, book, muted watercolor colors and bold black outlines exactly the same. Remove the tiny unwanted bright colored fringe along the horizontal bottom crop of the robe, and finish that horizontal bottom edge cleanly with a solid near-black outline just like the outer contour. Preserve actual transparency in all surrounding space, including every pixel below the horizontal bottom edge, and preserve antialiasing on character edges. Nothing else changes. Single character, transparent PNG, no added text or background."
+    },
+    {
+      "file": "04-sapling.png",
+      "referencePosition": {
+        "row": 1,
+        "column": 4
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual transparent branding logo. Input image is the original contact sheet and the edit reference. Regenerate ONLY the specified single first-row character as a standalone high-quality image, faithfully following its original appearance; do not reproduce the sheet or its label. Preserve the blank peach oval head with no facial features, near-black bold hand-drawn outlines, softly textured watercolor earth-tone robe, tied cord belt, closed book in viewer-left hand and plant in viewer-right hand, original waist-up shape and horizontal straight bottom crop. The character should be centered with ample clear margin in a 1024x1024 PNG with a genuine transparent alpha background. Keep the original proportions and polished simple watercolor-logo style. NO background color, white rectangle, paper, checkerboard pixels, lettering, numbers, labels, words, watermark, extra characters, extra anatomy or scenery. Book decorative nonletter motifs are allowed only as in the reference. Target first row, fourth column: SAPLING. Muted forest/olive-green robe with folded dark collar and tan cord belt; plain warm reddish-brown closed book with light page edge; a tiny brown terracotta pot held in viewer-right hand containing a young upright sapling with central brown stem and alternating pairs of pointed dark green leaves plus a top leaf.",
+      "refinementPrompt": "Use case: precise-object-edit. Edit this single transparent logo asset. Keep the entire character, proportions, blank face, plant, book, muted watercolor colors and bold black outlines exactly the same. Remove the tiny unwanted bright colored fringe along the horizontal bottom crop of the robe, and finish that horizontal bottom edge cleanly with a solid near-black outline just like the outer contour. Preserve actual transparency in all surrounding space, including every pixel below the horizontal bottom edge, and preserve antialiasing on character edges. Nothing else changes. Single character, transparent PNG, no added text or background."
+    },
+    {
+      "file": "05-olive.png",
+      "referencePosition": {
+        "row": 1,
+        "column": 5
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual transparent branding logo. Input image is the original contact sheet and the edit reference. Regenerate ONLY the specified single first-row character as a standalone high-quality image, faithfully following its original appearance; do not reproduce the sheet or its label. Preserve the blank peach oval head with no facial features, near-black bold hand-drawn outlines, softly textured watercolor earth-tone robe, tied cord belt, closed book in viewer-left hand and plant in viewer-right hand, original waist-up shape and horizontal straight bottom crop. The character should be centered with ample clear margin in a 1024x1024 PNG with a genuine transparent alpha background. Keep the original proportions and polished simple watercolor-logo style. NO background color, white rectangle, paper, checkerboard pixels, lettering, numbers, labels, words, watermark, extra characters, extra anatomy or scenery. Keep silhouette edges clean without fringe-colored stray pixels especially at the straight bottom. Book decorative nonletter motifs are allowed only as in the reference. Target first row, fifth column: OLIVE. Deep warm brown robe with folded dark collar and tan cord belt; very dark green closed book with light page edge and gold small botanical sprig cover motif; elegant upright olive twig held in viewer-right hand with slender brown branches and many slim pointed sage-green leaves, matching the reference.",
+      "refinementPrompt": "Use case: precise-object-edit. Edit this single transparent logo asset. Keep the entire character, proportions, blank face, plant, book, muted watercolor colors and bold black outlines exactly the same. There are unwanted tiny bright red/yellow/white colored speckles and a thin fringe directly below the horizontal bottom crop of the robe. Remove every stray pixel below the bottom of the robe, and finish that horizontal bottom edge cleanly with a solid near-black outline just like the outer contour. Preserve actual transparency in all surrounding space, including every pixel below the horizontal bottom edge, and preserve antialiasing on character edges. Nothing else changes. Single character, transparent PNG, no added text or background."
+    },
+    {
+      "file": "06-herb.png",
+      "referencePosition": {
+        "row": 1,
+        "column": 6
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual transparent branding logo. Input image is the original contact sheet and the edit reference. Regenerate ONLY the specified single first-row character as a standalone high-quality image, faithfully following its original appearance; do not reproduce the sheet or its label. Preserve the blank peach oval head with no facial features, near-black bold hand-drawn outlines, softly textured watercolor earth-tone robe, tied cord belt, closed book in viewer-left hand and plant in viewer-right hand, original waist-up shape and horizontal straight bottom crop. The character should be centered with ample clear margin in a 1024x1024 PNG with a genuine transparent alpha background. Keep the original proportions and polished simple watercolor-logo style. NO background color, white rectangle, paper, checkerboard pixels, lettering, numbers, labels, words, watermark, extra characters, extra anatomy or scenery. Keep silhouette edges clean without fringe-colored stray pixels especially at the straight bottom. Book decorative nonletter motifs are allowed only as in the reference. Target first row, sixth column: HERB. Warm pale stone/cream robe with folded collar and tan cord belt; muted russet reddish-brown closed book with light page edge and faint gold simple botanical nonletter cover motif; slender upright rosemary-like herb sprig in viewer-right hand with numerous tiny paired green oblong leaves along a central brown stem, matching the reference.",
+      "refinementPrompt": "Use case: precise-object-edit. Edit this single transparent logo asset. Keep the entire character, proportions, blank face, plant, book, muted watercolor colors and bold black outlines exactly the same. There are unwanted tiny bright red/yellow/white colored speckles and a thin fringe directly below the horizontal bottom crop of the robe. Remove every stray pixel below the bottom of the robe, and finish that horizontal bottom edge cleanly with a solid near-black outline just like the outer contour. Preserve actual transparency in all surrounding space, including every pixel below the horizontal bottom edge, and preserve antialiasing on character edges. Nothing else changes. Single character, transparent PNG, no added text or background."
+    },
+    {
+      "file": "07-bonsai.png",
+      "referencePosition": {
+        "row": 2,
+        "column": 1
+      },
+      "prompt": "Use case: logo-brand. Input image is a reference contact sheet only. Regenerate ONE selected individual illustration from scratch at high quality, faithful to its appearance in the reference. Output a single centered isolated waist-up character on a genuinely transparent RGBA background, 1024x1024, with clear margins on every side. Preserve blank peach oval head with no facial features, thick near-black hand-drawn contour, softly textured watercolor earth-tone robe, tied beige cord belt, closed book in hand on viewer-left and plant on viewer-right, straight horizontal cropped bottom of torso. Match the polished simple watercolor logo style, proportions and silhouette. No white or cream backdrop, no checkerboard pixels, no scenery, no ground shadow, no letters, text, numbers, labels, words, watermark or other figures. Decorative nonletter motifs may remain. Select ONLY second row, first column, the bonsai character numbered 7. Dark charcoal black robe with matching draped cowl, beige cord belt. Brown closed book with cream page edge in viewer-left hand, natural dark spine and subtle gold detail. Viewer-right hand holds a low brown pot containing a little bonsai tree with curved brown trunk and three rounded green foliage clusters. Keep the asymmetrical bonsai branch form shown in the source. Discard the caption entirely."
+    },
+    {
+      "file": "08-cactus.png",
+      "referencePosition": {
+        "row": 2,
+        "column": 2
+      },
+      "prompt": "Use case: logo-brand. Input image is a reference contact sheet only. Regenerate ONE selected individual illustration from scratch at high quality, faithful to its appearance in the reference. Output a single centered isolated waist-up character on a genuinely transparent RGBA background, 1024x1024, with clear margins on every side. Preserve blank peach oval head with no facial features, thick near-black hand-drawn contour, softly textured watercolor earth-tone robe, tied beige cord belt, closed book in hand on viewer-left and plant on viewer-right, straight horizontal cropped bottom of torso. Match the polished simple watercolor logo style, proportions and silhouette. No white or cream backdrop, no checkerboard pixels, no scenery, no ground shadow, no letters, text, numbers, labels, words, watermark or other figures. Decorative nonletter motifs may remain. Select ONLY second row, second column, the cactus character numbered 8. Warm sandy beige robe and draped cowl, beige cord belt. Very dark charcoal closed book with cream page edge held viewer-left. Viewer-right hand holds a terracotta pot containing a tall rounded green cactus with black fine spines and short side growths. Preserve cactus shape and pot exactly in spirit of the source. Discard the caption entirely."
+    },
+    {
+      "file": "09-mushroom.png",
+      "referencePosition": {
+        "row": 2,
+        "column": 3
+      },
+      "prompt": "Use case: logo-brand. Input image is a reference contact sheet only. Regenerate ONE selected individual illustration from scratch at high quality, faithful to its appearance in the reference. Output a single centered isolated waist-up character on a genuinely transparent RGBA background, 1024x1024, with clear margins on every side. Preserve blank peach oval head with no facial features, thick near-black hand-drawn contour, softly textured watercolor earth-tone robe, tied beige cord belt, closed book in hand on viewer-left and plant on viewer-right, straight horizontal cropped bottom of torso. Match the polished simple watercolor logo style, proportions and silhouette. No white or cream backdrop, no checkerboard pixels, no scenery, no ground shadow, no letters, text, numbers, labels, words, watermark or other figures. Decorative nonletter motifs may remain. Select ONLY second row, third column, the mushroom character numbered 9. Deep earthy burgundy-red robe with matching cowl and beige cord belt. Forest green closed book with cream page edge and small golden spine details in viewer-left hand. Viewer-right hand supports a small shallow brown planting base containing three mushrooms: large central mushroom with tan cap and cream stem, small mushroom at lower left and medium mushroom on right. Preserve the distinctive mushroom cluster silhouette shown. Discard caption entirely."
+    },
+    {
+      "file": "10-grain.png",
+      "referencePosition": {
+        "row": 2,
+        "column": 4
+      },
+      "prompt": "Use case: logo-brand. Input image is a reference contact sheet only. Regenerate ONE selected individual illustration from scratch at high quality, faithful to its appearance in the reference. Output a single centered isolated waist-up character on a genuinely transparent RGBA background, 1024x1024, with clear margins on every side. Preserve blank peach oval head with no facial features, thick near-black hand-drawn contour, softly textured watercolor earth-tone robe, tied beige cord belt, closed book in hand on viewer-left and plant on viewer-right, straight horizontal cropped bottom of torso. Match the polished simple watercolor logo style, proportions and silhouette. No white or cream backdrop, no checkerboard pixels, no scenery, no ground shadow, no letters, text, numbers, labels, words, watermark or other figures. Decorative nonletter motifs may remain. Select ONLY second row, fourth column, the grain character numbered 10. Light pale linen cream robe with diagonal wrap collar, beige cord belt. Dark earthy brown closed book with cream page edge and subtle golden spine detail in viewer-left hand. Viewer-right hand gently holds a narrow bundle of three golden wheat/grain stalks with detailed oval grains and pointed awns, tallest central stalk and shorter side stalks. No pot. Preserve original delicate grain shape. Discard caption entirely."
+    },
+    {
+      "file": "11-berry.png",
+      "referencePosition": {
+        "row": 2,
+        "column": 5
+      },
+      "prompt": "Use case: logo-brand. Input image is a reference contact sheet only. Regenerate ONE selected individual illustration from scratch at high quality, faithful to its appearance in the reference. Output a single centered isolated waist-up character on a genuinely transparent RGBA background, 1024x1024, with clear margins on every side. Preserve blank peach oval head with no facial features, thick near-black hand-drawn contour, softly textured watercolor earth-tone robe, tied beige cord belt, closed book in hand on viewer-left and plant on viewer-right, clean straight horizontal cropped bottom of torso without colored fringes or stray pixels. Match the polished simple watercolor logo style, proportions and silhouette. No white or cream backdrop, no checkerboard pixels, no scenery, no ground shadow, no letters, text, numbers, labels, words, watermark or other figures. Decorative nonletter motifs may remain. Select ONLY second row, fifth column, the berry character numbered 11. Muted dark olive-green robe with diagonal wrap collar, beige cord belt. Dark blue/slate closed book with cream page edge and very subtle nonletter leaf cover detail in viewer-left hand. Viewer-right hand holds a slender branching plant stem bearing rusty red-brown small berries and green pointed leaves like the source, tallest top leaf green, reddish oval berry/leaf shapes branching beneath it. No pot. Preserve original sparse branching botanical silhouette. Discard caption entirely."
+    },
+    {
+      "file": "12-conifer.png",
+      "referencePosition": {
+        "row": 2,
+        "column": 6
+      },
+      "prompt": "Use case: logo-brand. Input image is a reference contact sheet only. Regenerate ONE selected individual illustration from scratch at high quality, faithful to its appearance in the reference. Output a single centered isolated waist-up character on a genuinely transparent RGBA background, 1024x1024, with clear margins on every side. Preserve blank peach oval head with no facial features, thick near-black hand-drawn contour, softly textured watercolor earth-tone robe, tied beige cord belt, closed book in hand on viewer-left and plant on viewer-right, clean straight horizontal cropped bottom of torso without colored fringes or stray pixels. Match the polished simple watercolor logo style, proportions and silhouette. No white or cream backdrop, no checkerboard pixels, no scenery, no ground shadow, no letters, text, numbers, labels, words, watermark or other figures. Decorative nonletter motifs may remain. Select ONLY second row, sixth column, the conifer character numbered 12. Dark neutral slate-gray robe and draped cowl, beige cord belt. Rich brown closed book with cream page edge and simple pale gold decorative corner trim in viewer-left hand. Viewer-right hand holds a tiny shallow brown pot containing one miniature conifer tree: short brown trunk and pointed evergreen tree with tiered dark sage green needle-branch silhouette. Preserve original compact Christmas-tree-like botanical silhouette. Discard caption entirely."
+    },
+    {
+      "file": "13-clover.png",
+      "referencePosition": {
+        "row": 3,
+        "column": 1
+      },
+      "prompt": "Use case: logo-brand. Input image is a style and identity reference contact sheet, NOT the desired output layout. Regenerate exactly ONE individual from it as a fresh polished illustration. Output one centered isolated waist-up character at 1024x1024, genuine transparent RGBA PNG with alpha=0 background and generous transparent margin. Faithfully match the source's simple watercolor mascot logo style: featureless blank warm peach oval head without face or hair, strong handdrawn near-black outline, softly textured earth-tone robe, tied tan rope belt, peach hands, closed upright book in hand on viewer-left, plant in hand on viewer-right, straight horizontal waist-up bottom crop. Preserve the corresponding original color palette, pose, proportions and botanical design. No letters, words, numbers, captions, labels, signature or watermark anywhere. No scenery, white background, color background, checkerboard depiction, drop shadow or other figures. Regenerate this subject only: CLOVER, reference third row first column (number 13). Muted deep olive green monk robe and dark green book with a simple thin golden diamond geometric emblem (not a letter); on viewer-right hold upright green clover stem with a large four-leaf clover at top and small lower leaves. Keep no pot if none in reference. Do not reproduce caption."
+    },
+    {
+      "file": "14-vine.png",
+      "referencePosition": {
+        "row": 3,
+        "column": 2
+      },
+      "prompt": "Use case: logo-brand. Input image is a style and identity reference contact sheet, NOT the desired output layout. Regenerate exactly ONE individual from it as a fresh polished illustration. Output one centered isolated waist-up character at 1024x1024, genuine transparent RGBA PNG with alpha=0 background and generous transparent margin. Faithfully match the source's simple watercolor mascot logo style: featureless blank warm peach oval head without face or hair, strong handdrawn near-black outline, softly textured earth-tone robe, tied tan rope belt, peach hands, closed upright book in hand on viewer-left, plant in hand on viewer-right, straight horizontal waist-up bottom crop. Preserve the corresponding original color palette, pose, proportions and botanical design. No letters, words, numbers, captions, labels, signature or watermark anywhere. No scenery, white background, color background, checkerboard depiction, drop shadow or other figures. Regenerate this subject only: VINE, reference third row second column (number 14). Warm cream beige monk robe and reddish brown closed book with no writing; on viewer-right hold a graceful thin curling vine with heart-shaped green leaves that extends upward and trails downward alongside hand. No flower and no pot. Do not reproduce caption."
+    },
+    {
+      "file": "15-lotus.png",
+      "referencePosition": {
+        "row": 3,
+        "column": 3
+      },
+      "prompt": "Use case: logo-brand. Input image is a style and identity reference contact sheet, NOT the desired output layout. Regenerate exactly ONE individual from it as a fresh polished illustration. Output one centered isolated waist-up character at 1024x1024, genuine transparent RGBA PNG with alpha=0 background and generous transparent margin. Faithfully match the source's simple watercolor mascot logo style: featureless blank warm peach oval head without face or hair, strong handdrawn near-black outline, softly textured earth-tone robe, tied tan rope belt, peach hands, closed upright book in hand on viewer-left, plant in hand on viewer-right, straight horizontal waist-up bottom crop. Preserve the corresponding original color palette, pose, proportions and botanical design. No letters, words, numbers, captions, labels, signature or watermark anywhere. No scenery, white background, color background, checkerboard depiction, drop shadow or other figures. Regenerate this subject only: LOTUS, reference third row third column (number 15). Dark charcoal gray monk robe, dark blue-gray closed book with small thin golden circle emblem (not a letter) on cover. Viewer-right hand supports a small shallow dark brown dish or pot with one beautiful salmon pink lotus flower, broad layered pointed petals on a small stem. Keep this subject's simple pink lotus silhouette, no unrelated greenery. Do not reproduce caption."
+    },
+    {
+      "file": "16-fern.png",
+      "referencePosition": {
+        "row": 3,
+        "column": 4
+      },
+      "prompt": "Use case: logo-brand. Input image is a style and identity reference contact sheet, NOT the desired output layout. Regenerate exactly ONE individual from it as a fresh polished illustration. Output one centered isolated waist-up character at 1024x1024, genuine transparent RGBA PNG with alpha=0 background and generous transparent margin. Faithfully match the source's simple watercolor mascot logo style: featureless blank warm peach oval head without face or hair, strong handdrawn near-black outline, softly textured earth-tone robe, tied tan rope belt, peach hands, closed upright book in hand on viewer-left, plant in hand on viewer-right, straight horizontal waist-up bottom crop. Preserve the corresponding original color palette, pose, proportions and botanical design. No letters, words, numbers, captions, labels, signature or watermark anywhere. No scenery, white background, color background, checkerboard depiction, drop shadow or other figures. Regenerate this subject only: FERN, reference third row fourth column (number 16). Warm medium brown monk robe and plain dark reddish brown closed book without writing. Viewer-right hand supports a small brown pot from which rises a single graceful tall fern frond with many alternating narrow serrated green leaflets. Faithfully keep the fern's distinct curved frond and source proportions. Do not reproduce caption."
+    },
+    {
+      "file": "17-oak.png",
+      "referencePosition": {
+        "row": 3,
+        "column": 5
+      },
+      "prompt": "Use case: logo-brand. Input image is a style and identity reference contact sheet, NOT the desired output layout. Regenerate exactly ONE individual from it as a fresh polished illustration. Output one centered isolated waist-up character at 1024x1024, genuine transparent RGBA PNG with alpha=0 background and generous transparent margin. Faithfully match the source's simple watercolor mascot logo style: featureless blank warm peach oval head without face or hair, strong handdrawn near-black outline, softly textured earth-tone robe, tied tan rope belt, peach hands, closed upright book in hand on viewer-left, plant in hand on viewer-right, straight horizontal waist-up bottom crop. Preserve the corresponding original color palette, pose, proportions and botanical design. No letters, words, numbers, captions, labels, signature or watermark anywhere. No scenery, white background, color background, checkerboard depiction, drop shadow or other figures. Regenerate this subject only: OAK, reference third row fifth column (number 17). Warm cream beige monk robe and dark forest-green closed book with a small simple golden oak-leaf botanical emblem (not a letter). Viewer-right hand holds a small upright oak twig with several broad lobed green leaves. No pot. Use smooth clean antialiased alpha edges with no colored fringe or stray pixels; in particular keep the horizontal bottom of robe contour clean and black. Do not reproduce caption."
+    },
+    {
+      "file": "18-bamboo.png",
+      "referencePosition": {
+        "row": 3,
+        "column": 6
+      },
+      "prompt": "Use case: logo-brand. Input image is a style and identity reference contact sheet, NOT the desired output layout. Regenerate exactly ONE individual from it as a fresh polished illustration. Output one centered isolated waist-up character at 1024x1024, genuine transparent RGBA PNG with alpha=0 background and generous transparent margin. Faithfully match the source's simple watercolor mascot logo style: featureless blank warm peach oval head without face or hair, strong handdrawn near-black outline, softly textured earth-tone robe, tied tan rope belt, peach hands, closed upright book in hand on viewer-left, plant in hand on viewer-right, straight horizontal waist-up bottom crop. Preserve the corresponding original color palette, pose, proportions and botanical design. No letters, words, numbers, captions, labels, signature or watermark anywhere. No scenery, white background, color background, checkerboard depiction, drop shadow or other figures. Regenerate this subject only: BAMBOO, reference third row sixth column (number 18). Muted slate blue-gray monk robe and plain reddish brown closed book with no writing. Viewer-right hand holds a tall slim green bamboo shoot with long pointed leaves branching diagonally left and right; visible segmented stem. No pot. Use smooth clean antialiased alpha edges with no colored fringe or stray pixels; in particular keep the horizontal bottom of robe contour clean and black. Do not reproduce caption."
+    },
+    {
+      "file": "19-dried.png",
+      "referencePosition": {
+        "row": 4,
+        "column": 1
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual Non-verba character branding PNG. Input image: original 24-design contact sheet, reference only; regenerate ONLY the specified character as a separate clean high-resolution image. Match its simple hand-drawn watercolor logo style: bold near-black rounded outlines, restrained watercolor texture within filled shapes, blank peach oval head with no eyes/mouth/hair, robe with tied cord belt, waist-up portrait with a straight lower crop. Preserve its pose: closed book held on viewer-left, botanical object held on viewer-right. Preserve the selected design's shapes and muted colors rather than redesigning it. One centered character on a 1024x1024 canvas with comfortable transparent margin and the full plant/book inside frame. Output a genuine transparent-background RGBA PNG: all space outside the character and openings between silhouette parts must have real alpha transparency. No colored/white/cream background, no checkerboard drawn into the pixels, no shadow outside the artwork, no frame. No text, letters, numbers, caption, label, watermark, or additional design. Keep decorative nonalphabetic book motifs if present. Selected character: bottom row, column 1, labeled 19. DRIED. Brown robe with darker brown scarf folds, tan parchment-brown closed book with dark edging on viewer-left, a small upright dry twig with sparse pointed tan ochre leaves on viewer-right. Match this exact dry botanical branch; no green leaves, no pot."
+    },
+    {
+      "file": "20-fruit.png",
+      "referencePosition": {
+        "row": 4,
+        "column": 2
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual Non-verba character branding PNG. Input image: original 24-design contact sheet, reference only; regenerate ONLY the specified character as a separate clean high-resolution image. Match its simple hand-drawn watercolor logo style: bold near-black rounded outlines, restrained watercolor texture within filled shapes, blank peach oval head with no eyes/mouth/hair, robe with tied cord belt, waist-up portrait with a straight lower crop. Preserve its pose: closed book held on viewer-left, botanical object held on viewer-right. Preserve the selected design's shapes and muted colors rather than redesigning it. One centered character on a 1024x1024 canvas with comfortable transparent margin and the full plant/book inside frame. Output a genuine transparent-background RGBA PNG: all space outside the character and openings between silhouette parts must have real alpha transparency. No colored/white/cream background, no checkerboard drawn into the pixels, no shadow outside the artwork, no frame. No text, letters, numbers, caption, label, watermark, or additional design. Keep decorative nonalphabetic book motifs if present. Selected character: bottom row, column 2, labeled 20. FRUIT. Cream/ecru robe, dark slate-blue closed book with a small gold outlined circle on viewer-left; upright leafy green fruit twig with two small round orange fruits on viewer-right. No pot; preserve orange fruit and branch silhouette.",
+      "refinementPrompt": "Use case: precise-object-edit. The input is the edit target: a single cream-robed blank-faced character holding a blue book with a gold ring and an orange-fruit branch. Preserve the entire character, colors, watercolor texture, outline weight, pose, scale and blank face. Clean ONLY the transparent cutout edges: remove the stray white/red/yellow pixel fringe along the straight lower edge of the robe, and any loose colored pixels or background remnants outside the silhouette. End the robe and hanging cord at one clean smooth straight horizontal edge with no halo underneath. Keep real alpha transparency outside all artwork; no checkerboard pixels or background fill. No text, numbers, letters or labels. Output a clean transparent RGBA PNG ready as a branding icon."
+    },
+    {
+      "file": "21-seedling.png",
+      "referencePosition": {
+        "row": 4,
+        "column": 3
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual Non-verba character branding PNG. Input image: original 24-design contact sheet, reference only; regenerate ONLY the specified character as a separate clean high-resolution image. Match its simple hand-drawn watercolor logo style: bold near-black rounded outlines, restrained watercolor texture within filled shapes, blank peach oval head with no eyes/mouth/hair, robe with tied cord belt, waist-up portrait with a straight lower crop. Preserve its pose: closed book held on viewer-left, botanical object held on viewer-right. Preserve the selected design's shapes and muted colors rather than redesigning it. One centered character on a 1024x1024 canvas with comfortable transparent margin and the full plant/book inside frame. Output a genuine transparent-background RGBA PNG: all space outside the character and openings between silhouette parts must have real alpha transparency. No colored/white/cream background, no checkerboard drawn into the pixels, no shadow outside the artwork, no frame. No text, letters, numbers, caption, label, watermark, or additional design. Keep decorative nonalphabetic book motifs if present. Selected character: bottom row, column 3, labeled 21. SEEDLING. Muted olive-brown robe, brown closed book on viewer-left, tiny two-leaf green seedling emerging from soil in a small ochre-brown pot held viewer-right. Preserve the small two-leaf seedling, not a tree or bush. Use a precise clean alpha boundary: no loose colored pixels, halos, or background remnants along the silhouette or straight bottom edge."
+    },
+    {
+      "file": "22-coral.png",
+      "referencePosition": {
+        "row": 4,
+        "column": 4
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual Non-verba character branding PNG. Input image: original 24-design contact sheet, reference only; regenerate ONLY the specified character as a separate clean high-resolution image. Match its simple hand-drawn watercolor logo style: bold near-black rounded outlines, restrained watercolor texture within filled shapes, blank peach oval head with no eyes/mouth/hair, robe with tied cord belt, waist-up portrait with a straight lower crop. Preserve its pose: closed book held on viewer-left, botanical object held on viewer-right. Preserve the selected design's shapes and muted colors rather than redesigning it. One centered character on a 1024x1024 canvas with comfortable transparent margin and the full plant/book inside frame. Output a genuine transparent-background RGBA PNG: all space outside the character and openings between silhouette parts must have real alpha transparency. No colored/white/cream background, no checkerboard drawn into the pixels, no shadow outside the artwork, no frame. No text, letters, numbers, caption, label, watermark, or additional design. Keep decorative nonalphabetic book motifs if present. Selected character: bottom row, column 4, labeled 22. CORAL. Muted blue-gray robe, dark slate-blue closed book with two fine gold horizontal wavy decorative lines on viewer-left, upright branching salmon/rust coral specimen on viewer-right, no pot or leaves. Preserve the coral's tree-like forked finger branches. Use a precise clean alpha boundary: no loose colored pixels, halos, or background remnants along the silhouette or straight bottom edge."
+    },
+    {
+      "file": "23-succulent.png",
+      "referencePosition": {
+        "row": 4,
+        "column": 5
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual Non-verba character branding PNG. Input image: original 24-design contact sheet, reference only; regenerate ONLY the specified character as a separate clean high-resolution image. Match its simple hand-drawn watercolor logo style: bold near-black rounded outlines, restrained watercolor texture within filled shapes, blank peach oval head with no eyes/mouth/hair, robe with tied cord belt, waist-up portrait with a straight lower crop. Preserve its pose: closed book held on viewer-left, botanical object held on viewer-right. Preserve the selected design's shapes and muted colors rather than redesigning it. One centered character on a 1024x1024 canvas with comfortable transparent margin and the full plant/book inside frame. Output a genuine transparent-background RGBA PNG: all space outside the character and openings between silhouette parts must have real alpha transparency. No colored/white/cream background, no checkerboard drawn into the pixels, no shadow outside the artwork, no frame. No text, letters, numbers, caption, label, watermark, or additional design. Keep decorative nonalphabetic book motifs if present. Selected character: bottom row, column 5, labeled 23. SUCCULENT. Muted burgundy/rust-red robe, brown closed book on viewer-left, compact green pointed-leaf rosette succulent in a terracotta-brown pot on viewer-right. Preserve the layered rosette shape and pot. Use a precise clean alpha boundary: no loose colored pixels, halos, or background remnants along the silhouette or straight bottom edge."
+    },
+    {
+      "file": "24-multi.png",
+      "referencePosition": {
+        "row": 4,
+        "column": 6
+      },
+      "prompt": "Use case: background-extraction. Asset type: individual Non-verba character branding PNG. Input image: original 24-design contact sheet, reference only; regenerate ONLY the specified character as a separate clean high-resolution image. Match its simple hand-drawn watercolor logo style: bold near-black rounded outlines, restrained watercolor texture within filled shapes, blank peach oval head with no eyes/mouth/hair, robe with tied cord belt, waist-up portrait with a straight lower crop. Preserve its pose: closed book held on viewer-left, botanical object held on viewer-right. Preserve the selected design's shapes and muted colors rather than redesigning it. One centered character on a 1024x1024 canvas with comfortable transparent margin and the full plant/book inside frame. Output a genuine transparent-background RGBA PNG: all space outside the character and openings between silhouette parts must have real alpha transparency. No colored/white/cream background, no checkerboard drawn into the pixels, no shadow outside the artwork, no frame. No text, letters, numbers, caption, label, watermark, or additional design. Keep decorative nonalphabetic book motifs if present. Selected character: bottom row, column 6, labeled 24. MULTI. Warm sand/tan robe, deep green closed book with a small abstract gold geometric diamond/leaf emblem on viewer-left, tall mixed botanical bouquet on viewer-right: fine green foliage, small muted-purple blossoms and golden tan grain stems. No vase or pot. Preserve the varied delicate upright bouquet. Use a precise clean alpha boundary: no loose colored pixels, halos, or background remnants along the silhouette or straight bottom edge."
+    }
+  ]
+}

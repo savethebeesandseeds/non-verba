@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "locale": "en-GB",
+  "currency": "NOK",
+  "clock": {
+    "startsAt": "2026-09-26T12:00:00Z",
+    "timelineDays": 60,
+    "seedVoteAgeDays": 1
+  },
+  "scope": {
+    "jurisdiction": "NO",
+    "region": "Oslo",
+    "counterpartyId": "simulation-business-requester"
+  },
+  "policy": {
+    "validityDays": 366,
+    "decayDays": 30,
+    "minimumOperators": 3,
+    "minimumEffectiveVotes": 2,
+    "demandSensitivityBps": 2500,
+    "maxDemandPremiumBps": 5000,
+    "demandMaxAgeSeconds": 300,
+    "quoteLifetimeSeconds": 60
+  },
+  "demand": {
+    "requestedMinutes": 240,
+    "availableMinutes": 120,
+    "windowMinutes": 60
+  },
+  "limits": {
+    "rateMinorPerHour": 100000000,
+    "baselinePriceMinor": 100000000,
+    "workMinutes": 1440,
+    "demandMinutes": 525600,
+    "decayDays": 365
+  },
+  "operators": [
+    { "operatorId": "ana", "name": "Ana", "rateMinorPerHour": 30000 },
+    { "operatorId": "ben", "name": "Ben", "rateMinorPerHour": 32000 },
+    { "operatorId": "cleo", "name": "Cleo", "rateMinorPerHour": 28000 }
+  ],
+  "tasks": [
+    { "taskId": "site-photo", "taskVersion": "1", "name": "Site photograph", "baselinePriceMinor": 12000, "baselineMinutes": 30 },
+    { "taskId": "audio-inspection", "taskVersion": "1", "name": "Audio inspection", "baselinePriceMinor": 6000, "baselineMinutes": 10 }
+  ]
+}

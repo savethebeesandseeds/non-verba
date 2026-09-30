@@ -7,7 +7,8 @@ performance can contribute one equally weighted new vote; older votes lose weigh
 The protocol calculates a task minimum, allows higher individual prices, and keeps
 accepted price/time terms stable.
 
-This repository contains the protocol and its tests. The separate evidence-camera
+This repository contains the protocol, its tests and a standalone interactive
+union simulator. The separate evidence-camera
 application does not yet provide the identities, agreements, completion ledger or
 payments needed to operate it. Nothing here publishes prices or activates a union.
 
@@ -15,16 +16,44 @@ payments needed to operate it. Nothing here publishes prices or activates a unio
 
 | Path | Purpose |
 | --- | --- |
+| `web/index.html`, `web/index.css` | Responsive public homepage with the project identity and GitHub source link |
+| `web/union.html`, `web/union.css`, `web/union.mjs` | Standalone Operators' union simulator |
+| `web/setup.mjs` | On-page setup editor with configuration import and download |
+| `web/union.config.json` | Default simulator configuration loaded when the page opens |
 | `web/branding/` | Project artwork and branding assets |
 | `code/crates/` | Rust protocol implementation |
 | `code/protocol/` | JavaScript host wrapper for the shared Rust/WASM core |
+| `code/simulator/` | Configuration loading and fictional scenario state connected to the Rust/WASM core |
 | `code/test/` | Behavioral, WASM and browser tests |
 | `code/examples/` | Runnable protocol examples |
-| `code/tools/` | Build scripts |
+| `code/tools/` | Build scripts and local homepage/simulator preview server |
 | `docs/` | Protocol, regulatory boundary and validation documentation |
 
 Build metadata lives in `code/`. Generated WASM packages and Rust build outputs
 stay in the ignored `code/pkg/` and `code/target/` directories.
+
+## Homepage
+
+The homepage is plain HTML and CSS. It uses the existing transparent sprout
+character in `web/branding/individual/01-sprout.png`, loads no external assets,
+and links directly to this repository on GitHub. It requires no JavaScript,
+package installation, or Rust/WASM build.
+
+From the repository root:
+
+```sh
+cd code
+node --run serve:web
+```
+
+Open [the homepage](http://127.0.0.1:4174/). The same server keeps the simulator
+available at `/web/union.html`. Set `NONVERBA_UNION_PORT` to choose another port;
+`0` selects an available port. Static hosting can serve `web/` directly with
+`index.html` as its entry point; keep its CSS and branding assets alongside it.
+
+For local Codex annotation, use `/web/index-review.html`. The server generates
+this noindex route with a narrow inline-style-element exception. The production
+page retains its strict CSP; the generated review route is not a release asset.
 
 ## Build and run
 
@@ -56,7 +85,7 @@ automatically reuses the sensor checkout's already installed CLI when available.
 ```sh
 node tools/build-wasm.mjs
 cargo test --locked --workspace
-node --test test/cooperation.test.mjs test/wasm.test.mjs
+node --test test/cooperation.test.mjs test/wasm.test.mjs test/simulator-config.test.mjs test/simulator-model.test.mjs
 node examples/cooperation.mjs
 ```
 
@@ -72,8 +101,48 @@ resolvable; `NONVERBA_BROWSER_EXECUTABLE` can select a browser executable.
 The build produces `code/pkg/nonverba_cooperation.js`, TypeScript declarations, and
 `code/pkg/nonverba_cooperation_bg.wasm` using `wasm-bindgen --target web`. These
 generated files and `code/target/` are ignored by Git; source and the lockfile are
-retained. The default test command selects the two Node test suites; the browser
-smoke test runs separately through `npm run test:browser`.
+retained. The default test command selects the Node test suites; the browser
+smoke test runs separately through `npm run test:browser`, and the simulator's
+browser integration runs through `npm run test:simulator`.
+
+## Interactive union simulator
+
+From `code/`, build the WASM package if `pkg/` is not already available, then start
+the local server:
+
+```sh
+node tools/build-wasm.mjs
+node tools/serve-simulator.mjs
+```
+
+The equivalent package commands are `npm run build:wasm` and
+`npm run serve:simulator` (or `node --run serve:simulator` without npm).
+
+Open [the union simulator](http://127.0.0.1:4174/web/union.html). Set
+`NONVERBA_UNION_PORT` to use another port; `0` selects an available port and the
+server prints its URL. Serve the page over HTTP: opening it with `file://` does
+not support the required module and WASM loading.
+
+Explore shared personal hourly settings, completed-task votes, decay, demand,
+individual quotes and settlement using the existing Rust/WASM calculations.
+All people, completions, agreements and demand are fictional, and edits remain in
+memory. See [the simulator guide](docs/SIMULATOR.md) for its controls, timeline
+limits, JSON export and separate local review route.
+
+Use **Set up your simulation** at the top of the page to edit currency, locale,
+Operators, tasks and policy. Advanced settings cover the clock, scope, demand and
+limits. Edits remain a draft until **Apply setup**, which validates them and
+starts a new scenario, discarding the previous votes and acceptances. A currency change preserves the
+numbers entered without exchange-rate conversion; amounts must fit the new
+currency's precision (NOK: 2, JPY: 0, KWD: 3).
+
+**Download configuration** saves the validated draft as JSON. **Import
+configuration** loads a file into the draft for review before applying it;
+**Discard edits** restores the last applied setup. These settings remain in page
+memory. Reloading uses [web/union.config.json](web/union.config.json) again. To
+change that default, save a downloaded configuration as this file. **Export
+snapshot** separately saves the full simulation record. See the
+[configuration guide](docs/SIMULATOR.md#configure-in-the-page) for details.
 
 ## Runtime integration
 
@@ -111,6 +180,7 @@ checks; it does **not** authenticate or authorize that calculation by itself.
 
 - [Protocol, formulas, record fields and adapter contract](docs/COOPERATION_PROTOCOL.md)
 - [Regulatory boundary and requirements before operation](docs/REGULATORY_BOUNDARY.md)
+- [Interactive simulator guide](docs/SIMULATOR.md)
 - [Rust implementation](code/crates/nonverba-cooperation/src/lib.rs)
 - [JavaScript host wrapper](code/protocol/cooperation.mjs)
 - [Runnable example](code/examples/cooperation.mjs)

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Operators’ union simulator</title>
+  <link rel="stylesheet" href="./union.css">
+  <script type="module" src="./union.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#simulator">Skip to simulator</a>
+  <header class="masthead">
+    <a class="wordmark" href="./union.html" aria-label="Non-verba union simulator"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">COOPERATION / 03</span></a>
+    <span id="runtime" class="runtime" role="status">Starting local engine…</span>
+  </header>
+
+  <main id="simulator">
+    <div class="intro">
+      <div>
+        <p class="eyebrow">THE OPERATORS’ UNION</p>
+        <h1>A fair floor, together<span>.</span></h1>
+        <p class="lede">Each completed task has a voice. Explore how Operators’ choices, time and demand shape a shared minimum price.</p>
+      </div>
+      <p class="simulation-label"><span class="status-dot" aria-hidden="true"></span> SIMULATION<br><span>Fictional Operators and agreement.<br>No real prices or payments.</span></p>
+    </div>
+
+    <noscript><p class="notice error">Enable JavaScript to run the local WebAssembly simulator.</p></noscript>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <section class="setup-panel" aria-labelledby="setup-heading">
+      <div class="section-heading"><div><p class="eyebrow">YOUR SCENARIO</p><h2 id="setup-heading">Set up your simulation</h2></div><span class="pill">START HERE</span></div>
+      <p class="section-copy">Choose your currency, Operators and tasks, then apply your setup to start a new simulation.</p>
+      <div id="setup-editor">Loading setup…</div>
+    </section>
+
+    <fieldset id="simulator-controls" disabled>
+      <legend class="sr-only">Union simulation controls</legend>
+      <div class="scenario-toolbar">
+        <div class="task-picker">
+          <label for="task-select" class="tiny-label">TASK CATEGORY</label>
+          <select id="task-select"></select>
+        </div>
+        <button id="reset-demo" class="secondary" type="button">Reset simulation ↺</button>
+      </div>
+
+      <div class="overview-grid">
+        <section class="panel scenario-panel" aria-labelledby="scenario-heading">
+          <div class="section-heading"><div><p class="eyebrow">01 / SET THE SCENE</p><h2 id="scenario-heading">Time &amp; demand</h2></div><span class="pill"><span data-currency>—</span> · MINUTES</span></div>
+          <div class="range-heading"><label for="day-offset">Move forward in time</label><output id="day-label" for="day-offset">Day 0</output></div>
+          <input id="day-offset" type="range" min="0" step="1" value="0" aria-describedby="time-help">
+          <div class="range-endpoints" aria-hidden="true"><span>Today</span><span id="timeline-end">—</span></div>
+          <p id="time-help" class="hint">Older votes lose weight. Complete a task to add a new vote at full weight.</p>
+          <div class="form-grid">
+            <div class="field"><label for="requested-minutes">Requested work <span>min</span></label><input id="requested-minutes" type="number" min="0" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="available-minutes">Available work <span>min</span></label><input id="available-minutes" type="number" min="0" step="1" inputmode="numeric"></div>
+          </div>
+          <details class="policy-settings">
+            <summary>Adjust the example policy</summary>
+            <div class="form-grid policy-fields">
+              <div class="field"><label for="baseline-price">Protected baseline <span data-currency>—</span></label><input id="baseline-price" type="number" inputmode="decimal"></div>
+              <div class="field"><label for="baseline-minutes">Baseline time <span>min</span></label><input id="baseline-minutes" type="number" min="1" step="1" inputmode="numeric"></div>
+              <div class="field"><label for="decay-days">Vote lifetime <span>days</span></label><input id="decay-days" type="number" min="1" step="1" inputmode="numeric"></div>
+            </div>
+            <p class="hint">These controls explore policy choices in this simulation; changing them is not a member vote.</p>
+          </details>
+        </section>
+
+        <section class="price-panel" aria-labelledby="price-heading">
+          <div class="price-heading"><p id="price-heading" class="eyebrow">CURRENT COLLECTIVE MINIMUM</p><span class="price-mark" aria-hidden="true">↗</span></div>
+          <output id="collective-price" class="headline-price" aria-live="polite">—</output>
+          <p class="price-caption">For one assignment in this task category.<br>Every Operator may charge more.</p>
+          <dl class="price-facts">
+            <div><dt>Base minimum</dt><dd id="base-price">—</dd></div>
+            <div><dt>Demand premium</dt><dd id="premium-value">—</dd></div>
+            <div><dt>Expected time</dt><dd id="expected-time">—</dd></div>
+          </dl>
+          <div class="support"><span class="support-dot" aria-hidden="true"></span><div><strong id="support-label">Preparing task votes…</strong><p id="support-detail">The protected baseline remains when no active votes are available.</p></div></div>
+        </section>
+      </div>
+
+      <div class="members-grid">
+        <section class="panel" aria-labelledby="members-heading">
+          <div class="section-heading"><div><p class="eyebrow">02 / INDIVIDUAL CHOICES</p><h2 id="members-heading">Meet the Operators</h2></div><span class="pill">PERSONAL R</span></div>
+          <p class="section-copy">Each person sets their own hourly rate, R. Changes apply to future votes.</p>
+          <div class="table-wrap"><table class="operators-table"><caption class="sr-only">Operators and their individually chosen hourly rates in <span data-currency>the configured currency</span></caption><thead><tr><th scope="col">Operator</th><th scope="col">Personal R · <span data-currency>—</span>/hour</th></tr></thead><tbody id="operators-body"></tbody></table></div>
+        </section>
+
+        <section class="panel completion-panel" aria-labelledby="completion-heading">
+          <div class="section-heading"><div><p class="eyebrow">03 / WORK BECOMES A VOTE</p><h2 id="completion-heading">Complete a task</h2></div></div>
+          <p class="section-copy">Each completion adds one equally weighted new vote, using that Operator’s current R and recorded time.</p>
+          <form id="completion-form">
+            <div class="form-grid">
+              <div class="field"><label for="complete-operator">Operator</label><select id="complete-operator" required></select></div>
+              <div class="field"><label for="worked-minutes">Time worked <span>min</span></label><input id="worked-minutes" type="number" min="1" step="1" inputmode="numeric" required></div>
+            </div>
+            <button id="complete-task" class="primary wide" type="submit">Complete task &amp; add vote <span aria-hidden="true">→</span></button>
+          </form>
+          <p class="hint completion-note">An Operator can contribute again by completing another task. Every vote starts with weight 1.</p>
+        </section>
+      </div>
+
+      <div class="transaction-grid">
+        <section class="panel votes-panel" aria-labelledby="votes-heading">
+          <div class="section-heading"><div><p class="eyebrow">04 / A SHARED RECORD</p><h2 id="votes-heading">Task votes</h2></div><span class="pill"><span id="vote-count">0</span> VOTES</span></div>
+          <p class="section-copy">The weighted median shapes the base price. Each vote gradually fades to zero over its lifetime.</p>
+          <div class="table-wrap" tabindex="0" role="region" aria-label="Task votes; scroll horizontally on narrow screens">
+            <table class="votes-table"><caption class="sr-only">Votes for the selected task, including original rate, time, proposed price, age and remaining weight</caption><thead><tr><th scope="col">Operator</th><th scope="col">R snapshot</th><th scope="col">Time</th><th scope="col">Proposed price</th><th scope="col">Age</th><th scope="col">Weight</th></tr></thead><tbody id="votes-body"></tbody></table>
+          </div>
+          <p class="hint ledger-note">A new personal rate does not rewrite past votes. Votes belong to their own task category.</p>
+          <details class="calculation-help">
+            <summary>How the calculation works</summary>
+            <dl>
+              <div><dt>One completion, one vote</dt><dd>A vote proposes <code>R × time ÷ 60</code>, with R in <span data-currency>the configured currency</span> per hour and time in minutes. Money is rounded upward to the nearest <span id="minor-unit">minor currency unit</span>.</dd></div>
+              <div><dt>Time reduces influence</dt><dd>Remaining weight is <code>max(0, 1 − age ÷ lifetime)</code>. A new vote weighs 1; it reaches zero at the selected lifetime.</dd></div>
+              <div><dt>Enough participation</dt><dd>The vote-derived minimum needs at least <span id="minimum-operators">—</span> distinct Operators with active votes and at least <span id="minimum-effective-votes">—</span> effective votes—the sum of their remaining weights. Otherwise, the agreement’s baseline price and time apply.</dd></div>
+              <div><dt>The collective base</dt><dd>Price and expected time use separate upper weighted medians. At exactly half the weight, the higher value wins. The base price is the greater of the protected baseline and the median price.</dd></div>
+              <div><dt>Demand adds a premium</dt><dd><code id="demand-formula">Loading the configured demand rule…</code>. Zero requests means no premium. When sensitivity is enabled, positive requests with zero availability use the configured cap. The premium is added to the base price.</dd></div>
+              <div><dt>The Operator’s minimum</dt><dd>Use the greater of the collective minimum and <code>personal R × expected time ÷ 60</code>. An Operator can quote more.</dd></div>
+            </dl>
+            <p class="hint">Participation thresholds and premium limits come from this scenario’s configuration.</p>
+          </details>
+        </section>
+
+        <section class="panel quote-panel" aria-labelledby="quote-heading">
+          <div class="section-heading"><div><p class="eyebrow">05 / FROM PRICE TO PAYMENT</p><h2 id="quote-heading">Try an assignment</h2></div></div>
+          <div class="field"><label for="quote-operator">Quoting Operator</label><select id="quote-operator"></select></div>
+          <dl class="quote-facts"><div><dt>Personal hourly R</dt><dd id="personal-rate">—</dd></div><div><dt>Personal task price</dt><dd id="personal-price">—</dd></div><div class="quote-total"><dt>Minimum for this Operator</dt><dd id="quote-price">—</dd></div></dl>
+          <div class="field"><label for="offer-price">Offered price <span data-currency>—</span></label><input id="offer-price" type="number" inputmode="decimal"></div>
+          <button id="accept-offer" class="secondary wide" type="button">Check &amp; accept offer</button>
+          <p id="acceptance-status" class="acceptance-status" role="status" aria-live="polite">No offer accepted. Accepted terms stay locked.</p>
+          <div class="settlement">
+            <div class="field"><label for="approved-minutes">Approved total time <span>min</span></label><input id="approved-minutes" type="number" min="1" step="1" inputmode="numeric"></div>
+            <button id="settle-task" class="secondary wide" type="button">Calculate payment</button>
+            <div class="settlement-result"><span>Payment due</span><output id="settlement-price" aria-live="polite">—</output></div>
+            <p class="hint">Approved extra time is paid under the accepted terms.</p>
+          </div>
+        </section>
+      </div>
+
+      <section class="audit-panel" aria-labelledby="audit-heading">
+        <div><p id="audit-heading" class="eyebrow">TRANSPARENT BY DESIGN</p><details><summary>Inspect the calculation record</summary><pre id="audit-json" tabindex="0" aria-label="Simulation calculation record">Waiting for the local engine…</pre></details></div>
+        <button id="export-snapshot" class="secondary" type="button">Export snapshot ↓</button>
+      </section>
+    </fieldset>
+  </main>
+  <footer><span>non-verba <span class="footer-slash">/</span> cooperation protocol</span><span>LOCAL SIMULATION · RUST + WEBASSEMBLY</span></footer>
+</body>
+</html>

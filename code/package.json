@@ -8,9 +8,12 @@
   "exports": "./protocol/cooperation.mjs",
   "scripts": {
     "build:wasm": "node tools/build-wasm.mjs",
-    "test": "node tools/build-wasm.mjs && node --test test/cooperation.test.mjs test/wasm.test.mjs",
+    "test": "node tools/build-wasm.mjs && node --test test/cooperation.test.mjs test/wasm.test.mjs test/simulator-config.test.mjs test/simulator-model.test.mjs",
     "test:rust": "cargo test --locked --workspace",
     "test:browser": "node tools/build-wasm.mjs && node test/browser-smoke.mjs",
+    "test:simulator": "node tools/build-wasm.mjs && node test/simulator-browser.mjs",
+    "serve:web": "node tools/serve-simulator.mjs",
+    "serve:simulator": "node tools/serve-simulator.mjs",
     "check:rust": "cargo clippy --locked --workspace --all-targets -- -D warnings",
     "example": "node tools/build-wasm.mjs && node examples/cooperation.mjs"
   },

@@ -8,7 +8,41 @@ Rust dependencies came from the local cache; no live records were used.
 
 After moving the implementation, manifests, tests, tools, generated WASM, and Rust cache under `code/`, the following checks passed again: 15 native Rust tests plus doc-tests, the WASM rebuild and all 56 Node tests via `node --run test`, the Edge browser/module Worker smoke test, and the runnable example. JavaScript syntax, local documentation links, and ignore rules were also checked. Branding now lives under `web/branding/`; the repository and its license remain separate from the private application.
 
+## Public homepage — 26 September 2026
+
+The portrait concept is implemented in `web/index.html` and `web/index.css`, using
+the existing transparent sprout character. Browser checks passed at 320, 390,
+720, 1024, and 1440 pixel widths without horizontal overflow. The character loads,
+the GitHub source link navigates to the expected repository, keyboard focus is
+visible, and the page remains usable with JavaScript disabled. Initial page loads
+request only local assets and produce no browser or CSP errors.
+
+The local server redirects `/` to the homepage and preserves the simulator's
+explicit URL. Production CSP stays strict; `/web/index-review.html` is a separate
+noindex response with only the narrow style-element exception. Its HTTP method
+restrictions and asset allowlist were checked. The full existing simulator browser
+suite passed again with real WASM. Screenshots and the homepage check results are
+saved under ignored `code/artifacts/qa/homepage/`.
+
 ## Commands and results
+
+The standalone union simulator was also validated on 26 September 2026. Its
+17 scenario tests and 15 configuration/currency tests pass alongside the existing
+56 protocol/WASM tests (88 total).
+`node test/simulator-browser.mjs` passes in headless Edge with the real WASM
+module. It exercises personal R snapshots, task isolation, vote decay/fallback,
+offer rejection, locked terms, extra-time settlement, faster work, JSON export,
+missing-WASM failure, server allowlisting and separate production/review CSP.
+Configuration tests cover exact currency parsing/formatting, immutable settings,
+safe amount/time limits, and rejected malformed configurations. Browser tests
+also load alternate task/operator/policy/limit configurations, exercise EUR/JPY/KWD
+voting, acceptance and payment, and reject missing or invalid configuration.
+The visible setup editor is covered for draft isolation, apply/discard,
+currency changes without conversion, rejection of excess precision, configuration
+import/download, adding/removing Operators and tasks, and reset/reload behavior.
+Desktop and narrow-screen checks include collapsed and expanded setup controls.
+The page makes no external requests. Desktop (1440px) and mobile (390px/320px)
+screenshots are generated under the ignored `code/artifacts/qa/` directory.
 
 Commands below run from `code/`; paths reflect the current folder layout.
 
@@ -63,6 +97,6 @@ Fixtures deliberately substitute trusted adapters. Passing tests do not establis
 real identity, worker eligibility, lawful bargaining authority, authentic work,
 truthful demand/time, a complete production ledger or executed payments. Those
 integration requirements and the regulatory boundary are documented separately.
-There is no new user interface or live enforcement connected to the camera app.
+The standalone simulator is not connected to the camera app or live enforcement.
 The separate sensor application and Android APK were not changed or rebuilt;
 physical Android device validation remains outside this library migration.
