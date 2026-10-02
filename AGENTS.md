@@ -26,6 +26,9 @@
   are allowed. A missing or stopped container is not permission for a host build.
 - Reuse the existing `/opt/nonverba-tools` toolchains and `/opt/nonverba-build`
   caches. Do not put downloaded SDKs or dependency/build caches in a host checkout.
+- The five Rust packages share `code/Cargo.toml` and `code/Cargo.lock`. Add new
+  packages to that workspace; do not introduce nested workspaces or lockfiles
+  as an incidental implementation choice. Keep module responsibilities separate.
 - Run the smallest relevant validation. Documentation, license, ignore-rule,
   and instruction edits do not justify aggregate tests, Android builds, browser
   screenshots, or release packages.

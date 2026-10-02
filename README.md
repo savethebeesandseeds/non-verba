@@ -28,10 +28,13 @@ does not prove that a camera scene, sound, or location is truthful. Read the
 | `code/tools/`, `code/container/` | Build, packaging, and managed development tools |
 | `docs/` | [Specifications, usage, development, and limitations](docs/README.md) |
 
-The sensor and cooperation crates share one Rust workspace. Assignment and
-disputes retain their separate workspaces and lockfiles, preserving their
-deliberate protocol boundaries. Generated packages, captures, local trust
-material, build outputs, and toolchains are excluded from version control.
+All five Rust packages share the workspace and lockfile in `code/`. Sensor,
+Android, cooperation, assignment, and dispute code remain separate packages with
+their own module boundaries. Generated packages, captures, local trust material,
+build outputs, and toolchains are excluded from version control.
+
+Release builds use the shared size-optimized profile with LTO and
+`panic = "abort"`; tests retain Cargo's normal test profile.
 
 ## Development
 
@@ -60,7 +63,7 @@ node --run test:browser
 node --run test:simulator
 ```
 
-The aggregate test command covers the Rust workspaces, cooperation WASM tests,
+The aggregate test command covers the Rust workspace, cooperation WASM tests,
 and sensor JavaScript adapters. Browser, Android, and physical-device checks are
 separate. See [validation](docs/development/VALIDATION.md) for the checks actually
 performed for this consolidation.
@@ -87,9 +90,10 @@ grants remain valid. The previously separate application source enters this
 public repository with this consolidation under AGPLv3. Its private Git history,
 operational records, signing material, and personal captures are not imported.
 The private repository remains a reserve for future work. Its former source,
-uncommitted work and private journals were moved to a local archive during an
-interrupted cleanup. Its original Git history and retained local records remain
-private; conversion to a minimal reserve checkout is unfinished.
+uncommitted work and private journals remain in a small local recovery archive;
+obsolete caches and host toolchains were removed at the owner's request. The
+private repository now tracks only its README, ignore rules and text attributes.
+Its original Git history and ignored local records remain private.
 See [repository cleanup](docs/development/REPOSITORY_CLEANUP.md).
 
 Read the [governance principles](GOVERNANCE.md) for the project's intended rights

@@ -6,8 +6,6 @@ publish = false
 license = "AGPL-3.0-only"
 description = "Non-verba analysis-only dispute priors and local inference adapter"
 
-[workspace]
-
 [dependencies]
 nonverba-requests = { path = "../requests" }
 serde = { version = "=1.0.228", features = ["derive"] }

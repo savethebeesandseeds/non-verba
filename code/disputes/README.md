@@ -2,8 +2,8 @@
 
 `nonverba-disputes` 0.1.0 is a native Rust companion to the unchanged
 `nonverba-requests` 0.2.1 library. Extension record version is `1`; the dictionary
-is `nv-dispute-priors-5-v1`. It is a separate workspace and lockfile within the
-unified repository. Project-owned source and documentation are licensed under
+is `nv-dispute-priors-5-v1`. It shares the Cargo workspace and lockfile in `code/`
+with the other Rust packages. Project-owned source and documentation are licensed under
 **AGPL-3.0-only**; see the [root license](../../LICENSE) and
 [third-party notices](../../THIRD_PARTY_NOTICES.md). Actual participant records,
 keys and vaults are not part of the public source repository.

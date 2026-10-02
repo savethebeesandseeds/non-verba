@@ -30,7 +30,7 @@
     "test:browser:evidence-session": "node test/evidence-session-browser-tests.mjs",
     "test:browser:enrollment": "node test/key-enrollment-browser-tests.mjs",
     "build:wasm": "node tools/build-wasm.mjs",
-    "test": "node --run test:rust && node --run test:requests && node --run test:disputes && node --run test:cooperation && node --run test:javascript",
+    "test": "node --run test:rust && node --run test:cooperation && node --run test:javascript",
     "test:rust": "cargo test --locked --workspace",
     "test:browser": "node tools/build-wasm.mjs && node test/browser-smoke.mjs",
     "test:simulator": "node tools/build-wasm.mjs && node test/simulator-browser.mjs",
@@ -40,8 +40,8 @@
     "example": "node tools/build-wasm.mjs && node examples/cooperation.mjs",
     "test:cooperation": "node tools/build-wasm.mjs && node --test test/cooperation.test.mjs test/wasm.test.mjs test/simulator-config.test.mjs test/simulator-model.test.mjs",
     "test:javascript": "node --test test/*adapter-tests.mjs test/audio-worklet-tests.mjs test/device-preflight-tests.mjs",
-    "test:requests": "cargo test --locked --manifest-path requests/Cargo.toml",
-    "test:disputes": "cargo test --locked --manifest-path disputes/Cargo.toml"
+    "test:requests": "cargo test --locked -p nonverba-requests",
+    "test:disputes": "cargo test --locked -p nonverba-disputes"
   },
   "engines": {
     "node": ">=22"

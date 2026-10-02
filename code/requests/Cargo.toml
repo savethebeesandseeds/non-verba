@@ -6,9 +6,6 @@ publish = false
 license = "AGPL-3.0-only"
 description = "Non-verba three-party assignment protocol and portable verifier"
 
-# Deliberately independent of the sensor workspace while the boundary is designed.
-[workspace]
-
 [dependencies]
 serde = { version = "=1.0.228", features = ["derive"] }
 serde_json = "=1.0.150"

@@ -30,6 +30,14 @@ fn json<T: Serialize + ?Sized>(value: &T) -> Result<String, String> {
     serde_json::to_string(value).map_err(|e| format!("REVIEW_DISPLAY: {e}"))
 }
 
+// Keep the exact preview stable before and after retaining canonical JSON,
+// including when another workspace package enables serde_json preserve_order.
+fn pretty_json(value: &Value) -> Result<String, String> {
+    let mut sorted = value.clone();
+    sorted.sort_all_objects();
+    serde_json::to_string_pretty(&sorted).map_err(|e| e.to_string())
+}
+
 fn amount(value: &Money) -> Result<String, String> {
     let minor = value.validate()?;
     let scale = 10_u64.pow(u32::from(value.exponent));
@@ -396,22 +404,18 @@ impl Review {
         text.push('\n');
         if self.kind == "agreement" {
             text.push_str("EXACT SIGNED TERMS AND POLICY (scope, quote, destinations, exclusions and authority)\n");
-            text.push_str(
-                &serde_json::to_string_pretty(&self.exact_content).map_err(|e| e.to_string())?,
-            );
+            text.push_str(&pretty_json(&self.exact_content)?);
         } else {
             text.push_str(
                 "EXACT SIGNED CONTENT (all fields, including scope and authorized consequences)\n",
             );
-            text.push_str(
-                &serde_json::to_string_pretty(&self.exact_content).map_err(|e| e.to_string())?,
-            );
+            text.push_str(&pretty_json(&self.exact_content)?);
         }
         if let Some(context) = &self.retained_context {
             text.push_str(
                 "\n\nRETAINED SIGNING CONTEXT (separate from the signed object's digest)\n",
             );
-            text.push_str(&serde_json::to_string_pretty(context).map_err(|e| e.to_string())?);
+            text.push_str(&pretty_json(context)?);
         }
         text.push_str("\n\nOnly the participant's independently pinned local key can authorize its role.\nSynthetic payment records do not move funds or prove bank settlement.\n");
         Ok(crate::terminal_safe_json(&text))

@@ -46,8 +46,8 @@ outcomes. Read the [specification](../../docs/requests/SPECIFICATION.md) and
 
 ## Package boundary
 
-The package retains its own `[workspace]` and lockfile within the unified
-repository. Sensor acquisition, Android/browser builds and the cooperation
+The package shares the Cargo workspace and lockfile in `code/` with the other
+Rust packages. Sensor acquisition, Android/browser builds and the cooperation
 simulator are separate components with separate validation responsibilities.
 P-256/SHA-256 follows the existing project's signing algorithm family; contractual
 role keys are separately pinned and never inferred from a sensor signature.

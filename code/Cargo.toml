@@ -1,6 +1,11 @@
 [workspace]
-members = ["crates/nonverba-core", "crates/nonverba-android", "crates/nonverba-cooperation"]
-exclude = ["requests", "disputes"]
+members = [
+    "crates/nonverba-core",
+    "crates/nonverba-android",
+    "crates/nonverba-cooperation",
+    "requests",
+    "disputes",
+]
 resolver = "2"
 
 [profile.release]
