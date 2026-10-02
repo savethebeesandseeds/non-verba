@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Fictional local simulation. These adapters authenticate NOTHING and must never
 // be used in a deployment. Real adapters must satisfy the protocol specification.
 import { prepareVote, evaluateTask, quoteTask, prepareAcceptance, settlementMinimum }

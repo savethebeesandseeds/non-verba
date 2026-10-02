@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // UI and display conversions only. The simulator model uses the Rust/WASM core.
 const $ = id => document.getElementById(id);
 const money = value => currency.format(value);

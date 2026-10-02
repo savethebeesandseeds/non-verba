@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
 /* Standalone cooperation simulator. Shared visual language with the sensor pages. */
 :root{color-scheme:light;--paper:#f2f1eb;--panel:#f8f7f1;--ink:#242921;--muted:#626c58;--line:#d3d8ca;--orange:#cf5030;--olive:#283425}
 *{box-sizing:border-box}

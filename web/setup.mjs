@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Draft-only setup editor. The shared validator checks the complete configuration
 // before a synchronous callback can replace the active Rust/WASM simulation.
 import { createMoney, validateConfig } from '../code/simulator/config.mjs';

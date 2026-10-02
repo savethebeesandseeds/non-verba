@@ -16,3 +16,7 @@ The footer's `waajacu-favicon.png` is the unmodified favicon from
 [waajacu.com/favicon.ico](https://waajacu.com/favicon.ico); its actual file format
 is PNG. The homepage's inline GitHub mark comes from
 [Primer Octicons](https://github.com/primer/octicons/blob/main/icons/mark-github-24.svg).
+The GitHub mark retains its MIT license; the complete copyright and permission
+notice is included in [LICENSES/Primer-Octicons-MIT.txt](../../LICENSES/Primer-Octicons-MIT.txt)
+and in the homepage source. The public repository's AGPL license does not replace
+third-party asset licenses.

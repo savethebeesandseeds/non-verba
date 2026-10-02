@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Match the sensor core's pinned Rust + wasm-bindgen web target.
 import { mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';

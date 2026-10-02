@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - .github/workflows/pages.yml
+      - LICENSE
+      - LICENSES/Primer-Octicons-MIT.txt
       - code/tools/export-homepage.mjs
       - web/index.html
       - web/index.css

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 /**
  * Local scenario state for the standalone Operators' union simulator.
  *

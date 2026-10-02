@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Exercise the real compiled Rust/WASM in Chromium and a module Web Worker.
 // Supply Playwright via an existing install or NONVERBA_PLAYWRIGHT_PATH; this
 // tool installs nothing and uses only an ephemeral, allowlisted localhost server.

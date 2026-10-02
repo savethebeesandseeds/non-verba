@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Cooperation protocol v1: deterministic integer arithmetic for remuneration.
 //!
 //! [`cooperation_plan`] is a low-level WebAssembly transport. Its result is

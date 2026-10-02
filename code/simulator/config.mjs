@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 /** Simulator configuration and exact currency presentation. No protocol calculations live here. */
 const MAX = Number.MAX_SAFE_INTEGER;
 const MAX_BIG = BigInt(MAX);

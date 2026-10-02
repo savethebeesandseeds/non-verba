@@ -12,6 +12,25 @@ union simulator. The separate evidence-camera
 application does not yet provide the identities, agreements, completion ledger or
 payments needed to operate it. Nothing here publishes prices or activates a union.
 
+## License
+
+The project-owned source code and accompanying project materials in this public
+repository are licensed under the GNU Affero General Public License, version 3
+only (`AGPL-3.0-only`). See [LICENSE](LICENSE) for the complete terms. Third-party
+dependencies and assets retain their own licenses and notices; the homepage's
+Primer Octicons GitHub mark remains under its
+[MIT license](LICENSES/Primer-Octicons-MIT.txt).
+
+Contributions are accepted under `AGPL-3.0-only` unless explicitly agreed otherwise.
+Commercial use is permitted subject to the license's terms, including applicable
+source-sharing obligations for distribution and modified versions used over a
+network.
+
+This change starts with the commit introducing this section. Earlier revisions
+through `63e5884` were released under Apache 2.0, and their previously granted
+permissions remain valid. This license applies to this public repository; it
+does not relicense or publish the separate private application repository.
+
 ## Folder layout
 
 | Path | Purpose |

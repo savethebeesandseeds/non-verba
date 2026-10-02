@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 use super::*;
 
 const NOW: u64 = 10_000;

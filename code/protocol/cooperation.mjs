@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 /**
  * Host boundary only. Rust/WASM owns validation, voting and monetary arithmetic.
  * A Rust plan is provisional: all requested verification callbacks must succeed

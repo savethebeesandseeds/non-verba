@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Publish only the homepage and its assets, never the whole web/ directory.
 import { lstat, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -19,6 +20,9 @@ const assets = [
 const files = await Promise.all(assets.map(async (name) => [
   name, await readFile(path.join(root, 'web', name)),
 ]));
+files.push(['LICENSE.txt', await readFile(path.join(root, 'LICENSE'))]);
+files.push(['licenses/Primer-Octicons-MIT.txt',
+  await readFile(path.join(root, 'LICENSES', 'Primer-Octicons-MIT.txt'))]);
 files.push(['CNAME', 'non-verba.com\n'], ['.nojekyll', '']);
 
 // The fixed generated directory must remain inside this checkout, including

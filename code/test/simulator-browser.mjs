@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Real browser integration of the standalone page, local server and Rust/WASM.
 // Reuses an installed browser/Playwright; installs nothing and serves only local assets.
 import assert from 'node:assert/strict';

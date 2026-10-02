@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 // Local, read-only preview of the homepage and union simulator. No directory tree is served.
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
