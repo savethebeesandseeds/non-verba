@@ -1,9 +1,10 @@
 # Preserved container and explicit source snapshots
 
 The unified public checkout and the original private checkout remain separate
-physical directories. The private reserve conversion is unfinished: its original
-Git history and source index remain, while many previous working files were moved into
-a dated local archive outside both repositories. See
+physical directories. The private reserve tracks only README, ignore rules and
+text attributes; its original Git history is preserved. Former source and
+working changes remain in a small local recovery archive outside both repositories.
+Obsolete archived caches and host toolchains were removed at the owner's request. See
 [repository state and cleanup boundaries](REPOSITORY_CLEANUP.md).
 The existing managed container is
 preserved: name `non-verba-dev`, immutable ID

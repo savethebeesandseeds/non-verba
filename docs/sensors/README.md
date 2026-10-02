@@ -41,6 +41,10 @@ Open **Location proof** to request location alone, collect a short raw-GPS trace
 
 Camera requests can include the same location module. New camera and location requester forms default to a native GPS proof with raw satellite observations, a two-second minimum and at least three fixes/epochs; live camera also requires a correlated native capture clock. Reduced profiles are inside Details. The combined workflow exports a C2PA JPEG and a matching location proof that hashes the complete JPEG. Keep both files and verify them against both trusted key IDs. Required capabilities never silently fall back. See [complete packages and measured timing costs](COMPLETE_SENSOR_PACKAGES.md) and [location usage](LOCATION.md).
 
+[GPS preparation and short observations](GPS_PREPARATION.md) explains the
+foreground receiver warm-up, discarded preparation fixes and why a two-second
+minimum does not promise two-second completion.
+
 ## Microphone workflow
 
 To try it without an operator ID, choose **Try demo**, then **Start demo recording**. This device handles both roles, uses its real microphone and speaker, records four seconds, and verifies the signed result automatically. Demo mode is explicitly signed into the recording and is labelled throughout; it does not represent an independent requester.

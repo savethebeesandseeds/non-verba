@@ -35,7 +35,7 @@ The camera modules preserve the shared Rust timing limits: challenge wrapping an
 `camera-peer.js` is camera-only: one reliable ordered WebRTC data channel, no media tracks, signaling service, STUN or TURN. Pairing descriptions are exchanged manually. A directly reachable ICE route is required; existing HTTP/USB preview forwarding alone does not establish it. The 30 September phone preflight accepted the answer's SDP but observed no open data channel before timeout. A working browser-to-phone route and end-to-end physical capture on this path remain unvalidated.
 
 The Android debug test interface also supports a [bounded USB offer/answer file
-handoff](USB_DEBUGGING.md#pre-challenge-camera-pairing-files). Staging gives a
+handoff](../development/USB_DEBUGGING.md#pre-challenge-camera-pairing-files). Staging gives a
 32-character token for an explicit **Load staged USB offer** action on the
 operator page. It leaves the separately entered requester pin, normal Join,
 permission preparation and consent requirements intact. It cannot load into an

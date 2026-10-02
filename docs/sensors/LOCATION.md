@@ -28,7 +28,13 @@ The native location session accepts bounded final JPEG bytes from the WebView fo
 
 New raw requester preset: at least two seconds and three distinct samples/epochs; low-level omitted policies, reduced profiles and demos remain ten seconds. All presets retain accuracy at most 100 m, fix age at most five seconds, delivery delay at most three seconds and motion at most 100 m/s after accounting for reported uncertainty. Requesters can use the bounded Rust policy interface to choose supported values. Collection has a sixty-second total budget, including acquisition and permission delay on Android. A slow or unavailable provider produces an error, not fabricated observations.
 
-The last fix must still satisfy the requested age limit when the proof is sealed. If photo processing takes too long, the app refuses to sign/export the combined proof; after a signing reservation, retry with a new requester challenge. This build does not silently enlarge the requested freshness window.
+Android can prepare its GPS receiver on foreground camera/location pages using
+existing precise permission. The five-minute preparation subscription discards
+every fix; each request still collects fresh evidence. The UI reports an active
+subscription, not a verified fix. See [GPS preparation and short observations](GPS_PREPARATION.md)
+for lifecycle, observation minimums and timing limits.
+
+New UI requests include a separate signed finalization allowance of at most thirty seconds from the frozen collection end. Their last fix must satisfy the requested age limit at that collection end; requests without the allowance retain the original last-fix-to-seal rule. If photo processing or signing exceeds the original request's limits, the app refuses to sign/export the combined proof; after a signing reservation, retry with a new requester challenge. See [separate collection freshness and finalization](#separate-collection-freshness-and-finalization--29-september-2026).
 
 | Signal | Browser | Android native |
 | --- | --- | --- |
@@ -60,6 +66,7 @@ The default raw policy is:
   "min_satellites": 4,
   "max_epoch_gap_ms": 2500,
   "max_time_uncertainty_ns": 100000,
+  "max_elapsed_realtime_uncertainty_ns": 100000000,
   "max_pseudorange_rate_uncertainty_mps": 20
 }
 ```
@@ -68,7 +75,7 @@ An epoch is one native receiver measurement event. The native adapter retains ev
 
 The signed raw record preserves receiver clock time and full bias, available fractional bias/drift and their uncertainties, clock discontinuity count, hardware elapsed-realtime alignment and uncertainty, and native callback receipt time. Each satellite signal carries constellation/SVID, synchronization state, received satellite time and uncertainty, time offset, signal strength, pseudorange rate and uncertainty, and available frequency, code type, accumulated delta range and gain information. Integer nanosecond fields are canonical decimal strings, preserving Android's 64-bit values through JSON and JavaScript.
 
-Rust checks the same record before signing and during independent verification. Checks cover bounds, ordered epochs, distinct qualifying satellites, required signal synchronization and uncertainties, receiver-clock continuity, monotonic alignment with the native session, delivery delay, trace coverage and final freshness. The last raw epoch, as well as the selected location fix, must remain fresh at sealing. The verifier exposes individual results and error codes; a passing signature alone does not satisfy the requested policy.
+Rust checks the same record before signing and during independent verification. Checks cover bounds, ordered epochs, distinct qualifying satellites, required signal synchronization and uncertainties, receiver-clock continuity, monotonic alignment with the native session, delivery delay, trace coverage and finalization. The last raw epoch and last location fix must satisfy the original request's freshness rule at collection end or sealing, according to its signed finalization policy. Photo fix-to-exposure limits remain separate. The verifier exposes individual results and error codes; a passing signature alone does not satisfy the requested policy.
 
 During receiver warmup, missing mandatory clock fields or insufficient qualifying satellites can be rejected and counted before the first retained epoch. The coordinate trace begins only after that first accepted raw epoch. After collection begins, losing mandatory fields, satellite eligibility or clock continuity fails the session. A missing stream, inadequate coverage or unsupported receiver cannot produce a completed raw proof. The sixty-second session budget includes this warmup.
 

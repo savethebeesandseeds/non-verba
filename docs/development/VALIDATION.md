@@ -13,7 +13,7 @@ an explicit snapshot rather than the original private checkout. No Windows
 compiler, Java runtime, phone install, or physical sensor capture is part of
 these checks.
 
-## Checks completed on 2 October 2026
+## Initial source-unification checks — 2 October 2026
 
 | Check | Result |
 | --- | --- |
@@ -48,6 +48,37 @@ retained data or a provisioned pinned model/runtime. Synthetic importer and
 mock-runtime tests passed; this is not a claim that a real dispute model was
 validated. Android lint/build also reports existing Gradle deprecations for a
 future Gradle 9 migration.
+
+## Single Cargo workspace and final cleanup — 2 October 2026
+
+The five Rust packages now share `code/Cargo.toml` and `code/Cargo.lock`.
+Focused checks reused one public-source snapshot in the same managed container
+and its existing build cache. The snapshot also captured concurrent assignment
+terminology edits; those edits remain outside the consolidation commits.
+
+| Check | Result |
+| --- | --- |
+| Workspace metadata | Offline locked metadata resolved all five members in one workspace |
+| Native Rust tests | `cargo test --offline --locked --workspace` passed for all five members; optional checks remained opt-in |
+| Historical prompt replay | The existing version-1 failed-record replay passed with combined workspace dependency features |
+| Retained signing review | All five workflow acceptance tests passed with `serde_json/preserve_order` explicitly enabled |
+| WebAssembly libraries | Offline locked `--lib` checks passed for core, cooperation and requests on `wasm32-unknown-unknown`; terminal binaries are native |
+| Rust formatting | `cargo fmt --all --check` passed in the shared workspace |
+| Dependency pins | Existing root-lock dependency versions and checksums were preserved; the separate protocol packages and required dependencies were added |
+| Private reserve | Clean index with only README, ignore rules and text attributes; original history and ignored operational files retained |
+| Documentation | Reviewed local Markdown targets resolve against the publication index and the new GPS preparation guide; scoped whitespace checks passed |
+
+Combined dependency features exposed JSON key-order changes in historical
+dispute prompts and terminal consent previews. Local formatting now sorts object
+keys explicitly, preserving the original presentation while leaving signed
+content, canonical hashes, schemas and fixtures unchanged. Existing assertions
+continue to check historical replay and that retained content was displayed.
+
+The optional external-data, real-model and interoperability probes retain their
+explicit opt-in behavior. Existing `generic-array` deprecation warnings remain.
+This final cleanup did not build Android, export packages, install an APK or
+capture physical sensor data. The initial broader checks above are historical
+evidence, not repeated checks for this workspace change.
 
 ## Running related checks
 

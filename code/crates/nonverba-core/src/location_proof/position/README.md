@@ -110,7 +110,7 @@ by unmodified [RTKLIB](https://github.com/tomojitakasu/RTKLIB) at commit
 `71db0ffa0d9735697c6adfd06fdf766d0e5ce807`. The generator is
 `code/test/rtklib-oracle.c`. The pinned upstream source digests and attribution
 are retained in the [fixture notice](../../../../../../LICENSES/RTKLIB-fixtures-notice.txt).
-The original Windows generator is retired; its wrapper now refuses host builds.
+The original Windows generation procedure is retired.
 
 The oracle uses RTKLIB's `eph2pos`, `geodist`, `ionmodel` and `tropmodel`, never
 Non-verba propagation or solver code. It generates 32 synthetic ephemerides,
@@ -140,12 +140,11 @@ from `code` with `cargo test --locked -p nonverba-core rtklib`.
 This checks the retained oracle outputs against the current solver; it does not
 regenerate the independent oracle. A Linux regeneration launcher remains future
 work. Do not install or invoke a Windows compiler to reproduce these fixtures.
-Existing files with mismatched hashes are preserved and rejected. A deliberate
-fixture revision requires `-UpdateFixture`; normal validation never replaces it.
-Each invocation retains its source provenance, generator hash, executable and
-comparison report in a new `code/artifacts/qa/rtklib-reference/run-*` directory.
-The pinned upstream Windows build emits warnings in an unused time-parsing path;
-the oracle exercises only the bounded broadcast-orbit and atmosphere functions.
+Earlier Windows generation runs retained their source provenance, generator
+hash, executable and comparison report in local QA directories. Their retired
+launcher required `-UpdateFixture` for deliberate fixture revisions. There is
+no current regeneration launcher. A future Linux procedure must preserve the
+pinned independent source, explicit revision review and comparison evidence.
 
 ## Normative and implementation references
 

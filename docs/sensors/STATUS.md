@@ -23,6 +23,21 @@ Timing diagnostics help identify a freshness rejection but remain unsigned and
 do not authorize capture. No privacy, freshness or timing rule is relaxed by
 the repository unification.
 
+## Physical checkpoint — 1 October 2026
+
+A real-device GPS failed-attempt report was exported before the owner paused
+physical work. Independent verification of its signature and claims, the saved
+Downloads copy, and retention across retry and reload remained pending at that
+pause. It does not establish a successful GPS measurement or accepted evidence.
+Exact terminal duration and a preparation speedup were not verified. The
+[GPS attempt-report guide](GPS_ATTEMPT_REPORTS.md) describes the separate failure
+format; [GPS preparation](GPS_PREPARATION.md) explains the timing boundaries.
+
+Physical microphone playback, recording and calibration remain on hold and
+require separate explicit owner authorization before resuming. Publishing the
+source and reorganizing the repositories do not resume physical sensor work.
+Earlier device records are retained outside this public source tree.
+
 Start with [the evidence app guide](README.md),
 [complete sensor policies](COMPLETE_SENSOR_PACKAGES.md),
 [attestation verification](KEY_ATTESTATION_VERIFIER.md) and
