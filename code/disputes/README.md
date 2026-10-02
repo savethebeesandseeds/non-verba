@@ -1,12 +1,17 @@
 # Dispute analysis companion
 
 `nonverba-disputes` 0.1.0 is a native Rust companion to the unchanged
-`nonverba-requests` 0.2.1 library. Extension record version is `1`; the dictionary
+`nonverba-requests` 0.2.1 library. Extension record version is `1`; the catalog
 is `nv-dispute-priors-5-v1`. It shares the Cargo workspace and lockfile in `code/`
-with the other Rust packages. Project-owned source and documentation are licensed under
+with the other Rust packages and depends on `../requests`. Project-owned source and documentation are licensed under
 **AGPL-3.0-only**; see the [root license](../../LICENSE) and
 [third-party notices](../../THIRD_PARTY_NOTICES.md). Actual participant records,
 keys and vaults are not part of the public source repository.
+
+The shared [terminology](../../docs/requests/TERMINOLOGY.md) defines priors,
+the catalog and each party's declared priors, and maps the earlier dictionary
+and profile spellings retained for compatibility. Role framing and dispute
+stages under discussion remain exploratory.
 
 Read [the participant and implementation explanation](../../docs/requests/DISPUTE_PRIORS.md),
 [open decisions](../../docs/requests/DISPUTE_PRIORS_DECISIONS.md) and
@@ -17,7 +22,7 @@ The implemented DP-2 synthetic workflow uses Qwen as a workflow test component i
 `ANALYSIS_ONLY` mode. Its implementation does not establish reliable reasoning.
 Model interpretations, including question
 dispositions, are neither verified facts nor contractual authority. Reliable
-reasoning and a policy for interpreting priorities into settlement are separate
+reasoning and a policy for interpreting priors into settlement are separate
 future work. Deterministic tests do not establish useful model reasoning or fairness.
 
 The core already has a narrow R/O-authorized release action. It requires separate
@@ -27,7 +32,7 @@ and the separate amendment, payment and receipt paths.
 
 | Module | Responsibility |
 | --- | --- |
-| `binding` | Exact dictionary, allocations, authenticated source profiles, three-party annex and domain-separated authorship |
+| `binding` | Exact catalog, allocations, authenticated source profiles, three-party annex and domain-separated authorship |
 | `consent` | Full retained review, typed digest confirmation, independent trust and existing vault/guard boundary |
 | `preflight` | Pre-cooperation profile/settings comparison, unsigned local acceptance or decline, guarded base/annex signing and exact setup matching |
 | `case` | Core snapshot, shared evidence, revision/history validation and attributed challenges |
@@ -70,7 +75,7 @@ passphrase in command arguments. Each party retains its own vault and signing gu
 1. Establish independent role/key trust. Publish the signed Request with R's own
    signed profile; then O supplies its signed Quote and independently signed profile.
    Edit explicit allocation files if needed, validate, review and have each owner
-   authorize its profile. **Do this before endorsing the base Agreement.**
+   authorize its profile. **Do this before endorsing the base Contract.**
 2. Select the exact proposed analysis settings. `spec` preserves the version-1
    default; `spec-v2`, `spec-v3`, `spec-v4` and `spec-v5` explicitly select later drafts.
    `spec-v3` opts into the bounded-output experiment profile without changing any
@@ -79,19 +84,19 @@ passphrase in command arguments. Each party retains its own vault and signing gu
    an earlier acceptance cannot approve the changed settings. These commands create `MODEL_UNAVAILABLE`
    drafts; actual model/runtime identities still need explicit review before
    binding. `preflight-review` verifies both profiles and their
-   exact Request/Quote, displays both allocations in dictionary order, and retains
+   exact Request/Quote, displays both allocations in catalog order, and retains
    the complete signed sources, settings, fingerprints and independent trust hash.
    Each participant uses `preflight-decide` to accept or decline that exact full
    digest locally. An extreme but valid allocation can be a reason to decline;
    points do not predict a payment, fairness or another party's actual intent.
 3. If proceeding, `preflight-base-review` requires the local acceptance and a
-   matching proposed base Agreement. It retains that Agreement for a separate
+   matching proposed base Contract. It retains that Contract for a separate
    exact review. `authorize-preflight-base` checks again before requesting the
    passphrase, signs only the accepting role's base endorsement, and preserves
    the existing core authority and exclusive signing guards. Use the existing
    workflow's `attach endorsement` to assemble the base signatures.
    After base formation, `draft-context` and `review context` retain the same
-   profiles/settings against the exact formed Agreement. Each participant uses
+   profiles/settings against the exact formed Contract. Each participant uses
    `authorize-preflight-context`; it rejects substituted profiles/settings and
    a vault for a different locally accepting role. Merge with `attach-context`.
    `complete-setup` requires the retained local acceptance, exact material match,
@@ -130,7 +135,7 @@ After separately verified formation:
    budget; a diagnostic run after a single may require a budget allowing four runs
    selected before the package is frozen. Repeated identical schedules are refused.
 8. `report-analysis` writes a readable report; `inspect-analysis` produces JSON.
-   The report separates signed Agreement/annex/profile records, attributed evidence,
+   The report separates signed Contract/annex/profile records, attributed evidence,
    existing core balances and scoped releases, model interpretations and question
    dispositions, and signed challenges. It shows source hashes, exact amounts and
    receipt/release overlap, preserves failed and stale attempts, and appends the
@@ -145,7 +150,7 @@ After separately verified formation:
    updated core bundle. Add the signed answer/evidence, then `append-case` validates
    and retains it. Previous attempts become stale for the new case. Do not edit a
    published case or hide an earlier failed attempt.
-   A changed Agreement/annex needs a separate case and package; appending preserves
+   A changed Contract/annex needs a separate case and package; appending preserves
    the existing context. Redaction in a new revision does not erase retained
    earlier evidence, prompts or raw outputs from an export.
 9. `draft-challenge`, `review challenge`, the author's `authorize`, then

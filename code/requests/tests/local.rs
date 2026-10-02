@@ -247,7 +247,7 @@ fn bundle_merge_combines_partial_signatures_and_preserves_conflicting_records() 
 
 #[test]
 fn cli_signs_real_request_from_user_vault_with_exact_digest_consent() {
-    use nonverba_requests::{agreement, model::SignedRequest};
+    use nonverba_requests::{contract, model::SignedRequest};
     use std::{
         io::Write,
         process::{Command, Stdio},
@@ -285,7 +285,7 @@ fn cli_signs_real_request_from_user_vault_with_exact_digest_consent() {
         String::from_utf8_lossy(&result.stderr)
     );
     let signed: SignedRequest = read_json(&signature_file).unwrap();
-    agreement::verify_request(&signed, &trust).unwrap();
+    contract::verify_request(&signed, &trust).unwrap();
     assert_eq!(
         fs::read_dir(guard_directory(&vault).unwrap())
             .unwrap()

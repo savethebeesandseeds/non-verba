@@ -1,4 +1,4 @@
-# Assignment Agreement
+# Assignment Contract
 
 Note revision AN-2 · 28 September 2026 · package 0.2.1 · protocol 2 · terminal adapter 1
 
@@ -6,16 +6,16 @@ This is a protocol record specification and proposed drafting input. It is not
 adopted legal terms or a jurisdiction-specific determination of enforceability.
 
 For the plain-language explanation, read [the participant notes](PARTICIPANT_NOTES.md).
-[The detailed implementation record](AGREEMENT_NOTES.md) distinguishes executable
+[The detailed implementation record](CONTRACT_NOTES.md) distinguishes executable
 rules from signed descriptions and commitments, and records unresolved deployment
 decisions against the current code.
 
 ## DP-1 / DP-2 companion annex — 29 September 2026
 
-The base Agreement schema and formation rules below are unchanged. The private
+The base Contract schema and formation rules below are unchanged. The companion
 extension uses a version-1 typed companion annex. R and O author separate profiles
 against the authenticated Request and quote. R/O/M then endorse the same exact
-formed Agreement digest, dictionary, profiles and analysis specification. The
+formed Contract digest, catalog, profiles and analysis specification. The
 annex is `ANALYSIS_ONLY`, with settlement policy `UNSPECIFIED` and financial
 authority `NONE`. This is the companion's boundary; it does not remove R/O's
 existing authority to sign a permitted core release. Base formation and annex
@@ -28,10 +28,10 @@ check the reviewed material against the base and annex. This does not supply
 someone else's consent, make exchange atomic or amend existing formation rules.
 
 Missing or unsupported annexes supply no guessed profiles and erase no base
-rights. The signer reserves one context per exact Agreement; changed accepted
+rights. The signer reserves one context per exact Contract; changed accepted
 content needs the documented new-context path and old cases retain their context.
 See [exact consent and compatibility](DISPUTE_PRIORS.md#exact-consent-and-compatibility).
-This note does not retroactively incorporate an annex into existing Agreements.
+This note does not retroactively incorporate an annex into existing Contracts.
 
 DP-2 is closed and accepted as synthetic workflow integration. The local Qwen
 model remains a workflow test component; negative reasoning results are retained.
@@ -41,8 +41,8 @@ facts nor contractual authority; see the owner closeout (local review record, no
 
 ## Signed content
 
-All three parties sign the same immutable Agreement digest. Each authorization
-binds the Agreement's identity/context, digest, role, key ID, purpose, protocol
+All three parties sign the same immutable Contract digest. Each authorization
+binds the Contract's identity/context, digest, role, key ID, purpose, protocol
 version and deployment domain. Keys must match the pinned role registry and the
 verifier's independently established identity/key bindings. A public key supplied
 by an action cannot enroll itself.
@@ -70,7 +70,7 @@ real-world fulfillment or legal sufficiency of that text.
 
 Reference exact retained text and policy bytes, not a mutable remote URL labeled
 "current terms." The preview identifies their digests and displays the signed
-terms. Changing a website or policy database never changes an existing Agreement.
+terms. Changing a website or policy database never changes an existing Contract.
 
 Money uses bounded canonical decimal strings of integer minor units together with
 currency and exponent. Compensation, authorized expenses, and any separately
@@ -103,12 +103,12 @@ In the implemented local profile, R's signed Request includes
 `accepts_platform_terms: true` and the exact terms artifacts. O's signed quote
 includes `accepted_terms_hash`, which must equal the digest of those artifacts.
 These role-specific assent records precede and remain distinct from the three
-Agreement signatures. The Agreement retains the original terms in
+Contract signatures. The Contract retains the original terms in
 `legal.artifacts`. There is no invented account-enrollment database or remote
 terms-acceptance service.
 
 There is no required signature order. `AGREEMENT_BOUND` requires all three valid
-authorizations for the same Agreement. Partial drafts do not authorize performance
+authorizations for the same Contract. Partial drafts do not authorize performance
 charges, penalties or unilateral activation. The last signer can withhold a
 signature; the protocol does not pretend exchange is atomic.
 
@@ -130,18 +130,18 @@ defined operating process must address practical starting conditions; its stop
 or an open dispute does not erase independently established financial rights.
 
 Signing explanations must derive from the exact retained object and verified
-context. A milestone acknowledgment identifies its Agreement, milestone and
+context. A milestone acknowledgment identifies its Contract, milestone and
 compensation without describing an already established amount as another charge.
 A payee receipt distinguishes its stated amount, exact allocated units, overlap
 and unallocated excess. A scoped settlement identifies only its released claims
 and preserves M's separate rights. Evidence availability/integrity remains
 separate from these consequential authorizations. Explanatory display text is
 not an additional signed authorization or an unstated waiver of remedies; see
-[the display contract](AGREEMENT_NOTES.md#consequential-signing-display).
+[the display contract](CONTRACT_NOTES.md#consequential-signing-display).
 
 ## Amendment and settlement
 
-Every root-Agreement amendment requires R, O and M in protocol 2, an exact parent and an
+Every root-Contract amendment requires R, O and M in protocol 2, an exact parent and an
 exclusive version. It retains prior records and cannot silently erase accrued
 obligations. Honest signing clients must durably refuse incompatible authorizations
 for one exclusive slot, including across restart.
@@ -152,7 +152,7 @@ Request is allowed; new work-unit IDs require a new Request. Scope changes still
 need an exact O quote and all three amendment signatures. Existing units cannot be
 repriced by this profile; novation requires a future explicit policy. A new nonfinancial
 service revision requires a new explicit R/O/M activation. Prior activation is
-bound to its exact Agreement digest and cannot activate changed terms.
+bound to its exact Contract digest and cannot activate changed terms.
 
 The amendment also signs an authenticated observed frontier, preserved historical
 claims and any exact grandfathered action. Positive causal knowledge of a
@@ -168,7 +168,7 @@ counts once; a release is not a transfer, new debt or general dispute closure.
 It cannot create M duties, expand M exposure, remove M defenses, change assurance
 triggers, or waive a separate vested assurance benefit. A narrative assertion such
 as "the mediator should pay" creates no authority. Settlement is not a generic
-patch to Agreement JSON and is not a two-of-three majority decision.
+patch to Contract JSON and is not a two-of-three majority decision.
 
 No automatic analysis-to-settlement conversion is implemented or adopted. Work
 changes retain the separate amendment requirements; actual payments and payee

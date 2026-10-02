@@ -4,7 +4,7 @@ mod drafts;
 mod inspection;
 mod review;
 
-use nonverba_requests::{agreement, bundle, crypto::KeyBinding, encoding, local, model::*};
+use nonverba_requests::{bundle, contract, crypto::KeyBinding, encoding, local, model::*};
 use serde::Serialize;
 use serde_json::Value;
 use std::{
@@ -27,8 +27,8 @@ No payment command moves money. No account, mediator server or reset can sign.
 5. draft-quote <signed-request.json> <trust.json> <new-quote.json>
    review quote <quote.json> <new-review.json> <signed-request.json>
    authorize <review.json> <trust.json> <O-vault> <new-signed-quote.json>
-6. draft-agreement <signed-request.json> <signed-quote.json> <trust.json> <new-bundle.json>
-   review agreement <bundle.json> <new-review.json>
+6. draft-contract <signed-request.json> <signed-quote.json> <trust.json> <new-bundle.json>
+   review contract <bundle.json> <new-review.json>
    Each R/O/M: authorize <review.json> <trust.json> <your-vault> <new-endorsement.json>
    attach endorsement <bundle.json> <endorsement.json> <trust.json> <new-bundle.json>
 7. inspect <bundle.json> <trust.json> [new-report.txt]
@@ -223,7 +223,7 @@ fn temp_review(record: &review::Review) -> Result<(PathBuf, PathBuf), String> {
 fn authorize(args: &[String]) -> Result<(), String> {
     let record: review::Review = read(&args[0])?;
     let trust: TrustConfiguration = read(&args[1])?;
-    agreement::validate_trust(&trust)?;
+    contract::validate_trust(&trust)?;
     print!("{}", record.render_verified(&trust)?);
     println!(
         "INDEPENDENTLY SUPPLIED TRUST\n{}",
@@ -354,7 +354,7 @@ fn run(arguments: &[String]) -> Result<(), String> {
                     .ok_or("TRUST_TEMPLATE: role absent")?
                     .key = key;
             }
-            agreement::validate_trust(&trust)?;
+            contract::validate_trust(&trust)?;
             save(&args[3], &trust)?;
             println!(
                 "Synthetic trust draft saved to {}. Independently confirm all three public bindings before using it.",
@@ -367,9 +367,9 @@ fn run(arguments: &[String]) -> Result<(), String> {
             &args[2],
             &drafts::quote(&read(&args[0])?, &read(&args[1])?)?,
         ),
-        ("draft-agreement", 4) => save(
+        ("draft-contract" | "draft-agreement", 4) => save(
             &args[3],
-            &drafts::agreement(read(&args[0])?, read(&args[1])?, &read(&args[2])?)?,
+            &drafts::contract(read(&args[0])?, read(&args[1])?, &read(&args[2])?)?,
         ),
         ("draft-event", 4) => save(
             &args[3],

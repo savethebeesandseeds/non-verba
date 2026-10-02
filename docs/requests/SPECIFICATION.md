@@ -13,9 +13,9 @@ they do not acquire new consent or zero-valued balances.
 
 For every affected party P, an accepted effect must have either P's scoped
 authorization for that exact effect or a specific rule P previously accepted,
-applied only with its required verified proof. Agreement of the other two parties
+applied only with its required verified proof. Contract of the other two parties
 cannot create a new permission. A generic mediator override does not satisfy this
-invariant. The signed Agreement, not an administrator or majority vote, is the
+invariant. The signed Contract, not an administrator or majority vote, is the
 source of protocol authority.
 
 The corrective non-retraction clause is:
@@ -37,7 +37,7 @@ uncertainty and silence. Safety does not promise completion.
 Keep the following records distinct:
 
 1. Exact platform terms, role-specific acceptance, signed Request and O quote.
-2. Immutable R/O/M Agreement certificate and authorized amendment history.
+2. Immutable R/O/M Contract certificate and authorized amendment history.
 3. Per-author signed claims, evidence, commitments/reveals, receipts and proposals.
 4. Verified effects with rule, authority, proof and affected-obligation explanations.
 5. Itemized receivables and observations of actual external payments.
@@ -60,8 +60,8 @@ records and must never acquire independent authority.
 | --- | --- | --- |
 | Create Request | R | Attributed Request publication; no O/M obligation |
 | Issue quote | O | Exact offer of scope, compensation and expenses |
-| Bind Agreement | R + O + M | Exact signed terms only |
-| Amend root Agreement | R + O + M | Supported prospective terms; retain accrued obligations and history |
+| Bind Contract | R + O + M | Exact signed terms only |
+| Amend root Contract | R + O + M | Supported prospective terms; retain accrued obligations and history |
 | Submit claim/evidence | Author | Add attributed information |
 | Acknowledge receipt | Recipient | Acknowledgment of specified bytes, not substantive consent |
 | Acknowledge completion | R | Consequences already agreed for O's exact completion/milestone |
@@ -93,7 +93,7 @@ and recommendations are transcript events, not arbitrary additional effect types
 ## Cryptographic profile
 
 The profile retains the project's existing P-256 ECDSA/SHA-256 algorithm family.
-It does not migrate or enroll sensor keys. Agreement role keys are independently
+It does not migrate or enroll sensor keys. Contract role keys are independently
 pinned. A message cannot negotiate a weaker algorithm or supply its own trusted
 registry. Use maintained cryptographic and RFC 8785 JCS libraries; byte-level
 constants, key/signature encoding, bounds and rejection cases belong to the
@@ -119,10 +119,10 @@ sensor signer or a reviewed production client release.
 ## Action certificates
 
 Every state-changing action has immutable protocol/deployment context,
-Assignment ID, Agreement/policy hashes, a closed action type, exact scope,
+Assignment ID, Contract/policy hashes, a closed action type, exact scope,
 causal parent certificate references, bounded scope version, fresh nonce and a
 strict action-specific payload. Authorizations bind the proposal hash and exact
-role/key/purpose. The trusted registry is the relevant signed Agreement, anchored
+role/key/purpose. The trusted registry is the relevant signed Contract, anchored
 by the verifier's independent key bindings.
 
 Validate bounded input/schema, supported context, canonicalization/digests,
@@ -153,7 +153,7 @@ A shape-valid action proposal with at least one actual, independently pinned
 signature can establish attributed knowledge before it has all signatures needed
 for a financial effect. Completing its signatures later must not newly turn its
 existing context into an authority condition. A partial amendment remains a
-proposal and cannot introduce an active successor Agreement.
+proposal and cannot introduce an active successor Contract.
 
 **Required-effect proof** contains only the financial basis and evidence demanded
 by the closed action rule. Derive that finite basis from the action's type and
@@ -163,8 +163,8 @@ condition of an otherwise independent promise.
 
 | Effect | Required basis and checks |
 | --- | --- |
-| Service activation and separate M fee | Exact supported Agreement service/fee, supported prerequisites, exact commitment ID and R/O/M authorization; preserve any established same-fee provenance |
-| Completion acknowledgment | Exact scoped O completion proof, applicable Agreement and R authorization; preserve any established same-obligation provenance |
+| Service activation and separate M fee | Exact supported Contract service/fee, supported prerequisites, exact commitment ID and R/O/M authorization; preserve any established same-fee provenance |
+| Completion acknowledgment | Exact scoped O completion proof, applicable Contract and R authorization; preserve any established same-obligation provenance |
 | Artifact-rule invocation | Applicable supported rule, exact required artifact/completion proof and valid cutover authority; preserve any established same-obligation provenance |
 | Payment receipt | Identified established obligation, actual creditor authorization and exact signed unit allocations |
 | R/O release | Identified permitted R/O obligations, release policy, R/O authorization and exact allocations |
@@ -221,7 +221,7 @@ certificate, reason and numeric proof state.
 
 Use separate signed append-only streams per author/key epoch, not a global slot
 that serializes all three authors. Envelopes bind protocol/domain, Assignment and
-Agreement, author/key/epoch, sequence, prior event hash, closed type/body, nonce,
+Contract, author/key/epoch, sequence, prior event hash, closed type/body, nonce,
 causal references and any explicitly *claimed* creation time.
 
 Independent R/O events sharing a parent are normal concurrency. Two different
@@ -235,19 +235,19 @@ signers durably refuse incompatible authorizations for a previously signed slot.
 Known contradictions remain attributable evidence. They do not erase an
 independently authenticated completion claim, a Requester acknowledgment, or an
 existing credit/release grant. Transcript ordering and exact proof validity are
-separate projections. The financial rule checks its own exact role/body/Agreement
+separate projections. The financial rule checks its own exact role/body/Contract
 proof using authenticated proof records, even when unrelated stream ancestry is
 conflicted. Missing required proof still cannot create a new effect.
 
-Non-amendment exclusive slots span Agreement revisions; an amendment cannot reset
+Non-amendment exclusive slots spa Contract revisions; an amendment cannot reset
 a previously reserved expense/payment/settlement slot. Protection activation uses
-the Agreement revision as its scope version, and must be newly authorized for
+the Contract revision as its scope version, and must be newly authorized for
 changed service terms.
 
 ## Explicit financial grants
 
 Protocol 2 receipts, bilateral releases and reversals sign exact minor-unit
-allocations. Each allocation names an obligation, its immutable root Agreement
+allocations. Each allocation names an obligation, its immutable root Contract
 basis and a half-open interval `[start, end)` within that principal. The amount and
 currency must match the applicable supported rule. No allocation is guessed from
 arrival order, a remaining balance, an unsigned status or a v1 receipt.
@@ -281,7 +281,7 @@ accrual order does not make every contextual ancestor an effect-authority gate;
 the effect still needs its own exact authorization and required proof.
 
 Fresh exercise of a retired rule cannot create debt when its causal context
-positively establishes knowledge of the successor Agreement. A proved pre-cutover
+positively establishes knowledge of the successor Contract. A proved pre-cutover
 claim or explicitly grandfathered exact action follows its authorized scope.
 When old-policy timing/order is not established, retain the historical claim as
 unresolved rather than invent a clock, infer consent, erase it, or execute a new

@@ -324,7 +324,7 @@ pub struct TranscriptReport {
     /// Authenticated, body-valid records whose direct identity/proof relations
     /// validate against authenticated records. Contextual ancestor conflicts
     /// do not erase this evidence. This map grants no contractual authority;
-    /// each financial rule must check its own exact Agreement/role/body proof.
+    /// each financial rule must check its own exact Contract/role/body proof.
     pub proof_events: BTreeMap<String, SignedEvent>,
     pub pending: Vec<EventDiagnostic>,
     pub rejected: Vec<EventDiagnostic>,
@@ -380,16 +380,16 @@ pub fn sign_event(envelope: &EventEnvelope, key: &SigningKey) -> Result<SignedEv
 /// Verify a supplied local view, reconciling out-of-order records deterministically.
 /// Unsupported or incomplete data cannot be interpreted as contractual authority.
 pub fn verify_events(events: &[SignedEvent], context: &EventContext) -> TranscriptReport {
-    verify_events_for_agreements(
+    verify_events_for_contracts(
         events,
         context,
         &BTreeSet::from([context.agreement_hash.clone()]),
     )
 }
 
-/// The caller supplies only fully authorized, nonconflicted Agreement hashes.
+/// The caller supplies only fully authorized, nonconflicted Contract hashes.
 /// Amendments do not reset author sequences or permit replay into new terms.
-pub fn verify_events_for_agreements(
+pub fn verify_events_for_contracts(
     events: &[SignedEvent],
     context: &EventContext,
     agreement_hashes: &BTreeSet<String>,
@@ -1197,3 +1197,6 @@ fn diagnostic(
         missing_references,
     }
 }
+
+/// Compatibility entry point; authorized hashes keep their wire spelling.
+pub use verify_events_for_contracts as verify_events_for_agreements;

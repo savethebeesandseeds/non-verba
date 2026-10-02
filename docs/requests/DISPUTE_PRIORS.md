@@ -1,12 +1,12 @@
-# Dispute priorities and local analysis
+# Dispute priors and local analysis
 
 Development implementation record DP-1 / DP-2 · 29 September 2026 · `nonverba-disputes` 0.1.0
 
-This extension adds separately signed priorities and an inspectable analysis
+This extension adds separately signed priors and an inspectable analysis
 process to the accepted protocol-2 / package-0.2.1 / adapter-1 / AN-2 baseline.
 It does not change that baseline's financial rules. These are implementation and
 drafting notes, not newly adopted terms. The [decision record](DISPUTE_PRIORS_DECISIONS.md)
-lists what would have to be decided before priorities could determine settlement.
+lists what would have to be decided before priors could determine settlement.
 
 **DP-2 is closed and accepted as a synthetic workflow-integration increment.**
 The owner clarification (local review record, not included in this source release)
@@ -20,7 +20,7 @@ change, prompt tuning or further model-quality experiment.
 
 The Requester and Operator each distribute **250 points** across five questions:
 
-| Priority | What it asks about | Limit on its meaning |
+| Prior | What it asks about | Limit on its meaning |
 | --- | --- | --- |
 | Result | The usable result and conformity to agreed scope, quality and timing | Does not rewrite the agreed standard after performance |
 | Effort | Reasonable, diligent work within scope | Does not reward invented hours or unauthorized extra work |
@@ -33,15 +33,15 @@ emphasis when the consideration is relevant. **Zero does not waive a right;
 100 does not claim 100% of the payment.** Points are not honesty scores,
 probabilities or percentages. The Mediator has no preference vector.
 
-The dictionary is `nv-dispute-priors-5-v1`. Its exact definitions and bounds are
-returned by `dictionary` and retained in the signed context. Each value is an
+The catalog is `nv-dispute-priors-5-v1`. Its exact definitions and bounds are
+returned by `catalog` and retained in the signed context. Each value is an
 integer from 0 to 100. The validator derives the budget as checked `50 × N`
-from the exact supported five-dimension dictionary. Missing, duplicate, extra,
+from the exact supported five-dimension catalog. Missing, duplicate, extra,
 fractional, negative, over-limit or wrong-total allocations are rejected.
 An editable 50/50/50/50/50 draft is available; it is never inferred as historical
 consent or used to repair an invalid profile.
 
-Today the points provide declared inputs to an experimental analysis of priorities
+Today the points provide declared inputs to an experimental analysis of priors
 and tradeoffs; useful interpretation is not established by their validation.
 **How they translate into settlement remains UNSPECIFIED.** There is no average,
 payment formula, automatic split or award. Existing obligations remain visible
@@ -58,7 +58,7 @@ profile, then signed Quote plus O's signed profile, then comparison of both
 profiles and the proposed analysis settings **before base endorsement**.
 `preflight-review` verifies the existing authorship and exact Request/Quote against
 independent trust and retains complete sources, settings and their fingerprints.
-Both allocations are displayed in the same dictionary order. `preflight-decide`
+Both allocations are displayed in the same catalog order. `preflight-decide`
 records acceptance or decline of the full review digest without opening a vault.
 An Operator can decline an extreme but valid Requester allocation before signing
 the base. This automated workflow is not a resumed participant walkthrough.
@@ -66,26 +66,26 @@ the base. This automated workflow is not a resumed participant walkthrough.
 The decision is **unsigned local workflow evidence**, not authenticated consent
 by someone else. In the new guarded path, `preflight-base-review` and
 `authorize-preflight-base` require acceptance and unchanged sources, then obtain
-separate exact consent to the base Agreement under its existing authority rules.
+separate exact consent to the base Contract under its existing authority rules.
 `authorize-preflight-context` and `complete-setup` require the annex's exact
-profiles, dictionary and settings to match the retained preflight. Changing
+profiles, catalog and settings to match the retained preflight. Changing
 reviewed material requires a new review and local decision. Existing commands
 and historical records retain their original validity; the preflight is a local
 workflow protection, not a new financial-authority rule or robot safety approval.
 
 R signs its profile against an authenticated Request revision. O signs its own
-profile against the exact signed quote and Request. The existing closed Agreement
+profile against the exact signed quote and Request. The existing closed Contract
 schema has no suitable extension slot, so this implementation uses a separate
-version-1 companion annex. R, O and M endorse the same dictionary, final signed
-profiles, analysis specification and **already formed exact Agreement digest**.
+version-1 companion annex. R, O and M endorse the same catalog, final signed
+profiles, analysis specification and **already formed exact Contract digest**.
 It has typed `ANALYSIS_ONLY` authority and `UNSPECIFIED` settlement policy.
 
-Base formation and annex formation are reported independently. A base Agreement
+Base formation and annex formation are reported independently. A base Contract
 can be bound while the annex is missing, incomplete, invalid or unsupported.
 Only three valid annex endorsements complete annex formation. The new preflight
 workflow also requires `complete-setup` to verify the accepted material matches.
 Base and annex signatures are separate, not atomic. A later annex
-does not change when the base Agreement formed. Endorsing someone else's profile
+does not change when the base Contract formed. Endorsing someone else's profile
 acknowledges its place in the context; it does not transfer authorship.
 
 The P-256/SHA-256 suite and core signing statement are reused with distinct
@@ -97,15 +97,15 @@ exports do not unlock a vault. Agents and robots use the same explicit authority
 boundary as other participants; no new delegation mechanism is supplied.
 
 Local signing guards reserve one profile for a Request revision or quote identity,
-and one context for an exact accepted Agreement digest. Changing a pending draft
+and one context for an exact accepted Contract digest. Changing a pending draft
 invalidates its review. Changing an already signed profile requires a new signed
 Request revision or quote identity. Replacing an accepted context under the same
-Agreement is unsupported. A separately authorized base amendment or new Assignment
+Contract is unsupported. A separately authorized base amendment or new Assignment
 can carry a new context; old cases retain their exact old context. This deliberately
 restrictive first path also applies when moving from an unavailable model
 specification to a provisioned one. There is no silent runtime upgrade.
 
-A different accepted Agreement/annex starts a separate case and package. Appending
+A different accepted Contract/annex starts a separate case and package. Appending
 a case revision preserves the package's existing exact context; there is no
 mixed-context package or automatic migration of earlier dispute records.
 
@@ -115,7 +115,7 @@ protocol-1 or protocol-2 records, conditional proofs or accrued rights.
 ## Case, evidence and analysis
 
 Each case revision retains the supplied Assignment bundle, its locally observed
-frontier, exact Agreement/context/trust hashes, scope and shared evidence manifest.
+frontier, exact Contract/context/trust hashes, scope and shared evidence manifest.
 The existing verifier computes the financial report. Evidence authentication
 attributes a statement; it does not establish that the statement is true.
 
@@ -150,7 +150,7 @@ specifications and outputs remain supported without rewriting their hashes.
 
 Versions 3–5 add bounded formats and explicit source references. Versions 4–5
 permit empty unresolved-reason lists where the model claims the observations are
-settled. Version 5 also checks that each priority explanation begins with the
+settled. Version 5 also checks that each prior explanation begins with the
 exact points from that party's signed profile. Its comparison table joins by
 dimension ID while preserving Requester order, so independently ordered valid
 profiles remain usable. These checks do not validate the meaning of the prose.
@@ -176,7 +176,7 @@ or poor evidence do not create fault or a monetary default. No sensor or phone
 acceptance work was performed for this increment.
 
 The model schema permits bounded issues, competing arguments, uncertainties,
-questions, five ordered priority comparisons and unresolved reasons. Alternatives
+questions, five ordered prior comparisons and unresolved reasons. Alternatives
 are clarification, voluntary repair or a reference to an existing authenticated
 R/O monetary offer. There is no model-authored payment amount or executable action
 field. The application rejects unknown authority metadata and fabricated or
@@ -203,7 +203,7 @@ and authorize an exact `BILATERAL_SETTLEMENT` proposal. The core checks the
 permitted R-to-O compensation/expense obligations, entitlement basis and released
 units. M's separate rights and unrelated claims remain protected.
 
-The companion's `UNSPECIFIED` settlement policy concerns how priorities might
+The companion's `UNSPECIFIED` settlement policy concerns how priors might
 determine an outcome; it does not replace the existing core's signed-release
 rules. Release, new work/amendment, actual payment and payee receipt remain
 separate operations. See [settlement handling](SETTLEMENT_HANDLING.md) for the

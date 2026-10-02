@@ -3,16 +3,16 @@
 28 September 2026 · note revision AN-2 · package 0.2.1 · protocol 2 · terminal adapter 1
 
 These are explanatory drafting notes for the development prototype, not adopted
-legal terms. They do not change any signed Agreement or create a new promise.
-The exact retained Agreement, its policy and the authorized records are what
+legal terms. They do not change any signed Contract or create a new promise.
+The exact retained Contract, its policy and the authorized records are what
 the verifier checks.
 
-## DP-1 / DP-2 addition: priorities and settlement review
+## DP-1 / DP-2 addition: priors and settlement review
 
 29 September 2026. The accepted AN-2 snapshot retains its original bytes; this
 addition is explanatory and creates no newly adopted terms.
 
-These priorities describe what each participant wants the dispute-resolution
+These priors describe what each participant wants the dispute-resolution
 process to consider if cooperation leads to disagreement.
 
 The Requester and Operator can each allocate **250 points** across **result,
@@ -22,14 +22,14 @@ of the payment. A balanced draft is only a draft. Non Verba has no third profile
 
 Each owner signs its profile. The guided pre-cooperation path lets participants
 review both signed profiles and the exact analysis settings before signing the
-base Agreement, and record a local acceptance or decline. That local decision is
+base Contract, and record a local acceptance or decline. That local decision is
 not another party's consent. R, O and M separately endorse the same annex,
-binding the exact formed Agreement, both profiles and those settings. Extended
-setup requires the complete base Agreement and all three annex endorsements,
-matching the earlier review. An incomplete annex does not undo a formed Agreement.
+binding the exact formed Contract, both profiles and those settings. Extended
+setup requires the complete base Contract and all three annex endorsements,
+matching the earlier review. An incomplete annex does not undo a formed Contract.
 
 The experimental analysis is intended to organize claims, missing evidence and
-priority tradeoffs. **How points become settlement remains undecided.** Analysis cannot
+prior tradeoffs. **How points become settlement remains undecided.** Analysis cannot
 award money, confirm payment, waive a claim or authorize robot actuation. Missing
 evidence, silence, cancellation, unavailable computation or an exhausted budget
 does not mean anyone lost the dispute. Existing rights and conditional or unknown
@@ -47,7 +47,7 @@ execution or correct reasoning. No funded assurance service has been activated.
 
 DP-2 is closed as an accepted synthetic workflow-integration increment. The local
 Qwen model remains a workflow test component; its recorded reasoning failures
-remain failures. Reliable reasoning and the translation of priorities into
+remain failures. Reliable reasoning and the translation of priors into
 settlement are separate future work. See [the current explanation](DISPUTE_PRIORS.md)
 and retained closeout (local review record, not included in this source release).
 The optional participant walkthrough remains deferred.
@@ -78,7 +78,7 @@ that its owner, manufacturer or controller is automatically the responsible
 party. The current verifier checks supplied, independently trusted key bindings;
 it does not establish legal identity, capacity or general delegated authority.
 
-The **Mediator** is Non Verba's identified party to the Agreement. Mediation is
+The **Mediator** is Non Verba's identified party to the Contract. Mediation is
 free and proposal-only. The Mediator can help the Requester and Operator find a
 settlement, but its opinion does not itself decide payment or change their
 obligations. A separately agreed service, if present, has its own scope and fee.
@@ -100,10 +100,10 @@ Posting a Request alone does not assign work or bind an Operator. The first
 version supports one Assignment per Request; the local signing guard is not a
 global registry of every Assignment.
 
-All three parties then review the same Assignment Agreement. Check:
+All three parties then review the same Assignment Contract. Check:
 
 - Who is responsible, whose keys are authorized, and which Request and quote
-  this Agreement covers.
+  this Contract covers.
 - The work, exclusions, acceptance criteria, prerequisites, safety and stop
   conditions, and what counts as completion.
 - The currency, compensation, expense limits, due conditions and exact payment
@@ -116,10 +116,10 @@ All three parties then review the same Assignment Agreement. Check:
 If those details are unclear, clarify the draft before signing. A cap is a
 limit, not proof of spending, available funds or guaranteed reimbursement.
 
-## Signing and retaining the Agreement
+## Signing and retaining the Contract
 
 Initial formation requires valid Requester, Operator and Mediator signatures
-on the same exact Agreement. Platform-terms acceptance and Assignment consent
+on the same exact Contract. Platform-terms acceptance and Assignment consent
 are separate records. Two signatures do not substitute for the third.
 
 The terminal workflow displays the retained content, signing context, supplied
@@ -130,7 +130,7 @@ bytes to a trusted key and authorizes only the supported action and scope.
 
 For consequential actions, check the explanation against that exact object:
 
-- **Milestone acknowledgment:** identify the milestone, Agreement digest and
+- **Milestone acknowledgment:** identify the milestone, Contract digest and
   agreed compensation. This can establish that compensation; another
   acknowledgment of an already established obligation is not another charge.
   Evidence availability and integrity must be shown separately.
@@ -234,7 +234,7 @@ guaranteed collection of an unpaid amount.
 
 The actual service owner, contact, response commitment, delivery evidence, fee,
 data process and treatment of failure still need explicit decisions. The
-[unadopted service worksheet](AGREEMENT_NOTES.md#unadopted-service-decision-worksheet)
+[unadopted service worksheet](CONTRACT_NOTES.md#unadopted-service-decision-worksheet)
 keeps these blanks visible; signed service text alone does not staff the service.
 
 ## What this prototype is ready for
@@ -252,6 +252,6 @@ prototype does not enforce recipient lists, retention periods or deletion of
 other parties' copies; those promises need an actual operating process.
 
 See the [terminal guide](INTEGRATION.md) for the actual steps,
-[detailed agreement notes](AGREEMENT_NOTES.md) for promises and code evidence,
-[Agreement drafting specification](AGREEMENT.md) for the signed content, and
+[detailed Contract notes](CONTRACT_NOTES.md) for promises and code evidence,
+[Contract drafting specification](CONTRACT.md) for the signed content, and
 [readiness record](READINESS.md) for verified checks and remaining limits.

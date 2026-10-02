@@ -2,7 +2,7 @@
 //! Deterministic local-view verifier. It never consults a clock, server status or AI.
 use crate::{
     actions,
-    agreement::{self, diagnostic, ensure},
+    contract::{self, diagnostic, ensure},
     encoding::{canonical, digest, validate_id},
     evidence,
     model::*,
@@ -44,11 +44,11 @@ fn action_map(bundle: &AssignmentBundle) -> Result<BTreeMap<String, ActionCertif
 
 /// Only complete, nonconflicted all-party amendment chains introduce new policies.
 type AgreementChain = (
-    BTreeMap<String, AssignmentAgreement>,
+    BTreeMap<String, AssignmentContract>,
     String,
     BTreeSet<String>,
 );
-fn agreements(
+fn contracts(
     bundle: &AssignmentBundle,
     trust: &TrustConfiguration,
     errors: &mut Vec<Diagnostic>,
@@ -106,17 +106,17 @@ fn agreements(
     Ok((map, current, accepted))
 }
 
-pub fn known_agreement(
+pub fn known_contract(
     bundle: &AssignmentBundle,
     hash: &str,
     trust: &TrustConfiguration,
-) -> Result<AssignmentAgreement, String> {
+) -> Result<AssignmentContract, String> {
     ensure(
-        agreement::verify_agreement(&bundle.agreement, &bundle.requests, trust).bound,
+        contract::verify_contract(&bundle.agreement, &bundle.requests, trust).bound,
         "AGREEMENT_UNBOUND",
         "root must be bound",
     )?;
-    let (map, _, _) = agreements(bundle, trust, &mut vec![], &mut BTreeMap::new())?;
+    let (map, _, _) = contracts(bundle, trust, &mut vec![], &mut BTreeMap::new())?;
     map.get(hash).cloned().ok_or_else(|| {
         "UNKNOWN_AGREEMENT: missing, invalid or conflicted Agreement revision".into()
     })
@@ -125,7 +125,7 @@ pub fn known_agreement(
 fn completion<'a>(
     events: &'a BTreeMap<String, SignedEvent>,
     hash: &str,
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     milestone: Option<&str>,
 ) -> Result<(&'a str, &'a transcript::EvidenceManifest), String> {
     let e = events.get(hash).ok_or_else(|| {
@@ -178,7 +178,7 @@ fn establish(
     debtor: Role,
     creditor: Role,
     category: &str,
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     certificate: &str,
     root_hash: &str,
 ) -> Result<(), String> {
@@ -220,7 +220,7 @@ fn apply(
     state: &mut State,
     proposal: &ActionProposal,
     id: &str,
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     context: &ReductionContext<'_>,
     authorizers: Vec<Role>,
 ) -> Result<(), String> {
@@ -392,13 +392,13 @@ fn apply(
             reservation_of_other_rights,
         } => {
             validate_id(settlement_id)?;
-            agreement::text(reservation_of_other_rights)?;
+            contract::text(reservation_of_other_rights)?;
             ensure(
                 a.policy.bilateral_balance_releases && !releases.is_empty() && releases.len() <= 64,
                 "SETTLEMENT_SCOPE",
                 "only enabled, bounded R/O balance releases are supported",
             )?;
-            agreement::unique(releases.iter().map(|r| r.obligation_id.as_str()))?;
+            contract::unique(releases.iter().map(|r| r.obligation_id.as_str()))?;
             for release in releases {
                 let o = state
                     .obligations
@@ -454,7 +454,7 @@ fn apply(
             rail_reference,
         } => {
             validate_id(payment_id)?;
-            agreement::text(rail_reference)?;
+            contract::text(rail_reference)?;
             let o = state
                 .obligations
                 .get_mut(obligation_id)
@@ -506,7 +506,7 @@ fn apply(
             amount,
             reason,
         } => {
-            agreement::text(reason)?;
+            contract::text(reason)?;
             ensure(
                 proposal
                     .parent_certificate_ids
@@ -599,7 +599,7 @@ type AuthorizedActions = BTreeMap<String, (ActionCertificate, Vec<Role>)>;
 type Ancestry = BTreeMap<String, BTreeSet<String>>;
 type EffectProofs = BTreeMap<String, Vec<Obligation>>;
 
-fn establishment_id(proposal: &ActionProposal, agreement: &AssignmentAgreement) -> Option<String> {
+fn establishment_id(proposal: &ActionProposal, agreement: &AssignmentContract) -> Option<String> {
     match &proposal.action {
         Action::AcknowledgeCompletion { milestone_id, .. } => {
             Some(format!("milestone:{milestone_id}"))
@@ -628,7 +628,7 @@ fn required_effects(
     valid: &AuthorizedActions,
     proofs: &EffectProofs,
     dependencies: &Ancestry,
-    agreements: &BTreeMap<String, AssignmentAgreement>,
+    agreements: &BTreeMap<String, AssignmentContract>,
     conditional: &BTreeMap<String, UnresolvedRight>,
 ) -> BTreeSet<String> {
     let mut direct = BTreeSet::new();
@@ -728,7 +728,7 @@ fn required_effects(
 }
 
 struct ReductionContext<'a> {
-    agreements: &'a BTreeMap<String, AssignmentAgreement>,
+    agreements: &'a BTreeMap<String, AssignmentContract>,
     events: &'a BTreeMap<String, SignedEvent>,
     attachments: &'a evidence::AttachmentIndex,
     root_hash: &'a str,
@@ -947,13 +947,13 @@ fn derive_report(
         "BUNDLE_BOUNDS",
         "bundle exceeds profile limits",
     )?;
-    agreement::validate_trust(trust)?;
-    let result = agreement::verify_agreement(&bundle.agreement, &bundle.requests, trust);
+    contract::validate_trust(trust)?;
+    let result = contract::verify_contract(&bundle.agreement, &bundle.requests, trust);
     let root = &bundle.agreement.agreement;
     let mut errors = result.diagnostics.clone();
     let mut status = BTreeMap::new();
     let (map, current, amendments) = if result.bound {
-        agreements(bundle, trust, &mut errors, &mut status)?
+        contracts(bundle, trust, &mut errors, &mut status)?
     } else {
         (
             BTreeMap::from([(result.agreement_hash.clone(), root.clone())]),
@@ -984,7 +984,7 @@ fn derive_report(
             &mut errors,
         );
     }
-    let transcript = transcript::verify_events_for_agreements(
+    let transcript = transcript::verify_events_for_contracts(
         &versioned_events,
         &context,
         &map.keys().cloned().collect(),
@@ -1009,7 +1009,7 @@ fn derive_report(
                     .and_then(|p| {
                         crate::crypto::verify(
                             signature,
-                            &agreement::claims(
+                            &contract::claims(
                                 &a.deployment_domain,
                                 &a.assignment_id,
                                 id,
@@ -1125,7 +1125,7 @@ fn derive_report(
     let mut dependencies = Ancestry::new();
     let mut proof_states = EffectProofs::new();
     let mut unresolved_rights: BTreeMap<String, UnresolvedRight> = BTreeMap::new();
-    // Successor Agreements inherit the authenticated amendment frontier. This
+    // Successor Contracts inherit the authenticated amendment frontier. This
     // is ordering/provenance, not permission for contextual claims to gate money.
     let causal_ancestry: Ancestry = pending
         .iter()
@@ -1484,7 +1484,7 @@ pub fn validate_unsigned_action(
     trust: &TrustConfiguration,
 ) -> Result<(), String> {
     let report = verify_assignment_bundle(bundle, trust)?;
-    let a = known_agreement(bundle, &proposal.agreement_hash, trust)?;
+    let a = known_contract(bundle, &proposal.agreement_hash, trust)?;
     actions::validate_proposal(proposal, &a)?;
     if report
         .action_status
@@ -1496,7 +1496,7 @@ pub fn validate_unsigned_action(
     }
     if let Action::AmendAgreement { .. } = &proposal.action {
         let (known_agreements, _, amendment_ids) =
-            agreements(bundle, trust, &mut vec![], &mut BTreeMap::new())?;
+            contracts(bundle, trust, &mut vec![], &mut BTreeMap::new())?;
         crate::cutover::validate_amendment(
             proposal,
             &a,
@@ -1520,3 +1520,6 @@ pub fn validate_unsigned_action(
         "candidate is incomplete, rejected or conflicts under the same causal rules as final admission",
     )
 }
+
+/// Compatibility entry point for the prior API vocabulary.
+pub use known_contract as known_agreement;

@@ -611,7 +611,7 @@ pub fn inspect_case(
     references.sort();
     offers.sort();
     let agreement = if core.agreement.bound && case.bundle.protocol_version == "2" {
-        serde_json::to_value(bundle::known_agreement(
+        serde_json::to_value(bundle::known_contract(
             &case.bundle,
             &core.current_agreement_hash,
             trust,

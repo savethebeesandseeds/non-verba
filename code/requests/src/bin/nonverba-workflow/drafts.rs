@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //! Unsigned, synthetic development drafts. Only the core verifier grants effects.
 use nonverba_requests::{
-    actions, agreement, bundle, crypto, encoding, evidence,
+    actions, bundle, contract, crypto, encoding, evidence,
     model::*,
     money::{Money, parse_minor_units},
     transcript::{ArtifactRef, EventBody, EventEnvelope, EvidenceManifest, SignedEvent},
@@ -24,7 +24,7 @@ fn unique_id(prefix: &str) -> Result<String, String> {
 }
 
 fn trusted(trust: &TrustConfiguration, role: Role) -> Result<PartyBinding, String> {
-    agreement::validate_trust(trust)?;
+    contract::validate_trust(trust)?;
     trust
         .parties
         .iter()
@@ -47,7 +47,7 @@ pub fn request(trust: &TrustConfiguration) -> Result<Request, String> {
 }
 
 pub fn quote(request: &SignedRequest, trust: &TrustConfiguration) -> Result<Quote, String> {
-    let request_hash = agreement::verify_request(request, trust)?;
+    let request_hash = contract::verify_request(request, trust)?;
     let mut quote = template()?.agreement.agreement.quote.quote;
     quote.protocol_version = PROTOCOL_VERSION.into();
     quote.deployment_domain = trust.deployment_domain.clone();
@@ -59,12 +59,12 @@ pub fn quote(request: &SignedRequest, trust: &TrustConfiguration) -> Result<Quot
     Ok(quote)
 }
 
-pub fn agreement(
+pub fn contract(
     request: SignedRequest,
     quote: SignedQuote,
     trust: &TrustConfiguration,
 ) -> Result<AssignmentBundle, String> {
-    agreement::verify_quote(&quote, &request, trust)?;
+    contract::verify_quote(&quote, &request, trust)?;
     if quote.quote.milestones.len() != 1 {
         return Err("DRAFT_PROFILE: the guided synthetic Agreement supports one milestone; review a separately constructed Agreement for other shapes".into());
     }
@@ -95,7 +95,7 @@ pub fn agreement(
     output.actions.clear();
     output.events.clear();
     output.attachments.clear();
-    agreement::validate_agreement(a, &output.requests, trust)?;
+    contract::validate_contract(a, &output.requests, trust)?;
     Ok(output)
 }
 
@@ -118,16 +118,16 @@ pub fn synthetic_attachment() -> Result<Attachment, String> {
 fn current(
     input: &AssignmentBundle,
     trust: &TrustConfiguration,
-) -> Result<(AssignmentAgreement, BundleReport), String> {
+) -> Result<(AssignmentContract, BundleReport), String> {
     let report = bundle::verify_assignment_bundle(input, trust)?;
     if !report.agreement.bound {
         return Err("DRAFT_UNBOUND: retain the exact independently signed R/O/M Agreement certificate before drafting events or actions".into());
     }
-    let a = bundle::known_agreement(input, &report.current_agreement_hash, trust)?;
+    let a = bundle::known_contract(input, &report.current_agreement_hash, trust)?;
     Ok((a, report))
 }
 
-fn milestone(a: &AssignmentAgreement) -> Result<&Milestone, String> {
+fn milestone(a: &AssignmentContract) -> Result<&Milestone, String> {
     if a.quote.quote.milestones.len() != 1 {
         return Err("DRAFT_PROFILE: the guided event needs exactly one milestone; use an explicit reviewed envelope otherwise".into());
     }
@@ -235,7 +235,7 @@ pub fn event(
             );
         }
     };
-    let party = agreement::party(&a, role)?;
+    let party = contract::party(&a, role)?;
     let (sequence, previous_event_hash) = next_event(&report, role, &party.key.key_id)?;
     Ok(EventEnvelope {
         protocol_version: PROTOCOL_VERSION.into(),
@@ -520,7 +520,7 @@ mod tests {
             q.accepted_terms_hash,
             encoding::digest(&r.request.terms).unwrap()
         );
-        let draft = agreement(r.clone(), b.agreement.agreement.quote.clone(), &trust).unwrap();
+        let draft = contract(r.clone(), b.agreement.agreement.quote.clone(), &trust).unwrap();
         assert!(draft.agreement.signatures.is_empty());
         assert!(
             draft.actions.is_empty() && draft.events.is_empty() && draft.attachments.is_empty()

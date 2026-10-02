@@ -282,7 +282,9 @@ pub struct LegalTerms {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AssignmentAgreement {
+/// Exact Assignment Contract terms. Legacy JSON field spellings are part of the
+/// signed protocol; terminology changes do not change their encoding.
+pub struct AssignmentContract {
     pub protocol_version: String,
     pub schema_version: String,
     pub deployment_domain: String,
@@ -307,8 +309,8 @@ pub struct AssignmentAgreement {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AgreementCertificate {
-    pub agreement: AssignmentAgreement,
+pub struct ContractCertificate {
+    pub agreement: AssignmentContract,
     pub signatures: Vec<DetachedSignature>,
 }
 
@@ -353,7 +355,7 @@ pub enum Action {
         reason: String,
     },
     AmendAgreement {
-        replacement: Box<AssignmentAgreement>,
+        replacement: Box<AssignmentContract>,
     },
     ActivateProtectionService {
         commitment_id: String,
@@ -440,7 +442,7 @@ pub struct AssignmentBundle {
     pub protocol_version: String,
     pub deployment_domain: String,
     pub requests: Vec<SignedRequest>,
-    pub agreement: AgreementCertificate,
+    pub agreement: ContractCertificate,
     pub actions: Vec<ActionCertificate>,
     pub events: Vec<SignedEvent>,
     pub attachments: Vec<Attachment>,
@@ -496,7 +498,7 @@ pub struct PaymentObservation {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AgreementResult {
+pub struct ContractResult {
     pub agreement_hash: String,
     pub bound: bool,
     pub valid_signers: Vec<Role>,
@@ -512,7 +514,7 @@ pub struct BundleReport {
     /// unresolved. These conditional projections are not additive or zero debt.
     pub unresolved_rights: Vec<UnresolvedRight>,
     pub evidence_integrity: Vec<crate::evidence::EventEvidenceReport>,
-    pub agreement: AgreementResult,
+    pub agreement: ContractResult,
     pub current_agreement_hash: String,
     pub ready_to_start: bool,
     pub readiness_reasons: Vec<String>,
@@ -546,3 +548,9 @@ pub struct LegacyProof {
     pub authorizers: Vec<Role>,
     pub proposal: ActionProposal,
 }
+
+/// Compatibility names. Serialized fields and signing identifiers retain their
+/// versioned agreement spelling; the living vocabulary calls this a Contract.
+pub type AssignmentAgreement = AssignmentContract;
+pub type AgreementCertificate = ContractCertificate;
+pub type AgreementResult = ContractResult;

@@ -36,7 +36,7 @@ fn fixture(pins: &Value) -> (AnalysisPackageV1, TrustConfiguration) {
     let (mut bundle, trust, keys) = common::fixture();
     common::establish_compensation(&mut bundle, &keys);
     let request = bundle.requests[0].clone();
-    let requester = binding::draft_profile(
+    let requester = binding::draft_declared_priors(
         binding::ProfileProvenance::Request {
             signed_request: request.clone(),
         },
@@ -44,7 +44,7 @@ fn fixture(pins: &Value) -> (AnalysisPackageV1, TrustConfiguration) {
         &trust,
     )
     .unwrap();
-    let operator = binding::draft_profile(
+    let operator = binding::draft_declared_priors(
         binding::ProfileProvenance::Quote {
             signed_request: request,
             signed_quote: bundle.agreement.agreement.quote.clone(),
@@ -53,24 +53,24 @@ fn fixture(pins: &Value) -> (AnalysisPackageV1, TrustConfiguration) {
         &trust,
     )
     .unwrap();
-    let requester = binding::SignedProfileV1 {
+    let requester = binding::SignedDeclaredPriorsV1 {
         authorization: crypto::sign(
-            &binding::profile_claims(&requester, &trust).unwrap(),
+            &binding::declared_priors_claims(&requester, &trust).unwrap(),
             &keys[0],
         )
         .unwrap(),
         profile: requester,
     };
-    let operator = binding::SignedProfileV1 {
+    let operator = binding::SignedDeclaredPriorsV1 {
         authorization: crypto::sign(
-            &binding::profile_claims(&operator, &trust).unwrap(),
+            &binding::declared_priors_claims(&operator, &trust).unwrap(),
             &keys[1],
         )
         .unwrap(),
         profile: operator,
     };
     let mut spec = development_spec(
-        binding::dictionary_digest().unwrap(),
+        binding::priors_catalog_digest().unwrap(),
         digest(&requester.profile).unwrap(),
         digest(&operator.profile).unwrap(),
     );

@@ -42,18 +42,18 @@ pub fn render(bundle: &AssignmentBundle, report: &BundleReport) -> Result<String
     section(&mut out, "FORMATION AND PROTOCOL RECORD CHECKS");
     field(
         &mut out,
-        "Root Agreement hash",
+        "Root Contract hash",
         &report.agreement.agreement_hash,
     )?;
     field(
         &mut out,
-        "Current Agreement hash in this view",
+        "Current Contract hash in this view",
         &report.current_agreement_hash,
     )?;
-    field(&mut out, "Agreement bound", &report.agreement.bound)?;
+    field(&mut out, "Contract bound", &report.agreement.bound)?;
     field(
         &mut out,
-        "Valid Agreement signers",
+        "Valid Contract signers",
         &report.agreement.valid_signers,
     )?;
     out.push_str(if report.ready_to_start {
@@ -492,7 +492,7 @@ fn obligation(out: &mut String, item: &Obligation) -> Result<(), String> {
          The verifier does not generally interpret narrative due conditions. Check the agreed conditions and the process used to establish their fulfillment.\n",
     );
     field(out, "Retained due-condition text", &item.due_conditions)?;
-    field(out, "Immutable Agreement basis", &item.basis_agreement_hash)?;
+    field(out, "Immutable Contract basis", &item.basis_agreement_hash)?;
     field(out, "Supporting certificates", &item.certificate_ids)?;
     grants(out, "Credit grants", &item.credit_grants)?;
     grants(out, "Release grants", &item.release_grants)
@@ -518,7 +518,7 @@ fn allocations(out: &mut String, label: &str, items: &[UnitAllocation]) -> Resul
         field(out, "    Obligation", &allocation.obligation_id)?;
         field(
             out,
-            "    Immutable Agreement basis",
+            "    Immutable Contract basis",
             &allocation.basis_agreement_hash,
         )?;
         field(out, "    Start minor unit (inclusive)", &allocation.start)?;
@@ -676,7 +676,7 @@ mod tests {
         assert!(!report.readiness_reasons.is_empty());
         let text = render(&bundle, &report).unwrap();
         let (human, appendix) = text.split_once(APPENDIX).unwrap();
-        assert!(human.contains("Agreement bound: false"));
+        assert!(human.contains("Contract bound: false"));
         assert!(
             human.contains(
                 "Protocol record checks not passed — operational readiness not assessed."

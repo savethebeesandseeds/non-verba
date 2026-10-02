@@ -3,7 +3,7 @@
 //! Deterministic PUBLIC TEST KEYS. Never use these keys or fixtures for real work.
 
 use nonverba_requests::{
-    actions, agreement, crypto, encoding, model::*, money::Money, transcript::*,
+    actions, contract, crypto, encoding, model::*, money::Money, transcript::*,
 };
 use p256::ecdsa::SigningKey;
 
@@ -79,7 +79,7 @@ pub fn fixture() -> (AssignmentBundle, TrustConfiguration, [SigningKey; 3]) {
     };
     let signed_request = SignedRequest {
         authorization: crypto::sign(
-            &agreement::claims(
+            &contract::claims(
                 TEST_DOMAIN,
                 &request.request_id,
                 &encoding::digest(&request).unwrap(),
@@ -113,7 +113,7 @@ pub fn fixture() -> (AssignmentBundle, TrustConfiguration, [SigningKey; 3]) {
     };
     let signed_quote = SignedQuote {
         authorization: crypto::sign(
-            &agreement::claims(
+            &contract::claims(
                 TEST_DOMAIN,
                 &signed_request.request.request_id,
                 &encoding::digest(&quote).unwrap(),
@@ -135,7 +135,7 @@ pub fn fixture() -> (AssignmentBundle, TrustConfiguration, [SigningKey; 3]) {
         no_commission: true,
         mediator_has_task_fund_control: false,
     };
-    let agreement = AssignmentAgreement {
+    let agreement = AssignmentContract {
         protocol_version: PROTOCOL_VERSION.into(),
         schema_version: "2".into(),
         deployment_domain: TEST_DOMAIN.into(),
@@ -214,7 +214,7 @@ pub fn fixture() -> (AssignmentBundle, TrustConfiguration, [SigningKey; 3]) {
         protocol_version: PROTOCOL_VERSION.into(),
         deployment_domain: TEST_DOMAIN.into(),
         requests: vec![signed_request],
-        agreement: AgreementCertificate {
+        agreement: ContractCertificate {
             agreement,
             signatures: vec![],
         },
@@ -234,7 +234,7 @@ pub fn sign_root(bundle: &mut AssignmentBundle, keys: &[SigningKey; 3]) {
         .iter()
         .map(|party| {
             crypto::sign(
-                &agreement::claims(
+                &contract::claims(
                     &a.deployment_domain,
                     &a.assignment_id,
                     &hash,
@@ -251,7 +251,7 @@ pub fn sign_root(bundle: &mut AssignmentBundle, keys: &[SigningKey; 3]) {
 pub fn sign_quote(bundle: &mut AssignmentBundle, keys: &[SigningKey; 3]) {
     let a = &mut bundle.agreement.agreement;
     a.quote.authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             &a.deployment_domain,
             &a.request_id,
             &encoding::digest(&a.quote.quote).unwrap(),
@@ -333,7 +333,7 @@ pub fn sign_action(
     certificate
 }
 
-fn principal(a: &AssignmentAgreement, obligation_id: &str, fallback: u64) -> u64 {
+fn principal(a: &AssignmentContract, obligation_id: &str, fallback: u64) -> u64 {
     if let Some(milestone) = obligation_id.strip_prefix("milestone:")
         && let Some(item) = a
             .quote
@@ -385,7 +385,7 @@ fn allocate(
     result
 }
 
-fn default_allocations(a: &AssignmentAgreement, action: &Action) -> Vec<UnitAllocation> {
+fn default_allocations(a: &AssignmentContract, action: &Action) -> Vec<UnitAllocation> {
     // This fixture family has a root and at most one replacement revision.
     // Accrued coordinates remain anchored to the root after that replacement.
     let basis = a
@@ -565,7 +565,7 @@ fn bundle_allocations(
 }
 
 pub fn resign_action_for(
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     keys: &[SigningKey; 3],
     certificate: &mut ActionCertificate,
     roles: &[Role],
@@ -574,9 +574,9 @@ pub fn resign_action_for(
     certificate.authorizations = roles
         .iter()
         .map(|role| {
-            let party = agreement::party(a, *role).unwrap();
+            let party = contract::party(a, *role).unwrap();
             crypto::sign(
-                &agreement::claims(
+                &contract::claims(
                     &a.deployment_domain,
                     &a.assignment_id,
                     &hash,
@@ -591,7 +591,7 @@ pub fn resign_action_for(
 }
 
 pub fn sign_action_for(
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     keys: &[SigningKey; 3],
     action: Action,
     roles: &[Role],
@@ -638,9 +638,9 @@ pub fn sign_action_for(
     let authorizations = roles
         .iter()
         .map(|role| {
-            let party = agreement::party(a, *role).unwrap();
+            let party = contract::party(a, *role).unwrap();
             crypto::sign(
-                &agreement::claims(
+                &contract::claims(
                     &a.deployment_domain,
                     &a.assignment_id,
                     &hash,
@@ -674,7 +674,7 @@ pub fn event(
         assignment_id: a.assignment_id.clone(),
         agreement_hash: encoding::digest(a).unwrap(),
         author_role: role.code().into(),
-        key_id: agreement::party(a, role).unwrap().key.key_id.clone(),
+        key_id: contract::party(a, role).unwrap().key.key_id.clone(),
         key_epoch: "1".into(),
         sequence: sequence.to_string(),
         previous_event_hash: previous.map(|event| encoding::digest(&event.envelope).unwrap()),
@@ -736,7 +736,7 @@ pub fn establish_compensation(bundle: &mut AssignmentBundle, keys: &[SigningKey;
     hash
 }
 
-pub fn next_agreement(bundle: &AssignmentBundle) -> AssignmentAgreement {
+pub fn next_agreement(bundle: &AssignmentBundle) -> AssignmentContract {
     let mut next = bundle.agreement.agreement.clone();
     next.revision = "2".into();
     next.previous_agreement_hash = Some(encoding::digest(&bundle.agreement.agreement).unwrap());

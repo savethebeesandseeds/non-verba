@@ -2,7 +2,7 @@
 #[path = "../../requests/tests/common/mod.rs"]
 mod common;
 use nonverba_disputes::{binding::*, consent::ConsentReviewV1, preflight::*, runtime};
-use nonverba_requests::{agreement, bundle, crypto, encoding, local, model::*};
+use nonverba_requests::{bundle, contract, crypto, encoding, local, model::*};
 use p256::ecdsa::SigningKey;
 use std::{
     cell::Cell,
@@ -23,7 +23,7 @@ fn review(
     for (point, value) in allocation.iter_mut().zip([100, 100, 50, 0, 0]) {
         point.points = value;
     }
-    let r = draft_profile(
+    let r = draft_declared_priors(
         ProfileProvenance::Request {
             signed_request: base.requests[0].clone(),
         },
@@ -31,7 +31,7 @@ fn review(
         trust,
     )
     .unwrap();
-    let o = draft_profile(
+    let o = draft_declared_priors(
         ProfileProvenance::Quote {
             signed_request: base.requests[0].clone(),
             signed_quote: base.agreement.agreement.quote.clone(),
@@ -40,16 +40,16 @@ fn review(
         trust,
     )
     .unwrap();
-    let r = SignedProfileV1 {
-        authorization: crypto::sign(&profile_claims(&r, trust).unwrap(), &keys[0]).unwrap(),
+    let r = SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(&declared_priors_claims(&r, trust).unwrap(), &keys[0]).unwrap(),
         profile: r,
     };
-    let o = SignedProfileV1 {
-        authorization: crypto::sign(&profile_claims(&o, trust).unwrap(), &keys[1]).unwrap(),
+    let o = SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(&declared_priors_claims(&o, trust).unwrap(), &keys[1]).unwrap(),
         profile: o,
     };
     let spec = runtime::development_spec(
-        dictionary_digest().unwrap(),
+        priors_catalog_digest().unwrap(),
         encoding::digest(&r.profile).unwrap(),
         encoding::digest(&o.profile).unwrap(),
     );
@@ -200,7 +200,7 @@ fn changed_profile_settings_sources_or_trust_require_new_review_and_exact_annex_
     let accepted = decision(&review, &trust, Decision::Accept);
     let complete = annex(&review, &base, &trust, &keys);
     let v2 = runtime::development_spec_v2(
-        dictionary_digest().unwrap(),
+        priors_catalog_digest().unwrap(),
         review.requester_profile_hash.clone(),
         review.operator_profile_hash.clone(),
     );
@@ -234,7 +234,7 @@ fn changed_profile_settings_sources_or_trust_require_new_review_and_exact_annex_
         if change == "profile" {
             candidate.requester_profile.profile.allocations = balanced_allocations();
             candidate.requester_profile.authorization = crypto::sign(
-                &profile_claims(&candidate.requester_profile.profile, &trust).unwrap(),
+                &declared_priors_claims(&candidate.requester_profile.profile, &trust).unwrap(),
                 &keys[0],
             )
             .unwrap();
@@ -329,11 +329,11 @@ fn accepted_preflight_native_base_signing_reuses_core_authority_and_exclusive_gu
     let a = &base.agreement.agreement;
     crypto::verify(
         &signed,
-        &agreement::claims(
+        &contract::claims(
             &a.deployment_domain,
             &a.assignment_id,
             &encoding::digest(a).unwrap(),
-            agreement::party(a, Role::Operator).unwrap(),
+            contract::party(a, Role::Operator).unwrap(),
             "AGREEMENT",
         ),
         &trust.parties[1].key,

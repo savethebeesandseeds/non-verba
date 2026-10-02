@@ -20,7 +20,7 @@ fn fixture() -> (
     let (mut bundle, trust, keys) = common::fixture();
     common::establish_compensation(&mut bundle, &keys);
     let request = bundle.requests[0].clone();
-    let r = binding::draft_profile(
+    let r = binding::draft_declared_priors(
         binding::ProfileProvenance::Request {
             signed_request: request.clone(),
         },
@@ -28,7 +28,7 @@ fn fixture() -> (
         &trust,
     )
     .unwrap();
-    let o = binding::draft_profile(
+    let o = binding::draft_declared_priors(
         binding::ProfileProvenance::Quote {
             signed_request: request,
             signed_quote: bundle.agreement.agreement.quote.clone(),
@@ -37,18 +37,24 @@ fn fixture() -> (
         &trust,
     )
     .unwrap();
-    let r = binding::SignedProfileV1 {
-        authorization: crypto::sign(&binding::profile_claims(&r, &trust).unwrap(), &keys[0])
-            .unwrap(),
+    let r = binding::SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(
+            &binding::declared_priors_claims(&r, &trust).unwrap(),
+            &keys[0],
+        )
+        .unwrap(),
         profile: r,
     };
-    let o = binding::SignedProfileV1 {
-        authorization: crypto::sign(&binding::profile_claims(&o, &trust).unwrap(), &keys[1])
-            .unwrap(),
+    let o = binding::SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(
+            &binding::declared_priors_claims(&o, &trust).unwrap(),
+            &keys[1],
+        )
+        .unwrap(),
         profile: o,
     };
     let spec = development_spec(
-        binding::dictionary_digest().unwrap(),
+        binding::priors_catalog_digest().unwrap(),
         digest(&r.profile).unwrap(),
         digest(&o.profile).unwrap(),
     );
@@ -262,32 +268,32 @@ fn fixture_version_with_orders(
                     .collect();
             }
             profile.authorization = crypto::sign(
-                &binding::profile_claims(&profile.profile, &trust).unwrap(),
+                &binding::declared_priors_claims(&profile.profile, &trust).unwrap(),
                 key,
             )
             .unwrap();
         }
     }
     let mut spec = development_spec_v2(
-        binding::dictionary_digest().unwrap(),
+        binding::priors_catalog_digest().unwrap(),
         digest(&c.requester_profile.profile).unwrap(),
         digest(&c.operator_profile.profile).unwrap(),
     );
     if version == 3 {
         spec = development_spec_v3(
-            binding::dictionary_digest().unwrap(),
+            binding::priors_catalog_digest().unwrap(),
             digest(&c.requester_profile.profile).unwrap(),
             digest(&c.operator_profile.profile).unwrap(),
         );
     } else if version == 4 {
         spec = development_spec_v4(
-            binding::dictionary_digest().unwrap(),
+            binding::priors_catalog_digest().unwrap(),
             digest(&c.requester_profile.profile).unwrap(),
             digest(&c.operator_profile.profile).unwrap(),
         );
     } else if version == 5 {
         spec = development_spec_v5(
-            binding::dictionary_digest().unwrap(),
+            binding::priors_catalog_digest().unwrap(),
             digest(&c.requester_profile.profile).unwrap(),
             digest(&c.operator_profile.profile).unwrap(),
         );

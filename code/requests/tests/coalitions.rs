@@ -2,7 +2,7 @@
 mod common;
 use common::*;
 use nonverba_requests::{
-    actions, agreement, bundle::verify_assignment_bundle, crypto, encoding, model::*,
+    actions, bundle::verify_assignment_bundle, contract, crypto, encoding, model::*,
 };
 
 const ALL: [Role; 3] = [Role::Requester, Role::Operator, Role::Mediator];
@@ -32,7 +32,7 @@ fn every_two_party_coalition_fails_to_change_the_excluded_partys_agreement_right
                 replacement.quote.quote.compensation = money("20000");
                 replacement.quote.quote.milestones[0].compensation = money("20000");
                 replacement.quote.authorization = crypto::sign(
-                    &agreement::claims(
+                    &contract::claims(
                         &replacement.deployment_domain,
                         &replacement.request_id,
                         &encoding::digest(&replacement.quote.quote).unwrap(),
@@ -143,7 +143,7 @@ fn requester_cannot_change_an_operator_quote_even_if_all_root_signatures_are_new
     let quote = &bundle.agreement.agreement.quote.quote;
     // Deliberately use R's real signature. R is not authorized to issue this quote.
     bundle.agreement.agreement.quote.authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             TEST_DOMAIN,
             &bundle.agreement.agreement.request_id,
             &encoding::digest(quote).unwrap(),

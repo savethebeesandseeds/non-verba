@@ -7,7 +7,7 @@ mod common;
 use super::*;
 use nonverba_disputes::{binding, case, pipeline, runtime};
 use nonverba_requests::{
-    agreement, crypto,
+    contract, crypto,
     encoding::{canonical, digest},
     model::{AssignmentBundle, Role, TrustConfiguration},
 };
@@ -100,7 +100,7 @@ fn base(case: &ExperimentCase) -> (AssignmentBundle, TrustConfiguration, [Signin
     request.request.request_id = format!("dp2-{}", case.id);
     request.request.service = service.clone();
     request.authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             common::TEST_DOMAIN,
             &request.request.request_id,
             &digest(&request.request).unwrap(),
@@ -121,7 +121,7 @@ fn base(case: &ExperimentCase) -> (AssignmentBundle, TrustConfiguration, [Signin
     a.quote.quote.service_hash = digest(&service).unwrap();
     a.quote.quote.milestones[0].deliverable = service.deliverables[0].clone();
     a.quote.authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             common::TEST_DOMAIN,
             &a.request_id,
             &digest(&a.quote.quote).unwrap(),
@@ -142,15 +142,18 @@ fn profile(
     points: [u32; 5],
     trust: &TrustConfiguration,
     key: &SigningKey,
-) -> binding::SignedProfileV1 {
+) -> binding::SignedDeclaredPriorsV1 {
     let mut allocations = binding::balanced_allocations();
     for (allocation, points) in allocations.iter_mut().zip(points) {
         allocation.points = points as _;
     }
-    let profile = binding::draft_profile(provenance, allocations, trust).unwrap();
-    binding::SignedProfileV1 {
-        authorization: crypto::sign(&binding::profile_claims(&profile, trust).unwrap(), key)
-            .unwrap(),
+    let profile = binding::draft_declared_priors(provenance, allocations, trust).unwrap();
+    binding::SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(
+            &binding::declared_priors_claims(&profile, trust).unwrap(),
+            key,
+        )
+        .unwrap(),
         profile,
     }
 }
@@ -240,7 +243,7 @@ fn package(
         _ => unreachable!("validated experiment version"),
     };
     let mut spec = constructor(
-        binding::dictionary_digest().unwrap(),
+        binding::priors_catalog_digest().unwrap(),
         digest(&r.profile).unwrap(),
         digest(&o.profile).unwrap(),
     );

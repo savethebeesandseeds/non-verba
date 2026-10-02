@@ -7,7 +7,7 @@
 //! as zero debt. Its financial projection is explicitly unresolved.
 
 use crate::{
-    agreement::{self, claims_for_version, diagnostic, ensure},
+    contract::{self, claims_for_version, diagnostic, ensure},
     crypto,
     encoding::{canonical, digest, validate_digest, validate_id},
     model::*,
@@ -66,8 +66,8 @@ fn request(signed: &SignedRequest, trust: &TrustConfiguration) -> Result<String,
     Ok(hash)
 }
 
-fn agreement_binding(
-    value: &AssignmentAgreement,
+fn contract_binding(
+    value: &AssignmentContract,
     requests: &[SignedRequest],
     trust: &TrustConfiguration,
 ) -> Result<(), String> {
@@ -95,7 +95,7 @@ fn agreement_binding(
         "LEGACY_KEY_AUTHORITY",
         "three exact role bindings required",
     )?;
-    agreement::unique(value.parties.iter().map(|party| party.role.code()))?;
+    contract::unique(value.parties.iter().map(|party| party.role.code()))?;
     for party in &value.parties {
         ensure(
             party == trusted(trust, party.role)?,
@@ -147,7 +147,7 @@ fn agreement_binding(
 
 fn signers(
     signatures: &[crypto::DetachedSignature],
-    value: &AssignmentAgreement,
+    value: &AssignmentContract,
     hash: &str,
     purpose: &str,
     diagnostics: &mut Vec<Diagnostic>,
@@ -207,7 +207,7 @@ fn required(action: &Action) -> Vec<Role> {
     }
 }
 
-fn proposal_binding(proposal: &ActionProposal, basis: &AssignmentAgreement) -> Result<(), String> {
+fn proposal_binding(proposal: &ActionProposal, basis: &AssignmentContract) -> Result<(), String> {
     ensure(
         proposal.protocol_version == LEGACY_VERSION
             && proposal.allocations.is_empty()
@@ -263,7 +263,7 @@ pub fn inspect(
         "LEGACY_BOUNDS",
         "bundle exceeds inspection limits",
     )?;
-    agreement::validate_trust_bindings(trust)?;
+    contract::validate_trust_bindings(trust)?;
     let root = &bundle.agreement.agreement;
     let root_hash = digest(root)?;
     let mut diagnostics = vec![diagnostic(
@@ -275,7 +275,7 @@ pub fn inspect(
             diagnostics.push(diagnostic(&digest(&signed.request)?, &error));
         }
     }
-    let bindings_valid = match agreement_binding(root, &bundle.requests, trust) {
+    let bindings_valid = match contract_binding(root, &bundle.requests, trust) {
         Ok(()) => true,
         Err(error) => {
             diagnostics.push(diagnostic(&root_hash, &error));
@@ -357,7 +357,7 @@ pub fn inspect(
                     );
                     status.insert(id.clone(), "LEGACY_AUTHENTICATED_UNRESOLVED".into());
                     if let Action::AmendAgreement { replacement } = &proposal.action {
-                        let binding = agreement_binding(replacement, &bundle.requests, trust)
+                        let binding = contract_binding(replacement, &bundle.requests, trust)
                             .and_then(|()| {
                                 ensure(
                                     replacement.assignment_id == root.assignment_id
@@ -465,7 +465,7 @@ pub fn inspect(
         .collect();
     Ok(BundleReport {
         financial_projection: "LEGACY_UNRESOLVED".into(), recognized_legacy_proofs, unresolved_rights: vec![], evidence_integrity: vec![],
-        agreement: AgreementResult { agreement_hash: root_hash.clone(), bound, valid_signers, diagnostics: diagnostics.clone() },
+        agreement: ContractResult { agreement_hash: root_hash.clone(), bound, valid_signers, diagnostics: diagnostics.clone() },
         current_agreement_hash: root_hash, ready_to_start: false,
         readiness_reasons: vec!["Legacy authentication is not current-policy readiness; no automatic migration or renewed consent".into()],
         performance: "LEGACY_UNRESOLVED".into(), mediation: "LEGACY_UNRESOLVED".into(), assurance: "LEGACY_UNRESOLVED".into(),

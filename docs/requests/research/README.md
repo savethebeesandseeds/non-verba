@@ -8,7 +8,7 @@ Discussion material for future extensions of the Assignment protocol.
 retain the original user-supplied discussion handoff and subsequent owner additions.
 They keep three design questions separate:
 
-- **Selection:** what considerations a participant can express.
+- **Derivation:** what considerations a participant can express.
 - **Incorporation:** how each party's declaration influences the resolution process.
 - **Evaluation:** whether the vocabulary and mechanism serve their purpose together.
 
@@ -26,14 +26,21 @@ limits. It does not select an escalation mechanism or alter the preserved notes.
 [Notes on declarations, commitments and dispute resolution](PRINCIPLES_OF_DISPUTE_RESOLUTION.md)
 incorporate the owner's short notes from 30 September: make honest declaration
 cheap to honor and expensive to fake; consider an Operator's record of honoring
-declared values; and explore the catalog of values and selections as a possible commitment.
+declared priors; and explore the catalog of priors and each party's declarations
+as a possible commitment.
 The expansion offers possible interpretations and open questions. It selects no
 implementation details, settlement rule or credibility mechanism.
+
+The separate [terminology document](../TERMINOLOGY.md) records priors,
+derivation/incorporation/evaluation, the role framing and **Assignment Contract**,
+alongside proposed dispute stages and outcomes. It also retains the later
+code/documentation terminology review. Research notes link to that glossary;
+the current protocol records have not been renamed.
 
 ## Connection to the current work
 
 The [current implementation](../DISPUTE_PRIORS.md) still uses five dimensions and
-250 points per party. Exploring a different dictionary does not change existing
+250 points per party. Exploring a different catalog does not change existing
 signed profiles; any later implemented revision needs explicit versioning and
 consent. Requester and Operator remain roles open to people, organizations,
 agents and embodied robots under established signing authority.
@@ -46,5 +53,5 @@ remains `ANALYSIS_ONLY`, with financial authority `NONE` and settlement policy
 Use [open decisions](../DISPUTE_PRIORS_DECISIONS.md) for the current decision
 boundary, [settlement handling](../SETTLEMENT_HANDLING.md) for the existing
 independently authorized release path, and the [protocol context](../CONTEXT.md)
-for the broader foundation. Keep factual claims, declared priorities, model
+for the broader foundation. Keep factual claims, declared priors, model
 interpretations and authorized consequences distinct when resuming the discussion.

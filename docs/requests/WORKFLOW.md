@@ -19,7 +19,7 @@ the existing sensor pages are not the marketplace interface.
    policy/text digests, price/destination, acceptance consequences, deadlines,
    cancellation/remedies, privacy and assurance exclusions. Clearly distinguish
    mechanical artifact checks from judgment of physical work.
-5. **Sign and exchange:** participants independently sign one Agreement, then
+5. **Sign and exchange:** participants independently sign one Contract, then
    exchange/import authorizations. A local client verifies and retains the full
    R/O/M certificate. Partial signatures remain visibly unbound.
 6. **Readiness:** verify local possession and all actually supported agreed
@@ -44,13 +44,13 @@ the existing sensor pages are not the marketplace interface.
    signed unit intervals on the exact obligation/root basis; overlapping grants
    count coverage once. Retain partial/unresolved/overpaid/reversed records. A
    reversal names the exact earlier grant and requires all three authorizations.
-10. **Export:** each entitled participant keeps its Agreement, authorizations,
+10. **Export:** each entitled participant keeps its Contract, authorizations,
     certificates, evidence and receipts in a portable signed bundle. Independent
     verification needs no approval or continued availability from M.
 
 ## Companion review before cooperation
 
-The DP-2 guided path adds review of the separately signed R/O priority profiles
+The DP-2 guided path adds review of the separately signed R/O prior profiles
 and exact proposed analysis settings before base endorsement. Each participant
 records its own acceptance or decline against the full review digest. This is
 unsigned local workflow evidence, not another participant's consent. The guarded
@@ -58,7 +58,7 @@ signing path rejects changed reviewed material. After separate base and all-part
 annex formation, setup completion checks both against that earlier review.
 
 Base formation remains independent: a missing annex or failed setup check does
-not invalidate a formed Agreement or erase accrued rights. Existing signing
+not invalidate a formed Contract or erase accrued rights. Existing signing
 paths retain their rules. See the [companion guide](../../code/disputes/README.md)
 for the exact commands and [integration guide](INTEGRATION.md) for core signing.
 
@@ -167,7 +167,7 @@ preview/consent UX and durable storage. Those integrations are separately listed
 in [readiness](READINESS.md).
 
 The [native client](../../code/requests/README.md) exposes Request, quote, event,
-Agreement and action signing with exact reviewed digests. Import/merge encrypts
+Contract and action signing with exact reviewed digests. Import/merge encrypts
 local snapshots, while plaintext exports are explicit. The report can include
 rejected or incomplete records; a zero exit code means report generation, not
 universal validity. Machine clients must inspect formation, effect and transcript

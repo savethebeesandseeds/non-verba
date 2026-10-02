@@ -103,7 +103,7 @@ account freeze or key-rotation workflow is implemented. Future recovery must
 define its authority without creating an administrator bypass or rewriting
 existing rights.
 
-Evidence: [Agreement](requests/AGREEMENT.md),
+Evidence: [Agreement](requests/CONTRACT.md),
 [authorizer matrix](../code/requests/src/actions.rs) and
 [dispute-priority boundary](requests/DISPUTE_PRIORS.md).
 
@@ -169,7 +169,7 @@ of historical rights is not a recovery mechanism.
 
 Evidence: [signature claims](../code/requests/src/crypto.rs),
 [analysis retention and limits](requests/DISPUTE_PRIORS.md#retention-replay-and-remaining-limits)
-and [recovery boundary](requests/AGREEMENT.md#amendment-and-settlement).
+and [recovery boundary](requests/CONTRACT.md#amendment-and-settlement).
 
 ## 5. Confidentiality
 

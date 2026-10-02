@@ -5,7 +5,7 @@ use crate::{
     consent::{self, ConsentReviewV1},
 };
 use nonverba_requests::{
-    agreement,
+    contract,
     crypto::{self, DetachedSignature},
     encoding, local,
     model::{AssignmentBundle, Role, TrustConfiguration},
@@ -24,9 +24,9 @@ fn ensure(ok: bool, error: &str) -> Result<(), String> {
 #[serde(deny_unknown_fields)]
 pub struct PreflightReviewV1 {
     pub format: String,
-    pub dictionary: DictionaryV1,
-    pub requester_profile: SignedProfileV1,
-    pub operator_profile: SignedProfileV1,
+    pub dictionary: PriorsCatalogV1,
+    pub requester_profile: SignedDeclaredPriorsV1,
+    pub operator_profile: SignedDeclaredPriorsV1,
     pub analysis_specification: Value,
     pub request_hash: String,
     pub quote_hash: String,
@@ -40,20 +40,21 @@ pub struct PreflightReviewV1 {
 
 impl PreflightReviewV1 {
     pub fn new(
-        r: SignedProfileV1,
-        o: SignedProfileV1,
+        r: SignedDeclaredPriorsV1,
+        o: SignedDeclaredPriorsV1,
         spec: Value,
         trust: &TrustConfiguration,
     ) -> Result<Self, String> {
-        let r_hash = binding::verify_profile(&r, trust)?;
-        let o_hash = binding::verify_profile(&o, trust)?;
+        let r_hash = binding::verify_declared_priors(&r, trust)?;
+        let o_hash = binding::verify_declared_priors(&o, trust)?;
         ensure(
             r.profile.author.role == Role::Requester && o.profile.author.role == Role::Operator,
             "PREFLIGHT_ROLES: separate independently authored R and O profiles required",
         )?;
-        let request_hash = encoding::digest(&binding::profile_request(&r.profile).request)?;
+        let request_hash = encoding::digest(&binding::declared_priors_request(&r.profile).request)?;
         ensure(
-            request_hash == encoding::digest(&binding::profile_request(&o.profile).request)?,
+            request_hash
+                == encoding::digest(&binding::declared_priors_request(&o.profile).request)?,
             "PREFLIGHT_SOURCE: profiles must reference the same exact Request",
         )?;
         let ProfileProvenance::Quote { signed_quote, .. } = &o.profile.provenance else {
@@ -61,7 +62,7 @@ impl PreflightReviewV1 {
         };
         crate::spec::validate_spec_value(&spec)?;
         for (field, hash) in [
-            ("dictionary_hash", binding::dictionary_digest()?),
+            ("dictionary_hash", binding::priors_catalog_digest()?),
             ("requester_profile_hash", r_hash.clone()),
             ("operator_profile_hash", o_hash.clone()),
         ] {
@@ -72,7 +73,7 @@ impl PreflightReviewV1 {
         }
         Ok(Self {
             format: FORMAT.into(),
-            dictionary: binding::dictionary(),
+            dictionary: binding::priors_catalog(),
             quote_hash: encoding::digest(&signed_quote.quote)?,
             request_hash,
             requester_profile_hash: r_hash,
@@ -104,11 +105,11 @@ impl PreflightReviewV1 {
     pub fn render(&self, trust: &TrustConfiguration) -> Result<String, String> {
         self.validate(trust)?;
         let mut text = format!(
-            "PRE-COOPERATION REVIEW\nExact preflight digest: {}\nLOCAL WORKFLOW REVIEW — not an Agreement endorsement.\nDimension | Requester points | Operator points\n",
+            "PRE-COOPERATION REVIEW\nExact preflight digest: {}\nLOCAL WORKFLOW REVIEW — not a Contract endorsement.\nPrior | Requester points | Operator points\n",
             self.digest()?
         );
         for d in &self.dictionary.dimensions {
-            let points = |p: &SignedProfileV1| {
+            let points = |p: &SignedDeclaredPriorsV1| {
                 p.profile
                     .allocations
                     .iter()
@@ -123,7 +124,7 @@ impl PreflightReviewV1 {
                 points(&self.operator_profile)?
             ));
         }
-        text.push_str("Each profile totals 250 points. Zero waives no right; 100 is not a payment percentage. There is no settlement prediction or selected formula.\nAccept or decline before signing the base Agreement. Acceptance is a local workflow record, not authenticated consent by another party. Base and annex signatures remain separate and are not atomic. This is not permission to actuate a robot or a physical-safety finding.\nEXACT PROFILES, SETTINGS, SOURCES AND FINGERPRINTS:\n");
+        text.push_str("Each declaration totals 250 points. Zero waives no right; 100 is not a payment percentage. There is no settlement prediction or selected formula.\nAccept or decline before signing the base Contract. Acceptance is a local workflow record, not authenticated consent by another party. Base and annex signatures remain separate and are not atomic. This is not permission to actuate a robot or a physical-safety finding.\nEXACT DECLARED PRIORS, SETTINGS, SOURCES AND FINGERPRINTS:\n");
         text.push_str(&serde_json::to_string_pretty(self).map_err(|e| e.to_string())?);
         Ok(text)
     }
@@ -193,11 +194,11 @@ pub fn check_candidate(
 ) -> Result<(), String> {
     accepted(review, decision, trust)?;
     let a = &base.agreement.agreement;
-    agreement::validate_agreement(a, &base.requests, trust)?;
+    contract::validate_contract(a, &base.requests, trust)?;
     ensure(
         a.request_hash == review.request_hash
             && encoding::digest(&a.quote.quote)? == review.quote_hash,
-        "PREFLIGHT_SUBSTITUTION: candidate Agreement differs from the reviewed Request or Quote",
+        "PREFLIGHT_SUBSTITUTION: candidate Contract differs from the reviewed Request or Quote",
     )
 }
 pub fn check_context(
@@ -243,9 +244,9 @@ impl BaseSigningReviewV1 {
         let a = &base.agreement.agreement;
         ensure(
             a.revision == "1" && a.previous_agreement_hash.is_none(),
-            "PREFLIGHT_BASE: this command endorses only an initial base Agreement; amendments keep their existing path",
+            "PREFLIGHT_BASE: this command endorses only an initial base Contract; amendments keep their existing path",
         )?;
-        let result = agreement::verify_agreement(&base.agreement, &base.requests, trust);
+        let result = contract::verify_contract(&base.agreement, &base.requests, trust);
         if let Some(d) = result
             .diagnostics
             .iter()
@@ -276,11 +277,11 @@ impl BaseSigningReviewV1 {
     pub fn render(&self, trust: &TrustConfiguration) -> Result<String, String> {
         self.validate(trust)?;
         Ok(format!(
-            "{}\nEXACT BASE ENDORSEMENT REVIEW\nConfirm full signing review digest: {}\nCore Agreement digest: {}\n{}\nThe signature authorizes this exact base Agreement under its existing rules. It does not make annex signing atomic or transfer analysis authority.\n{}\n",
+            "{}\nEXACT BASE ENDORSEMENT REVIEW\nConfirm full signing review digest: {}\nCore Contract digest: {}\n{}\nThe signature authorizes this exact base Contract under its existing rules. It does not make annex signing atomic or transfer analysis authority.\n{}\n",
             self.preflight.render(trust)?,
             encoding::digest(self)?,
             self.agreement_hash,
-            agreement::preview(&self.base.agreement.agreement)?,
+            contract::preview(&self.base.agreement.agreement)?,
             serde_json::to_string_pretty(self).map_err(|e| e.to_string())?
         ))
     }
@@ -306,7 +307,7 @@ where
     review.validate(trust)?;
     let (key, binding) = local::unlock_vault(vault, &password()?)?;
     let a = &review.base.agreement.agreement;
-    let party = agreement::party(a, review.local_decision.participant_role)?;
+    let party = contract::party(a, review.local_decision.participant_role)?;
     ensure(
         binding == party.key,
         "PREFLIGHT_SIGNER: vault differs from the locally accepting independently trusted role",
@@ -336,7 +337,7 @@ where
         },
         &review.agreement_hash,
     )?;
-    let claims = agreement::claims(
+    let claims = contract::claims(
         &a.deployment_domain,
         &a.assignment_id,
         &review.agreement_hash,

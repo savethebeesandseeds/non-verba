@@ -53,22 +53,22 @@ pub fn render_analysis_report(
     out.push_str("\nWHAT THE PARTIES SIGNED\n");
     field(
         &mut out,
-        "Root Agreement hash",
+        "Root Contract hash",
         &core.agreement.agreement_hash,
     );
-    field(&mut out, "Root Agreement formed", &core.agreement.bound);
+    field(&mut out, "Root Contract formed", &core.agreement.bound);
     field(
         &mut out,
-        "Verified root Agreement signers",
+        "Verified root Contract signers",
         &core.agreement.valid_signers,
     );
     field(
         &mut out,
-        "Current core Agreement hash",
+        "Current core Contract hash",
         &core.current_agreement_hash,
     );
     for diagnostic in &core.agreement.diagnostics {
-        field(&mut out, "Agreement diagnostic", diagnostic);
+        field(&mut out, "Contract diagnostic", diagnostic);
     }
     if inspection.analysis_package_valid {
         let context = &package.context.context;
@@ -85,16 +85,20 @@ pub fn render_analysis_report(
             "Analysis settings hash",
             &context.analysis_specification_hash,
         );
-        field(&mut out, "Dictionary", &context.dictionary.dictionary_id);
-        out.push_str("Priorities describe what each participant wants considered when resolving disagreement. Separate budgets are not payment shares.\n");
+        field(
+            &mut out,
+            "Catalog of priors",
+            &context.dictionary.dictionary_id,
+        );
+        out.push_str("Declared priors describe what each participant wants considered when resolving disagreement. Separate budgets are not payment shares.\n");
         for (role, signed) in [
             ("R", &context.requester_profile),
             ("O", &context.operator_profile),
         ] {
-            out.push_str(&format!("{role} independently signed profile:\n"));
+            out.push_str(&format!("{role} independently signed declared priors:\n"));
             field(
                 &mut out,
-                "  Profile hash",
+                "  Declared priors hash",
                 &encoding::digest(&signed.profile)?,
             );
             // Lookup by dimension identity, never assume both parties used the same order.
@@ -328,7 +332,7 @@ fn render_obligation(out: &mut String, obligation: &Obligation) {
         ));
     }
     field(out, "  Due conditions", &obligation.due_conditions);
-    field(out, "  Basis Agreement", &obligation.basis_agreement_hash);
+    field(out, "  Basis Contract", &obligation.basis_agreement_hash);
     field(
         out,
         "  Entitlement certificates",

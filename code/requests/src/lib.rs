@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //! Portable, deterministic three-party assignment verification. No mediator custody.
 pub mod actions;
-pub mod agreement;
+pub mod contract;
+/// Compatibility name for integrations written before the terminology alignment.
+pub use contract as agreement;
 pub mod bundle;
 pub mod crypto;
 mod cutover;

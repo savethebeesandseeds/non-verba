@@ -7,7 +7,7 @@ use nonverba_disputes::{
     consent::{self, ConsentReviewV1},
     runtime,
 };
-use nonverba_requests::{agreement, bundle, crypto, encoding, local, model::*};
+use nonverba_requests::{bundle, contract, crypto, encoding, local, model::*};
 use p256::ecdsa::SigningKey;
 use std::{
     cell::Cell,
@@ -17,7 +17,7 @@ use std::{
 use zeroize::Zeroizing;
 
 fn allocations(values: [u16; 5]) -> Vec<Allocation> {
-    dictionary()
+    priors_catalog()
         .dimensions
         .into_iter()
         .zip(values)
@@ -32,8 +32,8 @@ fn profiles(
     base: &AssignmentBundle,
     trust: &TrustConfiguration,
     keys: &[SigningKey; 3],
-) -> (SignedProfileV1, SignedProfileV1) {
-    let r = draft_profile(
+) -> (SignedDeclaredPriorsV1, SignedDeclaredPriorsV1) {
+    let r = draft_declared_priors(
         ProfileProvenance::Request {
             signed_request: base.requests[0].clone(),
         },
@@ -41,7 +41,7 @@ fn profiles(
         trust,
     )
     .unwrap();
-    let o = draft_profile(
+    let o = draft_declared_priors(
         ProfileProvenance::Quote {
             signed_request: base.requests[0].clone(),
             signed_quote: base.agreement.agreement.quote.clone(),
@@ -51,12 +51,14 @@ fn profiles(
     )
     .unwrap();
     (
-        SignedProfileV1 {
-            authorization: crypto::sign(&profile_claims(&r, trust).unwrap(), &keys[0]).unwrap(),
+        SignedDeclaredPriorsV1 {
+            authorization: crypto::sign(&declared_priors_claims(&r, trust).unwrap(), &keys[0])
+                .unwrap(),
             profile: r,
         },
-        SignedProfileV1 {
-            authorization: crypto::sign(&profile_claims(&o, trust).unwrap(), &keys[1]).unwrap(),
+        SignedDeclaredPriorsV1 {
+            authorization: crypto::sign(&declared_priors_claims(&o, trust).unwrap(), &keys[1])
+                .unwrap(),
             profile: o,
         },
     )
@@ -69,7 +71,7 @@ fn annex(
 ) -> SignedDisputeContextV1 {
     let (r, o) = profiles(base, trust, keys);
     let spec = runtime::development_spec(
-        dictionary_digest().unwrap(),
+        priors_catalog_digest().unwrap(),
         encoding::digest(&r.profile).unwrap(),
         encoding::digest(&o.profile).unwrap(),
     );
@@ -107,31 +109,31 @@ fn exact_dictionary_and_individual_budget_accept_only_the_five_integer_dimension
         [50, 70, 60, 40, 30],
         [100, 100, 50, 0, 0],
     ] {
-        validate_allocations(&allocations(values), &dictionary()).unwrap();
+        validate_allocations(&allocations(values), &priors_catalog()).unwrap();
     }
     for values in [
         [49, 50, 50, 50, 50],
         [51, 50, 50, 50, 50],
         [101, 49, 50, 50, 0],
     ] {
-        assert!(validate_allocations(&allocations(values), &dictionary()).is_err());
+        assert!(validate_allocations(&allocations(values), &priors_catalog()).is_err());
     }
     let mut duplicate = balanced_allocations();
     duplicate[1].dimension_id = "result".into();
-    assert!(validate_allocations(&duplicate, &dictionary()).is_err());
+    assert!(validate_allocations(&duplicate, &priors_catalog()).is_err());
     let mut unknown = balanced_allocations();
     unknown[0].dimension_id = "honesty".into();
-    assert!(validate_allocations(&unknown, &dictionary()).is_err());
-    assert!(validate_allocations(&balanced_allocations()[..4], &dictionary()).is_err());
+    assert!(validate_allocations(&unknown, &priors_catalog()).is_err());
+    assert!(validate_allocations(&balanced_allocations()[..4], &priors_catalog()).is_err());
     let mut extra = balanced_allocations();
     extra.push(Allocation {
         dimension_id: "trustworthiness".into(),
         points: 0,
     });
-    assert!(validate_allocations(&extra, &dictionary()).is_err());
-    let mut altered = dictionary();
+    assert!(validate_allocations(&extra, &priors_catalog()).is_err());
+    let mut altered = priors_catalog();
     altered.dimensions[0].boundary = "100 percent of payment".into();
-    assert!(validate_dictionary(&altered).is_err());
+    assert!(validate_priors_catalog(&altered).is_err());
     for points in ["-1", "50.5", "\"50\""] {
         let json = format!("{{\"dimension_id\":\"result\",\"points\":{points}}}");
         assert!(encoding::strict_parse::<Allocation>(json.as_bytes()).is_err());
@@ -142,10 +144,10 @@ fn exact_dictionary_and_individual_budget_accept_only_the_five_integer_dimension
         )
         .is_err()
     );
-    let mut fake_n = serde_json::to_value(dictionary()).unwrap();
+    let mut fake_n = serde_json::to_value(priors_catalog()).unwrap();
     fake_n["N"] = 100.into();
     assert!(
-        encoding::strict_parse::<DictionaryV1>(&encoding::canonical(&fake_n).unwrap()).is_err()
+        encoding::strict_parse::<PriorsCatalogV1>(&encoding::canonical(&fake_n).unwrap()).is_err()
     );
 }
 
@@ -153,30 +155,33 @@ fn exact_dictionary_and_individual_budget_accept_only_the_five_integer_dimension
 fn profile_authorship_pins_source_revision_owner_dictionary_and_exact_allocations() {
     let (base, trust, keys) = common::fixture();
     let (r, o) = profiles(&base, &trust, &keys);
-    verify_profile(&r, &trust).unwrap();
-    verify_profile(&o, &trust).unwrap();
+    verify_declared_priors(&r, &trust).unwrap();
+    verify_declared_priors(&o, &trust).unwrap();
     let original = encoding::digest(&r.profile).unwrap();
     let mut edited_defaults = balanced_allocations();
     edited_defaults[0].points = 0;
     assert_eq!(encoding::digest(&r.profile).unwrap(), original);
     let mut tampered = r.clone();
     tampered.profile.allocations = balanced_allocations();
-    assert!(verify_profile(&tampered, &trust).is_err());
+    assert!(verify_declared_priors(&tampered, &trust).is_err());
     let mut tampered = r.clone();
     tampered.profile.dictionary_hash = "0".repeat(64);
-    assert!(verify_profile(&tampered, &trust).is_err());
+    assert!(verify_declared_priors(&tampered, &trust).is_err());
     let mut tampered = r.clone();
-    tampered.authorization =
-        crypto::sign(&profile_claims(&r.profile, &trust).unwrap(), &keys[1]).unwrap();
-    assert!(verify_profile(&tampered, &trust).is_err());
+    tampered.authorization = crypto::sign(
+        &declared_priors_claims(&r.profile, &trust).unwrap(),
+        &keys[1],
+    )
+    .unwrap();
+    assert!(verify_declared_priors(&tampered, &trust).is_err());
     let mut wrong_role = r.profile.clone();
     wrong_role.author = trust.parties[2].clone();
-    assert!(validate_profile(&wrong_role, &trust).is_err());
+    assert!(validate_declared_priors(&wrong_role, &trust).is_err());
     let mut changed_source = r.profile.clone();
     if let ProfileProvenance::Request { signed_request } = &mut changed_source.provenance {
         signed_request.request.revision = "2".into();
     }
-    assert!(validate_profile(&changed_source, &trust).is_err());
+    assert!(validate_declared_priors(&changed_source, &trust).is_err());
     let json = serde_json::to_value(&r.profile).unwrap();
     assert_eq!(
         serde_json::to_value(&r.profile).unwrap(),
@@ -314,7 +319,7 @@ fn private_vault_fixture() -> (
     base.requests[0].request.requester = trust.parties[0].clone();
     let request = &base.requests[0].request;
     base.requests[0].authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             &request.deployment_domain,
             &request.request_id,
             &encoding::digest(request).unwrap(),
@@ -387,8 +392,8 @@ fn local_signing_guards_profiles_and_exact_agreement_context_against_retroactive
         || Ok(Zeroizing::new(PASSWORD.to_vec())),
     )
     .unwrap();
-    verify_profile(
-        &SignedProfileV1 {
+    verify_declared_priors(
+        &SignedDeclaredPriorsV1 {
             profile: profile.profile.clone(),
             authorization: signature,
         },
@@ -422,7 +427,7 @@ fn local_signing_guards_profiles_and_exact_agreement_context_against_retroactive
     let mut replaced = complete.context.clone();
     replaced.requester_profile.profile.allocations = balanced_allocations();
     replaced.requester_profile.authorization = crypto::sign(
-        &profile_claims(&replaced.requester_profile.profile, &trust).unwrap(),
+        &declared_priors_claims(&replaced.requester_profile.profile, &trust).unwrap(),
         &keys[0],
     )
     .unwrap();
@@ -531,7 +536,7 @@ fn point_review_orders_each_exact_profile_without_rewriting_signed_allocation_or
         .allocations
         .reverse();
     complete.context.requester_profile.authorization = crypto::sign(
-        &profile_claims(&complete.context.requester_profile.profile, &trust).unwrap(),
+        &declared_priors_claims(&complete.context.requester_profile.profile, &trust).unwrap(),
         &keys[0],
     )
     .unwrap();
@@ -544,7 +549,7 @@ fn point_review_orders_each_exact_profile_without_rewriting_signed_allocation_or
     let before = encoding::canonical(&complete.context).unwrap();
     let review = ConsentReviewV1::context(complete.context, &base, &trust).unwrap();
     let display = review.render().unwrap();
-    let expected = "Dimension | R points | O points\nResult | 80 | 50\nEffort | 30 | 70\nReliance | 40 | 60\nResponsibility | 70 | 40\nRemedy | 30 | 30";
+    let expected = "Prior | R points | O points\nResult | 80 | 50\nEffort | 30 | 70\nReliance | 40 | 60\nResponsibility | 70 | 40\nRemedy | 30 | 30";
     assert!(display.contains(expected));
     assert_eq!(encoding::canonical(&review.exact_content).unwrap(), before);
     assert!(display.contains("Does not reward invented hours"));

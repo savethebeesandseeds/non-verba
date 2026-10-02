@@ -17,7 +17,7 @@ histories with signed participant evidence and challenges; portable replay;
 development compute limits. Case and runner envelopes have no author signature;
 their recorded execution provenance remains an unverified runner claim.
 
-**Not selected:** any formula converting priorities or model text into settlement.
+**Not selected:** any formula converting priors or model text into settlement.
 The code retains `ANALYSIS_ONLY`, `UNSPECIFIED` and financial authority `NONE`.
 No combination of R+M, O+M or R+O gains authority over the other party through this
 extension. The existing action matrix remains the only implemented contractual
@@ -43,7 +43,7 @@ decision to stop at commentary. Formula, authority, evidence requirements,
 challenge procedure and economic fallback require separate design and review.
 
 The [dispute settlement notes](research/DISPUTE_SETTLEMENT_NOTES.md)
-distinguish selection of the vocabulary, incorporation of declarations, and
+distinguish derivation of the vocabulary, incorporation of declarations, and
 evaluation of both. They leave the future dimensions and their number open.
 The [research context](research/README.md) connects these ideas to this baseline;
 filing the note changes no implementation or selected policy and starts no new work.
@@ -56,7 +56,7 @@ additional implementation decisions or a selected credibility mechanism.
 An unresolved status is not necessarily economically neutral: after work has
 occurred, a Requester retaining money and an Operator retaining only future labor
 may bear different unrecovered losses. Research must model that exposure and
-which evidence or priority changes a candidate remedy. Compute sponsorship alone
+which evidence or prior changes a candidate remedy. Compute sponsorship alone
 does not resolve it. No payout default is inferred from this concern.
 
 Before a future binding mechanism, explicitly decide and review:
@@ -64,7 +64,7 @@ Before a future binding mechanism, explicitly decide and review:
 1. Whether the scales mean only relative emphasis or permit interpersonal/cardinal
    comparisons; evaluate the chosen dimensions and definitions themselves.
 2. How separately authored profiles could be combined, and how conflicting
-   priorities are resolved without buying points or guessing consent.
+   priors are resolved without buying points or guessing consent.
 3. Treatment of incomplete evidence, uncertainty, silence and inconclusive analysis;
    no current fallback allocation exists.
 4. Permitted compensation and remedies, caps, accrued rights, double counting,
@@ -94,9 +94,9 @@ Model quality, citation accuracy, role-order sensitivity, verbosity/prestige
 effects, injection resistance, costs and allocation sensitivity remain research
 questions. No test establishes fairness or strategy resistance.
 
-The initial consent path permits one context per exact Agreement. A provisioned
+The initial consent path permits one context per exact Contract. A provisioned
 runtime/specification change needs an explicitly supported new context through
-an authorized Agreement revision or new Assignment; there is no same-context
+an authorized Contract revision or new Assignment; there is no same-context
 replacement or general annex-amendment protocol. Designing a narrower separately
 endorsed annex succession path is a possible later extension, not current behavior.
 

@@ -19,7 +19,7 @@ fn annex(
     keys: &[p256::ecdsa::SigningKey; 3],
 ) -> binding::SignedDisputeContextV1 {
     let request = bundle.requests[0].clone();
-    let r = binding::draft_profile(
+    let r = binding::draft_declared_priors(
         binding::ProfileProvenance::Request {
             signed_request: request.clone(),
         },
@@ -27,7 +27,7 @@ fn annex(
         trust,
     )
     .unwrap();
-    let o = binding::draft_profile(
+    let o = binding::draft_declared_priors(
         binding::ProfileProvenance::Quote {
             signed_request: request,
             signed_quote: bundle.agreement.agreement.quote.clone(),
@@ -36,18 +36,24 @@ fn annex(
         trust,
     )
     .unwrap();
-    let r = binding::SignedProfileV1 {
-        authorization: crypto::sign(&binding::profile_claims(&r, trust).unwrap(), &keys[0])
-            .unwrap(),
+    let r = binding::SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(
+            &binding::declared_priors_claims(&r, trust).unwrap(),
+            &keys[0],
+        )
+        .unwrap(),
         profile: r,
     };
-    let o = binding::SignedProfileV1 {
-        authorization: crypto::sign(&binding::profile_claims(&o, trust).unwrap(), &keys[1])
-            .unwrap(),
+    let o = binding::SignedDeclaredPriorsV1 {
+        authorization: crypto::sign(
+            &binding::declared_priors_claims(&o, trust).unwrap(),
+            &keys[1],
+        )
+        .unwrap(),
         profile: o,
     };
     let spec = nonverba_disputes::runtime::development_spec(
-        binding::dictionary_digest().unwrap(),
+        binding::priors_catalog_digest().unwrap(),
         digest(&r.profile).unwrap(),
         digest(&o.profile).unwrap(),
     );
@@ -600,7 +606,7 @@ fn research_has_nine_labelled_scenarios_and_explicit_adversarial_variations() {
         .find(|v| v["id"] == "extreme-profiles")
         .unwrap();
     for role in ["requester_points", "operator_points"] {
-        let allocations = binding::dictionary()
+        let allocations = binding::priors_catalog()
             .dimensions
             .into_iter()
             .zip(extreme[role].as_array().unwrap())
@@ -609,7 +615,7 @@ fn research_has_nine_labelled_scenarios_and_explicit_adversarial_variations() {
                 points: points.as_u64().unwrap() as u16,
             })
             .collect::<Vec<_>>();
-        binding::validate_allocations(&allocations, &binding::dictionary()).unwrap();
+        binding::validate_allocations(&allocations, &binding::priors_catalog()).unwrap();
     }
     assert!(suite.get("fair_payment").is_none());
 }

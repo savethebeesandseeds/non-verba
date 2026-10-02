@@ -4,7 +4,7 @@ Working documentation · 29 September 2026
 
 Requester and Operator can discuss a resolution and jointly authorize the
 existing protocol's limited release of identified claims. The dispute companion
-helps retain priorities, evidence and interpretations for that discussion. It
+helps retain priors, evidence and interpretations for that discussion. It
 does not decide an award or authorize a settlement.
 
 **DP-2 is closed as the completed synthetic workflow-integration increment.**
@@ -22,15 +22,15 @@ It adds no executable closure state or authority.
 ## From review to an authorized release
 
 1. **Before agreeing to work**, inspect the signed Request and Quote, both
-   independently signed priority profiles, and the exact proposed analysis
+   independently signed prior profiles, and the exact proposed analysis
    settings. A participant can decline before base endorsement. Local preflight
-   acceptance records that review; base Agreement and companion-annex signatures
+   acceptance records that review; base Contract and companion-annex signatures
    still form separately.
 2. **If a dispute arises**, retain the exact case, attributed evidence, competing
    accounts and existing financial record. A signed claim proves its authorship,
    not its truth. Review any model interpretation against those sources.
 3. **Discuss a proposal.** R, O or M may propose a resolution. Model text,
-   priorities, an assurance assessment and a mediation proposal supply no new
+   priors, an assurance assessment and a mediation proposal supply no new
    authority. A repair suggestion does not itself require extra or unpaid work.
 4. **Choose the applicable existing action.** If R and O agree to release a
    supported claim, prepare a separate `BILATERAL_SETTLEMENT` proposal identifying
@@ -38,7 +38,7 @@ It adds no executable closure state or authority.
    other rights reserved. The companion does not generate or submit this action.
 5. **Review and authorize that exact proposal.** R and O each use their existing
    independent signing workflow. The core validates the required signatures,
-   Agreement/policy context, entitlement basis and release scope. An accepted
+   Contract/policy context, entitlement basis and release scope. An accepted
    analysis report cannot substitute for either authorization.
 6. **Inspect and retain the result.** The core reports the authorized release and
    remaining balance. Actual payment and a payee-signed receipt remain separate.
@@ -46,7 +46,7 @@ It adds no executable closure state or authority.
    not automatically close every dispute or erase unrelated claims.
 
 The [guided integration](INTEGRATION.md) gives the existing signing commands;
-[dispute priorities](DISPUTE_PRIORS.md) describes preflight, case records,
+[dispute priors](DISPUTE_PRIORS.md) describes preflight, case records,
 questions, challenges and replay. These are supported workflow capabilities,
 not a request to run further model-quality experiments for the closed milestone.
 
@@ -54,7 +54,7 @@ not a request to run further model-quality experiments for the closed milestone.
 
 | Record or label | Meaning for settlement |
 | --- | --- |
-| R/O priority profiles and analysis annex | Separately declared emphases and exact accepted analysis settings; no payment percentages, waiver or settlement formula |
+| R/O prior profiles and analysis annex | Separately declared emphases and exact accepted analysis settings; no payment percentages, waiver or settlement formula |
 | Model issue, comparison or question disposition | An interpretation to inspect; even `ANSWERED_FROM_SOURCE` or `UNNECESSARY` does not verify a fact or grant contractual authority |
 | `SUCCEEDED` | Both recorded stages and their outputs passed validation; questions may still remain, and successful execution does not establish correct reasoning |
 | `ANALYSIS_READY` in current inspection | The derived question account has no outstanding questions; dispositions remain model interpretations, not factual resolution, settlement or payment |
@@ -64,18 +64,18 @@ not a request to run further model-quality experiments for the closed milestone.
 
 The companion remains `ANALYSIS_ONLY`, with financial authority `NONE` and
 settlement policy `UNSPECIFIED`. Those labels concern the companion and the
-unselected interpretation of priorities. The core's existing signed-release
+unselected interpretation of priors. The core's existing signed-release
 rules remain implemented and separate.
 
 ## Exact limits of the existing settlement action
 
-The current action is enabled only when the Agreement's
+The current action is enabled only when the Contract's
 `bilateral_balance_releases` policy permits it. It releases existing obligations
 whose debtor is R, creditor is O, and category is `COMPENSATION` or `EXPENSE`.
 Each release must name its entitlement basis and exact allocated units, with
 matching currency/exponent and release amount. R and O must authorize it.
 
-This action cannot create a new payment obligation, refund, arbitrary Agreement
+This action cannot create a new payment obligation, refund, arbitrary Contract
 patch, protection-claim release or change to M's fees, duties or rights. A change
 to agreed work or other supported terms needs the applicable separate amendment
 path and its required authority. Unsupported outcomes remain unsupported.
@@ -88,7 +88,7 @@ Historical records and unrelated rights remain visible.
 For example, if EUR 100 of compensation is established, with no receipt coverage,
 an authorized EUR 25 release leaves EUR 75 outstanding. M's separate EUR 5 fee
 would remain untouched. The EUR 25 is the parties' chosen release, not a value
-computed from priorities or inferred from the model. The retained
+computed from priors or inferred from the model. The retained
 synthetic settlement inspection (local review record, not included in this source release)
 illustrates the existing mechanism; it is not a new execution or adopted price.
 
@@ -99,7 +99,7 @@ Implementation references: [required authorizers](../../code/requests/src/action
 
 ## Separate future work
 
-Reliable reasoning and a procedure translating priorities into a settlement
+Reliable reasoning and a procedure translating priors into a settlement
 remain distinct research and design tasks. The current research interface admits
 candidate-policy metadata but returns `POLICY_NOT_IMPLEMENTED`; it selects no
 default formula, split, award or enforcement rule.

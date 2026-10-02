@@ -141,8 +141,8 @@ impl ConsentReviewV1 {
         })
     }
 
-    pub fn profile(profile: PartyProfileV1, trust: &TrustConfiguration) -> Result<Self, String> {
-        binding::validate_profile(&profile, trust)?;
+    pub fn profile(profile: DeclaredPriorsV1, trust: &TrustConfiguration) -> Result<Self, String> {
+        binding::validate_declared_priors(&profile, trust)?;
         Self::new(ConsentKind::Profile, &profile, None, None, trust)
     }
 
@@ -258,7 +258,7 @@ impl ConsentReviewV1 {
         )?;
         let points = match self.kind {
             ConsentKind::Profile => {
-                let profile: PartyProfileV1 = typed(&self.exact_content)?;
+                let profile: DeclaredPriorsV1 = typed(&self.exact_content)?;
                 profile_table(&[&profile])?
             }
             ConsentKind::Context => {
@@ -273,7 +273,7 @@ impl ConsentReviewV1 {
             }
         };
         let header = format!(
-            "DISPUTE PRIORS — EXACT ANALYSIS-ONLY REVIEW\nFull review digest to confirm: {}\nSigned content digest: {}\n\nPoints are declared settlement priorities, not probabilities, honesty scores or payment percentages. Each R/O profile has its own 250-point budget. Zero waives no right; 100 grants no payment fraction. How the profiles translate into a settlement is UNSPECIFIED.\nAll three annex endorsements acknowledge the same context; they do not transfer profile authorship or financial authority.\nThis review grants no model, sponsor or agent signing authority. Existing core obligations and rights remain separate.\nProfile editing and this display have not opened a signing vault. Validate against independent trust before signing.\n\nEXACT RETAINED REVIEW (including source signatures, context and trust digest):\n{}\n",
+            "DISPUTE PRIORS — EXACT ANALYSIS-ONLY REVIEW\nFull review digest to confirm: {}\nSigned content digest: {}\n\nPoints express declared priors, not probabilities, honesty scores or payment percentages. Each R/O declaration has its own 250-point budget. Zero waives no right; 100 grants no payment fraction. How declared priors influence a settlement is UNSPECIFIED.\nAll three annex endorsements acknowledge the same context; they do not transfer profile authorship or financial authority.\nThis review grants no model, sponsor or agent signing authority. Existing core obligations and rights remain separate.\nEditing declared priors and this display have not opened a signing vault. Validate against independent trust before signing.\n\nEXACT RETAINED REVIEW (including source signatures, context and trust digest):\n{}\n",
             self.review_digest()?,
             self.content_hash,
             serde_json::to_string_pretty(self).map_err(|e| format!("DISPUTE_REVIEW: {e}"))?,
@@ -282,9 +282,9 @@ impl ConsentReviewV1 {
     }
 }
 
-fn profile_table(profiles: &[&PartyProfileV1]) -> Result<String, String> {
-    let dictionary = binding::dictionary();
-    let mut table = String::from("DECLARED POINTS — supported dictionary order\nDimension");
+fn profile_table(profiles: &[&DeclaredPriorsV1]) -> Result<String, String> {
+    let dictionary = binding::priors_catalog();
+    let mut table = String::from("DECLARED PRIORS — supported catalog order\nPrior");
     for profile in profiles {
         binding::validate_allocations(&profile.allocations, &dictionary)?;
         table.push_str(&format!(" | {} points", profile.author.role.code()));
@@ -302,7 +302,7 @@ fn profile_table(profiles: &[&PartyProfileV1]) -> Result<String, String> {
         }
         table.push('\n');
     }
-    table.push_str("\nEXACT DICTIONARY DEFINITIONS (digest-bound by each profile):\n");
+    table.push_str("\nEXACT CATALOG DEFINITIONS (digest-bound by each declaration):\n");
     table.push_str(&serde_json::to_string_pretty(&dictionary).map_err(|e| e.to_string())?);
     table.push('\n');
     Ok(table)
@@ -338,12 +338,12 @@ fn claims_and_slot(
 ) -> Result<(SignatureClaims, local::ExclusiveSlot), String> {
     let (claims, scope_id, scope_version) = match review.kind {
         ConsentKind::Profile => {
-            let profile: PartyProfileV1 = typed(&review.exact_content)?;
+            let profile: DeclaredPriorsV1 = typed(&review.exact_content)?;
             fail_if(
                 profile.author.role != signer,
                 "DISPUTE_AUTHOR: only the profile owner may sign its allocations",
             )?;
-            let claims = binding::profile_claims(&profile, trust)?;
+            let claims = binding::declared_priors_claims(&profile, trust)?;
             let (scope, version) = match &profile.provenance {
                 ProfileProvenance::Request { signed_request } => (
                     "dispute-profile:R".into(),

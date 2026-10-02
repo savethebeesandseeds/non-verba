@@ -3,9 +3,9 @@
 mod common;
 use common::*;
 use nonverba_requests::{
-    actions, agreement,
+    actions,
     bundle::verify_assignment_bundle,
-    crypto, encoding,
+    contract, crypto, encoding,
     model::*,
     transcript::{ArtifactRef, EventBody, EvidenceManifest, SignedEvent},
 };
@@ -72,7 +72,7 @@ fn two_categories() -> (AssignmentBundle, TrustConfiguration, [SigningKey; 3]) {
         cap: money("1000"),
     });
     a.quote.authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             &a.deployment_domain,
             &a.request_id,
             &encoding::digest(&a.quote.quote).unwrap(),
@@ -494,7 +494,7 @@ fn conditional_duplicate_entitlement_keeps_the_already_accrued_due_conditions() 
     third.revision = "3".into();
     third.previous_agreement_hash = Some(encoding::digest(&second).unwrap());
     third.timing.review_window = "Third-revision reminder".into();
-    // The previous Agreement carries the original accrued frontier. The second
+    // The previous Contract carries the original accrued frontier. The second
     // acknowledgment has no established order relative to this third revision.
     let amend_third = sign_action_for(
         &second,

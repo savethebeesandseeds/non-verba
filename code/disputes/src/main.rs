@@ -26,21 +26,21 @@ use zeroize::Zeroizing;
 
 const HELP: &str = r#"Non Verba — dispute priors, analysis only (extension 1)
 
-Base Agreement formation and companion annex formation are separate.
+Base Contract formation and companion annex formation are separate.
 R and O independently author their own 250 points; M has no preference vector.
-Points are priorities, not percentages, probabilities, truth or payment awards.
+Points express declared priors, not percentages, probabilities, truth or payment awards.
 Settlement policy remains UNSPECIFIED. No analysis command signs or pays.
 
-dictionary [new-dictionary.json]
-draft-profile R <signed-request> <trust> <new-profile> [allocations.json]
-draft-profile O <signed-request> <signed-quote> <trust> <new-profile> [allocations.json]
+catalog [new-catalog.json]
+draft-priors R <signed-request> <trust> <new-priors> [allocations.json]
+draft-priors O <signed-request> <signed-quote> <trust> <new-priors> [allocations.json]
   Without allocations.json the editable draft has 50 points per dimension.
-validate-profile <unsigned-profile> <trust>
-verify-profile <signed-profile> <trust>
-review profile <unsigned-profile> <trust> <new-review>
+validate-priors <unsigned-priors> <trust>
+verify-priors <signed-priors> <trust>
+review priors <unsigned-priors> <trust> <new-review>
 authorize <review> <independent-trust> <your-vault> <new-signed-record>
   Reads full review digest, then private passphrase from stdin. Empty digest cancels.
-  Profile output is a signed profile. Each owner signs only their own allocation.
+  Priors output is a signed declaration. Each owner signs only their own allocation.
 spec <signed-R-profile> <signed-O-profile> <trust> <new-spec>
   Version-1 MODEL_UNAVAILABLE draft; no downloaded weights or invented hashes.
 spec-v2 <signed-R-profile> <signed-O-profile> <trust> <new-spec>
@@ -59,7 +59,7 @@ check-preflight <preflight-review> <local-decision> <candidate-base> <trust>
 preflight-base-review <preflight-review> <local-decision> <candidate-base> <trust> <new-base-review>
 authorize-preflight-base <base-review> <trust> <your-vault> <new-base-endorsement>
   Requires acceptance, unchanged sources, exact base review and existing core guards.
-draft-context <base-bundle> <trust> <exact-Agreement-hash> <signed-R-profile> <signed-O-profile> <spec> <new-context>
+draft-context <base-bundle> <trust> <exact-Contract-hash> <signed-R-profile> <signed-O-profile> <spec> <new-context>
 review context <context> <base-bundle> <trust> <new-review>
   Each R/O/M authorizes the same review independently; output has one endorsement.
 authorize-preflight-context <preflight-review> <local-decision> <context-review> <trust> <your-vault> <new-annex>
@@ -78,8 +78,8 @@ JSON commands documented in disputes/README.md. Run `help` for this guide.
 Use independently pinned trust; this tool does not establish real-world identity.
 Keep a vault and its sibling signing-guards together. This is a software vault.
 New file paths only: retained records are immutable, never overwritten.
-Same accepted Agreement cannot receive a replacement context through this signer.
-A validated new Agreement revision or new Assignment supports a new context;
+Same accepted Contract cannot receive a replacement context through this signer.
+A validated new Contract revision or new Assignment supports a new context;
 earlier case records retain their exact earlier context and all base rights.
 "#;
 
@@ -235,7 +235,7 @@ fn authorize(args: &[String]) -> Result<(), String> {
     match review.kind {
         ConsentKind::Profile => save(
             &args[4],
-            &SignedProfileV1 {
+            &SignedDeclaredPriorsV1 {
                 profile: typed(&review.exact_content)?,
                 authorization: signature,
             },
@@ -394,44 +394,44 @@ fn run(args: &[String]) -> Result<(), String> {
             commands::print_help();
             Ok(())
         }
-        "dictionary" if args.len() == 1 || args.len() == 2 => {
+        "catalog" | "dictionary" if args.len() == 1 || args.len() == 2 => {
             if args.len() == 2 {
-                save(&args[1], &dictionary())?;
+                save(&args[1], &priors_catalog())?;
             }
-            show(&dictionary())
+            show(&priors_catalog())
         }
-        "draft-profile" => {
+        "draft-priors" | "draft-profile" => {
             let (provenance, trust_path, output, allocation_path) = match args.get(1).map(String::as_str) {
                 Some("R") if args.len() == 5 || args.len() == 6 => (ProfileProvenance::Request { signed_request: read::<SignedRequest>(&args[2])? }, &args[3], &args[4], args.get(5)),
                 Some("O") if args.len() == 6 || args.len() == 7 => (ProfileProvenance::Quote { signed_request: read::<SignedRequest>(&args[2])?, signed_quote: read::<SignedQuote>(&args[3])? }, &args[4], &args[5], args.get(6)),
-                _ => return Err("USAGE: draft-profile R request trust out [allocations] | O request quote trust out [allocations]".into()),
+                _ => return Err("USAGE: draft-priors R request trust out [allocations] | O request quote trust out [allocations]".into()),
             };
             let allocations = allocation_path
                 .map(|path| read::<Vec<Allocation>>(path))
                 .transpose()?
                 .unwrap_or_else(balanced_allocations);
-            let profile = draft_profile(provenance, allocations, &read(trust_path)?)?;
+            let profile = draft_declared_priors(provenance, allocations, &read(trust_path)?)?;
             save(output, &profile)?;
             println!(
-                "Saved editable unsigned profile draft; no consent or profile defaults were adopted."
+                "Saved editable unsigned declared priors; no consent or declaration defaults were adopted."
             );
             Ok(())
         }
-        "validate-profile" if args.len() == 3 => {
-            validate_profile(&read(&args[1])?, &read(&args[2])?)?;
+        "validate-priors" | "validate-profile" if args.len() == 3 => {
+            validate_declared_priors(&read(&args[1])?, &read(&args[2])?)?;
             println!("VALID_DRAFT; unsigned validation is not consent.");
             Ok(())
         }
-        "verify-profile" if args.len() == 3 => {
+        "verify-priors" | "verify-profile" if args.len() == 3 => {
             println!(
-                "Verified profile content digest: {}",
-                verify_profile(&read(&args[1])?, &read(&args[2])?)?
+                "Verified declared priors content digest: {}",
+                verify_declared_priors(&read(&args[1])?, &read(&args[2])?)?
             );
             Ok(())
         }
         "spec" | "spec-v2" | "spec-v3" | "spec-v4" | "spec-v5" if args.len() == 5 => {
-            let r: SignedProfileV1 = read(&args[1])?;
-            let o: SignedProfileV1 = read(&args[2])?;
+            let r: SignedDeclaredPriorsV1 = read(&args[1])?;
+            let o: SignedDeclaredPriorsV1 = read(&args[2])?;
             let trust = read(&args[3])?;
             if r.profile.author.role.code() != "R" || o.profile.author.role.code() != "O" {
                 return Err("DISPUTE_AUTHOR: expected separate R then O profiles".into());
@@ -444,9 +444,9 @@ fn run(args: &[String]) -> Result<(), String> {
                 _ => runtime::development_spec,
             };
             let spec = constructor(
-                dictionary_digest()?,
-                verify_profile(&r, &trust)?,
-                verify_profile(&o, &trust)?,
+                priors_catalog_digest()?,
+                verify_declared_priors(&r, &trust)?,
+                verify_declared_priors(&o, &trust)?,
             );
             spec.validate()?;
             save(&args[4], &spec)?;
@@ -472,7 +472,7 @@ fn run(args: &[String]) -> Result<(), String> {
         }
         "review" => {
             let review = match args.get(1).map(String::as_str) {
-                Some("profile") if args.len() == 5 => {
+                Some("priors" | "profile") if args.len() == 5 => {
                     ConsentReviewV1::profile(read(&args[2])?, &read(&args[3])?)?
                 }
                 Some("context") if args.len() == 6 => {

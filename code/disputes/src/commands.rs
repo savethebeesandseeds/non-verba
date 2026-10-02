@@ -136,20 +136,20 @@ pub fn dispatch(args: &[String]) -> Result<bool, String> {
     match (command, a.len()) {
         ("guide-data", 0) => print_help(),
         ("compare-profiles", 3) => {
-            let r: binding::SignedProfileV1 = read(&a[0])?;
-            let o: binding::SignedProfileV1 = read(&a[1])?;
+            let r: binding::SignedDeclaredPriorsV1 = read(&a[0])?;
+            let o: binding::SignedDeclaredPriorsV1 = read(&a[1])?;
             let trust = read(&a[2])?;
-            binding::verify_profile(&r, &trust)?;
-            binding::verify_profile(&o, &trust)?;
+            binding::verify_declared_priors(&r, &trust)?;
+            binding::verify_declared_priors(&o, &trust)?;
             if r.profile.author.role != Role::Requester || o.profile.author.role != Role::Operator {
                 return Err("PROFILE_ROLES".into());
             }
-            if encoding::digest(binding::profile_request(&r.profile))?
-                != encoding::digest(binding::profile_request(&o.profile))?
+            if encoding::digest(binding::declared_priors_request(&r.profile))?
+                != encoding::digest(binding::declared_priors_request(&o.profile))?
             {
                 return Err("PROFILE_REQUEST_MISMATCH".into());
             }
-            let rows:Vec<_>=binding::dictionary().dimensions.iter().map(|d|json!({"dimension":d.id,"requester_points":r.profile.allocations.iter().find(|p|p.dimension_id==d.id).map(|p|p.points),"operator_points":o.profile.allocations.iter().find(|p|p.dimension_id==d.id).map(|p|p.points)})).collect();
+            let rows:Vec<_>=binding::priors_catalog().dimensions.iter().map(|d|json!({"dimension":d.id,"requester_points":r.profile.allocations.iter().find(|p|p.dimension_id==d.id).map(|p|p.points),"operator_points":o.profile.allocations.iter().find(|p|p.dimension_id==d.id).map(|p|p.points)})).collect();
             print(
                 &json!({"rows":rows,"settlement_policy_status":"UNSPECIFIED","note":"Separate 250-point priority budgets. No average, payout percentage, honesty score or waiver."}),
             )?;

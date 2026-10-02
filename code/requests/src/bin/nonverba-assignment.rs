@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //! Independent local command line client. No network, mediator session or API.
-use nonverba_requests::{
-    actions, agreement, bundle, crypto, encoding, local, model::*, transcript,
-};
+use nonverba_requests::{actions, bundle, contract, crypto, encoding, local, model::*, transcript};
 use std::{
     io::{self, BufRead, Read},
     path::Path,
@@ -86,8 +84,8 @@ fn endorse(args: &[String]) -> Result<(), String> {
     let bundle: AssignmentBundle = local::read_json(Path::new(&args[0]))?;
     let trust: TrustConfiguration = local::read_json(Path::new(&args[1]))?;
     let agreement = &bundle.agreement.agreement;
-    agreement::validate_agreement(agreement, &bundle.requests, &trust)?;
-    let result = agreement::verify_agreement(&bundle.agreement, &bundle.requests, &trust);
+    contract::validate_contract(agreement, &bundle.requests, &trust)?;
+    let result = contract::verify_contract(&bundle.agreement, &bundle.requests, &trust);
     if let Some(problem) = result
         .diagnostics
         .iter()
@@ -98,14 +96,14 @@ fn endorse(args: &[String]) -> Result<(), String> {
     let hash = confirm_hash(agreement, &args[4])?;
     let vault_path = Path::new(&args[2]);
     let (key, binding) = local::unlock_vault(vault_path, &passphrase()?)?;
-    let party = agreement::party(agreement, role(&binding.role)?)?;
+    let party = contract::party(agreement, role(&binding.role)?)?;
     if party.key != binding {
         return Err(
-            "KEY_AUTHORITY: local vault is not this Agreement's independently trusted role key"
+            "KEY_AUTHORITY: local vault is not this Contract's independently trusted role key"
                 .into(),
         );
     }
-    let claims = agreement::claims(
+    let claims = contract::claims(
         &agreement.deployment_domain,
         &agreement.assignment_id,
         &hash,
@@ -147,7 +145,7 @@ fn sign_request(args: &[String]) -> Result<(), String> {
         return Err("VERSION: new Request signatures require protocol 2; legacy material is inspection-only".into());
     }
     let trust: TrustConfiguration = local::read_json(Path::new(&args[1]))?;
-    agreement::validate_trust(&trust)?;
+    contract::validate_trust(&trust)?;
     let hash = confirm_hash(&request, &args[4])?;
     let vault_path = Path::new(&args[2]);
     let (key, binding) = local::unlock_vault(vault_path, &passphrase()?)?;
@@ -161,7 +159,7 @@ fn sign_request(args: &[String]) -> Result<(), String> {
             "KEY_AUTHORITY: only the independently trusted Requester may sign its Request".into(),
         );
     }
-    let claims = agreement::claims(
+    let claims = contract::claims(
         &request.deployment_domain,
         &request.request_id,
         &hash,
@@ -183,7 +181,7 @@ fn sign_request(args: &[String]) -> Result<(), String> {
         authorization: crypto::sign(&claims, &key)?,
         request,
     };
-    agreement::verify_request(&signed, &trust)?;
+    contract::verify_request(&signed, &trust)?;
     local::write_immutable(Path::new(&args[3]), &encoding::canonical(&signed)?)?;
     output(&signed)
 }
@@ -198,7 +196,7 @@ fn sign_quote(args: &[String]) -> Result<(), String> {
     }
     let request: SignedRequest = local::read_json(Path::new(&args[1]))?;
     let trust: TrustConfiguration = local::read_json(Path::new(&args[2]))?;
-    agreement::verify_request(&request, &trust)?;
+    contract::verify_request(&request, &trust)?;
     let hash = confirm_hash(&quote, &args[5])?;
     let vault_path = Path::new(&args[3]);
     let (key, binding) = local::unlock_vault(vault_path, &passphrase()?)?;
@@ -212,7 +210,7 @@ fn sign_quote(args: &[String]) -> Result<(), String> {
             "KEY_AUTHORITY: only the independently trusted Operator may author a quote".into(),
         );
     }
-    let claims = agreement::claims(
+    let claims = contract::claims(
         &quote.deployment_domain,
         &request.request.request_id,
         &hash,
@@ -234,7 +232,7 @@ fn sign_quote(args: &[String]) -> Result<(), String> {
         authorization: crypto::sign(&claims, &key)?,
         quote,
     };
-    agreement::verify_quote(&signed, &request, &trust)?;
+    contract::verify_quote(&signed, &request, &trust)?;
     local::write_immutable(Path::new(&args[4]), &encoding::canonical(&signed)?)?;
     output(&signed)
 }
@@ -249,18 +247,18 @@ fn sign_event(args: &[String]) -> Result<(), String> {
     }
     if envelope.protocol_version != PROTOCOL_VERSION || bundle.protocol_version != PROTOCOL_VERSION
     {
-        return Err("EVENT_VERSION: legacy material is inspection-only; fresh signatures require an explicit policy-2 Agreement".into());
+        return Err("EVENT_VERSION: legacy material is inspection-only; fresh signatures require an explicit policy-2 Contract".into());
     }
     if envelope.agreement_hash != report.current_agreement_hash {
         return Err(
-            "EVENT_AGREEMENT: envelope must reference the current locally authorized Agreement"
+            "EVENT_AGREEMENT: envelope must reference the current locally authorized Contract"
                 .into(),
         );
     }
     let hash = confirm_hash(&envelope, &args[5])?;
     let vault_path = Path::new(&args[3]);
     let (key, binding) = local::unlock_vault(vault_path, &passphrase()?)?;
-    let party = agreement::party(&bundle.agreement.agreement, role(&binding.role)?)?;
+    let party = contract::party(&bundle.agreement.agreement, role(&binding.role)?)?;
     if party.key != binding
         || envelope.author_role != binding.role
         || envelope.key_id != binding.key_id
@@ -299,7 +297,7 @@ fn sign_action(args: &[String]) -> Result<(), String> {
     let (key, binding) = local::unlock_vault(vault_path, &passphrase()?)?;
     let claims =
         actions::prepare_action_signature(&proposal, &bundle, &trust, role(&binding.role)?)?;
-    let party = agreement::party(&bundle.agreement.agreement, role(&binding.role)?)?;
+    let party = contract::party(&bundle.agreement.agreement, role(&binding.role)?)?;
     if party.key != binding || claims.key_id != binding.key_id {
         return Err("KEY_AUTHORITY: local vault is not the independently trusted signer".into());
     }
@@ -347,7 +345,7 @@ fn run(args: &[String]) -> Result<(), String> {
         )?),
         ("preview", 1) => {
             let b: AssignmentBundle = local::read_json(Path::new(&rest[0]))?;
-            println!("{}", agreement::preview(&b.agreement.agreement)?);
+            println!("{}", contract::preview(&b.agreement.agreement)?);
             Ok(())
         }
         ("verify", 2) => {

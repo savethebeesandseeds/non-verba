@@ -6,6 +6,10 @@ agents and embodied robots under explicit signing authority. M is Non Verba's
 contractual party; mediation is free and proposal-only. The protocol grants M no
 commission or control over requester-to-operator task funds.
 
+Use the shared [terminology](../../docs/requests/TERMINOLOGY.md) for Assignment
+Contract and priors. Source types and terminal reviews follow that vocabulary;
+the glossary maps earlier names retained in versioned records and API aliases.
+
 Current execution uses **protocol 2 / package 0.2.1**, a corrective prototype with explicit
 financial unit grants and signed amendment cutover. Protocol-1 aggregation is
 withdrawn: old signed records remain authenticated with an explicitly unresolved
@@ -27,11 +31,11 @@ analysis and portable replay. It remains `ANALYSIS_ONLY`, with financial authori
 `NONE` and settlement policy `UNSPECIFIED`. The implemented synthetic workflow
 does not establish reliable model reasoning. The current Qwen model remains a workflow test
 component; its negative findings are preserved. Reliable reasoning and interpreting
-priorities into settlement remain separate future work.
+priors into settlement remain separate future work.
 
 The existing core `BILATERAL_SETTLEMENT` rule is distinct from that companion
 policy: it supports exact R/O-authorized releases of established R-to-O
-compensation or expense claims within the signed Agreement's permission. It
+compensation or expense claims within the signed Contract's permission. It
 neither moves funds nor changes M's rights. Model output, including question
 dispositions, cannot authorize this action. See [settlement handling](../../docs/requests/SETTLEMENT_HANDLING.md)
 for the release, amendment, payment and receipt boundaries.
@@ -54,8 +58,8 @@ role keys are separately pinned and never inferred from a sensor signature.
 
 | Source | Responsibility |
 | --- | --- |
-| `src/model.rs` | Strict Agreement, Request, Operator quote, action, certificate and report schemas |
-| `src/agreement.rs` | Request/quote/terms validation, R/O/M binding, exact preview and trusted role checks |
+| `src/model.rs` | Strict Contract, Request, Operator quote, action, certificate and report schemas |
+| `src/contract.rs` | Request/quote/terms validation, R/O/M binding, exact preview and trusted role checks |
 | `src/actions.rs` | Closed required-authorizer matrix, exact scopes and action-signing preparation |
 | `src/bundle.rs` | Shared deterministic reducer, closed required-effect proof, itemized obligations and local-view report |
 | `src/rights.rs` | Exact per-certificate credit/release grants, interval union and scoped reversal |
@@ -91,9 +95,9 @@ For repeated work/fee establishment, validated nonconditional witnesses for the
 same stable obligation preserve its accrued due conditions. They do not import
 unrelated expense context or promote an unresolved old claim to active provenance.
 
-Platform assent is explicit before Agreement formation: R signs a Request with
+Platform assent is explicit before Contract formation: R signs a Request with
 `accepts_platform_terms: true` and embedded terms; O signs their exact
-`accepted_terms_hash` in its quote. The Agreement retains those artifacts and
+`accepted_terms_hash` in its quote. The Contract retains those artifacts and
 requires separate R/O/M signatures. This does not imply a hosted enrollment system.
 
 ## Wire profile
@@ -132,14 +136,14 @@ identical events are idempotent; incompatible authenticated records are retained
 as conflicts rather than resolved by arrival order.
 
 Protocol-2 payment/release/reversal proposals include signed `allocations`: exact
-obligation/root-Agreement coordinates with half-open integer minor-unit intervals.
+obligation/root-Contract coordinates with half-open integer minor-unit intervals.
 Independent grants persist despite appended contradictions; overlapping coverage
 is counted once and reported separately. All-party reversal revokes only its named
 receipt grant's exact units. Amendments sign a `cutover` frontier, preserved claims
 and grandfathered actions; they retain existing milestone principals and identities.
 
 Bundles permit at most 1,000 actions, 64 Requests and 128 attachments; each raw
-attachment is at most 1 MiB. Agreements are at most 512 KiB. Local encrypted
+attachment is at most 1 MiB. Contracts are at most 512 KiB. Local encrypted
 plaintext has a stricter 2 MiB bound, so a structurally valid 4 MiB bundle may be
 too large for this local store. Large-evidence hosting is not implemented.
 
@@ -231,11 +235,11 @@ seal-evidence <plaintext-file> <new-encrypted-file> <public-context>
 open-evidence <encrypted-file> <new-plaintext-file> <expected-public-context>
 ```
 
-`preview` displays exact Agreement terms and their digest; `inspect-json` displays
+`preview` displays exact Contract terms and their digest; `inspect-json` displays
 an object's exact parsed content and JCS digest. Inspection does not establish
 validity. Signing requires the reviewed digest and independently trusted role key.
 Request/quote/event signing writes their complete signed record; `endorse` and
-`sign-action` write a detached authorization to include with the exact Agreement
+`sign-action` write a detached authorization to include with the exact Contract
 or proposal. A caller still assembles the strict bundle records; there is no form
 builder or account backend. `merge` combines partial authorizations in two bundles
 with the same immutable root and retains conflicts.
@@ -276,7 +280,7 @@ or implement remote retention/deletion. The low-level `store_snapshot` API permi
 plaintext metadata-only bundles and rejects raw attachments.
 
 The signer reserves an exclusive scope before releasing a signature. R's initial
-Agreement endorsement also reserves one Assignment ID per Request. Conflicting
+Contract endorsement also reserves one Assignment ID per Request. Conflicting
 or incomplete guard records fail closed; identical reservations are idempotent.
 Keep the vault and its sibling `<vault-filename>.signing-guards` directory together
 when backing up or restoring. Deleting/copying/rolling back guards can defeat local
@@ -305,7 +309,7 @@ explicitly exported bundles can contain sensitive information. The local encrypt
 store does not supply a production account/access-control or backup service.
 
 See [the design index](../../docs/requests/README.md),
-[Agreement terms](../../docs/requests/AGREEMENT.md),
+[Contract terms](../../docs/requests/CONTRACT.md),
 [workflow](../../docs/requests/WORKFLOW.md),
 [threat model](../../docs/requests/THREAT_MODEL.md), and
 [migration plan](../../docs/requests/MIGRATION.md).

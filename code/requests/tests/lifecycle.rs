@@ -2,7 +2,7 @@
 mod common;
 use common::*;
 use nonverba_requests::{
-    agreement, bundle::verify_assignment_bundle, crypto, encoding, model::*, transcript::EventBody,
+    bundle::verify_assignment_bundle, contract, crypto, encoding, model::*, transcript::EventBody,
 };
 
 fn obligation<'a>(report: &'a BundleReport, id: &str) -> &'a Obligation {
@@ -16,9 +16,9 @@ fn obligation<'a>(report: &'a BundleReport, id: &str) -> &'a Obligation {
 #[test]
 fn real_signed_happy_path_preserves_partial_payments_and_portable_verification() {
     let (mut bundle, trust, keys) = fixture();
-    assert!(agreement::verify_request(&bundle.requests[0], &trust).is_ok());
+    assert!(contract::verify_request(&bundle.requests[0], &trust).is_ok());
     assert!(
-        agreement::verify_quote(
+        contract::verify_quote(
             &bundle.agreement.agreement.quote,
             &bundle.requests[0],
             &trust

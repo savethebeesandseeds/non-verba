@@ -2,7 +2,7 @@
 //! Prospective policy authority is distinct from historical authentication.
 use crate::{
     actions,
-    agreement::{self, ensure},
+    contract::{self, ensure},
     encoding::digest,
     model::*,
     money::parse_minor_units,
@@ -47,7 +47,7 @@ fn event_references(e: &SignedEvent) -> Vec<String> {
 }
 type Graph = BTreeMap<String, Vec<String>>;
 pub(crate) fn graph(
-    map: &BTreeMap<String, AssignmentAgreement>,
+    map: &BTreeMap<String, AssignmentContract>,
     actions: &BTreeMap<String, ActionCertificate>,
     events: &BTreeMap<String, SignedEvent>,
     amendments: &BTreeSet<String>,
@@ -59,7 +59,7 @@ pub(crate) fn graph(
     for (id, c) in actions {
         if let Some(a) = map.get(&c.proposal.agreement_hash)
             && actions::validate_proposal(&c.proposal, a).is_ok()
-            && agreement::verify_role_signatures(&c.authorizations, a, id, "ACTION")
+            && contract::verify_role_signatures(&c.authorizations, a, id, "ACTION")
                 .is_ok_and(|roles| !roles.is_empty())
         {
             // Knowledge is attributed once a pinned party signs this exact
@@ -68,7 +68,7 @@ pub(crate) fn graph(
             // admission separately requires every action-specific authorizer.
             graph.insert(id.clone(), action_references(&c.proposal));
             // A partial amendment is only an attributed proposal. It cannot
-            // introduce a successor Agreement or change active authority.
+            // introduce a successor Contract or change active authority.
             if amendments.contains(id)
                 && let Action::AmendAgreement { replacement } = &c.proposal.action
             {
@@ -95,17 +95,17 @@ pub(crate) fn ancestors(seeds: &[String], graph: &Graph) -> BTreeSet<String> {
 /// truth or applicability of a referenced claim. Its effect is validated later.
 pub(crate) fn validate_amendment(
     p: &ActionProposal,
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     bundle: &AssignmentBundle,
     trust: &TrustConfiguration,
-    map: &BTreeMap<String, AssignmentAgreement>,
+    map: &BTreeMap<String, AssignmentContract>,
     accepted: &BTreeSet<String>,
 ) -> Result<(), String> {
     actions::validate_proposal(p, a)?;
     let Action::AmendAgreement { replacement } = &p.action else {
         return Err("AMENDMENT_TYPE: amendment required".into());
     };
-    agreement::validate_agreement(replacement, &bundle.requests, trust)?;
+    contract::validate_contract(replacement, &bundle.requests, trust)?;
     ensure(
         replacement.assignment_id == a.assignment_id
             && replacement.request_id == a.request_id
@@ -169,7 +169,7 @@ pub(crate) fn validate_amendment(
         .cloned()
         .collect();
     let transcript =
-        transcript::verify_events_for_agreements(&events, &context, &map.keys().cloned().collect());
+        transcript::verify_events_for_contracts(&events, &context, &map.keys().cloned().collect());
     let mut certs = BTreeMap::<String, ActionCertificate>::new();
     for c in &bundle.actions {
         let id = digest(&c.proposal)?;

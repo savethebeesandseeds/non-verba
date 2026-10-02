@@ -44,7 +44,7 @@ missing independent information.
 | M with either beneficiary | Cannot extinguish another party's established assurance rights merely by assessment or refusal |
 
 Allowlisted R/O settlement changes only their permitted balances. All three must
-authorize Agreement amendments. A pre-agreed rule can operate without a fresh
+authorize Contract amendments. A pre-agreed rule can operate without a fresh
 signature only within the exact proof/effect scope already authorized by each
 affected party. There is no generic majority override.
 
@@ -60,7 +60,7 @@ authenticated distribution, update authorization and rollback, device key access
 exact preview-to-signature binding, agent delegation and durable local storage.
 Participants must obtain the verifier and trusted key bindings independently of
 the bundle they are asked to verify. Updating an application does not authorize
-rewriting pinned policy in an existing Agreement.
+rewriting pinned policy in an existing Contract.
 
 The local development CLI's software-key workflow is not hardware enrollment or
 production key custody. R/O private keys must not be sent to M or exposed to a
@@ -69,7 +69,7 @@ scheme. If rotation on an existing Assignment would require unsupported authorit
 the intended operating response is to stop new signing and preserve historical
 records. There is no implemented account-recovery or administrative freeze
 workflow; an admin/password reset supplies no contractual authority. See
-[the Agreement's recovery boundary](AGREEMENT.md#amendment-and-settlement).
+[the Contract's recovery boundary](CONTRACT.md#amendment-and-settlement).
 
 The current native client encrypts software vaults, evidence and imported/merged
 snapshots using AES-256-GCM with a password-derived key. This protects retained
@@ -108,7 +108,7 @@ a genuinely conditional historical claim or a missing named obligation proof.
 The knowledge graph admits a shape-valid proposal only with at least one actual
 pinned signature; effect admission still requires all rule-specific authorizers.
 Partial proposals expose their attributed references without authorizing money or
-activating a successor Agreement. Required-effect proof is selected by the closed
+activating a successor Contract. Required-effect proof is selected by the closed
 rule. Invalid wrappers cannot authenticate knowledge, while authenticated context
 continues to support positive successor-knowledge and provenance checks even if
 its own financial effect is unresolved.

@@ -223,7 +223,7 @@ fn parse_stage(
             v.question_reconciliation,
         )
     };
-    a.validate_profile(stage, refs, offers, matches!(version, 4 | 5))?;
+    a.validate_analysis_profile(stage, refs, offers, matches!(version, 4 | 5))?;
     if matches!(version, 3..=5) {
         if a.issues.len() > 1 || a.questions.len() > 2 || a.unresolved_reasons.len() > 2 {
             return Err(format!("ANALYSIS_V{version}_BOUNDS"));
@@ -409,12 +409,12 @@ impl DisputeAnalysisV1 {
         refs: &[String],
         offers: &[String],
     ) -> Result<(), String> {
-        self.validate_profile(stage, refs, offers, false)
+        self.validate_analysis_profile(stage, refs, offers, false)
     }
 
     // Historical v1-v3 require an unresolved reason; explicitly signed v4/v5
     // allows settled factual interpretations without manufactured uncertainty.
-    fn validate_profile(
+    fn validate_analysis_profile(
         &self,
         stage: InputStage,
         refs: &[String],

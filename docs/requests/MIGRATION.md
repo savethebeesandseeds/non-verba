@@ -29,7 +29,7 @@ Test identities/receipts establish no real-world payment or identity.
 ## Explicit future adoption
 
 Any decision to use protocol 2 for future work needs the actual parties' exact
-new agreement. Preserve prior rights independently. An explicit negotiated
+new Contract. Preserve prior rights independently. An explicit negotiated
 settlement or future novation must identify the claims it changes and obtain the
 necessary authority; a database migration cannot perform that legal or contractual
 operation. Protocol 2 does not implement general novation of existing units.
@@ -37,14 +37,14 @@ operation. Protocol 2 does not implement general novation of existing units.
 The earlier bilateral type/trait scaffold likewise supplies no invented R/O/M
 signatures. Legacy sensor artifacts retain their own request, keys, format,
 evidence bytes and verifier limitations. This work does not rotate sensor keys,
-change enrollment or acceptance ledgers, or turn old photos/GPS into Agreement
+change enrollment or acceptance ledgers, or turn old photos/GPS into Contract
 consent.
 
 For prospective protocol-2 records:
 
 1. Establish independent original role/key bindings and the exact applicable terms.
 2. R signs a Request and O signs its quote/terms hash; all three review/sign the
-   exact new Agreement.
+   exact new Contract.
 3. Retain the complete local certificate before readiness. Check the actually
    supported prerequisites.
 4. Financial receipts/releases sign their exact obligation/root-basis/unit ranges.
@@ -94,4 +94,4 @@ When key recovery would require unsupported authority, the intended operational
 restriction is to stop new signing and preserve historical signatures and rights.
 This prototype does not implement account recovery or an administrative freeze
 workflow. An account administrator cannot replace contractual signing authority;
-see [the Agreement's recovery boundary](AGREEMENT.md#amendment-and-settlement).
+see [the Contract's recovery boundary](CONTRACT.md#amendment-and-settlement).

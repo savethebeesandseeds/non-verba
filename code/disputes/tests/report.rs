@@ -66,10 +66,11 @@ fn fixture(original: &str) -> (AnalysisPackageV1, TrustConfiguration) {
     .enumerate()
     {
         let profile =
-            binding::draft_profile(provenance, binding::balanced_allocations(), &trust).unwrap();
-        profiles.push(binding::SignedProfileV1 {
+            binding::draft_declared_priors(provenance, binding::balanced_allocations(), &trust)
+                .unwrap();
+        profiles.push(binding::SignedDeclaredPriorsV1 {
             authorization: crypto::sign(
-                &binding::profile_claims(&profile, &trust).unwrap(),
+                &binding::declared_priors_claims(&profile, &trust).unwrap(),
                 &keys[index],
             )
             .unwrap(),
@@ -77,7 +78,7 @@ fn fixture(original: &str) -> (AnalysisPackageV1, TrustConfiguration) {
         });
     }
     let spec = development_spec(
-        binding::dictionary_digest().unwrap(),
+        binding::priors_catalog_digest().unwrap(),
         digest(&profiles[0].profile).unwrap(),
         digest(&profiles[1].profile).unwrap(),
     );

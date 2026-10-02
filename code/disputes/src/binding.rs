@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //! Typed companion consent. None of these records is a contractual action.
 use nonverba_requests::{
-    agreement, bundle,
+    bundle, contract,
     crypto::{self, DetachedSignature, SignatureClaims},
     encoding,
     model::{
-        AssignmentAgreement, AssignmentBundle, PartyBinding, Role, SignedQuote, SignedRequest,
+        AssignmentBundle, AssignmentContract, PartyBinding, Role, SignedQuote, SignedRequest,
         TrustConfiguration,
     },
 };
@@ -20,7 +20,9 @@ pub const CONTEXT_PURPOSE: &str = "NONVERBA_DISPUTE_CONTEXT_V1";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct DimensionV1 {
+/// One defined prior in the shared vocabulary. The pinned v1 definitions below
+/// remain exact signed content even where their original wording differs.
+pub struct PriorV1 {
     pub id: String,
     pub label: String,
     pub question: String,
@@ -29,15 +31,16 @@ pub struct DimensionV1 {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct DictionaryV1 {
+/// Catalog of priors; serialized dictionary names retain the version-1 schema.
+pub struct PriorsCatalogV1 {
     pub dictionary_id: String,
     pub version: String,
     pub maximum_points: u16,
     pub budget_per_dimension: u16,
-    pub dimensions: Vec<DimensionV1>,
+    pub dimensions: Vec<PriorV1>,
 }
 
-pub fn dictionary() -> DictionaryV1 {
+pub fn priors_catalog() -> PriorsCatalogV1 {
     let definitions = [
         (
             "result",
@@ -70,14 +73,14 @@ pub fn dictionary() -> DictionaryV1 {
             "Does not require indefinite work, unilateral scope expansion, or automatic unpaid rework. New performance needs the appropriate agreement.",
         ),
     ];
-    DictionaryV1 {
+    PriorsCatalogV1 {
         dictionary_id: DICTIONARY_ID.into(),
         version: EXTENSION_VERSION.into(),
         maximum_points: 100,
         budget_per_dimension: 50,
         dimensions: definitions
             .into_iter()
-            .map(|(id, label, question, boundary)| DimensionV1 {
+            .map(|(id, label, question, boundary)| PriorV1 {
                 id: id.into(),
                 label: label.into(),
                 question: question.into(),
@@ -95,15 +98,15 @@ fn ensure(condition: bool, message: &str) -> Result<(), String> {
     }
 }
 
-pub fn validate_dictionary(value: &DictionaryV1) -> Result<(), String> {
+pub fn validate_priors_catalog(value: &PriorsCatalogV1) -> Result<(), String> {
     ensure(
-        value == &dictionary(),
+        value == &priors_catalog(),
         "DISPUTE_DICTIONARY: unsupported or altered dictionary; definitions and budget are exact",
     )
 }
 
-pub fn dictionary_digest() -> Result<String, String> {
-    encoding::digest(&dictionary())
+pub fn priors_catalog_digest() -> Result<String, String> {
+    encoding::digest(&priors_catalog())
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -115,9 +118,9 @@ pub struct Allocation {
 
 pub fn validate_allocations(
     allocations: &[Allocation],
-    dictionary: &DictionaryV1,
+    dictionary: &PriorsCatalogV1,
 ) -> Result<(), String> {
-    validate_dictionary(dictionary)?;
+    validate_priors_catalog(dictionary)?;
     let n = u32::try_from(dictionary.dimensions.len())
         .map_err(|_| "DISPUTE_BUDGET: dimension count overflow")?;
     let budget = u32::from(dictionary.budget_per_dimension)
@@ -154,7 +157,7 @@ pub fn validate_allocations(
 
 /// A suggested draft, never an inferred historical profile or evidence of consent.
 pub fn balanced_allocations() -> Vec<Allocation> {
-    dictionary()
+    priors_catalog()
         .dimensions
         .into_iter()
         .map(|d| Allocation {
@@ -180,7 +183,9 @@ pub enum ProfileProvenance {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct PartyProfileV1 {
+/// A party's declared priors. Allocations express emphasis; their role-dependent
+/// consequences remain open research, not additional authority in this record.
+pub struct DeclaredPriorsV1 {
     pub extension_version: String,
     pub author: PartyBinding,
     pub dictionary_hash: String,
@@ -190,40 +195,40 @@ pub struct PartyProfileV1 {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct SignedProfileV1 {
-    pub profile: PartyProfileV1,
+pub struct SignedDeclaredPriorsV1 {
+    pub profile: DeclaredPriorsV1,
     pub authorization: DetachedSignature,
 }
 
-pub fn profile_request(profile: &PartyProfileV1) -> &SignedRequest {
+pub fn declared_priors_request(profile: &DeclaredPriorsV1) -> &SignedRequest {
     match &profile.provenance {
         ProfileProvenance::Request { signed_request }
         | ProfileProvenance::Quote { signed_request, .. } => signed_request,
     }
 }
 
-pub fn draft_profile(
+pub fn draft_declared_priors(
     provenance: ProfileProvenance,
     allocations: Vec<Allocation>,
     trust: &TrustConfiguration,
-) -> Result<PartyProfileV1, String> {
+) -> Result<DeclaredPriorsV1, String> {
     let author = match &provenance {
         ProfileProvenance::Request { signed_request } => signed_request.request.requester.clone(),
         ProfileProvenance::Quote { signed_quote, .. } => signed_quote.quote.operator.clone(),
     };
-    let profile = PartyProfileV1 {
+    let profile = DeclaredPriorsV1 {
         extension_version: EXTENSION_VERSION.into(),
         author,
-        dictionary_hash: dictionary_digest()?,
+        dictionary_hash: priors_catalog_digest()?,
         provenance,
         allocations,
     };
-    validate_profile(&profile, trust)?;
+    validate_declared_priors(&profile, trust)?;
     Ok(profile)
 }
 
-pub fn validate_profile(
-    profile: &PartyProfileV1,
+pub fn validate_declared_priors(
+    profile: &DeclaredPriorsV1,
     trust: &TrustConfiguration,
 ) -> Result<(), String> {
     ensure(
@@ -231,20 +236,20 @@ pub fn validate_profile(
         "DISPUTE_VERSION: unsupported profile version",
     )?;
     ensure(
-        profile.dictionary_hash == dictionary_digest()?,
+        profile.dictionary_hash == priors_catalog_digest()?,
         "DISPUTE_DICTIONARY: profile dictionary digest mismatch",
     )?;
-    validate_allocations(&profile.allocations, &dictionary())?;
+    validate_allocations(&profile.allocations, &priors_catalog())?;
     let expected = match &profile.provenance {
         ProfileProvenance::Request { signed_request } => {
-            agreement::verify_request(signed_request, trust)?;
+            contract::verify_request(signed_request, trust)?;
             &signed_request.request.requester
         }
         ProfileProvenance::Quote {
             signed_request,
             signed_quote,
         } => {
-            agreement::verify_quote(signed_quote, signed_request, trust)?;
+            contract::verify_quote(signed_quote, signed_request, trust)?;
             &signed_quote.quote.operator
         }
     };
@@ -254,13 +259,13 @@ pub fn validate_profile(
     )
 }
 
-pub fn profile_claims(
-    profile: &PartyProfileV1,
+pub fn declared_priors_claims(
+    profile: &DeclaredPriorsV1,
     trust: &TrustConfiguration,
 ) -> Result<SignatureClaims, String> {
-    validate_profile(profile, trust)?;
-    let request = &profile_request(profile).request;
-    Ok(agreement::claims(
+    validate_declared_priors(profile, trust)?;
+    let request = &declared_priors_request(profile).request;
+    Ok(contract::claims(
         &request.deployment_domain,
         &request.request_id,
         &encoding::digest(profile)?,
@@ -269,11 +274,11 @@ pub fn profile_claims(
     ))
 }
 
-pub fn verify_profile(
-    profile: &SignedProfileV1,
+pub fn verify_declared_priors(
+    profile: &SignedDeclaredPriorsV1,
     trust: &TrustConfiguration,
 ) -> Result<String, String> {
-    let claims = profile_claims(&profile.profile, trust)?;
+    let claims = declared_priors_claims(&profile.profile, trust)?;
     crypto::verify(&profile.authorization, &claims, &profile.profile.author.key)?;
     Ok(claims.content_hash)
 }
@@ -297,9 +302,9 @@ pub struct DisputeContextV1 {
     pub deployment_domain: String,
     pub assignment_id: String,
     pub agreement_hash: String,
-    pub dictionary: DictionaryV1,
-    pub requester_profile: SignedProfileV1,
-    pub operator_profile: SignedProfileV1,
+    pub dictionary: PriorsCatalogV1,
+    pub requester_profile: SignedDeclaredPriorsV1,
+    pub operator_profile: SignedDeclaredPriorsV1,
     pub analysis_specification: Value,
     pub analysis_specification_hash: String,
     pub settlement_policy_status: SettlementPolicyStatus,
@@ -313,16 +318,16 @@ pub struct SignedDisputeContextV1 {
     pub endorsements: Vec<DetachedSignature>,
 }
 
-fn base_agreement(
+fn base_contract(
     base: &AssignmentBundle,
     hash: &str,
     trust: &TrustConfiguration,
-) -> Result<AssignmentAgreement, String> {
+) -> Result<AssignmentContract, String> {
     ensure(
         base.protocol_version == "2",
         "DISPUTE_BASE_UNSUPPORTED: legacy base records remain inspection-only; no inferred profiles",
     )?;
-    bundle::known_agreement(base, hash, trust)
+    bundle::known_contract(base, hash, trust)
 }
 
 pub fn validate_context(
@@ -334,15 +339,15 @@ pub fn validate_context(
         context.extension_version == EXTENSION_VERSION,
         "DISPUTE_VERSION: unsupported context version",
     )?;
-    validate_dictionary(&context.dictionary)?;
-    let a = base_agreement(base, &context.agreement_hash, trust)?;
+    validate_priors_catalog(&context.dictionary)?;
+    let a = base_contract(base, &context.agreement_hash, trust)?;
     ensure(
         context.deployment_domain == a.deployment_domain
             && context.assignment_id == a.assignment_id,
         "DISPUTE_BINDING: wrong Agreement identity/domain",
     )?;
-    let r_hash = verify_profile(&context.requester_profile, trust)?;
-    let o_hash = verify_profile(&context.operator_profile, trust)?;
+    let r_hash = verify_declared_priors(&context.requester_profile, trust)?;
+    let o_hash = verify_declared_priors(&context.operator_profile, trust)?;
     let r = &context.requester_profile.profile;
     let o = &context.operator_profile.profile;
     ensure(
@@ -350,8 +355,8 @@ pub fn validate_context(
         "DISPUTE_AUTHOR: profiles must be independently authored by R and O",
     )?;
     ensure(
-        encoding::digest(&profile_request(r).request)? == a.request_hash
-            && encoding::digest(&profile_request(o).request)? == a.request_hash,
+        encoding::digest(&declared_priors_request(r).request)? == a.request_hash
+            && encoding::digest(&declared_priors_request(o).request)? == a.request_hash,
         "DISPUTE_BINDING: profiles reference another Request revision",
     )?;
     let ProfileProvenance::Quote { signed_quote, .. } = &o.provenance else {
@@ -389,18 +394,18 @@ pub fn validate_context(
 pub fn draft_context(
     base: &AssignmentBundle,
     agreement_hash: &str,
-    requester_profile: SignedProfileV1,
-    operator_profile: SignedProfileV1,
+    requester_profile: SignedDeclaredPriorsV1,
+    operator_profile: SignedDeclaredPriorsV1,
     analysis_specification: Value,
     trust: &TrustConfiguration,
 ) -> Result<DisputeContextV1, String> {
-    let a = base_agreement(base, agreement_hash, trust)?;
+    let a = base_contract(base, agreement_hash, trust)?;
     let context = DisputeContextV1 {
         extension_version: EXTENSION_VERSION.into(),
         deployment_domain: a.deployment_domain,
         assignment_id: a.assignment_id,
         agreement_hash: agreement_hash.into(),
-        dictionary: dictionary(),
+        dictionary: priors_catalog(),
         requester_profile,
         operator_profile,
         analysis_specification_hash: encoding::digest(&analysis_specification)?,
@@ -419,12 +424,12 @@ pub fn context_claims(
     role: Role,
 ) -> Result<SignatureClaims, String> {
     validate_context(context, base, trust)?;
-    let a = base_agreement(base, &context.agreement_hash, trust)?;
-    Ok(agreement::claims(
+    let a = base_contract(base, &context.agreement_hash, trust)?;
+    Ok(contract::claims(
         &context.deployment_domain,
         &context.assignment_id,
         &encoding::digest(context)?,
-        agreement::party(&a, role)?,
+        contract::party(&a, role)?,
         CONTEXT_PURPOSE,
     ))
 }
@@ -468,7 +473,7 @@ pub fn verify_context(
         report.diagnostics.push(error);
         return Ok(report);
     }
-    let a = base_agreement(base, &annex.context.agreement_hash, trust)?;
+    let a = base_contract(base, &annex.context.agreement_hash, trust)?;
     for signature in &annex.endorsements {
         let Some(party) = a
             .parties
@@ -480,7 +485,7 @@ pub fn verify_context(
                 .push("DISPUTE_SIGNER: signer is not an independently trusted party".into());
             continue;
         };
-        let expected = agreement::claims(
+        let expected = contract::claims(
             &a.deployment_domain,
             &a.assignment_id,
             report.context_hash.as_deref().unwrap_or_default(),
@@ -591,13 +596,13 @@ pub fn attributed_claims<T: Serialize>(
     base: &AssignmentBundle,
     trust: &TrustConfiguration,
 ) -> Result<SignatureClaims, String> {
-    let a = base_agreement(base, &scope.agreement_hash, trust)?;
+    let a = base_contract(base, &scope.agreement_hash, trust)?;
     let statement = attributed_statement(payload, scope)?;
-    Ok(agreement::claims(
+    Ok(contract::claims(
         &a.deployment_domain,
         &a.assignment_id,
         &encoding::digest(&statement)?,
-        agreement::party(&a, scope.author_role)?,
+        contract::party(&a, scope.author_role)?,
         scope.kind.purpose(),
     ))
 }
@@ -610,10 +615,24 @@ pub fn verify_attributed<T: Serialize>(
     trust: &TrustConfiguration,
 ) -> Result<(), String> {
     let claims = attributed_claims(payload, scope, base, trust)?;
-    let a = base_agreement(base, &scope.agreement_hash, trust)?;
+    let a = base_contract(base, &scope.agreement_hash, trust)?;
     crypto::verify(
         signature,
         &claims,
-        &agreement::party(&a, scope.author_role)?.key,
+        &contract::party(&a, scope.author_role)?.key,
     )
 }
+
+// Vocabulary aliases preserve integration compatibility and exact signed v1 bytes.
+pub type DimensionV1 = PriorV1;
+pub type DictionaryV1 = PriorsCatalogV1;
+pub type PartyProfileV1 = DeclaredPriorsV1;
+pub type SignedProfileV1 = SignedDeclaredPriorsV1;
+pub use declared_priors_claims as profile_claims;
+pub use declared_priors_request as profile_request;
+pub use draft_declared_priors as draft_profile;
+pub use priors_catalog as dictionary;
+pub use priors_catalog_digest as dictionary_digest;
+pub use validate_declared_priors as validate_profile;
+pub use validate_priors_catalog as validate_dictionary;
+pub use verify_declared_priors as verify_profile;

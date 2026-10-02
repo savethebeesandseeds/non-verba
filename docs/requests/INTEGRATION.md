@@ -23,7 +23,7 @@ controls R-to-O task money.
 The AN-2 clarification pass adds signing-consequence explanations and qualifies
 the inspection labels. The adapter record format remains version 1 and the
 protocol remains version 2. No fixture terms, payer schema or authority rule is
-changed. The [agreement notes](AGREEMENT_NOTES.md) separately record the
+changed. The [Contract notes](CONTRACT_NOTES.md) separately record the
 requester-funded product direction, free Operator registration and unselected
 Request-creation/service billing terms. The synthetic draft template keeps its
 optional service disabled; this is not a billing implementation.
@@ -87,7 +87,7 @@ are exchanged to prepare `trust.json`. Keep each vault with its sibling
 `<vault-filename>.signing-guards` directory during backup/restore. Copying only the
 vault or rolling back guards can defeat local refusal of conflicting signatures.
 
-## From Request to retained Agreement
+## From Request to retained Contract
 
 1. **R prepares and signs the Request.** `draft-request` creates an editable
    synthetic proposal from independently checked trust. R reviews the exact
@@ -95,14 +95,14 @@ vault or rolling back guards can defeat local refusal of conflicting signatures.
 2. **O quotes the signed Request.** `draft-quote` binds O's offer and exact
    platform-terms acceptance to that signed Request. O reviews and authorizes the
    quote. Scope/price changes require a fresh exact review and valid signatures.
-3. **All three review the Agreement.** `draft-agreement` assembles the signed
-   Request and O quote. Each participant reviews the same Agreement digest in
+3. **All three review the Contract.** `draft-contract` assembles the signed
+   Request and O quote. Each participant reviews the same Contract digest in
    its own context and creates its own endorsement. `attach endorsement` writes
    a new bundle containing the supplied endorsement; it cannot invent the others.
 4. **Inspect and retain locally.** `inspect` reports formation and readiness from
    the core. `retain` writes the participant's password-encrypted immutable
    snapshot. Partial signatures or unsupported prerequisites remain visible;
-   saving a file never makes an incomplete Agreement ready.
+   saving a file never makes an incomplete Contract ready.
 
 For a new Assignment using the companion's preflight path, review the signed R/O
 profiles and exact analysis settings **before base endorsement**. Each role's
@@ -111,7 +111,7 @@ workflow evidence, not another party's authenticated consent. The guarded base
 and annex commands check the exact reviewed material; `complete-setup` also checks
 base formation and all three annex endorsements. Base and annex signatures remain
 separate, not atomic. A failed or declined extended setup does not invalidate an
-already formed base Agreement or its rights. Existing core signing paths retain
+already formed base Contract or its rights. Existing core signing paths retain
 their original rules; follow the [companion sequence](../../code/disputes/README.md#guided-sequence)
 for the additional checks.
 
@@ -134,9 +134,9 @@ destination, exclusions, policy, terms and consequences before consenting.
 
 `review` supplies no independent trust, so its consequence description explicitly
 labels the retained values as unauthenticated. `authorize` uses the independently
-supplied trust and the existing core verifier to explain the referenced Agreement,
+supplied trust and the existing core verifier to explain the referenced Contract,
 existing obligations and evidence findings before asking for consent. It resolves
-the exact Agreement digest in the action; it never substitutes another revision's
+the exact Contract digest in the action; it never substitutes another revision's
 price. A failed preflight is shown as rejected, not as an authorized effect.
 
 The signing display distinguishes:
@@ -167,10 +167,10 @@ dispute events, plus acknowledgment, payee receipt, bilateral settlement,
 grant-specific reversal and supported nonfinancial service activation actions.
 Use `nv guide` for exact names, targets and optional minor-unit arguments. Drafts
 are proposals; they receive no authority merely because this adapter created them.
-The guided initial Agreement supports one milestone and a synthetic payment
-destination. Service activation is available only when the exact signed Agreement
+The guided initial Contract supports one milestone and a synthetic payment
+destination. Service activation is available only when the exact signed Contract
 already contains the supported service; it does not add protection to a disabled
-Agreement.
+Contract.
 
 Acknowledgment takes the exact completion-event hash. Receipt and settlement take
 an explicit active obligation ID and minor-unit amount; reversal takes the exact
@@ -188,7 +188,7 @@ transfers funds or proves bank settlement.
 
 Settlement requires R/O authorization within their permitted obligations. A
 reversal names the exact receipt grant and units and requires R/O/M. Service
-activation requires its supported Agreement configuration and all three roles;
+activation requires its supported Contract configuration and all three roles;
 it is not financial coverage. A draft requiring more than one signer needs each
 owner's separate authorization over the same proposal digest. Attach the supplied
 signatures without rewriting that proposal. Missing authority and proof remain

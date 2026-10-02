@@ -39,7 +39,7 @@ pub(crate) fn version(value: &str) -> Result<(), String> {
         "new agreements require protocol/schema/policy 2; inspect legacy signatures separately",
     )
 }
-pub fn party(agreement: &AssignmentAgreement, role: Role) -> Result<&PartyBinding, String> {
+pub fn party(agreement: &AssignmentContract, role: Role) -> Result<&PartyBinding, String> {
     agreement
         .parties
         .iter()
@@ -272,8 +272,8 @@ pub fn verify_quote(
     Ok(hash)
 }
 
-pub fn validate_agreement(
-    a: &AssignmentAgreement,
+pub fn validate_contract(
+    a: &AssignmentContract,
     requests: &[SignedRequest],
     trust: &TrustConfiguration,
 ) -> Result<(), String> {
@@ -519,19 +519,19 @@ pub fn validate_agreement(
     Ok(())
 }
 
-pub fn verify_agreement(
-    c: &AgreementCertificate,
+pub fn verify_contract(
+    c: &ContractCertificate,
     requests: &[SignedRequest],
     trust: &TrustConfiguration,
-) -> AgreementResult {
+) -> ContractResult {
     let hash = digest(&c.agreement).unwrap_or_default();
-    let mut result = AgreementResult {
+    let mut result = ContractResult {
         agreement_hash: hash.clone(),
         bound: false,
         valid_signers: vec![],
         diagnostics: vec![],
     };
-    if let Err(e) = validate_agreement(&c.agreement, requests, trust) {
+    if let Err(e) = validate_contract(&c.agreement, requests, trust) {
         result.diagnostics.push(diagnostic(&hash, &e));
         return result;
     }
@@ -596,9 +596,9 @@ pub fn diagnostic(subject: &str, error: &str) -> Diagnostic {
     }
 }
 
-pub fn preview(a: &AssignmentAgreement) -> Result<String, String> {
+pub fn preview(a: &AssignmentContract) -> Result<String, String> {
     let mut result = format!(
-        "Non Verba — three-party Assignment\nAgreement: {} / revision {}\nDigest: {}\nDomain: {}\n\n{}\n\nOperator compensation: {} minor {} (exponent {})\nTask payment: R -> O, {} / {}\nMediation: FREE; proposal-only. No task-money custody.\nDelegates/recovery: not enabled in this v2 prototype profile.\nDeadlines: reminders and escalation only; silence is not consent.\nAssurance (including exclusions):\n{}\n\nEXACT SIGNED TERMS AND POLICY:\n",
+        "Non Verba — three-party Assignment\nContract: {} / revision {}\nDigest: {}\nDomain: {}\n\n{}\n\nOperator compensation: {} minor {} (exponent {})\nTask payment: R -> O, {} / {}\nMediation: FREE; proposal-only. No task-money custody.\nDelegates/recovery: not enabled in this v2 prototype profile.\nDeadlines: reminders and escalation only; silence is not consent.\nAssurance (including exclusions):\n{}\n\nEXACT SIGNED TERMS AND POLICY:\n",
         a.assignment_id,
         a.revision,
         digest(a)?,
@@ -621,7 +621,7 @@ pub fn preview(a: &AssignmentAgreement) -> Result<String, String> {
 
 pub fn verify_role_signatures(
     signatures: &[DetachedSignature],
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
     hash: &str,
     purpose: &str,
 ) -> Result<Vec<Role>, String> {
@@ -653,3 +653,7 @@ pub fn verify_role_signatures(
     roles.sort();
     Ok(roles)
 }
+
+// Compatibility entry points; no schema or signing-domain migration.
+pub use validate_contract as validate_agreement;
+pub use verify_contract as verify_agreement;

@@ -58,10 +58,10 @@ fn amount(value: &Money) -> Result<String, String> {
 }
 
 /// Locate exact retained text only. Authentication, when requested, uses the core.
-fn declared_agreement(
+fn declared_contract(
     input: &AssignmentBundle,
     hash: &str,
-) -> Result<Option<AssignmentAgreement>, String> {
+) -> Result<Option<AssignmentContract>, String> {
     if encoding::digest(&input.agreement.agreement)? == hash {
         return Ok(Some(input.agreement.agreement.clone()));
     }
@@ -131,7 +131,7 @@ fn action_consequences(
     trust: Option<&TrustConfiguration>,
 ) -> Result<String, String> {
     let mut text = format!(
-        "Referenced Agreement: {}\nRequired role authorizations: {}\n",
+        "Referenced Contract: {}\nRequired role authorizations: {}\n",
         json(&proposal.agreement_hash)?,
         json(&actions::required_authorizers(&proposal.action))?,
     );
@@ -141,7 +141,7 @@ fn action_consequences(
         );
     }
     let (agreement, preflight_ok) = if let Some(trust) = trust {
-        let agreement = bundle::known_agreement(input, &proposal.agreement_hash, trust);
+        let agreement = bundle::known_contract(input, &proposal.agreement_hash, trust);
         let preflight = bundle::validate_unsigned_action(proposal, input, trust);
         match &preflight {
             Ok(()) => text.push_str("Core unsigned-action preflight: PASSED for the supplied view. This is not a signature or an executed new effect.\n"),
@@ -151,15 +151,15 @@ fn action_consequences(
             Ok(a) => (Some(a), preflight.is_ok()),
             Err(error) => {
                 text.push_str(&format!(
-                    "Exact referenced Agreement could not be authenticated: {}\n",
+                    "Exact referenced Contract could not be authenticated: {}\n",
                     json(&error)?
                 ));
                 (None, false)
             }
         }
     } else {
-        text.push_str("No independent trust was supplied: the following describes unsigned content and matching retained text only. No Agreement authority, existing obligation, evidence status or balance has been authenticated.\n");
-        (declared_agreement(input, &proposal.agreement_hash)?, false)
+        text.push_str("No independent trust was supplied: the following describes unsigned content and matching retained text only. No Contract authority, existing obligation, evidence status or balance has been authenticated.\n");
+        (declared_contract(input, &proposal.agreement_hash)?, false)
     };
     let proposal_id = encoding::digest(proposal)?;
     match &proposal.action {
@@ -169,7 +169,7 @@ fn action_consequences(
             text.push_str("This proposes acknowledgment of the identified milestone completion. It is not merely acknowledgment that a message or file arrived.\n");
             if (preflight_ok || trust.is_none()) && let Some(a) = &agreement {
                 if let Some(milestone) = a.quote.quote.milestones.iter().find(|m| &m.id == milestone_id) {
-                    text.push_str(&format!("{}: {}\n", if preflight_ok { "Agreed milestone compensation this acknowledgment would recognize" } else { "Declared compensation in exact matching Agreement text (UNAUTHENTICATED)" }, amount(&milestone.compensation)?));
+                    text.push_str(&format!("{}: {}\n", if preflight_ok { "Agreed milestone compensation this acknowledgment would recognize" } else { "Declared compensation in exact matching Contract text (UNAUTHENTICATED)" }, amount(&milestone.compensation)?));
                     let existing = report.and_then(|r| r.obligations.iter().find(|o| o.id == format!("milestone:{milestone_id}")));
                     if let Some(obligation) = existing {
                         text.push_str("This obligation is already established in the supplied verified view. Another compatible acknowledgment does not create an additional charge.\n");
@@ -181,10 +181,10 @@ fn action_consequences(
                         text.push_str("Whether this obligation is already established is unverified. Compatible repeated acknowledgments do not add the milestone price again.\n");
                     }
                 } else {
-                    text.push_str("The exact matching Agreement has no such milestone; no compensation amount is inferred.\n");
+                    text.push_str("The exact matching Contract has no such milestone; no compensation amount is inferred.\n");
                 }
             } else {
-                text.push_str("Compensation is not confirmed: the exact referenced Agreement or required preflight is unavailable. No other Agreement or root price is substituted.\n");
+                text.push_str("Compensation is not confirmed: the exact referenced Contract or required preflight is unavailable. No other Contract or root price is substituted.\n");
             }
             completion_evidence(&mut text, report, completion_event_hash)?;
         }
@@ -228,7 +228,7 @@ fn action_consequences(
 
 fn event_consequences(event: &EventEnvelope) -> Result<String, String> {
     let mut text = format!(
-        "Unsigned event author role: {}\nReferenced Agreement: {}\n",
+        "Unsigned event author role: {}\nReferenced Contract: {}\n",
         json(&event.author_role)?,
         json(&event.agreement_hash)?
     );
@@ -254,6 +254,12 @@ fn event_consequences(event: &EventEnvelope) -> Result<String, String> {
 
 impl Review {
     pub fn new(kind: &str, value: Value, context: Option<Value>) -> Result<Self, String> {
+        // Keep adapter-1 review records byte-compatible with retained reviews.
+        let kind = if kind == "contract" {
+            "agreement"
+        } else {
+            kind
+        };
         let (exact_content, retained_context) = match kind {
             "request" => (typed::<Request>(value)?, None),
             "quote" => (
@@ -284,7 +290,7 @@ impl Review {
             ),
             _ => {
                 return Err(
-                    "REVIEW_KIND: request, quote, agreement, action or event required".into(),
+                    "REVIEW_KIND: request, quote, contract, action or event required".into(),
                 );
             }
         };
@@ -324,11 +330,11 @@ impl Review {
             let context = self
                 .retained_context
                 .clone()
-                .ok_or("REVIEW_CONTEXT: Agreement bundle required")?;
+                .ok_or("REVIEW_CONTEXT: Contract bundle required")?;
             let rebuilt = Self::new(&self.kind, context, None)?;
             if rebuilt.content_hash != self.content_hash {
                 return Err(
-                    "CONSENT_CONTEXT: Agreement in retained bundle differs from signed content"
+                    "CONSENT_CONTEXT: Contract in retained bundle differs from signed content"
                         .into(),
                 );
             }
@@ -354,7 +360,7 @@ impl Review {
 
     /// Display core findings only against independently supplied participant trust.
     pub fn render_verified(&self, trust: &TrustConfiguration) -> Result<String, String> {
-        nonverba_requests::agreement::validate_trust(trust)?;
+        nonverba_requests::contract::validate_trust(trust)?;
         self.render_with_trust(Some(trust))
     }
 
@@ -362,7 +368,12 @@ impl Review {
         self.validate(&self.content_hash)?;
         let mut text = format!(
             "SYNTHETIC DEVELOPMENT — EXACT SIGNING REVIEW\nRecord type: {}\nDigest to authorize: {}\nNo signature has been made by displaying this review.\n\n",
-            self.kind, self.content_hash
+            if self.kind == "agreement" {
+                "contract"
+            } else {
+                &self.kind
+            },
+            self.content_hash
         );
         text.push_str("SIGNING CONSEQUENCES\nExplanations describe this exact reviewed object; they are not separate terms, signatures or waivers.\n");
         if matches!(self.kind.as_str(), "agreement" | "action" | "event") {
@@ -377,11 +388,11 @@ impl Review {
                 .transpose()?;
             if let Some(report) = &report {
                 text.push_str(&format!(
-                    "Supplied Agreement certificate complete: {}\nValid Agreement signer roles: {}\nFinancial projection: {}\nFindings describe only the supplied local history; omitted records may exist.\n",
+                    "Supplied Contract certificate complete: {}\nValid Contract signer roles: {}\nFinancial projection: {}\nFindings describe only the supplied local history; omitted records may exist.\n",
                     report.agreement.bound, json(&report.agreement.valid_signers)?, json(&report.financial_projection)?,
                 ));
                 if !report.agreement.bound {
-                    text.push_str("FORMATION INCOMPLETE: all three valid R/O/M signatures on one exact Agreement are required. Displaying this review supplies no missing consent.\n");
+                    text.push_str("FORMATION INCOMPLETE: all three valid R/O/M signatures on one exact Contract are required. Displaying this review supplies no missing consent.\n");
                 }
             } else {
                 text.push_str("UNAUTHENTICATED DRAFT DESCRIPTION: no independent trust supplied. Signature validity, existing obligations and evidence integrity have not been verified.\n");
@@ -396,7 +407,7 @@ impl Review {
                     text.push_str(&event_consequences(&envelope)?);
                     text.push_str("The proposed event is not signed yet. Context findings do not authenticate this new event; role, stream and signing checks still apply.\n");
                 }
-                _ => text.push_str("Each R/O/M endorsement authorizes the same exact Agreement and its supported rules. It does not certify physical performance, payment capacity, practical readiness or another participant's retention.\n"),
+                _ => text.push_str("Each R/O/M endorsement authorizes the same exact Contract and its supported rules. It does not certify physical performance, payment capacity, practical readiness or another participant's retention.\n"),
             }
         } else {
             text.push_str("The Request or Quote below is unsigned. Review its exact terms, scope, party and price before authorizing it; viewing this explanation creates no consent.\n");
@@ -635,14 +646,14 @@ mod tests {
             review.render_verified(&trust).unwrap(),
         ] {
             let text = consequence_text(&full);
-            assert!(text.contains("No other Agreement or root price is substituted"));
+            assert!(text.contains("No other Contract or root price is substituted"));
             assert!(!text.contains("EUR 100.00"));
         }
         input.agreement.signatures.pop();
         let review = Review::new("agreement", serde_json::to_value(&input).unwrap(), None).unwrap();
         let text = review.render_verified(&trust).unwrap();
         assert!(text.contains("FORMATION INCOMPLETE"));
-        assert!(text.contains("Supplied Agreement certificate complete: false"));
+        assert!(text.contains("Supplied Contract certificate complete: false"));
     }
 
     #[test]

@@ -129,6 +129,32 @@ fn review(kind: &str, source: &Path, output: &Path, context: Option<&Path>) -> S
     assert_signing_consequences(&rendered, &retained);
     hash.to_owned()
 }
+
+#[test]
+fn contract_review_alias_preserves_retained_bytes_and_signed_digest() {
+    let w = Workspace::new("contract-vocabulary");
+    let (base, trust, _) = common::fixture();
+    let source = w.file("base.json");
+    save(&source, &base);
+    let current = w.file("contract-review.json");
+    let earlier = w.file("agreement-review.json");
+    let displayed = ok(&["review", "contract", p(&source), p(&current)], "");
+    ok(&["review", "agreement", p(&source), p(&earlier)], "");
+    assert!(displayed.contains("Record type: contract"));
+    assert_eq!(fs::read(&current).unwrap(), fs::read(&earlier).unwrap());
+    let retained: Value = read(&current);
+    assert_eq!(retained["kind"], "agreement");
+    assert_eq!(
+        retained["content_hash"],
+        base.agreement.signatures[0].claims.content_hash
+    );
+    assert!(
+        verify_assignment_bundle(&base, &trust)
+            .unwrap()
+            .agreement
+            .bound
+    );
+}
 fn authorize(review: &Path, trust: &Path, vault: &Path, output: &Path, password: &str) {
     let record: Value = read(review);
     let hash = record["content_hash"].as_str().unwrap();
@@ -165,7 +191,7 @@ fn assert_projection(text: &str, expected: &BundleReport) {
     let (human, json) = text.split_once(APPENDIX).expect("complete report appendix");
     let actual: Value = serde_json::from_str(json).unwrap();
     assert_eq!(actual, serde_json::to_value(expected).unwrap());
-    assert!(human.contains(&format!("Agreement bound: {}", expected.agreement.bound)));
+    assert!(human.contains(&format!("Contract bound: {}", expected.agreement.bound)));
     assert!(human.contains(&format!(
         "Core ready_to_start (technical record-check flag): {}",
         expected.ready_to_start

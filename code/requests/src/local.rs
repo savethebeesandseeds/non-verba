@@ -434,7 +434,7 @@ pub fn store_snapshot(
 }
 
 /// CLI default for local retention, including raw evidence attachments. The
-/// encrypted header authenticates the immutable root Agreement digest.
+/// encrypted header authenticates the immutable root Contract digest.
 pub fn store_encrypted_snapshot(
     bundle: &AssignmentBundle,
     trust: &TrustConfiguration,

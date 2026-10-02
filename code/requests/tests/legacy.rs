@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //! Immutable captured v1 evidence remains authenticated, without silently
 //! interpreting old credits under protocol-2 interval allocation semantics.
-use nonverba_requests::{agreement, crypto, encoding, legacy, model::*};
+use nonverba_requests::{contract, crypto, encoding, legacy, model::*};
 
 fn original() -> (AssignmentBundle, TrustConfiguration) {
     (
@@ -76,7 +76,7 @@ fn v1_signature_cannot_authorize_v2_context_and_unknown_versions_fail_closed() {
     expected.protocol_version = "3".into();
     assert!(expected.validate().is_err());
     assert_eq!(
-        agreement::claims(
+        contract::claims(
             "nonverba.test",
             "assignment",
             &"00".repeat(32),
@@ -87,8 +87,7 @@ fn v1_signature_cannot_authorize_v2_context_and_unknown_versions_fail_closed() {
         "2"
     );
     assert!(
-        agreement::validate_agreement(&bundle.agreement.agreement, &bundle.requests, &trust)
-            .is_err()
+        contract::validate_contract(&bundle.agreement.agreement, &bundle.requests, &trust).is_err()
     );
 }
 

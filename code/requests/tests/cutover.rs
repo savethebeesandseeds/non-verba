@@ -28,7 +28,7 @@ fn amendment(bundle: &AssignmentBundle, keys: &[SigningKey; 3]) -> ActionCertifi
         "cutover",
     )
 }
-fn replacement(c: &ActionCertificate) -> AssignmentAgreement {
+fn replacement(c: &ActionCertificate) -> AssignmentContract {
     match &c.proposal.action {
         Action::AmendAgreement { replacement } => *replacement.clone(),
         _ => unreachable!(),

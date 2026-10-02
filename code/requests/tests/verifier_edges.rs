@@ -2,7 +2,7 @@
 mod common;
 use common::*;
 use nonverba_requests::{
-    actions, agreement, bundle::verify_assignment_bundle, crypto, encoding, model::*, transcript,
+    actions, bundle::verify_assignment_bundle, contract, crypto, encoding, model::*, transcript,
 };
 
 fn receipt(
@@ -455,7 +455,7 @@ fn versioned_entitlement_case(
     replacement.quote.quote.compensation = money(new_amount);
     replacement.quote.quote.milestones[0].compensation = money(new_amount);
     replacement.quote.authorization = crypto::sign(
-        &agreement::claims(
+        &contract::claims(
             &replacement.deployment_domain,
             &replacement.request_id,
             &encoding::digest(&replacement.quote.quote).unwrap(),

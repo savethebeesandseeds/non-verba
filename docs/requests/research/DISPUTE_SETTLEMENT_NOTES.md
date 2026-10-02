@@ -1,16 +1,16 @@
-# Non Verba — Dispute priors: selection, incorporation, and evaluation
+# Non Verba — Dispute priors: derivation, incorporation, and evaluation
 
 **Discussion handoff · 29 September 2026**
 
-**Purpose:** preserve the conceptual decisions from this conversation so that another session can continue refining the priors without losing their intended role.
+**Purpose:** preserve the working language, discussion aims and exploratory ideas so that another session can continue refining the priors without losing their intended role.
 
-**Status:** a research and discussion note, not a new implementation instruction, signed agreement, selected settlement rule, or replacement for retained project records.
+**Status:** a research and discussion note, not a new implementation instruction, signed Contract, selected settlement rule, or replacement for retained project records.
 
 ## 1. The idea we are preserving
 
 Before cooperating, the Requester and Operator should each be able to declare, in a small and understandable vocabulary, what they want the resolution process to consider when a disagreement arises. Both should see the other's declaration before deciding to enter the arrangement.
 
-The priors are **priorities for resolving disagreement**, not a general description of labor, a personality assessment, or a substitute for the agreed work and acceptance conditions.
+The priors are **priors for resolving disagreement**, not a general description of labor, a personality assessment, or a substitute for the agreed work and acceptance conditions.
 
 The central question is:
 
@@ -20,11 +20,11 @@ The eventual purpose is an explainable route toward settlement, potentially incl
 
 ## 2. Three separate procedures
 
-### A. Selection: what can a participant express?
+### A. Derivation: what can a participant express?
 
-Selection determines the dictionary: its dimensions, their definitions, and their number. Its output is a set of candidate considerations with understandable meanings and contrasts—not participant allocations or settlement amounts.
+Derivation develops the catalog: its dimensions, their definitions, and their number. Its output is a set of candidate considerations with understandable meanings and contrasts—not participant allocations or settlement amounts.
 
-The current five dimensions are a starting proposal, not a fixed answer. We have not agreed that the final dictionary must contain five dimensions or that new ideas must fit within the existing five.
+The current five dimensions are a starting proposal, not a fixed answer. We have not agreed that the final catalog must contain five dimensions or that new ideas must fit within the existing five.
 
 Research can assist discovery. Waku proposed studying a corpus of disputes and published resolutions, embedding relevant material, and looking for clusters that could suggest recurring considerations. This remains a proposed research route, not an executed study or an adopted selection algorithm. The number of clusters need not be fixed at five. Giving a cluster a clear, useful meaning is itself an interpretive step.
 
@@ -32,29 +32,39 @@ Such methods may propose candidates; they do not automatically choose Non Verba'
 
 ### B. Incorporation: how does a declaration influence resolution?
 
-Incorporation determines how the selected definitions and each party's allocations enter the dispute process alongside the agreement and evidence.
+Incorporation determines how the selected definitions and each party's allocations enter the dispute process alongside the Contract and evidence.
 
-Possible approaches mentioned in the conversation include supplying the profiles as model context, defining operations in an embedding space, or combining approaches. These are possibilities, not selected settlement methods. Merely naming vector algebra or embeddings does not specify what a priority should do.
+Possible approaches mentioned in the conversation include supplying the profiles as model context, defining operations in an embedding space, or combining approaches. These are possibilities, not selected settlement methods. Merely naming vector algebra or embeddings does not specify what a prior should do.
 
 This procedure must eventually explain what the priors influence: the analysis of competing considerations, which alternatives are considered, how alternatives are assessed, or a proposed settlement. The rule must also explain how the two separate profiles are treated when they differ.
 
 The prototype has one experimental incorporation path: an evidence-oriented first pass without numeric profiles, followed by a second pass that receives both profiles and the first interpretation. This supports qualitative analysis. It does not settle how points become a payment amount or other binding consequence.
 
-### C. Evaluation: do the dictionary and mechanism serve their purpose?
+### C. Evaluation: do the catalog and mechanism serve their purpose?
 
 Evaluation examines **the dimensions, the incorporation mechanism, and their interaction**.
 
-Some questions concern the dictionary directly: can people understand a term, distinguish it from neighboring terms, and describe what different emphasis means? Other questions concern behavior under a particular mechanism: does it introduce unexplained asymmetry, react to irrelevant presentation changes, or permit an exploitable advantage?
+Some questions concern the catalog directly: can people understand a term, distinguish it from neighboring terms, and describe what different emphasis means? Other questions concern behavior under a particular mechanism: does it introduce unexplained asymmetry, react to irrelevant presentation changes, or permit an exploitable advantage?
 
 A result that drifts could arise from an ambiguous dimension, an incorporation rule, the model's interpretation, or an interaction between them. Evaluation should make those possibilities distinguishable rather than attribute every failure to the priors.
 
 The object of design is what people can express and how that expression is used. **It is not an effort to secretly optimize the values participants choose.** Sampling allocations for an explicitly labeled test is different from choosing or changing someone's actual declaration.
 
+A proposed adversarial evaluation could hold a task, Contract and evidence fixed while sampling or searching over test declarations, including concentrating weight on one prior. We would look for advantages inconsistent with the intended meanings, rather than treat every changed outcome as gaming. Such findings could prompt refinement of the catalog's definitions, while also checking whether incorporation caused the advantage. Searching over weights here is an evaluation exercise; actual participants still choose their own weights. The test and criteria remain to be designed.
+
 The framework in one sentence:
 
-> Selection defines what can be expressed; incorporation defines how it influences the process; evaluation examines both and their interaction.
+> Derivation defines what can be expressed; incorporation defines how it influences the process; evaluation examines both and their interaction.
 
-## 3. The current starting dictionary
+### Short research additions · 2 October 2026
+
+All three fronts remain difficult, open research questions. These are tentative notes to build on:
+
+- **Derivation:** consider a large contract corpus to explore candidate priors. Stanford's [Material Contracts Corpus](https://mcc.law.stanford.edu/) is the source identified in this discussion, alongside the possibility of other sources: its [2025 announcement](https://news.stanford.edu/stories/2025/04/law-school-dataset-sec-material-contracts-corpus) describes more than a million SEC-filed corporate contracts. Its relevance to our disputes and permitted use still need checking.
+- **Incorporation:** still to be determined; we have not selected how declared priors should influence a proposed resolution.
+- **Evaluation:** explore an adversarial setup with agents taking proposing and challenging roles, possibly through training or fine-tuning. The aim would be to discover ways participants could game the platform and test possible mitigations. The roles, training approach and evaluation criteria remain open.
+
+## 3. The current starting catalog
 
 These are the five implemented starting dimensions described in the supplied project records. They are retained here for reference, not endorsed as the final selection.
 
@@ -62,15 +72,15 @@ These are the five implemented starting dimensions described in the supplied pro
 | --- | --- | --- |
 | **Result** | Emphasis on the usable result and conformity to agreed scope, quality, and timing. | Does not rewrite the agreed standard after performance. |
 | **Effort** | Emphasis on reasonable, diligent work actually undertaken within the agreed scope. | Does not reward invented hours, avoidable inefficiency, or unauthorized extra work. |
-| **Reliance** | Emphasis on reasonable commitments, reserved resources, and unrecovered costs incurred because of the agreement. | Applies to either party; does not double-count recognized expenses or create uncapped liability. |
+| **Reliance** | Emphasis on reasonable commitments, reserved resources, and unrecovered costs incurred because of the Contract. | Applies to either party; does not double-count recognized expenses or create uncapped liability. |
 | **Responsibility** | Emphasis on who could reasonably control, prevent, communicate, or mitigate the cause of a shortfall. | Requires relevant evidence; is not a character score, criminal verdict, or presumption of Operator fault. |
 | **Remedy** | Emphasis on a practical, proportionate opportunity to correct, complete, replace, or otherwise resolve a deficient outcome. | Does not require indefinite work, unilateral scope expansion, or automatic unpaid rework. |
 
-The allocation rule gives **each party independently fifty points per dictionary dimension in total**. With the initial five dimensions, that is **250 points for the Requester and 250 for the Operator**, with integer values from zero to 100 per dimension in the initial implementation.
+The allocation rule gives **each party independently fifty points per catalog dimension in total**. With the initial five dimensions, that is **250 points for the Requester and 250 for the Operator**, with integer values from zero to 100 per dimension in the initial implementation.
 
-The budgets are separate, not pooled. Non Verba has no third preference vector in this version. The balanced fifty-per-dimension profile is an editable draft, not inferred consent. Zero does not waive a right; 100 is not a payment percentage. These points are declared priorities, not probabilities of honesty or proof of a person's actual intentions.
+The budgets are separate, not pooled. Non Verba has no third preference vector in this version. The balanced fifty-per-dimension profile is an editable draft, not inferred consent. Zero does not waive a right; 100 is not a payment percentage. These points are declared priors, not probabilities of honesty or proof of a person's actual intentions.
 
-Changing the dictionary in a future design must not silently change the meaning of an earlier signed profile.
+Changing the catalog in a future design must not silently change the meaning of an earlier signed profile.
 
 ## 4. The refinement made in this conversation
 
@@ -90,7 +100,7 @@ These statements are discussion candidates, not replacement definitions or rules
 
 “Intention” could mean the purpose of entering the cooperation, or the intention behind the disputed conduct. A profit-oriented purpose is different from distinguishing a mistake from deliberate disregard.
 
-Waku wants the economic purpose of cooperation, including profit orientation, to be visible. We have not yet decided whether that belongs in the priors dictionary, a separate declaration, or another part of the agreement context. Nor have we selected what financial consequence, if any, it should have in a dispute.
+Waku wants the economic purpose of cooperation, including profit orientation, to be visible. We have not yet decided whether that belongs in the priors catalog, a separate declaration, or another part of the Contract context. Nor have we selected what financial consequence, if any, it should have in a dispute.
 
 A declared purpose must remain distinguishable from evidence about conduct. Saying “my intentions were good” must not silently become proof that a factual account is correct.
 
@@ -106,7 +116,7 @@ A useful distinction from the conversation is:
 
 Different participants may legitimately place different emphasis on effort, outcome, or another consideration. The aim is to avoid the same label meaning different things to different people, or its meaning shifting according to whom an interpretation favors.
 
-Choosing priorities that serve one's interests is not automatically gaming. Providing meaningful choice is part of the design. The concern is advantage obtained through ambiguous wording, unsupported claims, hidden features of the incorporation mechanism, or other exploits—not the mere fact that someone makes a deliberate choice.
+Choosing priors that serve one's interests is not automatically gaming. Providing meaningful choice is part of the design. The concern is advantage obtained through ambiguous wording, unsupported claims, hidden features of the incorporation mechanism, or other exploits—not the mere fact that someone makes a deliberate choice.
 
 The intended basis for trust is:
 
@@ -119,8 +129,8 @@ Equal point budgets do not by themselves establish fair outcomes. A middle value
 The owner's short notes from 30 September are now preserved in
 [notes on declarations, commitments and dispute resolution](PRINCIPLES_OF_DISPUTE_RESOLUTION.md).
 They add the aim of making honest declaration cheap to honor and expensive to
-fake, the possibility of credibility from conduct matching declared values, and
-the possibility that the catalog of values and selections could carry a commitment.
+fake, the possibility of credibility from conduct matching declared priors, and
+the possibility that the catalog of priors and selections could carry a commitment.
 Suggested interpretations and open questions are labeled as discussion material;
 no implementation details or mechanism have been decided by this addition.
 
@@ -137,18 +147,18 @@ Then identify its nearest possible confusion with another dimension. Keep these 
 | Kind of statement | Example |
 | --- | --- |
 | Factual claim | “Substantial effort occurred.” |
-| Declared priority | “Substantial effort should carry considerable weight in resolving this disagreement.” |
+| Declared prior | “Substantial effort should carry considerable weight in resolving this disagreement.” |
 | Settlement consequence | “Therefore, this amount is owed.” |
 
 The first needs evidence. The second belongs to the participant's declaration. Connecting them to the third requires an incorporation and settlement rule; that connection has not been selected.
 
 A later discussion can use a recognizable disagreement and a contrasting situation to examine whether a candidate expresses a principle that can apply to either party, rather than merely “favor me.” No worked cases, payout targets, or selected formulas are introduced by this note.
 
-New candidates should be considered on equal terms with the original five. The next conversation can begin with Waku's ideas rather than treating the existing dictionary as a constraint.
+New candidates should be considered on equal terms with the original five. The next conversation can begin with Waku's ideas rather than treating the existing catalog as a constraint.
 
-## 7. Relationship to the three-party agreement
+## 7. Relationship to the three-party Contract
 
-The broader Request–Quote–Assignment Agreement defines the cooperation, explicit rights, and supported authorizations. The dispute-priors extension is a separately endorsed companion context bound to the exact Agreement. It does not replace the broader protocol.
+The broader Request–Quote–Assignment Contract defines the cooperation, explicit rights, and supported authorizations. The dispute-priors extension is a separately endorsed companion context bound to the exact Contract. It does not replace the broader protocol.
 
 Preserve the foundational rule:
 
@@ -174,16 +184,45 @@ A deterministic rule already accepted in the Assignment may still produce its pr
 
 Non Verba should not gain authority merely because the parties disagree. Its dispute mechanisms should be transparent and inspectable, including the applicable procedure, evidence, computation, result, and challenge path. **How Non Verba itself is held accountable—external oversight, governance, or meaningful stakes—remains a separate design question to develop later.**
 
+### Proposed routes and legal challenge mechanisms · 2 October 2026
+
+**Agreed working direction for payment resolution:**
+
+> The platform follows the automatic payment procedure the parties accepted, while providing the records for external scrutiny.
+
+Participants should feel confident that, at any point, they can download a package of the information needed for scrutiny, containing the records available at that point. The platform should hold the necessary formal identification information, while the downloadable package need not disclose the parties' private identifying information. The package contents, privacy safeguards and circumstances for disclosing identification information remain to be defined.
+
+The discussion suggests three routes for an Assignment:
+
+- **Ordinary fulfilment:** performance and payment proceed under the Contract without a dispute.
+- **Payment dispute:** either party could raise a disagreement over payment. The proposal is that the parties commit in the Contract to resolving this category through the agreed automatic procedure, using the Contract, evidence and declared priors. This is the intended route for ordinary payment disputes; the procedure and its authority remain to be defined.
+- **Catastrophe management (working term):** the separate route concerning serious harm, including injury or loss of assets. It involves assurance and a process for taking the case to court. Its scope, the assurance model and the process will be defined more precisely later.
+
+The central aim is a credible commitment to automatic resolution of payment disputes. Dissatisfaction with the result is not intended to create a general contractual opt-out that routes small payment disagreements to insurers or courts. Research must establish how this commitment can be effective and which legal review rights and safeguards still apply. Those requirements are a separate question from offering a routine choice to abandon the agreed procedure.
+
+These are working proposals, not adopted closure states. An Assignment may give rise to separate payment claims and claims involving harm; the scope of a payment settlement would need to be clear. Any optional human mediation, insurance assistance and access to external remedies require their own scope and conditions. Access to applicable legal remedies should not depend on having insurance.
+
+Possible funding ideas include a contribution reflecting an Assignment's risks and insurance-funded human mediation or review. Coverage, pricing, insurer arrangements, legal responsibility and any recovery from another party remain open. We have not selected an insurance model.
+
+Keep the following sources for later legal review and scenario research; their applicability to Non Verba remains to be established:
+
+- **[GDPR, Article 22](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32016R0679):** for qualifying solely automated decisions using personal data with legal or similarly significant effects, the contract-necessity and explicit-consent exceptions require safeguards including human intervention and the ability to contest the decision.
+- **[EU consumer ADR Directive, Article 10](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32013L0011):** a pre-dispute ADR agreement cannot bind a consumer if it deprives them of their right to bring the dispute before a court.
+- **[UNCITRAL Arbitration Model Law, Articles 34 and 36](https://uncitral.un.org/en/texts/arbitration/modellaw/commercial_arbitration):** provides limited grounds for setting aside awards or refusing enforcement; operation depends on national law. Whether an LLM output could qualify as an award requires separate review.
+- **[Singapore Convention on Mediation, Articles 2, 4 and 5](https://www.singaporeconvention.org/node/27):** addresses assisted settlements, evidence of agreement and specified grounds for refusing enforcement. Its scope covers certain international commercial settlements and excludes consumer and employment settlements; its mediator has no authority to impose a solution.
+
+These texts and related decisions, including [UNCITRAL's CLOUT collection](https://uncitral.un.org/en/case_law), could inform derivation, the limits of incorporation and adversarial evaluation scenarios. Court access, legal assistance, cost, delay and judicial workload remain research questions. No court-filing channel or insurer-backed review process is implemented by these notes.
+
 ## 8. Development boundary and how to resume
 
 The small local model running through llama.cpp is a workflow test component, not the final resolver. Its weak reasoning is expected at this stage. This discussion does not reopen the integration milestone, request a model change, or ask for more prompt tuning. Retain observed failures honestly while keeping workflow integration, model competence, and settlement-policy research distinct.
 
-Resume with these points intact: the dimensions are open to refinement; five is not mandatory; the parties retain separate equal budgets; incorporation is a separate unresolved design question; evaluation examines the dictionary and mechanism together; and the purpose is understandable influence over disagreement, ultimately toward settlement.
+Resume with these points intact: the dimensions are open to refinement; five is not mandatory; the parties retain separate equal budgets; incorporation is a separate unresolved design question; evaluation examines the catalog and mechanism together; and the purpose is understandable influence over disagreement, ultimately toward settlement.
 
 ### Basis and provenance
 
 This note consolidates the conversation with Waku on 29 September 2026. The three-procedure framework, the disagreement-specific framing, and the emphasis on agency and trust are conversation decisions and discussion aims.
 
-The implemented starting dictionary and analysis-only boundary are described in the supplied **DP-1 colleague review packet**, particularly `docs/requests/DISPUTE_PRIORS.md`, `DISPUTE_PRIORS_DECISIONS.md`, and `code/disputes/src/binding.rs`. The supplied **DP-2 — pre-cooperation review and local-analysis evidence** handout describes the later workflow and its remaining limitations. The original **Non Verba — context for the next protocol extension** handoff supplies the broader three-party baseline.
+The implemented starting catalog and analysis-only boundary are described in the supplied **DP-1 colleague review packet**, particularly `docs/requests/DISPUTE_PRIORS.md`, `DISPUTE_PRIORS_DECISIONS.md`, and `code/disputes/src/binding.rs`. The supplied **DP-2 — pre-cooperation review and local-analysis evidence** handout describes the later workflow and its remaining limitations. The original **Non Verba — context for the next protocol extension** handoff supplies the broader three-party baseline.
 
-No new code inspection, test execution, external corpus study, legal research, or model-quality experiment was performed to produce this note. It records the current discussion without upgrading proposals into implemented or authorized behavior.
+The original handoff records the 29 September discussion. The 2 October additions include exploratory checks of a contract-corpus reference, research literature, legal instruments and a CLOUT case abstract. No corpus analysis, model training or model-quality experiment was performed for these research additions, and applicability under particular jurisdictions remains unassessed. Proposals remain separate from implemented or authorized behavior.

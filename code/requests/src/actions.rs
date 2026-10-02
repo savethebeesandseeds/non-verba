@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //! Closed authorization matrix. No votes, administrator role, or generic patches.
 use crate::{
-    agreement::{claims, ensure, party, verify_role_signatures},
+    contract::{claims, ensure, party, verify_role_signatures},
     crypto::SignatureClaims,
     encoding::{digest, validate_id},
     model::*,
@@ -29,10 +29,7 @@ pub fn required_authorizers(action: &Action) -> Vec<Role> {
     }
 }
 
-pub fn expected_scope(
-    proposal: &ActionProposal,
-    a: &AssignmentAgreement,
-) -> Result<String, String> {
+pub fn expected_scope(proposal: &ActionProposal, a: &AssignmentContract) -> Result<String, String> {
     Ok(match &proposal.action {
         Action::AcknowledgeCompletion { milestone_id, .. } => format!("milestone:{milestone_id}"),
         Action::InvokeArtifactRule { rule_id, .. } => format!(
@@ -64,7 +61,7 @@ pub fn exclusive(action: &Action) -> bool {
     )
 }
 
-pub fn validate_proposal(proposal: &ActionProposal, a: &AssignmentAgreement) -> Result<(), String> {
+pub fn validate_proposal(proposal: &ActionProposal, a: &AssignmentContract) -> Result<(), String> {
     ensure(
         proposal.protocol_version == PROTOCOL_VERSION
             && proposal.deployment_domain == a.deployment_domain
@@ -109,7 +106,7 @@ pub fn validate_proposal(proposal: &ActionProposal, a: &AssignmentAgreement) -> 
         "ACTION_PARENTS",
         "exact Agreement parent is required",
     )?;
-    crate::agreement::unique(proposal.parent_certificate_ids.iter().map(String::as_str))?;
+    crate::contract::unique(proposal.parent_certificate_ids.iter().map(String::as_str))?;
     for hash in &proposal.parent_certificate_ids {
         crate::encoding::validate_digest(hash)?;
     }
@@ -142,7 +139,7 @@ pub fn validate_proposal(proposal: &ActionProposal, a: &AssignmentAgreement) -> 
                     "CUTOVER_BOUNDS",
                     "bounded signed cutover references required",
                 )?;
-                crate::agreement::unique(list.iter().map(String::as_str))?;
+                crate::contract::unique(list.iter().map(String::as_str))?;
                 for hash in list {
                     crate::encoding::validate_digest(hash)?;
                 }
@@ -178,7 +175,7 @@ pub fn validate_proposal(proposal: &ActionProposal, a: &AssignmentAgreement) -> 
 
 pub fn validate_authorizations(
     cert: &ActionCertificate,
-    a: &AssignmentAgreement,
+    a: &AssignmentContract,
 ) -> Result<Vec<Role>, String> {
     validate_proposal(&cert.proposal, a)?;
     let roles =
@@ -212,7 +209,7 @@ pub fn prepare_action_signature(
         "AGREEMENT_UNBOUND",
         "complete retained certificate required",
     )?;
-    let a = crate::bundle::known_agreement(bundle, &proposal.agreement_hash, trust)?;
+    let a = crate::bundle::known_contract(bundle, &proposal.agreement_hash, trust)?;
     validate_proposal(proposal, &a)?;
     ensure(
         required_authorizers(&proposal.action).is_empty()

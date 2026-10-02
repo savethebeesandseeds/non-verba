@@ -144,10 +144,13 @@ fn terminal_profiles_annex_shared_case_mock_analysis_export_replay_and_challenge
             .contains("CONSENT_DIGEST")
     );
     for (index, name) in [(0, "r"), (1, "o")] {
-        let profile: PartyProfileV1 = cli.read(&format!("{name}.json"));
-        let signed = SignedProfileV1 {
-            authorization: crypto::sign(&profile_claims(&profile, &trust).unwrap(), &keys[index])
-                .unwrap(),
+        let profile: DeclaredPriorsV1 = cli.read(&format!("{name}.json"));
+        let signed = SignedDeclaredPriorsV1 {
+            authorization: crypto::sign(
+                &declared_priors_claims(&profile, &trust).unwrap(),
+                &keys[index],
+            )
+            .unwrap(),
             profile,
         };
         cli.save(&format!("signed-{name}.json"), &signed);
@@ -277,7 +280,7 @@ fn terminal_profiles_annex_shared_case_mock_analysis_export_replay_and_challenge
         "trust.json",
         "context-review.json",
     ]);
-    assert!(display.contains("Dimension | R points | O points"));
+    assert!(display.contains("Prior | R points | O points"));
     assert!(display.contains("Result | 80 | 50"));
     let context: DisputeContextV1 = cli.read("context.json");
     for (index, role) in [Role::Requester, Role::Operator, Role::Mediator]
@@ -546,5 +549,53 @@ fn terminal_profiles_annex_shared_case_mock_analysis_export_replay_and_challenge
             .unwrap()
             .count(),
         4
+    );
+}
+
+#[test]
+fn priors_commands_preserve_catalog_declaration_and_review_bytes() {
+    let cli = Cli::new();
+    let (base, trust, _) = common::fixture();
+    cli.save("request.json", &base.requests[0]);
+    cli.save("trust.json", &trust);
+    assert_eq!(cli.ok(&["catalog"]), cli.ok(&["dictionary"]));
+    cli.ok(&[
+        "draft-priors",
+        "R",
+        "request.json",
+        "trust.json",
+        "priors.json",
+    ]);
+    cli.ok(&[
+        "draft-profile",
+        "R",
+        "request.json",
+        "trust.json",
+        "profile.json",
+    ]);
+    let current: DeclaredPriorsV1 = cli.read("priors.json");
+    let earlier: PartyProfileV1 = cli.read("profile.json");
+    assert_eq!(
+        encoding::canonical(&current).unwrap(),
+        encoding::canonical(&earlier).unwrap()
+    );
+    cli.ok(&["validate-priors", "priors.json", "trust.json"]);
+    cli.ok(&[
+        "review",
+        "priors",
+        "priors.json",
+        "trust.json",
+        "current-review.json",
+    ]);
+    cli.ok(&[
+        "review",
+        "profile",
+        "profile.json",
+        "trust.json",
+        "earlier-review.json",
+    ]);
+    assert_eq!(
+        fs::read(cli.dir.join("current-review.json")).unwrap(),
+        fs::read(cli.dir.join("earlier-review.json")).unwrap()
     );
 }

@@ -639,7 +639,7 @@ fn authorized_amendments_keep_one_continuous_author_stream() {
         next.agreement_hash.clone(),
     ]);
     let report =
-        verify_events_for_agreements(&[second.clone(), first.clone()], &f.context, &authorized);
+        verify_events_for_contracts(&[second.clone(), first.clone()], &f.context, &authorized);
     assert_eq!(report.accepted.len(), 2);
     assert!(report.conflicts.is_empty());
     let singleton = verify_events(&[second, first.clone()], &f.context);
@@ -648,7 +648,7 @@ fn authorized_amendments_keep_one_continuous_author_stream() {
     reset.sequence = "0".into();
     reset.previous_event_hash = None;
     let reset = sign_event(&reset, f.key("O")).unwrap();
-    let report = verify_events_for_agreements(&[reset, first], &f.context, &authorized);
+    let report = verify_events_for_contracts(&[reset, first], &f.context, &authorized);
     assert!(
         report.accepted.is_empty(),
         "new agreement does not grant a new stream slot"
@@ -1004,7 +1004,7 @@ fn old_revision_claim_after_new_revision_is_retained_as_proof_without_assigning_
     old.protocol_version = "2".into();
     let old = sign_event(&old, f.key("O")).unwrap();
     let allowed = std::collections::BTreeSet::from([old_hash.clone(), new_hash]);
-    let report = verify_events_for_agreements(&[new, old.clone()], &f.context, &allowed);
+    let report = verify_events_for_contracts(&[new, old.clone()], &f.context, &allowed);
     assert!(report.proof_events.contains_key(&hash(&old)));
     assert_eq!(
         report.proof_events[&hash(&old)].envelope.agreement_hash,

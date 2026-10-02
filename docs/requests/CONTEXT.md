@@ -10,8 +10,8 @@ The repository unifies several components without changing their authority:
 
 | Component | Current role |
 | --- | --- |
-| [`code/requests/`](../../code/requests/README.md) | Agreement formation, scoped authorization, retained evidence references and financial projection |
-| [`code/disputes/`](../../code/disputes/README.md) | Local analysis, priority profiles and readable reports; analysis has no financial authority |
+| [`code/requests/`](../../code/requests/README.md) | Contract formation, scoped authorization, retained evidence references and financial projection |
+| [`code/disputes/`](../../code/disputes/README.md) | Local analysis, prior profiles and readable reports; analysis has no financial authority |
 | [Sensor application](../sensors/README.md) | Attributed camera/audio/location evidence and requester observations under explicit policies |
 | [Cooperation protocol](../cooperation/COOPERATION_PROTOCOL.md) | Separate remuneration calculations and fictional simulator scenarios |
 
@@ -33,9 +33,9 @@ not, by itself, authority to revoke a previously established right. Amendments,
 releases and other effects require the exact authorizers and proof specified by
 the accepted policy. Proposal text and mediation do not create authority.
 
-Read [the Agreement](AGREEMENT.md), [specification](SPECIFICATION.md) and
+Read [the Contract](CONTRACT.md), [specification](SPECIFICATION.md) and
 [settlement guide](SETTLEMENT_HANDLING.md) for executable scope. The explanatory
-[participant notes](PARTICIPANT_NOTES.md) and [detailed notes](AGREEMENT_NOTES.md)
+[participant notes](PARTICIPANT_NOTES.md) and [detailed notes](CONTRACT_NOTES.md)
 remain drafting material, not adopted production terms.
 
 ## Sensor evidence is a separate boundary
@@ -69,7 +69,7 @@ the protocol or reorganize its documentation.
 Production participant enrollment and delegated contractual authority, discovery,
 access control, payment providers/finality, recovery and rollback protection,
 privacy/retention and jurisdiction-specific adopted terms remain separate work.
-The [service decision worksheet](AGREEMENT_NOTES.md#unadopted-service-decision-worksheet)
+The [service decision worksheet](CONTRACT_NOTES.md#unadopted-service-decision-worksheet)
 is unselected until actual decisions are made.
 
 Earlier local handoffs and review journals are preserved outside this public

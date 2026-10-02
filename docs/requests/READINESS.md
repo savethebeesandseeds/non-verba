@@ -9,7 +9,7 @@ records **78 passing deterministic companion tests, 2 opt-in model tests ignored
 formatting and strict Clippy. This increment changes no core financial rule,
 signed schema, model or prompt and performs no model-quality experiment.
 
-The separate [dispute-priority analysis companion](DISPUTE_PRIORS.md) has completed
+The separate [dispute-prior analysis companion](DISPUTE_PRIORS.md) has completed
 DP-2 as a **synthetic workflow-integration increment**, under the
 owner's closeout scope (local review record, not included in this source release).
 Workflow acceptance does not establish model-quality acceptance. Existing
@@ -30,7 +30,7 @@ jurisdiction-specific compliance determination. The constitutional principle and
 the exact corrective non-retraction clause appear in [the specification](SPECIFICATION.md).
 
 [Participant notes](PARTICIPANT_NOTES.md) explain this boundary in plain language.
-[Agreement notes AN-2](AGREEMENT_NOTES.md) map proposed wording to the code, separate
+[Contract notes AN-2](CONTRACT_NOTES.md) map proposed wording to the code, separate
 signed commitments from executable rules, and retain the remaining deployment
 decisions. They are documentation for review, not adopted terms or new guarantees.
 
@@ -79,7 +79,7 @@ obligations stay active; conditional receipts retain their numeric credit withou
 inventing an active entitlement.
 
 Original protocol-1 signatures are not regenerated or upgraded. Legacy inspection
-authenticates the original Request, quote, Agreement, action and event contexts
+authenticates the original Request, quote, Contract, action and event contexts
 and retains their proofs. Its report says `financial_projection:
 LEGACY_UNRESOLVED`, exposes `recognized_legacy_proofs`, and supplies no aggregate
 obligations/payments/effects or readiness. An empty legacy obligation list means
@@ -176,7 +176,7 @@ different findings. Missing evidence is not an automatic forfeiture rule.
 Assurance enables only an explicit nonfinancial M service with
 `financial_compensation: false`. Activation is an undertaking, not proof of
 performance, solvency or coverage. Any protection fee is a separate identified
-obligation; it is never deducted from O compensation. Each changed Agreement
+obligation; it is never deducted from O compensation. Each changed Contract
 requires a fresh supported service activation. Unsupported payment preconditions
 block readiness; unsupported service prerequisites prevent activation.
 
@@ -194,6 +194,21 @@ All new build/test execution is confined to the approved managed Debian containe
 Use the [container procedure](../development/CONTAINER_PLAN.md) and package-specific commands
 in [the package README](../../code/requests/README.md). Do not fall back to a host
 Rust, Node, wasm-bindgen or Java toolchain.
+
+### Terminology alignment — 2 October 2026
+
+The public docs, source types and readable terminal reviews now follow the shared
+[terminology](TERMINOLOGY.md): Assignment Contract and priors, with compatibility
+aliases for earlier API/command names and unchanged versioned record fields.
+Proposed dispute stages and role-dependent consequences remain exploratory.
+
+The two affected packages passed in the shared Cargo workspace: **176 Assignment
+tests and 75 companion tests**, plus the separately enabled Node/Rust signing
+interoperability test. Formatting passed. Two opt-in model probes were not run.
+The 23 pipeline tests also passed with `serde_json/preserve_order` enabled after
+the concurrent workspace fix preserved historical prompt ordering. These focused
+checks are not aggregate workspace or model-quality acceptance. The shared
+lockfile run emits deprecation warnings from existing `generic_array` calls.
 
 The historical package-0.2.1 core run on **28 September 2026** passed **152 native tests,
 0 failures, 0 ignored**, including the explicitly enabled Node interoperability
@@ -309,7 +324,7 @@ the old signed inputs. Four synthetic signing reviews were cancelled before any
 vault was opened or signature produced. These checks establish the described
 presentation behavior, not service fulfillment, legal validity or operational
 robot readiness. See AN-2 captures (local review record, not included in this source release)
-and [the updated notes](AGREEMENT_NOTES.md).
+and [the updated notes](CONTRACT_NOTES.md).
 
 ## Unsupported or unreviewed capabilities
 

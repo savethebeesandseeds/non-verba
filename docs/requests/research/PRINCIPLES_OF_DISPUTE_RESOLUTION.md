@@ -3,13 +3,14 @@
 Research notes · incorporated 1 October 2026 · wording refined 2 October 2026
 
 These notes belong to the [dispute-priors discussion](DISPUTE_SETTLEMENT_NOTES.md).
-The owner clarified that **catalog** means the catalog of dispute values and
+The owner clarified that **catalog** means the catalog of priors and
 each party's declared selections.
 
 **Status: discussion notes.** The three seed ideas are preserved below.
-Everything beyond them is a suggested interpretation or an open question, not
-an additional decision. No implementation details, settlement formula,
-credibility score or enforcement mechanism have been selected here.
+Their elaborations remain suggested interpretations and open questions.
+The separate [terminology document](../TERMINOLOGY.md) records the working conventions.
+No implementation details, settlement formula, credibility score or enforcement
+mechanism have been selected here.
 
 ## Original seed notes
 
@@ -52,8 +53,8 @@ advantage from a newly introduced value need not mean losing an otherwise
 valid claim, canceling existing obligations or ignoring new evidence.
 
 Questions to retain: what counts as an unrequested value, a reasonable
-implication of the agreement, or a legitimate clarification? How could an
-earlier priority constrain a later argument without suppressing a valid
+implication of the Contract, or a legitimate clarification? How could an
+earlier prior constrain a later argument without suppressing a valid
 challenge? The same question could be explored for an Operator who invokes
 unagreed extra work or unsupported effort, while recognizing that the parties'
 roles and losses differ.
@@ -85,27 +86,27 @@ disagreement complicate any interpretation of a track record.
 
 Questions to retain: which conduct would actually demonstrate commitment?
 Could the same idea apply to Requesters? How would a newcomer, partial history
-or a change of priorities for future cooperation be understood? What would
+or a change of priors for future cooperation be understood? What would
 credibility mean in practice, and could an assessment itself be challenged?
 We have not chosen how to record, measure, publish or use it.
 
 ## 3. The catalog as a possible commitment
 
-Here, catalog refers to the dispute values and each party's declared
+Here, catalog refers to the priors and each party's declared
 selections. The seed idea is that a selection could carry an expectation of
 consistency when disagreement arises. The meaning and strength of that
-commitment remain to be explored; we have not decided what selecting a value
+commitment remain to be explored; we have not decided what declaring a prior
 would oblige a party to do.
 
-A useful way to explore a candidate value might be to describe:
+A useful way to explore a candidate prior might be to describe:
 
-- What it means, and how it differs from neighboring values.
+- What it means, and how it differs from neighboring priors.
 - A circumstance in which honoring it helps its declarer.
 - A circumstance in which honoring it favors the other party.
 - What evidence could distinguish consistency from an unsupported assertion.
 
 These are discussion prompts, not requirements for a new data structure.
-Choosing a value that serves one's interests remains a legitimate choice;
+Declaring a prior that serves one's interests remains a legitimate choice;
 the existing research already distinguishes that from exploiting ambiguity
 or misrepresentation. We are not trying to infer a participant's private
 "true values."
@@ -173,12 +174,12 @@ and settlement policy `UNSPECIFIED`.
 
 ## Connection to the priors research
 
-These ideas concern the dictionary and the way it is used together. They are
-not automatically additional dimensions in the dictionary.
+These ideas concern the catalog and the way it is used together. They are
+not automatically additional dimensions in the catalog.
 
 | Existing research question | What these notes add |
 | --- | --- |
-| Selection | Can a candidate value express an understandable commitment? |
+| Derivation | Can a candidate prior express an understandable commitment? |
 | Incorporation | How might earlier declarations influence later arguments and possible resolutions? |
 | Evaluation | Does honoring a declaration remain practical, and can misrepresentation obtain an advantage? |
 
@@ -198,6 +199,14 @@ boundary: `ANALYSIS_ONLY`, financial authority `NONE`, settlement policy
 assessments or consequences from these notes. The
 [lifecycle discussion](../DISPUTE_LIFECYCLE.md) retains the separate questions
 of mutual settlement, an accepted escalation procedure and accountability.
+
+## Terminology
+
+The working-language conventions from 2 October have their separate home in
+[Terminology](../TERMINOLOGY.md). That document records the priors vocabulary,
+the agreed name Assignment Contract, proposed dispute terms, and the later
+development follow-up to align documentation and code. These research notes
+retain the reasoning behind the ideas rather than duplicate the glossary.
 
 ## Provenance
 

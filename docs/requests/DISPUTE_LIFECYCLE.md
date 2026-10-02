@@ -18,11 +18,11 @@ robots acting through established signing authority.
 | Record or operation | Implemented meaning |
 | --- | --- |
 | Core signed `DisputeOpened` event | Attributed unilateral dispute opening with a dispute ID, subject ID and reason; it does not establish the claim's truth, receipt of notice or settlement authority |
-| `DisputeCaseV1` | Agreement-bound case, local supplied-history frontier, scope, evidence and hash-linked revisions; its envelope has no author signature |
+| `DisputeCaseV1` | Contract-bound case, local supplied-history frontier, scope, evidence and hash-linked revisions; its envelope has no author signature |
 | `CaseLifecycleV1` | Only `OPEN` and `UNDER_REVIEW`; neither is a contractual decision, and there is no executable closed or escalated state |
 | Signed submission or challenge | Attributes exact content to a participant; it does not establish factual truth or authorize settlement |
 | Analysis and question dispositions | Model interpretations to inspect against sources; `ANALYSIS_READY` does not mean the dispute is resolved |
-| Core `ActionProposal` and `ActionCertificate` | Exact proposed effect and required authorizations, independently checked against the Agreement, proof and permitted scope |
+| Core `ActionProposal` and `ActionCertificate` | Exact proposed effect and required authorizations, independently checked against the Contract, proof and permitted scope |
 | `BILATERAL_SETTLEMENT` | Existing, independently authorized R/O release of specified compensation or expense debt units; not general case closure |
 
 The core already supports an authenticated `DisputeOpened` event, as described
@@ -42,7 +42,7 @@ A future interface should keep these items visible together:
 
 | Review item | Required distinction |
 | --- | --- |
-| Case reference | Exact Assignment, Agreement, case revision/hash and supplied frontier; no claim of globally complete history |
+| Case reference | Exact Assignment, Contract, case revision/hash and supplied frontier; no claim of globally complete history |
 | Disputed matters | Attributed claims, accessible evidence, missing or contested material and participant challenges |
 | Analysis | Exact attempt and source references; keep model conclusions and question dispositions separate from verified record checks |
 | Proposal reference | Stable discussion identity, explicit revision and exact content digest; keep earlier versions inspectable |
