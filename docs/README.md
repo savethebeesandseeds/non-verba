@@ -12,7 +12,7 @@ prototype into a deployed marketplace or make sensor claims physically true.
 | Assignments | [Assignment guide](requests/README.md), [specification](requests/SPECIFICATION.md) | Exact Agreement terms, scoped authority, evidence and protected rights |
 | Disputes | [Priorities and local analysis](requests/DISPUTE_PRIORS.md), [settlement handling](requests/SETTLEMENT_HANDLING.md) | Analysis and reports; binding settlement requires its separate authorization |
 | Sensors | [Evidence app](sensors/README.md), [security](sensors/SECURITY.md), [status](sensors/STATUS.md) | Camera, microphone, location, enrollment and requester verification |
-| Development | [Managed container](development/CONTAINER_PLAN.md), [checkout migration](development/CONTAINER_MIGRATION.md), [validation](development/VALIDATION.md) | Reproducible development procedures and the checks for this unification |
+| Development | [Managed container](development/CONTAINER_PLAN.md), [checkout migration](development/CONTAINER_MIGRATION.md), [repository cleanup](development/REPOSITORY_CLEANUP.md), [validation](development/VALIDATION.md) | Reproducible development procedures and the checks for this unification |
 | Homepage | [Deployment](development/HOMEPAGE_DEPLOYMENT.md) | A static, allowlisted export of `web/site/` |
 
 The assignment [threat model](requests/THREAT_MODEL.md) and the sensor

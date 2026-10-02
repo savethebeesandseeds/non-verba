@@ -1,24 +1,34 @@
-/code/target/
+# Reproducible caches and dependency trees, including nested workspaces.
+target/
+node_modules/
+.tools/
+.toolchain/
+.gradle/
+.kotlin/
+.cxx/
+__pycache__/
+*.py[cod]
+
+# Generated packages, local records, and release staging.
+/target/
+/dist/
+/pkg/
+/artifacts/
+/local-archive/
 /code/pkg/
 /code/artifacts/
-/code/node_modules/
 /code/dist/
 /web/dist/
-/web/node_modules/
-/code/.tools/
-/code/android/.toolchain/
-/code/android/.gradle/
-/code/android/.kotlin/
-/code/android/build/
-/code/android/app/build/
-/code/android/app/.cxx/
+/code/android/**/build/
 /code/android/app/src/main/assets/web/
 /code/android/app/src/main/assets/nonverba-license/
 /code/android/app/src/main/jniLibs/
 /code/android/local.properties
-/code/requests/target/
-/code/disputes/target/
 /reviews/
+*.apk
+*.aab
+
+# Local secrets and machine state; authored examples remain trackable.
 *.keystore
 *.jks
 *.log

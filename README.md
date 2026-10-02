@@ -44,6 +44,11 @@ containers remain tied to their original checkout; the explicit
 [snapshot bridge](docs/development/CONTAINER_MIGRATION.md) permits working on this
 repository without replacing them or their volumes.
 
+Follow the [working boundaries](AGENTS.md): use the smallest relevant check,
+reuse container caches, and keep source cleanup separate from disk cleanup.
+Ignore rules prevent generated files from entering Git; they do not limit disk
+usage or authorize archiving or deleting local data.
+
 Inside the managed container, from `code/`:
 
 ```sh
@@ -81,7 +86,11 @@ Earlier public revisions through `63e5884` were released under Apache 2.0; those
 grants remain valid. The previously separate application source enters this
 public repository with this consolidation under AGPLv3. Its private Git history,
 operational records, signing material, and personal captures are not imported.
-The original private checkout and its uncommitted work are preserved.
+The private repository remains a reserve for future work. Its former source,
+uncommitted work and private journals were moved to a local archive during an
+interrupted cleanup. Its original Git history and retained local records remain
+private; conversion to a minimal reserve checkout is unfinished.
+See [repository cleanup](docs/development/REPOSITORY_CLEANUP.md).
 
 Read the [governance principles](GOVERNANCE.md) for the project's intended rights
 and cooperation model. They are a draft design, not a legal charter or a

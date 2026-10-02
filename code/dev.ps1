@@ -165,7 +165,9 @@ function Invoke-SourceSnapshot {
     $sourceBytes = 0L
     foreach ($name in $files) {
         $sourceBytes += (Get-Item -LiteralPath (Join-Path $workspace $name)).Length
-        if ($sourceBytes -gt 512MB) { throw 'Source snapshot exceeds the reviewed size bound.' }
+        if ($sourceBytes -gt 128MB) { throw 'Source snapshot exceeds the 128 MiB source-only limit. Review the inputs before copying.' }
+    }
+    foreach ($name in $files) {
         $before[$name] = (Get-FileHash -LiteralPath (Join-Path $workspace $name) -Algorithm SHA256).Hash
     }
     $token = [Guid]::NewGuid().ToString('N')
@@ -205,6 +207,19 @@ function Invoke-SourceSnapshot {
         Invoke-Docker @('cp',$archivePath,"$($existing.Id):$remoteArchive")
         $extract = @'
 set -euo pipefail
+snapshot_token=${1##*/}
+if [[ ! $snapshot_token =~ ^[0-9a-f]{32}$ ||
+      $1 != "/tmp/nonverba-unified-source/$snapshot_token" ||
+      $2 != "/tmp/nonverba-source-$snapshot_token.tar" ]]; then
+  echo 'Unexpected snapshot transfer paths; extraction and cleanup refused.' >&2
+  exit 2
+fi
+readonly transfer_archive="$2"
+# Remove only this invocation's copied transfer file, including extraction failure.
+# The source snapshot, build outputs, caches and previously existing data stay intact.
+trap 'if [[ -f "$transfer_archive" && ! -L "$transfer_archive" ]]; then rm -- "$transfer_archive"; fi' EXIT
+test -f "$transfer_archive"
+test ! -L "$transfer_archive"
 test ! -L /tmp/nonverba-unified-source
 mkdir -p /tmp/nonverba-unified-source
 test ! -e "$1"
