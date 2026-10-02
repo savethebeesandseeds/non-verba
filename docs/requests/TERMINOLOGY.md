@@ -37,7 +37,7 @@ responsibilities remain questions for separate review.
 
 | Term | Working meaning |
 | --- | --- |
-| Priors | Defined terms through which a party expresses the considerations or commitments it wants represented in dispute resolution |
+| Priors | Defined terms through which a party precommits to considerations or principles of cooperation and interpretation it wants represented in dispute resolution |
 | Catalog of priors | The shared vocabulary of priors and their meanings |
 | Declared priors | A party's expression using that shared vocabulary |
 | Derivation | Developing and defining the priors; the earlier notes use selection for this question |
@@ -54,18 +54,30 @@ how the Operator proposes to be treated. The shared prior retains a recognizable
 meaning, while interpretation takes the declaring party's role into account.
 The obligations or consequences of this framing have not been selected.
 
+The later 2 October clarification distinguishes priors from participant-selected
+reliability weights for GPS, photographs, audio or other evidence types. They do
+not establish facts, certify good faith or override protected rights. Their
+precise influence on ambiguity, established shortfalls and remedies remains open;
+this wording does not reinterpret the current signed five-prior catalog. See the
+[connected research note](research/RESOLUTION_INCIDENTS_AND_PRIORS.md#priors-as-principles-for-interpreting-ambiguity).
+
 ## Dispute vocabulary under discussion
 
-The 2 October discussion uses Dispute for payment disagreements and chooses
-Catastrophe management as the working name for the separate route involving
-assurance and a process for taking a case to court. Its precise scope remains
-open. The other wording below remains under discussion; these names do not
-establish implemented resolution rules.
+The 2 October discussion uses Dispute for ordinary contractual disagreements,
+particularly payment. Its later refinement prefers Material incident over the
+earlier Catastrophe management label for significant harm beyond that payment
+disagreement. Safety, evidence preservation and appropriate external channels
+are the proposed direction. The scope and any materiality gate remain open;
+these names do not establish implemented resolution rules.
 
 | Term | Working or proposed meaning |
 | --- | --- |
-| Dispute | A raised disagreement over an Assignment's payment, addressed through the automatic payment procedure the parties accepted |
-| Catastrophe management | Working name for the separate route concerning serious harm, including injury or asset loss; involves assurance and a process for taking the case to court, with its precise definition left for later |
+| Dispute | A raised contractual disagreement over an Assignment, particularly performance or payment, intended to use the scoped resolution procedure accepted beforehand |
+| Material incident | Preferred provisional term for significant harm beyond an ordinary payment disagreement, such as injury, theft, destruction or substantial property damage; does not presume fault |
+| Material incident notice | Candidate term for an attributed report of a possible material incident; notice alone establishes neither liability nor every escalation consequence |
+| Material incident procedure | Proposed safety, preservation and external-assistance route for material incidents; scope and responsibilities remain open |
+| Materiality gate | Candidate assessment of whether a notice qualifies for the material incident procedure; thresholds, assessor and challenge path remain open, and urgent assistance would not wait for it |
+| Catastrophe management | Earlier working label for the material incident route, retained for interpreting prior notes |
 | Scrutiny package | Information needed for scrutiny that participants should be able to download at any point; the parties' private formal identification information is not automatically included |
 | Dispute case | The organized record of identified disputed matters, claims, evidence and review history |
 | Claim | What a party asserts happened or is owed; the assertion alone does not establish it |
@@ -79,6 +91,12 @@ establish implemented resolution rules.
 The platform should hold the necessary formal identification information.
 The scrutiny package's contents, privacy safeguards and circumstances for
 disclosing identification information remain to be defined.
+
+A material incident and a contractual dispute may coexist within one Assignment.
+Neither the notice nor its classification would by itself settle either claim.
+The [incident and evidence-access discussion](research/RESOLUTION_INCIDENTS_AND_PRIORS.md)
+develops the provisional route and scrutiny-package aims. Existing local replay
+exports do not implement that production privacy design.
 
 The current core's **bilateral settlement** operation is a specific, limited
 release of identified claims. It does not implement every outcome described by

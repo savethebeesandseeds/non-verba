@@ -53,6 +53,16 @@ preserve ideas about honest declaration, consistency over time and the catalog
 of values as a possible commitment. Their elaborations remain discussion notes, not
 additional implementation decisions or a selected credibility mechanism.
 
+The later [2 October research note](research/RESOLUTION_INCIDENTS_AND_PRIORS.md)
+connects those commitments to a candidate multimodal resolver and a distinct
+inspection harness. It adds the provisional material-incident route, external
+insurance as a possible initial path and jurisdiction selection as a way to bound
+the problem. It clarifies that priors are not sensor reliability weights. Outcome
+amounts, deterrents, materiality criteria, coverage checks, privacy, legal authority
+and evaluation methods remain open. An external model API and later insurance
+institution are possible branches, not changes to the retained runtime or selected
+dependencies. These additions do not reopen DP-2 or confer financial authority.
+
 An unresolved status is not necessarily economically neutral: after work has
 occurred, a Requester retaining money and an Operator retaining only future labor
 may bear different unrecovered losses. Research must model that exposure and

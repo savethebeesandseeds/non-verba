@@ -64,6 +64,16 @@ All three fronts remain difficult, open research questions. These are tentative 
 - **Incorporation:** still to be determined; we have not selected how declared priors should influence a proposed resolution.
 - **Evaluation:** explore an adversarial setup with agents taking proposing and challenging roles, possibly through training or fine-tuning. The aim would be to discover ways participants could game the platform and test possible mitigations. The roles, training approach and evaluation criteria remain open.
 
+The later [connected research note](RESOLUTION_INCIDENTS_AND_PRIORS.md) develops
+these candidates: semantic units, embeddings and clusters for derivation; explicit
+Contract/evidence/prior context for a multimodal harness; and a distinct inspector
+for role consistency, relevance, fabrication and model variation. These make the
+research routes more concrete without selecting an incorporation or settlement
+rule. Priors concern precommitted principles of cooperation and interpretation,
+not participant-selected reliability weights for GPS, photographs or audio.
+The note also checks the corpus's historical count and non-commercial license;
+candidate discovery remains separate from deciding what is fair.
+
 ## 3. The current starting catalog
 
 These are the five implemented starting dimensions described in the supplied project records. They are retained here for reference, not endorsed as the final selection.
@@ -196,13 +206,21 @@ The discussion suggests three routes for an Assignment:
 
 - **Ordinary fulfilment:** performance and payment proceed under the Contract without a dispute.
 - **Payment dispute:** either party could raise a disagreement over payment. The proposal is that the parties commit in the Contract to resolving this category through the agreed automatic procedure, using the Contract, evidence and declared priors. This is the intended route for ordinary payment disputes; the procedure and its authority remain to be defined.
-- **Catastrophe management (working term):** the separate route concerning serious harm, including injury or loss of assets. It involves assurance and a process for taking the case to court. Its scope, the assurance model and the process will be defined more precisely later.
+- **Material incident procedure (preferred provisional term, replacing catastrophe management):** the separate route concerning significant harm, including injury, theft or substantial property damage. The later discussion favors immediate safety, evidence preservation and appropriate medical, insurance, authority or legal channels, without Non Verba determining civil or criminal blame. Scope, notice handling and any materiality gate remain open.
 
 The central aim is a credible commitment to automatic resolution of payment disputes. Dissatisfaction with the result is not intended to create a general contractual opt-out that routes small payment disagreements to insurers or courts. Research must establish how this commitment can be effective and which legal review rights and safeguards still apply. Those requirements are a separate question from offering a routine choice to abandon the agreed procedure.
 
 These are working proposals, not adopted closure states. An Assignment may give rise to separate payment claims and claims involving harm; the scope of a payment settlement would need to be clear. Any optional human mediation, insurance assistance and access to external remedies require their own scope and conditions. Access to applicable legal remedies should not depend on having insurance.
 
 Possible funding ideas include a contribution reflecting an Assignment's risks and insurance-funded human mediation or review. Coverage, pricing, insurer arrangements, legal responsibility and any recovery from another party remain open. We have not selected an insurance model.
+
+The later [incident and insurance discussion](RESOLUTION_INCIDENTS_AND_PRIORS.md)
+adds a possible initial path through existing professional coverage for eligible
+task classes, rather than requiring Non Verba to become an insurer. This is a
+conditional deployment hypothesis, not a finding that launch or hazardous work
+is authorized. It also develops the privacy and evidentiary limits of the scrutiny
+package and treats a material incident and payment dispute as potentially
+overlapping claims within one Assignment.
 
 Keep the following sources for later legal review and scenario research; their applicability to Non Verba remains to be established:
 
@@ -226,3 +244,10 @@ This note consolidates the conversation with Waku on 29 September 2026. The thre
 The implemented starting catalog and analysis-only boundary are described in the supplied **DP-1 colleague review packet**, particularly `docs/requests/DISPUTE_PRIORS.md`, `DISPUTE_PRIORS_DECISIONS.md`, and `code/disputes/src/binding.rs`. The supplied **DP-2 — pre-cooperation review and local-analysis evidence** handout describes the later workflow and its remaining limitations. The original **Non Verba — context for the next protocol extension** handoff supplies the broader three-party baseline.
 
 The original handoff records the 29 September discussion. The 2 October additions include exploratory checks of a contract-corpus reference, research literature, legal instruments and a CLOUT case abstract. No corpus analysis, model training or model-quality experiment was performed for these research additions, and applicability under particular jurisdictions remains unassessed. Proposals remain separate from implemented or authorized behavior.
+
+Two fuller owner-supplied summaries from later on 2 October are incorporated in
+[Dispute resolution, material incidents, insurance and priors](RESOLUTION_INCIDENTS_AND_PRIORS.md).
+They refine the working term for serious harm and connect the existing three
+research fronts to insurance, evidence acquisition and a candidate resolver.
+Their stronger wording is retained as design aims or hypotheses where appropriate,
+not promoted to adopted rules.

@@ -16,6 +16,16 @@ The vocabulary and its size remain open to refinement. The aim is understandable
 influence over disagreement, building toward settlement. These notes are input
 for later discussion, not an implementation task or an adopted settlement rule.
 
+[Dispute resolution, material incidents, insurance and priors](RESOLUTION_INCIDENTS_AND_PRIORS.md)
+incorporates the two fuller discussion summaries from 2 October. It develops the
+ordinary-dispute/material-incident separation, external insurance as a possible
+initial path, and a public multimodal resolver with a distinct inspection harness.
+It clarifies priors as precommitted principles of interpretation rather than
+sensor reliability weights, and outlines a contract-corpus discovery experiment.
+Material incident is the preferred provisional successor to catastrophe. Gates,
+coverage, launch jurisdiction, consequences and legal authority remain open;
+payment and deterrence aims are retained without adopting rules.
+
 The [mutual closure and escalation addition](DISPUTE_SETTLEMENT_NOTES.md#mutual-closure-and-escalation)
 records the intended consent and escalation boundary. The general escalation
 procedure and Non Verba's accountability remain future design questions.

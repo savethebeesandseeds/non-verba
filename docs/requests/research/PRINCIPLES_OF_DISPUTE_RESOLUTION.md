@@ -117,6 +117,24 @@ be disadvantageous. That is the unresolved incentive question behind
 "expensive to fake." It does not yet imply money penalties, deposits,
 automatic payment changes or a platform-wide reputation score.
 
+### Precommitment and competition through values
+
+The later [2 October discussion](RESOLUTION_INCIDENTS_AND_PRIORS.md#priors-as-principles-for-interpreting-ambiguity)
+sharpens the idea: priors could express principles for interpreting cooperation
+under uncertainty, chosen and visible before the disputed event. Counterparties
+could compare those commitments when deciding whether to cooperate. Their meaning
+would be demonstrated partly by situations in which applying them favors the
+other party. This is the proposed competition through values, not a selected
+credibility score or proof of private intentions.
+
+Priors are not participant-selected reliability weights for sensor types, and a
+declaration does not establish a factual claim. The clarification leaves open
+how principles affect ambiguity, established shortfalls and remedies. Today's
+discussion also retains deterrents for either Requester or Operator as important
+research. A lost dispute, honest incident report or technical failure would not
+alone establish dishonesty. The candidates below remain unselected; the newer
+notes do not define a penalty or authorize payment deductions.
+
 ## 4. Candidate deterrents outside the payment flow
 
 **Status: proposed research mechanisms, not selected or implemented rules.**
