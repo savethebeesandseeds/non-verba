@@ -1,214 +1,88 @@
-# Non-verba cooperation protocol
+# Non-verba
 
-A Rust reference implementation of task-based cooperation over labour remuneration,
-compiled to WebAssembly using the same stack as the photo, location and audio
-sensors. Operators set their personal hourly rate **R**. Each verified
-performance can contribute one equally weighted new vote; older votes lose weight.
-The protocol calculates a task minimum, allows higher individual prices, and keeps
-accepted price/time terms stable.
+Non-verba develops tools for cooperation, signed assignments, sensor evidence,
+and independent verification. The protocol, Android application, browser
+application, and reference verifiers now live in this repository.
 
-This repository contains the protocol, its tests and a standalone interactive
-union simulator. The separate evidence-camera
-application does not yet provide the identities, agreements, completion ledger or
-payments needed to operate it. Nothing here publishes prices or activates a union.
+This is a development project. Its components do not yet form a deployed
+marketplace, payment service, or complete cooperation workflow. A valid signature
+does not prove that a camera scene, sound, or location is truthful. Read the
+[evidence boundaries](docs/sensors/SECURITY.md) and the
+[assignment threat model](docs/requests/THREAT_MODEL.md) before relying on a report.
 
-## License
+## Project structure
 
-The project-owned source code and accompanying project materials in this public
-repository are licensed under the GNU Affero General Public License, version 3
-only (`AGPL-3.0-only`). See [LICENSE](LICENSE) for the complete terms. Third-party
-dependencies and assets retain their own licenses and notices; the homepage's
-Primer Octicons GitHub mark remains under its
-[MIT license](LICENSES/Primer-Octicons-MIT.txt).
-
-Contributions are accepted under `AGPL-3.0-only` unless explicitly agreed otherwise.
-Commercial use is permitted subject to the license's terms, including applicable
-source-sharing obligations for distribution and modified versions used over a
-network.
-
-This change starts with the commit introducing this section. Earlier revisions
-through `63e5884` were released under Apache 2.0, and their previously granted
-permissions remain valid. This license applies to this public repository; it
-does not relicense or publish the separate private application repository.
-
-## Folder layout
-
-| Path | Purpose |
+| Path | Responsibility |
 | --- | --- |
-| `web/index.html`, `web/index.css` | Responsive public homepage with the project identity and GitHub source link |
-| `web/union.html`, `web/union.css`, `web/union.mjs` | Standalone Operators' union simulator |
-| `web/setup.mjs` | On-page setup editor with configuration import and download |
-| `web/union.config.json` | Default simulator configuration loaded when the page opens |
-| `web/branding/` | Project artwork and branding assets |
-| `code/crates/` | Rust protocol implementation |
-| `code/protocol/` | JavaScript host wrapper for the shared Rust/WASM core |
-| `code/simulator/` | Configuration loading and fictional scenario state connected to the Rust/WASM core |
-| `code/test/` | Behavioral, WASM and browser tests |
-| `code/examples/` | Runnable protocol examples |
-| `code/tools/` | Build scripts and local homepage/simulator preview server |
-| `docs/` | Protocol, regulatory boundary and validation documentation |
+| `web/site/` | Public homepage and project artwork |
+| `web/simulator/` | Standalone cooperation simulator and setup editor |
+| `web/src/` | Shared requester, operator, and verifier browser UI |
+| `code/crates/nonverba-cooperation/` | Task-scoped remuneration calculations |
+| `code/crates/nonverba-core/` | Sensor policies, evidence formats, signing, and verification |
+| `code/crates/nonverba-android/` | Native sensor JNI interface |
+| `code/android/` | Android application and native acquisition adapters |
+| `code/requests/` | Three-party assignment protocol and portable verifier |
+| `code/disputes/` | Analysis-only dispute workflow; no financial authority |
+| `code/protocol/`, `code/simulator/` | Cooperation host API and simulator model |
+| `code/test/`, `code/examples/` | Integration tests and runnable examples |
+| `code/tools/`, `code/container/` | Build, packaging, and managed development tools |
+| `docs/` | [Specifications, usage, development, and limitations](docs/README.md) |
 
-Build metadata lives in `code/`. Generated WASM packages and Rust build outputs
-stay in the ignored `code/pkg/` and `code/target/` directories.
+The sensor and cooperation crates share one Rust workspace. Assignment and
+disputes retain their separate workspaces and lockfiles, preserving their
+deliberate protocol boundaries. Generated packages, captures, local trust
+material, build outputs, and toolchains are excluded from version control.
 
-## Homepage
+## Development
 
-The homepage is plain HTML and CSS. It uses the existing transparent sprout
-character in `web/branding/individual/01-sprout.png`, loads no external assets,
-and links directly to this repository on GitHub. It requires no JavaScript,
-package installation, or Rust/WASM build.
+Project builds, tests, and Java run inside the documented Debian development
+container. Rust 1.96.0 and wasm-bindgen 0.2.122 are pinned. Do not install or run
+project toolchains on Windows.
 
-From the repository root:
+Use the [container guide](docs/development/CONTAINER_PLAN.md). Existing local
+containers remain tied to their original checkout; the explicit
+[snapshot bridge](docs/development/CONTAINER_MIGRATION.md) permits working on this
+repository without replacing them or their volumes.
 
-```sh
-cd code
-node --run serve:web
-```
-
-Open [the homepage](http://127.0.0.1:4174/). The same server keeps the simulator
-available at `/web/union.html`. Set `NONVERBA_UNION_PORT` to choose another port;
-`0` selects an available port. Static hosting can serve `web/` directly with
-`index.html` as its entry point; keep its CSS and branding assets alongside it.
-
-For local Codex annotation, use `/web/index-review.html`. The server generates
-this noindex route with a narrow inline-style-element exception. The production
-page retains its strict CSP; the generated review route is not a release asset.
-
-## Build and run
-
-The toolchain is pinned to Rust 1.96.0 and `wasm-bindgen` 0.2.122, matching the
-sensor core. Rust owns all protocol validation and calculations. The small
-JavaScript wrapper loads WASM, freezes records and invokes the host's verification
-callbacks; there is no JavaScript pricing implementation or fallback.
-
-Use Node.js 22 or newer for the build wrapper and browser/WASM tests. No npm runtime
-dependencies are needed. Rust dependencies are pinned in `code/Cargo.lock`. A first
-build requires the Rust toolchain, WASM target, native linker and dependencies.
-
-Run build and test commands from `code/` so the pinned toolchain and package
-metadata apply:
+Inside the managed container, from `code/`:
 
 ```sh
-cd code
+node --run test
+node --run build:web
+export NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright
+export PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers
+node --run test:browser
+node --run test:simulator
 ```
 
-For a standalone checkout, provision the matching CLI if it is not on PATH:
+The aggregate test command covers the Rust workspaces, cooperation WASM tests,
+and sensor JavaScript adapters. Browser, Android, and physical-device checks are
+separate. See [validation](docs/development/VALIDATION.md) for the checks actually
+performed for this consolidation.
 
-```sh
-cargo install wasm-bindgen-cli --version 0.2.122 --locked
-```
+The homepage export is a deliberately small static package. Adding Android and
+browser source does not automatically deploy either application through Pages.
+See [homepage deployment](docs/development/HOMEPAGE_DEPLOYMENT.md).
 
-The build script also accepts `NONVERBA_WASM_BINDGEN` as an executable path, and
-automatically reuses the sensor checkout's already installed CLI when available.
+## License and contributions
 
-```sh
-node tools/build-wasm.mjs
-cargo test --locked --workspace
-node --test test/cooperation.test.mjs test/wasm.test.mjs test/simulator-config.test.mjs test/simulator-model.test.mjs
-node examples/cooperation.mjs
-```
+Project-owned source and accompanying materials are licensed under the GNU
+Affero General Public License, version 3 only (`AGPL-3.0-only`). See [LICENSE](LICENSE),
+[third-party notices](THIRD_PARTY_NOTICES.md), and [contribution guidance](CONTRIBUTING.md).
+Third-party dependencies, artwork, and data retain their own terms.
 
-`npm test` and `npm run example` rebuild WASM before running. `npm run test:rust`
-runs the native Rust tests. The example is explicitly a local simulation with
-fictional records, not a production verification adapter.
+AGPL permits commercial use and forks. Its applicable distribution and modified
+network-service obligations provide access to corresponding source; they do not
+require every private modification to be published or certify a fork as fair.
+Modified versions must carry the required modification notices. Project names
+and release identity must not be used to imply endorsement of a fork.
 
-With an existing Playwright installation, `node test/browser-smoke.mjs` checks
-the actual web build in both a browser and a module Worker. Set
-`NONVERBA_PLAYWRIGHT_PATH` to that package's location if it is not locally
-resolvable; `NONVERBA_BROWSER_EXECUTABLE` can select a browser executable.
+Earlier public revisions through `63e5884` were released under Apache 2.0; those
+grants remain valid. The previously separate application source enters this
+public repository with this consolidation under AGPLv3. Its private Git history,
+operational records, signing material, and personal captures are not imported.
+The original private checkout and its uncommitted work are preserved.
 
-The build produces `code/pkg/nonverba_cooperation.js`, TypeScript declarations, and
-`code/pkg/nonverba_cooperation_bg.wasm` using `wasm-bindgen --target web`. These
-generated files and `code/target/` are ignored by Git; source and the lockfile are
-retained. The default test command selects the Node test suites; the browser
-smoke test runs separately through `npm run test:browser`, and the simulator's
-browser integration runs through `npm run test:simulator`.
-
-## Interactive union simulator
-
-From `code/`, build the WASM package if `pkg/` is not already available, then start
-the local server:
-
-```sh
-node tools/build-wasm.mjs
-node tools/serve-simulator.mjs
-```
-
-The equivalent package commands are `npm run build:wasm` and
-`npm run serve:simulator` (or `node --run serve:simulator` without npm).
-
-Open [the union simulator](http://127.0.0.1:4174/web/union.html). Set
-`NONVERBA_UNION_PORT` to use another port; `0` selects an available port and the
-server prints its URL. Serve the page over HTTP: opening it with `file://` does
-not support the required module and WASM loading.
-
-Explore shared personal hourly settings, completed-task votes, decay, demand,
-individual quotes and settlement using the existing Rust/WASM calculations.
-All people, completions, agreements and demand are fictional, and edits remain in
-memory. See [the simulator guide](docs/SIMULATOR.md) for its controls, timeline
-limits, JSON export and separate local review route.
-
-Use **Set up your simulation** at the top of the page to edit currency, locale,
-Operators, tasks and policy. Advanced settings cover the clock, scope, demand and
-limits. Edits remain a draft until **Apply setup**, which validates them and
-starts a new scenario, discarding the previous votes and acceptances. A currency change preserves the
-numbers entered without exchange-rate conversion; amounts must fit the new
-currency's precision (NOK: 2, JPY: 0, KWD: 3).
-
-**Download configuration** saves the validated draft as JSON. **Import
-configuration** loads a file into the draft for review before applying it;
-**Discard edits** restores the last applied setup. These settings remain in page
-memory. Reloading uses [web/union.config.json](web/union.config.json) again. To
-change that default, save a downloaded configuration as this file. **Export
-snapshot** separately saves the full simulation record. See the
-[configuration guide](docs/SIMULATOR.md#configure-in-the-page) for details.
-
-## Runtime integration
-
-Import `code/protocol/cooperation.mjs` in Node, a browser module or a module Worker.
-Its existing API is unchanged and waits for the adjacent WASM to initialize.
-Serve `code/protocol/` and `code/pkg/` as adjacent directories in the same application, with the WASM MIME type
-`application/wasm` and a CSP permitting same-origin WASM execution and loading.
-The sensor app already uses this pattern in browsers and Android's WebView.
-
-Verification callbacks must run in the realm that owns the authenticated records.
-Functions cannot be transferred in Worker messages; install real adapters in the
-Worker or perform admission in the owning realm. Never replace them with posted
-`verified: true` flags.
-
-Native Rust applications can depend on `code/crates/nonverba-cooperation` as an `rlib`
-and call `execute_json` with a verifier. See the crate's API documentation and
-[protocol boundary](docs/COOPERATION_PROTOCOL.md#rust-wasm-and-host-boundary).
-The raw `cooperation_plan` export returns a provisional calculation and required
-checks; it does **not** authenticate or authorize that calculation by itself.
-
-## Rules at a glance
-
-- One vote per completed assignment per Operator; repeat performances contribute
-  additional votes. This is equal influence **per performance**, not per person.
-- Each vote snapshots personal R, measured working time and the corresponding
-  proposed task price. Actual prices paid are not automatically votes.
-- A linear decay window and an upper weighted median provide deterministic rules.
-- An agreed baseline protects against an automatic fall below the protected floor.
-- Price and time are the only working-condition quantities modeled in v1.
-- A bounded optional demand premium uses authenticated requested/available time.
-- An individual quote respects both the collective minimum and personal R.
-- Accepted work retains its terms. Approved overruns are paid proportionally.
-
-## Read and integrate
-
-- [Protocol, formulas, record fields and adapter contract](docs/COOPERATION_PROTOCOL.md)
-- [Regulatory boundary and requirements before operation](docs/REGULATORY_BOUNDARY.md)
-- [Interactive simulator guide](docs/SIMULATOR.md)
-- [Rust implementation](code/crates/nonverba-cooperation/src/lib.rs)
-- [JavaScript host wrapper](code/protocol/cooperation.mjs)
-- [Runnable example](code/examples/cooperation.mjs)
-- [Behavioral tests](code/test/cooperation.test.mjs)
-- [WASM integration tests](code/test/wasm.test.mjs)
-- [Validation results and limits](docs/VALIDATION.md)
-
-The reference implementation validates shapes, scopes, arithmetic and transaction
-limits. Deployment adapters must authenticate the underlying facts. A valid
-signature, a successful test suite or a changing formula does not establish that a
-collective pricing arrangement is lawful. Applicability must be assessed for the
-actual workers, work and counterparties before activating an agreement.
+Read the [governance principles](GOVERNANCE.md) for the project's intended rights
+and cooperation model. They are a draft design, not a legal charter or a
+guarantee of deployed behavior.

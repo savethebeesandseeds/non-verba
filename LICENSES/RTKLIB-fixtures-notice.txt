@@ -1,0 +1,27 @@
+RTKLIB-generated synthetic numerical fixtures
+
+Files:
+code/crates/nonverba-core/src/location_proof/position/rtklib-reference.json
+code/crates/nonverba-core/src/location_proof/position/rtklib-rollover-reference.json
+
+Generator: code/test/rtklib-oracle.c, authored for Non-verba.
+Upstream oracle: unmodified RTKLIB by T. Takasu, commit
+71db0ffa0d9735697c6adfd06fdf766d0e5ce807.
+https://github.com/tomojitakasu/RTKLIB/tree/71db0ffa0d9735697c6adfd06fdf766d0e5ce807
+
+RTKLIB source is not vendored in this repository. The development oracle uses
+its eph2pos, geodist, ionmodel and tropmodel functions to generate deliberately
+synthetic orbit parameters, signal observations and numerical expected results.
+The known Budapest coordinate is an authored mathematical test input, not a
+captured person's location. These fixtures establish numerical regression
+coverage, not physical-device measurements or independent proof of correctness.
+
+RTKLIB retains its upstream BSD 2-clause license with its additional clauses;
+consult the exact pinned readme before using or redistributing that software:
+https://github.com/tomojitakasu/RTKLIB/blob/71db0ffa0d9735697c6adfd06fdf766d0e5ce807/readme.txt
+
+Pinned source SHA-256 values used by the fixture generator:
+rtklib.h: 5b61545cb703c781b206497040194efdc8b8a23cdac4c627283efd1260693653
+rtkcmn.c: c1d7e9af54518733dc874fc64523114b4a77a45e80895d0bb8ff4fcecfea65c7
+ephemeris.c: c0e5aa04b1dc2f098f2ac3399c43410323ad44f8122f52f806f122a3ac52c626
+readme.txt: e74c5106fa3d8b7e3855807bf10dca8325f4f141586f6b99058c868873def09a

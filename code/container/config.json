@@ -1,0 +1,18 @@
+{
+  "name": "non-verba-dev",
+  "image": "non-verba:dev-gpu-v1",
+  "configuration": "dev-gpu-v1",
+  "gpus": "all",
+  "command": ["sleep", "infinity"],
+  "workdir": "/workspace/code",
+  "volumes": {"non-verba-dev-home": "/root", "non-verba-dev-tools": "/opt"},
+  "ports": {"4173": "4173", "9222": "9222"},
+  "gpuImage": {
+    "image": "non-verba:dev-gpu-v1",
+    "baseImage": "debian:13-slim@sha256:7792b1f7702a86946cd518db72b6a407302c3e9bc1635634368b878189e8221c",
+    "configuration": "dev-gpu-v1",
+    "gpus": "all",
+    "gpuBackend": "cuda",
+    "cudaArchitectures": "86"
+  }
+}

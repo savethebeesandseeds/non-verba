@@ -1,0 +1,581 @@
+{
+  "actions": [
+    {
+      "authorizations": [
+        {
+          "claims": {
+            "assignment_id": "test-assignment-1",
+            "content_hash": "b16469970dfdc05f571f94d1aed955d7cb4bdfecff4f5c46fdee8b43fc4db980",
+            "deployment_domain": "nonverba.test",
+            "key_id": "public-test-key-R",
+            "protocol_version": "2",
+            "purpose": "ACTION",
+            "role": "R"
+          },
+          "signature": "oiJkXmVeusrdTeXJ470HUHXs2rar3G-ZySJcy42uFnsDwYGUFJUFqBgyIzQ1xl9XRiwlSVEXIuutxvhXbRyCBw"
+        }
+      ],
+      "proposal": {
+        "action": {
+          "amount": {
+            "currency": "EUR",
+            "exponent": 2,
+            "minor_units": "1500"
+          },
+          "category": "travel",
+          "evidence_event_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+          "expense_id": "late-expense-a",
+          "type": "AUTHORIZE_EXPENSE"
+        },
+        "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+        "assignment_id": "test-assignment-1",
+        "deployment_domain": "nonverba.test",
+        "nonce": "late-expense-a",
+        "parent_certificate_ids": [
+          "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7"
+        ],
+        "policy_hash": "195f79982ce39e1ae7681f1aa5152614257f3413a5b657c76af0c350e4730831",
+        "protocol_version": "2",
+        "scope_id": "expense:late-expense-a",
+        "scope_version": "0"
+      }
+    },
+    {
+      "authorizations": [
+        {
+          "claims": {
+            "assignment_id": "test-assignment-1",
+            "content_hash": "5beee2f099d6da360911b94354315c9d88c06e23772d72611f3634d8a93d51c6",
+            "deployment_domain": "nonverba.test",
+            "key_id": "public-test-key-R",
+            "protocol_version": "2",
+            "purpose": "ACTION",
+            "role": "R"
+          },
+          "signature": "OmJaAVClFivYNVWXtIXQLzmypHvVHiheFzFgWJVl8iZuEMP7Uf6XZMhGC3JpTfB_fGotW5y-YarfYlzS2_M1hQ"
+        }
+      ],
+      "proposal": {
+        "action": {
+          "amount": {
+            "currency": "EUR",
+            "exponent": 2,
+            "minor_units": "1500"
+          },
+          "category": "travel",
+          "evidence_event_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+          "expense_id": "late-expense-b",
+          "type": "AUTHORIZE_EXPENSE"
+        },
+        "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+        "assignment_id": "test-assignment-1",
+        "deployment_domain": "nonverba.test",
+        "nonce": "late-expense-b",
+        "parent_certificate_ids": [
+          "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7"
+        ],
+        "policy_hash": "195f79982ce39e1ae7681f1aa5152614257f3413a5b657c76af0c350e4730831",
+        "protocol_version": "2",
+        "scope_id": "expense:late-expense-b",
+        "scope_version": "0"
+      }
+    },
+    {
+      "authorizations": [
+        {
+          "claims": {
+            "assignment_id": "test-assignment-1",
+            "content_hash": "91ec46f94c4a6f197559dfb7dc7e8cfeb29b54f2137e2e9d9328cb142294328f",
+            "deployment_domain": "nonverba.test",
+            "key_id": "public-test-key-R",
+            "protocol_version": "2",
+            "purpose": "ACTION",
+            "role": "R"
+          },
+          "signature": "GRaoglX_bRwyCoQR7yaR2cwKkwJ1x0W4PD5d6re5JN5O8mXzd1M8IjM9EhldclJlNIboPm6vpSSxjHpSBh3jag"
+        },
+        {
+          "claims": {
+            "assignment_id": "test-assignment-1",
+            "content_hash": "91ec46f94c4a6f197559dfb7dc7e8cfeb29b54f2137e2e9d9328cb142294328f",
+            "deployment_domain": "nonverba.test",
+            "key_id": "public-test-key-O",
+            "protocol_version": "2",
+            "purpose": "ACTION",
+            "role": "O"
+          },
+          "signature": "4EHvD983ETCDoxXFyDvB0vrHjqIwLsmezrMOUmKrmAdz6i0iYkh2qpDufNLSqvjYZOnAKorwHK8jbzwJ1Qu36w"
+        },
+        {
+          "claims": {
+            "assignment_id": "test-assignment-1",
+            "content_hash": "91ec46f94c4a6f197559dfb7dc7e8cfeb29b54f2137e2e9d9328cb142294328f",
+            "deployment_domain": "nonverba.test",
+            "key_id": "public-test-key-M",
+            "protocol_version": "2",
+            "purpose": "ACTION",
+            "role": "M"
+          },
+          "signature": "Yjmj-csolEfOGPhPTihcQlnE17JMP2GnT48CHcAsJ6IwakcCO0cpc6LEf-Mu2VlIaTEYUhIaPnxlMkDyeTXUfA"
+        }
+      ],
+      "proposal": {
+        "action": {
+          "commitment_id": "evidence-assistance",
+          "type": "ACTIVATE_PROTECTION_SERVICE"
+        },
+        "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+        "assignment_id": "test-assignment-1",
+        "deployment_domain": "nonverba.test",
+        "nonce": "late-context-activation",
+        "parent_certificate_ids": [
+          "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8"
+        ],
+        "policy_hash": "195f79982ce39e1ae7681f1aa5152614257f3413a5b657c76af0c350e4730831",
+        "protocol_version": "2",
+        "scope_id": "protection:evidence-assistance",
+        "scope_version": "1"
+      }
+    }
+  ],
+  "agreement": {
+    "agreement": {
+      "acceptance": [
+        {
+          "description": "Requester judges agreed deliverable against exact scope.",
+          "evaluation": "REQUESTER_JUDGMENT",
+          "id": "delivery",
+          "milestone_id": "work"
+        }
+      ],
+      "assignment_id": "test-assignment-1",
+      "assurance": {
+        "beneficiaries": [
+          "R",
+          "O"
+        ],
+        "challenge_path": "Preserve disputed assessment; seek independent lawful escalation.",
+        "claim_path": "Submit attributed assurance claim.",
+        "evidence_requirements": "Exact signed records supplied by the participants.",
+        "exclusions": [
+          "No debt enforcement, physical adjudication, or custody."
+        ],
+        "fee": {
+          "amount": {
+            "currency": "EUR",
+            "exponent": 2,
+            "minor_units": "500"
+          },
+          "destination": "mediator-test-service-account",
+          "due_conditions": "On all-party service activation.",
+          "fee_id": "assistance-fee",
+          "payer": "R",
+          "provider": "M",
+          "service_scope": "Separate nonfinancial record assistance."
+        },
+        "financial_compensation": false,
+        "id": "evidence-assistance",
+        "limits": "No compensation promise; no insurance or guarantee of performance.",
+        "prerequisites": [],
+        "provider": "M",
+        "response_commitment": "Only the explicit record-export assistance undertaking; no invented SLA.",
+        "services": [
+          "Preserve supplied synthetic records and assist their export."
+        ],
+        "status": "SERVICE",
+        "triggers": "Activated only by all-party scoped action."
+      },
+      "deployment_domain": "nonverba.test",
+      "legal": {
+        "artifacts": [
+          {
+            "id": "platform-terms",
+            "media_type": "text/plain",
+            "text": "No combination of parties gains authority over another party merely by agreeing with one another. Within the Assignment Protocol, an effect on a party's protected rights must be supported by that party's authorization or by a specific rule previously accepted by that party and applied with its required proof. Mediation proposals and unsupported assertions do not themselves change obligations. Amendments and settlements have only the scope authorized in the Assignment Record. This does not exclude mandatory legal rights or the authority of competent external bodies.\n\nAn authenticated contradiction is evidence of misconduct or uncertainty; it is not, by itself, authority to revoke a right previously established for another party.",
+            "version": "1"
+          }
+        ],
+        "consent_text": "I authorize this exact Agreement and its embedded terms and policy.",
+        "governing_law": null,
+        "jurisdiction": null,
+        "mandatory_rights_reserved": true
+      },
+      "mediation": {
+        "availability_commitment": "No guaranteed response time in this test.",
+        "escalation": "Unresolved factual disputes remain unresolved.",
+        "free": true,
+        "obligations": [
+          "Offer nonbinding discussion."
+        ],
+        "proposal_only": true
+      },
+      "parties": [
+        {
+          "identity_record": {
+            "id": "test-identity-R",
+            "media_type": "text/plain",
+            "text": "Public synthetic identity; not onboarding evidence.",
+            "version": "1"
+          },
+          "key": {
+            "key_id": "public-test-key-R",
+            "public_key_sec1_b64": "A_5TuOQXKatS3rRc7goOJ8p3HFkQ2ZDm39r4CL8rl_3b",
+            "role": "R"
+          },
+          "party_id": "test-party-R",
+          "role": "R"
+        },
+        {
+          "identity_record": {
+            "id": "test-identity-O",
+            "media_type": "text/plain",
+            "text": "Public synthetic identity; not onboarding evidence.",
+            "version": "1"
+          },
+          "key": {
+            "key_id": "public-test-key-O",
+            "public_key_sec1_b64": "A_KQEp7o3hrmVpabSMHjg-k81FfyRpHO2kfNTGeAxDKS",
+            "role": "O"
+          },
+          "party_id": "test-party-O",
+          "role": "O"
+        },
+        {
+          "identity_record": {
+            "id": "test-identity-M",
+            "media_type": "text/plain",
+            "text": "Public synthetic identity; not onboarding evidence.",
+            "version": "1"
+          },
+          "key": {
+            "key_id": "public-test-key-M",
+            "public_key_sec1_b64": "Apvs4qCOLNBMu5ulECpRhw9UseRQwv1Bfag-_hZwehkG",
+            "role": "M"
+          },
+          "party_id": "test-party-M",
+          "role": "M"
+        }
+      ],
+      "payments": {
+        "destination": "operator-test-account",
+        "due_conditions": "On authorized milestone entitlement.",
+        "payee": "O",
+        "payer": "R",
+        "preconditions": [],
+        "rail": "bank-transfer",
+        "reversal_treatment": "Reconcile only under scoped authorization; preserve disputed records."
+      },
+      "policy": {
+        "artifact_rules": [],
+        "bilateral_balance_releases": true,
+        "id": "nonverba-three-party-v2",
+        "mediator_has_task_fund_control": false,
+        "no_commission": true,
+        "payment_rule": "PAYEE_SIGNED_RECEIPT",
+        "time_rule": "REMINDERS_ONLY",
+        "version": "2"
+      },
+      "policy_hash": "195f79982ce39e1ae7681f1aa5152614257f3413a5b657c76af0c350e4730831",
+      "previous_agreement_hash": null,
+      "privacy": {
+        "disclosure_rules": "Share only scoped evidence with authorized recipients.",
+        "export_rights": "Each party can export independently.",
+        "purposes": [
+          "Verify this synthetic assignment."
+        ],
+        "recipients": [
+          "R",
+          "O",
+          "M"
+        ],
+        "retention": {
+          "id": "retention",
+          "media_type": "text/plain",
+          "text": "Participants retain their exports; no real personal data in fixtures.",
+          "version": "1"
+        }
+      },
+      "protocol_version": "2",
+      "quote": {
+        "authorization": {
+          "claims": {
+            "assignment_id": "test-request-1",
+            "content_hash": "f506dbaf4eb077127a1ba74393d8871e6b10b58335ffcaa7d4bbef62abcca591",
+            "deployment_domain": "nonverba.test",
+            "key_id": "public-test-key-O",
+            "protocol_version": "2",
+            "purpose": "QUOTE",
+            "role": "O"
+          },
+          "signature": "2KI4WSqUkbvlb3YVbY8YDT262NaZFb8SUF8g9nH8PoAsPIVxxZj-24VHZgayJ1HoVRRwg8207t0olaYVgYr0Zw"
+        },
+        "quote": {
+          "accepted_terms_hash": "720fca70d9fbae2995027df32d5fc10bb5a7dc378f9868bfbdc8f139c30b7d89",
+          "compensation": {
+            "currency": "EUR",
+            "exponent": 2,
+            "minor_units": "10000"
+          },
+          "deployment_domain": "nonverba.test",
+          "expenses": [
+            {
+              "cap": {
+                "currency": "EUR",
+                "exponent": 2,
+                "minor_units": "2000"
+              },
+              "category": "travel"
+            }
+          ],
+          "milestones": [
+            {
+              "compensation": {
+                "currency": "EUR",
+                "exponent": 2,
+                "minor_units": "10000"
+              },
+              "deliverable": "One specified artifact.",
+              "id": "work"
+            }
+          ],
+          "operator": {
+            "identity_record": {
+              "id": "test-identity-O",
+              "media_type": "text/plain",
+              "text": "Public synthetic identity; not onboarding evidence.",
+              "version": "1"
+            },
+            "key": {
+              "key_id": "public-test-key-O",
+              "public_key_sec1_b64": "A_KQEp7o3hrmVpabSMHjg-k81FfyRpHO2kfNTGeAxDKS",
+              "role": "O"
+            },
+            "party_id": "test-party-O",
+            "role": "O"
+          },
+          "protocol_version": "2",
+          "quote_id": "test-quote-1",
+          "request_hash": "1f1ff88b3a3024648096bef8af8d06916fc72a72a77b58aa7699094fed790e24",
+          "service_hash": "700aa2bf153f1439d00dc94b92b2b8378bde396beb79d3173dbead6250356719"
+        }
+      },
+      "remedies": {
+        "cancellation": "Notice alone creates no penalty or erasure.",
+        "escalation": "Independent lawful escalation remains available.",
+        "expenses": "Only separate authorized travel expenses within cap.",
+        "interruption": "Retain accrued claims.",
+        "partial_completion": "Resolve explicit scoped claims.",
+        "preserve_accrued_claims": true
+      },
+      "request_hash": "1f1ff88b3a3024648096bef8af8d06916fc72a72a77b58aa7699094fed790e24",
+      "request_id": "test-request-1",
+      "revision": "1",
+      "schema_version": "2",
+      "service": {
+        "deliverables": [
+          "One specified artifact."
+        ],
+        "description": "Produce the agreed digital test deliverable.",
+        "exclusions": [
+          "No claim to verified physical performance."
+        ],
+        "execution_resources": [
+          "Operator-controlled test client."
+        ],
+        "location": null,
+        "prerequisites": [],
+        "requester_inputs": [
+          "Provide the source material."
+        ],
+        "safety_stop_conditions": [
+          "Stop if unsafe."
+        ]
+      },
+      "timing": {
+        "completion_window": "Target next agreed day.",
+        "grace_extensions": "Extensions require agreed terms.",
+        "notices": "Signed receipt identifies bytes only.",
+        "review_window": "Reminder after one day.",
+        "start_window": "After local certificate readiness.",
+        "time_assumptions": "No independent time source; no automatic adverse effects."
+      }
+    },
+    "signatures": [
+      {
+        "claims": {
+          "assignment_id": "test-assignment-1",
+          "content_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "deployment_domain": "nonverba.test",
+          "key_id": "public-test-key-R",
+          "protocol_version": "2",
+          "purpose": "AGREEMENT",
+          "role": "R"
+        },
+        "signature": "2VMWNMD5y0v3bnfObj-H_GbEwo7alBRzEeJdSoFalm4-iVNCmX5ThQERZKpUUoQfjXIU31VNoIOOKtSUiSSxBg"
+      },
+      {
+        "claims": {
+          "assignment_id": "test-assignment-1",
+          "content_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "deployment_domain": "nonverba.test",
+          "key_id": "public-test-key-O",
+          "protocol_version": "2",
+          "purpose": "AGREEMENT",
+          "role": "O"
+        },
+        "signature": "D2A3U5MBJIAhGke0lh0Jpebh8EhU82NUJPELK9UaBsIAbAItBtALF9UF31GxL-k7O3U2tvh6MJgAx_G8vyii6A"
+      },
+      {
+        "claims": {
+          "assignment_id": "test-assignment-1",
+          "content_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "deployment_domain": "nonverba.test",
+          "key_id": "public-test-key-M",
+          "protocol_version": "2",
+          "purpose": "AGREEMENT",
+          "role": "M"
+        },
+        "signature": "tIYp1ViAWXf5FlamN71AkI6e-DTIYGbJmbqSqoZ1f8laB93SeGeNkKqwka4QVeLYXefv9D0y748z4By0LGb-lw"
+      }
+    ]
+  },
+  "attachments": [],
+  "deployment_domain": "nonverba.test",
+  "events": [
+    {
+      "authorization": {
+        "claims": {
+          "assignment_id": "test-assignment-1",
+          "content_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+          "deployment_domain": "nonverba.test",
+          "key_id": "public-test-key-O",
+          "protocol_version": "2",
+          "purpose": "EVENT",
+          "role": "O"
+        },
+        "signature": "mXfV42Tc3a7E7mS5MW4v0dZ2TNj_Y7Y5RQwEeWNmCiRWVgjfr3yMRTQDwV_J6yMNXqFp5i2IYC7qvPnOdhSqTA"
+      },
+      "envelope": {
+        "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+        "assignment_id": "test-assignment-1",
+        "author_role": "O",
+        "body": {
+          "type": "START_CLAIM"
+        },
+        "causal_references": [],
+        "claimed_creation_time": null,
+        "deployment_domain": "nonverba.test",
+        "key_epoch": "1",
+        "key_id": "public-test-key-O",
+        "nonce": "event-O-0",
+        "previous_event_hash": null,
+        "protocol_version": "2",
+        "sequence": "0"
+      }
+    },
+    {
+      "authorization": {
+        "claims": {
+          "assignment_id": "test-assignment-1",
+          "content_hash": "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8",
+          "deployment_domain": "nonverba.test",
+          "key_id": "public-test-key-O",
+          "protocol_version": "2",
+          "purpose": "EVENT",
+          "role": "O"
+        },
+        "signature": "j2ZPKE0itW-59BIDkTSJIph-a1S3uw0__BEsVZs7Cvoo42f3X90qoYLJhPvv1UoX4_AG1KQdwMsRLa2FfMsRDA"
+      },
+      "envelope": {
+        "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+        "assignment_id": "test-assignment-1",
+        "author_role": "O",
+        "body": {
+          "type": "START_CLAIM"
+        },
+        "causal_references": [
+          "b16469970dfdc05f571f94d1aed955d7cb4bdfecff4f5c46fdee8b43fc4db980",
+          "5beee2f099d6da360911b94354315c9d88c06e23772d72611f3634d8a93d51c6"
+        ],
+        "claimed_creation_time": null,
+        "deployment_domain": "nonverba.test",
+        "key_epoch": "1",
+        "key_id": "public-test-key-O",
+        "nonce": "event-O-1",
+        "previous_event_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+        "protocol_version": "2",
+        "sequence": "1"
+      }
+    }
+  ],
+  "protocol_version": "2",
+  "requests": [
+    {
+      "authorization": {
+        "claims": {
+          "assignment_id": "test-request-1",
+          "content_hash": "1f1ff88b3a3024648096bef8af8d06916fc72a72a77b58aa7699094fed790e24",
+          "deployment_domain": "nonverba.test",
+          "key_id": "public-test-key-R",
+          "protocol_version": "2",
+          "purpose": "REQUEST",
+          "role": "R"
+        },
+        "signature": "mfyWHu5HbxPyb5SmcCehiy7yJaF552-9J9eTFhu-_GBY5AxXc5iIFULbankjcvipxtmDyUWHqwG90_4UDAuMEw"
+      },
+      "request": {
+        "accepts_platform_terms": true,
+        "deployment_domain": "nonverba.test",
+        "protocol_version": "2",
+        "request_id": "test-request-1",
+        "requester": {
+          "identity_record": {
+            "id": "test-identity-R",
+            "media_type": "text/plain",
+            "text": "Public synthetic identity; not onboarding evidence.",
+            "version": "1"
+          },
+          "key": {
+            "key_id": "public-test-key-R",
+            "public_key_sec1_b64": "A_5TuOQXKatS3rRc7goOJ8p3HFkQ2ZDm39r4CL8rl_3b",
+            "role": "R"
+          },
+          "party_id": "test-party-R",
+          "role": "R"
+        },
+        "revision": "1",
+        "service": {
+          "deliverables": [
+            "One specified artifact."
+          ],
+          "description": "Produce the agreed digital test deliverable.",
+          "exclusions": [
+            "No claim to verified physical performance."
+          ],
+          "execution_resources": [
+            "Operator-controlled test client."
+          ],
+          "location": null,
+          "prerequisites": [],
+          "requester_inputs": [
+            "Provide the source material."
+          ],
+          "safety_stop_conditions": [
+            "Stop if unsafe."
+          ]
+        },
+        "terms": [
+          {
+            "id": "platform-terms",
+            "media_type": "text/plain",
+            "text": "No combination of parties gains authority over another party merely by agreeing with one another. Within the Assignment Protocol, an effect on a party's protected rights must be supported by that party's authorization or by a specific rule previously accepted by that party and applied with its required proof. Mediation proposals and unsupported assertions do not themselves change obligations. Amendments and settlements have only the scope authorized in the Assignment Record. This does not exclude mandatory legal rights or the authority of competent external bodies.\n\nAn authenticated contradiction is evidence of misconduct or uncertainty; it is not, by itself, authority to revoke a right previously established for another party.",
+            "version": "1"
+          }
+        ]
+      }
+    }
+  ]
+}

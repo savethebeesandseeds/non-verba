@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "type": "nonverba-camera-location-request",
+  "location_request": {
+    "version": 1,
+    "type": "nonverba-location-request",
+    "challenge": {
+      "version": 1,
+      "id": "8fd611d184ffcd01a9c445a11e6ca667be88fc96465c438bc0db5f29a24f154b",
+      "requester": "Quiet device acceptance",
+      "task": "Camera cancellation and fresh retry",
+      "nonce": "j9YR0YT_zQGpxEWhHmymZ76I_JZGXEOLwNtfKaJPFUs",
+      "issued_at": 1790674044,
+      "expires_at": 1790674944
+    },
+    "policy": {
+      "profile": "browser-or-native",
+      "required_provider": "any",
+      "duration_ms": 10000,
+      "min_samples": 3,
+      "max_accuracy_m": 100,
+      "max_fix_age_ms": 5000,
+      "max_delivery_delay_ms": 3000,
+      "max_speed_mps": 100
+    },
+    "context": {
+      "session_id": "8fd611d184ffcd01a9c445a11e6ca667be88fc96465c438bc0db5f29a24f154b",
+      "purpose": "camera"
+    }
+  }
+}

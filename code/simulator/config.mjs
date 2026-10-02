@@ -181,7 +181,7 @@ export function validateConfig(raw) {
 }
 
 /** Read the same JSON from a Node file URL or an HTTP-served browser page. */
-export async function loadConfig(url = new URL('../../web/union.config.json', import.meta.url)) {
+export async function loadConfig(url = new URL('../../web/simulator/union.config.json', import.meta.url)) {
   const location = url instanceof URL ? url : new URL(url, import.meta.url);
   let source;
   try {

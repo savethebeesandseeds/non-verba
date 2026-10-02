@@ -1,0 +1,14 @@
+* text=auto
+*.sh text eol=lf
+*.toml text eol=lf
+*.rs text eol=lf
+*.js text eol=lf
+*.png binary
+*.jpg binary
+*.wasm binary
+*.apk binary
+code/container/debian-packages.lock text eol=lf
+# Preserve exact fixture/data bytes, including existing CRLF line endings.
+code/**/fixtures/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.rnx -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+code/crates/nonverba-core/src/android_attestation/google-roots-2026.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

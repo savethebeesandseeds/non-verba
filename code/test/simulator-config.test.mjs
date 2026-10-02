@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { createMoney, loadConfig, maximumOfferMinor, validateConfig } from '../simulator/config.mjs';
 
-const fixture = JSON.parse(await readFile(new URL('../../web/union.config.json', import.meta.url), 'utf8'));
+const fixture = JSON.parse(await readFile(new URL('../../web/simulator/union.config.json', import.meta.url), 'utf8'));
 const copy = () => structuredClone(fixture);
 
 test('one JSON configuration loads unchanged as a detached, recursively frozen value', async () => {

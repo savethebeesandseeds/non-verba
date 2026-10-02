@@ -1,0 +1,433 @@
+{
+  "financial_projection": "UNIT_GRANTS_V2",
+  "recognized_legacy_proofs": [],
+  "unresolved_rights": [],
+  "evidence_integrity": [
+    {
+      "event_hash": "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2",
+      "event_type": "COMPLETION_CLAIM",
+      "signature_valid": true,
+      "body_valid": true,
+      "commitment_opening": null,
+      "commitment_status": "NOT_APPLICABLE",
+      "transcript_status": "ACCEPTED",
+      "manifest": {
+        "manifest_digest": "9959fd9c852bf05eaf2480f6b8866338751c6c1cf83683e0d2c4e3ec34a5100f",
+        "schema_valid": true,
+        "status": "INTEGRITY_VALID",
+        "artifacts": [
+          {
+            "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+            "declared_byte_length": "77",
+            "actual_byte_length": "77",
+            "availability": "SUPPLIED_VALID",
+            "digest_match": true,
+            "length_match": true,
+            "media_type": "text/plain",
+            "media_type_status": "DECLARED_UNVERIFIED"
+          }
+        ],
+        "diagnostics": []
+      }
+    }
+  ],
+  "agreement": {
+    "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+    "bound": true,
+    "valid_signers": [
+      "R",
+      "O",
+      "M"
+    ],
+    "diagnostics": []
+  },
+  "current_agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+  "ready_to_start": true,
+  "readiness_reasons": [],
+  "performance": "ACCEPTED",
+  "mediation": "NO_OPEN_CASE",
+  "assurance": "DISABLED",
+  "obligations": [
+    {
+      "id": "milestone:work",
+      "debtor": "R",
+      "creditor": "O",
+      "category": "COMPENSATION",
+      "amount": {
+        "minor_units": "10000",
+        "currency": "EUR",
+        "exponent": 2
+      },
+      "basis_agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+      "certificate_ids": [
+        "479972c77a9ab699bd292305276e8cee3790418b951a4579f7afac03365d8b14",
+        "4507c7dbb2fd78dc25b7c6c9c3bfdb586429f9e307bdd936b9faf29b8566adfa"
+      ],
+      "due_conditions": "On authorized milestone entitlement.",
+      "disputed_amount": "0",
+      "discharged_amount": "10000",
+      "released_amount": "0",
+      "overlap_amount": "0",
+      "credit_grants": [
+        {
+          "certificate_id": "4507c7dbb2fd78dc25b7c6c9c3bfdb586429f9e307bdd936b9faf29b8566adfa",
+          "allocations": [
+            {
+              "obligation_id": "milestone:work",
+              "basis_agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+              "start": "0",
+              "end": "10000"
+            }
+          ],
+          "revoked": []
+        }
+      ],
+      "release_grants": [],
+      "unresolved_balance": "0"
+    }
+  ],
+  "effects": [
+    {
+      "certificate_id": "479972c77a9ab699bd292305276e8cee3790418b951a4579f7afac03365d8b14",
+      "rule_id": "ACKNOWLEDGE_COMPLETION",
+      "authorizers": [
+        "R"
+      ],
+      "proof_references": [
+        "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2"
+      ],
+      "obligation_ids": [
+        "milestone:work"
+      ],
+      "explanation": "Requester acknowledgment applies the compensation previously agreed for this milestone; no waiver or physical-truth certification."
+    },
+    {
+      "certificate_id": "4507c7dbb2fd78dc25b7c6c9c3bfdb586429f9e307bdd936b9faf29b8566adfa",
+      "rule_id": "PAYMENT_RECEIPT",
+      "authorizers": [
+        "O"
+      ],
+      "proof_references": [
+        "479972c77a9ab699bd292305276e8cee3790418b951a4579f7afac03365d8b14"
+      ],
+      "obligation_ids": [
+        "milestone:work"
+      ],
+      "explanation": "Actual creditor grants discharge of exact signed debt units. Independent grants survive equivocation; their set union is counted once. Excess and bank finality remain separate."
+    }
+  ],
+  "payments": [
+    {
+      "certificate_id": "4507c7dbb2fd78dc25b7c6c9c3bfdb586429f9e307bdd936b9faf29b8566adfa",
+      "obligation_id": "milestone:work",
+      "amount": {
+        "minor_units": "10000",
+        "currency": "EUR",
+        "exponent": 2
+      },
+      "kind": "PAYEE_SIGNED_RECEIPT",
+      "discharged_amount": "10000",
+      "excess_amount": "0",
+      "reference": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+    },
+    {
+      "certificate_id": "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d",
+      "obligation_id": "milestone:work",
+      "amount": {
+        "minor_units": "10000",
+        "currency": "EUR",
+        "exponent": 2
+      },
+      "kind": "PAYER_STATEMENT",
+      "discharged_amount": "0",
+      "excess_amount": "0",
+      "reference": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+    }
+  ],
+  "diagnostics": [],
+  "action_status": {
+    "4507c7dbb2fd78dc25b7c6c9c3bfdb586429f9e307bdd936b9faf29b8566adfa": "APPLIED",
+    "479972c77a9ab699bd292305276e8cee3790418b951a4579f7afac03365d8b14": "APPLIED"
+  },
+  "transcript": {
+    "accepted": {
+      "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+          "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+          "author_role": "R",
+          "key_id": "development-R",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "synthetic-event-ed31ac8e913b45fe3040e88037b67c39",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "PAYER_STATEMENT",
+            "obligation_id": "milestone:work",
+            "amount": {
+              "minor_units": "10000",
+              "currency": "EUR",
+              "exponent": 2
+            },
+            "reference": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+            "content_hash": "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d",
+            "role": "R",
+            "key_id": "development-R",
+            "purpose": "EVENT"
+          },
+          "signature": "rPnxoomSWV9ClBoqsdXV2iBGDueelrdM-0JtadKlEORmJzQQBKTZ2Lu1cIuOpLUNRusMxjf1Rba-6BSTl3nU6w"
+        }
+      },
+      "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+          "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+          "author_role": "O",
+          "key_id": "development-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "synthetic-event-3a82c82d967a77777870bc8aa033af4c",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "77",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+            "content_hash": "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2",
+            "role": "O",
+            "key_id": "development-O",
+            "purpose": "EVENT"
+          },
+          "signature": "lMgK62GzGFvnv-XymXWGRunARvRfJ4bFWeSuum-H2CZ_eB_7A9jCA9A72RNLhvdqCoN4e9gG9V47kEGWXc6msQ"
+        }
+      }
+    },
+    "retained_events": {
+      "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+          "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+          "author_role": "R",
+          "key_id": "development-R",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "synthetic-event-ed31ac8e913b45fe3040e88037b67c39",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "PAYER_STATEMENT",
+            "obligation_id": "milestone:work",
+            "amount": {
+              "minor_units": "10000",
+              "currency": "EUR",
+              "exponent": 2
+            },
+            "reference": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+            "content_hash": "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d",
+            "role": "R",
+            "key_id": "development-R",
+            "purpose": "EVENT"
+          },
+          "signature": "rPnxoomSWV9ClBoqsdXV2iBGDueelrdM-0JtadKlEORmJzQQBKTZ2Lu1cIuOpLUNRusMxjf1Rba-6BSTl3nU6w"
+        }
+      },
+      "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+          "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+          "author_role": "O",
+          "key_id": "development-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "synthetic-event-3a82c82d967a77777870bc8aa033af4c",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "77",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+            "content_hash": "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2",
+            "role": "O",
+            "key_id": "development-O",
+            "purpose": "EVENT"
+          },
+          "signature": "lMgK62GzGFvnv-XymXWGRunARvRfJ4bFWeSuum-H2CZ_eB_7A9jCA9A72RNLhvdqCoN4e9gG9V47kEGWXc6msQ"
+        }
+      }
+    },
+    "proof_events": {
+      "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+          "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+          "author_role": "R",
+          "key_id": "development-R",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "synthetic-event-ed31ac8e913b45fe3040e88037b67c39",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "PAYER_STATEMENT",
+            "obligation_id": "milestone:work",
+            "amount": {
+              "minor_units": "10000",
+              "currency": "EUR",
+              "exponent": 2
+            },
+            "reference": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+            "content_hash": "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d",
+            "role": "R",
+            "key_id": "development-R",
+            "purpose": "EVENT"
+          },
+          "signature": "rPnxoomSWV9ClBoqsdXV2iBGDueelrdM-0JtadKlEORmJzQQBKTZ2Lu1cIuOpLUNRusMxjf1Rba-6BSTl3nU6w"
+        }
+      },
+      "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+          "agreement_hash": "22cd082b607bc5e80633869183c2d9795d94c5d6ac1460e90dbd46b0d5945f68",
+          "author_role": "O",
+          "key_id": "development-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "synthetic-event-3a82c82d967a77777870bc8aa033af4c",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "77",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "SYNTHETIC DEVELOPMENT ONLY; no real payment or physical performance is asserted."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "synthetic-assignment-9f9ee19a69c72c82360ca2683224be40",
+            "content_hash": "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2",
+            "role": "O",
+            "key_id": "development-O",
+            "purpose": "EVENT"
+          },
+          "signature": "lMgK62GzGFvnv-XymXWGRunARvRfJ4bFWeSuum-H2CZ_eB_7A9jCA9A72RNLhvdqCoN4e9gG9V47kEGWXc6msQ"
+        }
+      }
+    },
+    "pending": [],
+    "rejected": [],
+    "warnings": [],
+    "conflicts": [],
+    "event_status": {
+      "c1d824509444597bc44a5907ee81e8516f24a9f0d64eff4c323c60aa6b78318d": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": true,
+        "status": "ACCEPTED"
+      },
+      "c65ceb9e00c1f7fc1d897f3e3898e964c953f21f935052beba92328346409ab2": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": true,
+        "status": "ACCEPTED"
+      }
+    },
+    "rounds": [],
+    "delivery_acknowledgments": {},
+    "duplicate_count": 0,
+    "completeness_unknown": true
+  },
+  "unresolved_claims": [],
+  "history_completeness": "UNKNOWN: this report describes only the supplied local view; omitted records may exist",
+  "assumptions": [
+    "Role-key bindings supplied independently; excluded participant's key and verifier uncompromised",
+    "No hardware/distribution trust claim is supplied by this package",
+    "Payee receipts are attributed acknowledgments, not independently observed or irreversible bank settlement",
+    "Physical truth, solvency, timely delivery, hidden transcript branches and universal dispute resolution are not established"
+  ]
+}

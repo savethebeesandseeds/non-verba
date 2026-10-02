@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Publish only the homepage and its assets, never the whole web/ directory.
+// Publish only web/site's allowlisted homepage assets.
 import { lstat, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,7 +18,7 @@ const assets = [
 
 // Read every input before replacing an earlier generated export.
 const files = await Promise.all(assets.map(async (name) => [
-  name, await readFile(path.join(root, 'web', name)),
+  name, await readFile(path.join(root, 'web', 'site', name)),
 ]));
 files.push(['LICENSE.txt', await readFile(path.join(root, 'LICENSE'))]);
 files.push(['licenses/Primer-Octicons-MIT.txt',

@@ -1,0 +1,51 @@
+{
+  "deployment_domain": "nonverba.test",
+  "parties": [
+    {
+      "identity_record": {
+        "id": "test-identity-R",
+        "media_type": "text/plain",
+        "text": "Public synthetic identity; not onboarding evidence.",
+        "version": "1"
+      },
+      "key": {
+        "key_id": "public-test-key-R",
+        "public_key_sec1_b64": "A_5TuOQXKatS3rRc7goOJ8p3HFkQ2ZDm39r4CL8rl_3b",
+        "role": "R"
+      },
+      "party_id": "test-party-R",
+      "role": "R"
+    },
+    {
+      "identity_record": {
+        "id": "test-identity-O",
+        "media_type": "text/plain",
+        "text": "Public synthetic identity; not onboarding evidence.",
+        "version": "1"
+      },
+      "key": {
+        "key_id": "public-test-key-O",
+        "public_key_sec1_b64": "A_KQEp7o3hrmVpabSMHjg-k81FfyRpHO2kfNTGeAxDKS",
+        "role": "O"
+      },
+      "party_id": "test-party-O",
+      "role": "O"
+    },
+    {
+      "identity_record": {
+        "id": "test-identity-M",
+        "media_type": "text/plain",
+        "text": "Public synthetic identity; not onboarding evidence.",
+        "version": "1"
+      },
+      "key": {
+        "key_id": "public-test-key-M",
+        "public_key_sec1_b64": "Apvs4qCOLNBMu5ulECpRhw9UseRQwv1Bfag-_hZwehkG",
+        "role": "M"
+      },
+      "party_id": "test-party-M",
+      "role": "M"
+    }
+  ],
+  "protocol_version": "1"
+}

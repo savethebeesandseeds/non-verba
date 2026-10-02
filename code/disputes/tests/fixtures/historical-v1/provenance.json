@@ -1,0 +1,20 @@
+[
+  {
+    "file": "portable-export.json",
+    "sha256": "5f571b42d2cc59d828ac63da8681a5bd406e369c2097a261989c209079c3bb45",
+    "bytes": 76764,
+    "source_snapshot": "reviews/dispute-priors-v1-2026-09-29/real-local/20260929T092954Z-6f02f007"
+  },
+  {
+    "file": "independent-fixture-trust.json",
+    "sha256": "a8db3852e098a5d46df05c41c37c14b60ed840e6695590eb65f9b7caa96d2226",
+    "bytes": 1367,
+    "source_snapshot": "reviews/dispute-priors-v1-2026-09-29/real-local/20260929T092954Z-6f02f007"
+  },
+  {
+    "file": "analysis-specification.json",
+    "sha256": "32646f79fe567bb34f05e785d2f2d403f118f1b6b46d49a884fb94cc3207a3f2",
+    "bytes": 2252,
+    "source_snapshot": "reviews/dispute-priors-v1-2026-09-29/real-local/20260929T092954Z-6f02f007"
+  }
+]

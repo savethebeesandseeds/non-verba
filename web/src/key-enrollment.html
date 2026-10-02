@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Signing key enrollment</title>
+  <link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./location.css"><link rel="stylesheet" href="./key-enrollment.css">
+  <script type="module" src="./key-enrollment-ui.js"></script>
+<script type="module" src="./screen-awake.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="./index.html"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">KEY ENROLLMENT</span></a><nav class="location-links" aria-label="Evidence types"><a href="./index.html">Camera ↗</a><a href="./audio.html">Audio ↗</a><a href="./location.html">Location ↗</a></nav></header>
+  <main>
+    <div id="screen-awake" class="screen-awake" hidden><button id="screen-awake-toggle" type="button" class="secondary" aria-pressed="false" aria-describedby="screen-awake-note">Keep screen awake</button><div><p id="screen-awake-status" role="status" aria-live="polite">Off — normal screen timeout.</p><p id="screen-awake-note">For this app session only. Tap again to turn off; restarting the app resets it. Android lock settings stay unchanged.</p></div></div>
+    <div class="intro location-intro"><div><p class="eyebrow">KNOW THE SIGNING KEY</p><h1>Enroll a key.<br>Verify independently<span>.</span></h1><p class="lede">Ask an Android operator to create a challenged signing key. Check its hardware certificate chain on the requester’s device.</p></div><span class="pill" id="enrollment-runtime">STARTING LOCAL ENGINE</span></div>
+    <div class="notice" id="enrollment-notice" role="status" aria-live="polite" hidden></div>
+    <nav class="tabs" aria-label="Key enrollment workflow"><button data-enrollment-view="requester" aria-current="page">01 Requester</button><button data-enrollment-view="operator">02 Operator</button><button data-enrollment-view="verify">03 Verify key</button></nav>
+    <section id="enrollment-requester" class="enrollment-view">
+      <div class="two-column"><div class="panel roomy"><h2>Request a new key.</h2><p class="muted">Keep the original challenge. Send a copy to the operator and receive the enrollment within ten minutes.</p>
+        <label for="enrollment-purpose">Signing purpose</label><select id="enrollment-purpose"><option value="location">Location proofs</option><option value="media">Camera and audio</option></select>
+        <button id="enrollment-create" class="primary wide spaced" disabled>Create enrollment challenge →</button>
+        <p class="fineprint">The new key is a separate identity. Existing keys and previously signed evidence remain available.</p></div>
+      <div class="panel roomy"><h3>Share the challenge.</h3><label for="enrollment-created">Original requester challenge</label><textarea id="enrollment-created" rows="9" readonly spellcheck="false"></textarea><div class="button-row"><button id="enrollment-save-request" class="primary" disabled>Save original</button><button id="enrollment-use-request" class="secondary" disabled>Use here</button></div></div></div>
+    </section>
+    <section id="enrollment-operator" class="enrollment-view" hidden>
+      <div class="two-column"><div class="panel roomy"><h2>Create the challenged identity.</h2><p id="enrollment-native-note" class="muted">Key creation requires the Android app.</p>
+        <label for="enrollment-operator-request">Requester challenge</label><textarea id="enrollment-operator-request" rows="8" spellcheck="false"></textarea><label class="button secondary file-label" for="enrollment-request-file">Import challenge<input type="file" id="enrollment-request-file" accept="application/json,.json"></label>
+        <div class="button-row spaced"><button id="enrollment-begin" class="primary" disabled>Create separate key</button><button id="enrollment-cancel" class="secondary" disabled>Cancel</button></div>
+        <p id="enrollment-progress" role="status" aria-live="polite">No enrollment in progress.</p>
+        <button id="enrollment-export" class="secondary wide" disabled>Save enrollment response</button>
+        <p class="fineprint">Creation does not select the key for captures. A new challenge creates a separate identity; earlier keys and enrollment records stay preserved. Up to 32 enrolled identities are retained per purpose.</p></div>
+      <div class="panel roomy"><h3>Select a signing identity.</h3><p class="muted">Selection applies to future captures. Send the selected identity’s key ID to your requester through a trusted channel.</p>
+        <label for="enrollment-select-purpose">Purpose</label><select id="enrollment-select-purpose"><option value="location">Location proofs</option><option value="media">Camera and audio</option></select>
+        <p id="enrollment-selected" class="mono">No native key profiles available.</p>
+        <label for="enrollment-profile">Identity to use</label><select id="enrollment-profile"><option value="legacy">Existing capture identity</option><option value="attested">Challenged enrollment identity</option></select>
+        <label for="enrollment-key">Enrolled identity</label><select id="enrollment-key" aria-describedby="enrollment-profile-pin"></select>
+        <p id="enrollment-profile-pin" class="mono"></p><button id="enrollment-select" class="primary wide" disabled>Use this identity for future captures</button><button id="enrollment-export-existing" class="secondary wide spaced" disabled>Export saved enrollment</button>
+        <p class="fineprint">“Challenged” describes how this key was created. Only independent certificate verification establishes hardware enrollment.</p></div></div>
+    </section>
+    <section id="enrollment-verify" class="enrollment-view" hidden>
+      <div class="two-column"><div class="panel roomy"><h2>Check on the requester’s device.</h2><label for="enrollment-verify-request">Independently retained original challenge</label><textarea id="enrollment-verify-request" rows="5" spellcheck="false"></textarea><label class="button secondary file-label" for="enrollment-original-file">Import original<input id="enrollment-original-file" type="file" accept="application/json,.json"></label>
+        <label for="enrollment-response">Operator enrollment response</label><textarea id="enrollment-response" rows="6" spellcheck="false"></textarea><label class="button secondary file-label" for="enrollment-response-file">Receive response file<input id="enrollment-response-file" type="file" accept="application/json,.json"></label>
+        <label for="enrollment-arrival">Requester-observed arrival (Unix seconds)</label><input id="enrollment-arrival" type="number" min="0" step="1"><button id="enrollment-mark-arrival" class="text-button">Record arrival now</button>
+        <details class="spaced"><summary>Requester verification policy</summary><p class="fineprint">The initial policy pins this development APK’s signing certificate. Review the expected app signer, minimum app/OS versions and patch dates for your deployment. These settings belong to the requester, not the operator.</p><textarea id="enrollment-policy" rows="13" spellcheck="false"></textarea></details>
+        <label for="enrollment-trust">Trusted roots and current revocation snapshot</label><textarea id="enrollment-trust" rows="5" spellcheck="false" placeholder="Load independently obtained verifier trust settings"></textarea><label class="button secondary file-label" for="enrollment-trust-file">Import trust settings<input id="enrollment-trust-file" type="file" accept="application/json,.json"></label>
+        <button id="enrollment-verify-button" class="primary wide spaced" disabled>Verify enrollment</button></div>
+      <div class="panel roomy"><span class="tiny-label">INDEPENDENT VERIFICATION</span><h3 id="enrollment-verdict" class="spaced">No enrollment checked.</h3><p id="enrollment-verification-note" class="muted"></p><p id="enrollment-verified-pin" class="mono"></p><button id="enrollment-save-report" class="secondary wide" disabled>Save report and enrollment expectations</button><details class="spaced"><summary>Full verification record</summary><pre id="enrollment-report"></pre></details></div></div>
+    </section>
+    <div class="trust-note spaced"><h4>Key protection is one part of trust.</h4><p>Attestation describes the key and device state at key generation. It does not authenticate a later camera scene, microphone signal or GPS position. Future evidence must also verify under this exact enrolled key. Challenge reuse and acceptance remain the requester’s responsibility.</p></div>
+  </main><footer><span>non-verba / signing key enrollment</span><span>INDEPENDENT REQUESTER VERIFICATION · EXISTING IDENTITIES PRESERVED</span></footer>
+</body>
+</html>

@@ -1,5 +1,6 @@
 [workspace]
-members = ["crates/nonverba-cooperation"]
+members = ["crates/nonverba-core", "crates/nonverba-android", "crates/nonverba-cooperation"]
+exclude = ["requests", "disputes"]
 resolver = "2"
 
 [profile.release]

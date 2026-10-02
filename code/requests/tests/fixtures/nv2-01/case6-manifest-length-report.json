@@ -1,0 +1,228 @@
+{
+  "financial_projection": "UNIT_GRANTS_V2",
+  "recognized_legacy_proofs": [],
+  "unresolved_rights": [],
+  "evidence_integrity": [
+    {
+      "event_hash": "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286",
+      "event_type": "COMPLETION_CLAIM",
+      "signature_valid": true,
+      "body_valid": true,
+      "commitment_opening": null,
+      "commitment_status": "NOT_APPLICABLE",
+      "transcript_status": "ACCEPTED",
+      "manifest": {
+        "manifest_digest": "5a661483f92e2345cebe4d14a03998b7745cdeb812a753a2376bac5cd4faf596",
+        "schema_valid": true,
+        "status": "INTEGRITY_INVALID",
+        "artifacts": [
+          {
+            "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+            "declared_byte_length": "1",
+            "actual_byte_length": "77",
+            "availability": "SUPPLIED_VALID",
+            "digest_match": true,
+            "length_match": false,
+            "media_type": "text/plain",
+            "media_type_status": "DECLARED_UNVERIFIED"
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "MANIFEST_LENGTH_MISMATCH",
+            "subject": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+            "message": "Manifest declares 1 bytes; verified supplied content has 77 bytes."
+          }
+        ]
+      }
+    }
+  ],
+  "agreement": {
+    "agreement_hash": "11a03feee0b5f4388e7eb8fcf6a5231e1e3629eecc300692f0d9667525e43f02",
+    "bound": true,
+    "valid_signers": [
+      "R",
+      "O",
+      "M"
+    ],
+    "diagnostics": []
+  },
+  "current_agreement_hash": "11a03feee0b5f4388e7eb8fcf6a5231e1e3629eecc300692f0d9667525e43f02",
+  "ready_to_start": true,
+  "readiness_reasons": [],
+  "performance": "COMPLETION_CLAIMED",
+  "mediation": "NO_OPEN_CASE",
+  "assurance": "DISABLED",
+  "obligations": [],
+  "effects": [],
+  "payments": [],
+  "diagnostics": [
+    {
+      "code": "MANIFEST_LENGTH_MISMATCH",
+      "subject": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+      "message": "Manifest declares 1 bytes; verified supplied content has 77 bytes."
+    }
+  ],
+  "action_status": {},
+  "transcript": {
+    "accepted": {
+      "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "11a03feee0b5f4388e7eb8fcf6a5231e1e3629eecc300692f0d9667525e43f02",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "1",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "Synthetic bytes, no truthful-physical-performance assertion."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "7nbSlYdQG2vEpOCCXyvjMGP1caA3cnY5_U9PYN8RYZkJs0GebEspEBSL4-8NWRhPjypfsR39mqqRsjHPcQis9g"
+        }
+      }
+    },
+    "retained_events": {
+      "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "11a03feee0b5f4388e7eb8fcf6a5231e1e3629eecc300692f0d9667525e43f02",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "1",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "Synthetic bytes, no truthful-physical-performance assertion."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "7nbSlYdQG2vEpOCCXyvjMGP1caA3cnY5_U9PYN8RYZkJs0GebEspEBSL4-8NWRhPjypfsR39mqqRsjHPcQis9g"
+        }
+      }
+    },
+    "proof_events": {
+      "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "11a03feee0b5f4388e7eb8fcf6a5231e1e3629eecc300692f0d9667525e43f02",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "1",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "Synthetic bytes, no truthful-physical-performance assertion."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "7nbSlYdQG2vEpOCCXyvjMGP1caA3cnY5_U9PYN8RYZkJs0GebEspEBSL4-8NWRhPjypfsR39mqqRsjHPcQis9g"
+        }
+      }
+    },
+    "pending": [],
+    "rejected": [],
+    "warnings": [],
+    "conflicts": [],
+    "event_status": {
+      "b45bb098141808bb1083219a02288eb1f582016d46e5708b4a4007958dbcc286": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": true,
+        "status": "ACCEPTED"
+      }
+    },
+    "rounds": [],
+    "delivery_acknowledgments": {},
+    "duplicate_count": 0,
+    "completeness_unknown": true
+  },
+  "unresolved_claims": [],
+  "history_completeness": "UNKNOWN: this report describes only the supplied local view; omitted records may exist",
+  "assumptions": [
+    "Role-key bindings supplied independently; excluded participant's key and verifier uncompromised",
+    "No hardware/distribution trust claim is supplied by this package",
+    "Payee receipts are attributed acknowledgments, not independently observed or irreversible bank settlement",
+    "Physical truth, solvency, timely delivery, hidden transcript branches and universal dispute resolution are not established"
+  ]
+}

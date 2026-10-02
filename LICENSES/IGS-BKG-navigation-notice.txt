@@ -1,0 +1,39 @@
+IGS/BKG broadcast navigation test data
+
+File: code/crates/nonverba-core/src/location_proof/position/importer/igs-2026270-excerpt.rnx
+
+Provider: International GNSS Service (IGS), its contributing organizations and
+sponsors; distributed by the German Federal Agency for Cartography and Geodesy
+(BKG) IGS data center.
+
+Original archive:
+https://igs.bkg.bund.de/root_ftp/IGS/BRDC/2026/270/BRDC00IGS_R_20262700000_01D_MN.rnx.gz
+
+The retained excerpt contains the original 103 header lines, the first record
+for each GPS satellite and the first record for each other constellation.
+Selected characters and LF endings are unchanged. This is satellite broadcast
+navigation test data, not Android receiver measurements.
+
+SHA-256:
+  Original compressed archive:
+  f6e526808c833507142f2da6b458e0c467d02d7986c4dc8bf6019ebc98dc4e15
+  Complete uncompressed source:
+  bb97b96492ec3639de90dedc57d38b3439805aaa7098d0615bcf591a0762e89c
+  Retained excerpt:
+  626044960321d5730074f257283b208a8ce8248f138d8084cf32d87d569344e8
+
+IGS Data and Product Disclaimer and Terms of Use, 5 August 2020:
+https://igs.org/wp-content/uploads/2020/09/IGS-Data-and-Product-Disclaimer-and-Terms-of-Use-200805.pdf
+
+IGS makes its data available for scientific, educational and commercial use.
+Users must appropriately attribute providers, sponsors, IGS and contributing
+organizations. The policy disclaims guarantees of quality, reliability and
+fitness; the data should not be used for life-critical functions. Consult the
+linked policy for its complete terms. Non-verba does not claim ownership of this
+data or relicense it under AGPL.
+
+Recommended IGS citation:
+Johnston, G., Riddell, A., Hausler, G. (2017). The International GNSS Service.
+In Teunissen, P. J. G. and Montenbruck, O. (eds.), Springer Handbook of Global
+Navigation Satellite Systems, pp. 967-982.
+https://doi.org/10.1007/978-3-319-42928-1

@@ -1,0 +1,14 @@
+cuda-cccl-13-1=13.1.115-1
+cuda-crt-13-1=13.1.115-1
+cuda-cudart-13-1=13.1.80-1
+cuda-cudart-dev-13-1=13.1.80-1
+cuda-culibos-dev-13-1=13.1.115-1
+cuda-driver-dev-13-1=13.1.80-1
+cuda-nvcc-13-1=13.1.115-1
+cuda-toolkit-13-1-config-common=13.1.80-1
+cuda-toolkit-13-config-common=13.1.80-1
+cuda-toolkit-config-common=13.1.80-1
+libcublas-13-1=13.2.2.2-1
+libcublas-dev-13-1=13.2.2.2-1
+libnvptxcompiler-13-1=13.1.115-1
+libnvvm-13-1=13.1.115-1

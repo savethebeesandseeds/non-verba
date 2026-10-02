@@ -2,7 +2,7 @@
 /**
  * Host boundary only. Rust/WASM owns validation, voting and monetary arithmetic.
  * A Rust plan is provisional: all requested verification callbacks must succeed
- * before any public API below returns its result. See docs/COOPERATION_PROTOCOL.md.
+ * before any public API below returns its result. See docs/cooperation/COOPERATION_PROTOCOL.md.
  */
 import init, { cooperation_plan } from '../pkg/nonverba_cooperation.js';
 

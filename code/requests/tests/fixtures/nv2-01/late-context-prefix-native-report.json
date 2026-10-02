@@ -1,0 +1,277 @@
+{
+  "financial_projection": "UNIT_GRANTS_V2",
+  "recognized_legacy_proofs": [],
+  "unresolved_rights": [],
+  "evidence_integrity": [],
+  "agreement": {
+    "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+    "bound": true,
+    "valid_signers": [
+      "R",
+      "O",
+      "M"
+    ],
+    "diagnostics": []
+  },
+  "current_agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+  "ready_to_start": true,
+  "readiness_reasons": [],
+  "performance": "START_CLAIMED",
+  "mediation": "NO_OPEN_CASE",
+  "assurance": "SERVICE_UNDERTAKING_ACTIVE",
+  "obligations": [
+    {
+      "id": "protection:assistance-fee",
+      "debtor": "R",
+      "creditor": "M",
+      "category": "PROTECTION_FEE",
+      "amount": {
+        "minor_units": "500",
+        "currency": "EUR",
+        "exponent": 2
+      },
+      "basis_agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+      "certificate_ids": [
+        "91ec46f94c4a6f197559dfb7dc7e8cfeb29b54f2137e2e9d9328cb142294328f"
+      ],
+      "due_conditions": "On all-party service activation.",
+      "disputed_amount": "0",
+      "discharged_amount": "0",
+      "released_amount": "0",
+      "overlap_amount": "0",
+      "credit_grants": [],
+      "release_grants": [],
+      "unresolved_balance": "500"
+    }
+  ],
+  "effects": [
+    {
+      "certificate_id": "91ec46f94c4a6f197559dfb7dc7e8cfeb29b54f2137e2e9d9328cb142294328f",
+      "rule_id": "ACTIVATE_PROTECTION_SERVICE",
+      "authorizers": [
+        "R",
+        "O",
+        "M"
+      ],
+      "proof_references": [],
+      "obligation_ids": [
+        "protection:assistance-fee"
+      ],
+      "explanation": "All parties activated the explicit nonfinancial service undertaking. Any protection fee is separate from Operator compensation; performance and solvency are not certified."
+    }
+  ],
+  "payments": [],
+  "diagnostics": [],
+  "action_status": {
+    "91ec46f94c4a6f197559dfb7dc7e8cfeb29b54f2137e2e9d9328cb142294328f": "APPLIED"
+  },
+  "transcript": {
+    "accepted": {
+      "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "mXfV42Tc3a7E7mS5MW4v0dZ2TNj_Y7Y5RQwEeWNmCiRWVgjfr3yMRTQDwV_J6yMNXqFp5i2IYC7qvPnOdhSqTA"
+        }
+      }
+    },
+    "retained_events": {
+      "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "1",
+          "previous_event_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+          "nonce": "event-O-1",
+          "causal_references": [
+            "b16469970dfdc05f571f94d1aed955d7cb4bdfecff4f5c46fdee8b43fc4db980",
+            "5beee2f099d6da360911b94354315c9d88c06e23772d72611f3634d8a93d51c6"
+          ],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "j2ZPKE0itW-59BIDkTSJIph-a1S3uw0__BEsVZs7Cvoo42f3X90qoYLJhPvv1UoX4_AG1KQdwMsRLa2FfMsRDA"
+        }
+      },
+      "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "mXfV42Tc3a7E7mS5MW4v0dZ2TNj_Y7Y5RQwEeWNmCiRWVgjfr3yMRTQDwV_J6yMNXqFp5i2IYC7qvPnOdhSqTA"
+        }
+      }
+    },
+    "proof_events": {
+      "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "1",
+          "previous_event_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+          "nonce": "event-O-1",
+          "causal_references": [
+            "b16469970dfdc05f571f94d1aed955d7cb4bdfecff4f5c46fdee8b43fc4db980",
+            "5beee2f099d6da360911b94354315c9d88c06e23772d72611f3634d8a93d51c6"
+          ],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "j2ZPKE0itW-59BIDkTSJIph-a1S3uw0__BEsVZs7Cvoo42f3X90qoYLJhPvv1UoX4_AG1KQdwMsRLa2FfMsRDA"
+        }
+      },
+      "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "f9aabe4a89691a3dd248261668171a365dcd5d2def90d04a12c490a4ba66cec7",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "mXfV42Tc3a7E7mS5MW4v0dZ2TNj_Y7Y5RQwEeWNmCiRWVgjfr3yMRTQDwV_J6yMNXqFp5i2IYC7qvPnOdhSqTA"
+        }
+      }
+    },
+    "pending": [
+      {
+        "event_hash": "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8",
+        "code": "MISSING_EVENT_DEPENDENCY",
+        "message": "Required records are missing, rejected, conflicted, or causally unresolved.",
+        "missing_references": [
+          "5beee2f099d6da360911b94354315c9d88c06e23772d72611f3634d8a93d51c6",
+          "b16469970dfdc05f571f94d1aed955d7cb4bdfecff4f5c46fdee8b43fc4db980"
+        ]
+      }
+    ],
+    "rejected": [],
+    "warnings": [],
+    "conflicts": [],
+    "event_status": {
+      "31434639f7a13918e215b168dde81ea3c6d3785f96416f391547f5ee5da712e8": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": false,
+        "status": "PENDING"
+      },
+      "56e314db22e5c1f74613d0b256487f91b02c72d6c1fbe70cc5e12f6dfec8abf7": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": true,
+        "status": "ACCEPTED"
+      }
+    },
+    "rounds": [],
+    "delivery_acknowledgments": {},
+    "duplicate_count": 0,
+    "completeness_unknown": true
+  },
+  "unresolved_claims": [],
+  "history_completeness": "UNKNOWN: this report describes only the supplied local view; omitted records may exist",
+  "assumptions": [
+    "Role-key bindings supplied independently; excluded participant's key and verifier uncompromised",
+    "No hardware/distribution trust claim is supplied by this package",
+    "Payee receipts are attributed acknowledgments, not independently observed or irreversible bank settlement",
+    "Physical truth, solvency, timely delivery, hidden transcript branches and universal dispute resolution are not established"
+  ]
+}

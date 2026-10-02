@@ -8,12 +8,12 @@ on:
       - LICENSE
       - LICENSES/Primer-Octicons-MIT.txt
       - code/tools/export-homepage.mjs
-      - web/index.html
-      - web/index.css
-      - web/index.js
-      - web/branding/sprout.svg
-      - web/branding/waajacu-favicon.png
-      - web/branding/individual/01-sprout.png
+      - web/site/index.html
+      - web/site/index.css
+      - web/site/index.js
+      - web/site/branding/sprout.svg
+      - web/site/branding/waajacu-favicon.png
+      - web/site/branding/individual/01-sprout.png
   workflow_dispatch:
 
 permissions:

@@ -6,11 +6,24 @@ import { createRequire } from 'node:module';
 import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { createSimulatorServer } from '../tools/serve-simulator.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.NONVERBA_PLAYWRIGHT_PATH || 'playwright');
 const artifacts = resolve(dirname(fileURLToPath(import.meta.url)), '../artifacts/qa');
+const previewScript = fileURLToPath(new URL('../tools/serve-simulator.mjs', import.meta.url));
+for (const [environment, expectedError] of [
+  [{ NONVERBA_BIND: '192.0.2.1' }, 'NONVERBA_BIND must be'],
+  [{ NONVERBA_BIND: '0.0.0.0', NONVERBA_CONTAINER: '0' }, 'allowed only inside'],
+]) {
+  const rejected = spawnSync(process.execPath, [previewScript], {
+    env: { ...process.env, NONVERBA_UNION_PORT: '0', ...environment },
+    encoding: 'utf8', timeout: 5_000,
+  });
+  assert.notEqual(rejected.status, 0);
+  assert.match(rejected.stderr, new RegExp(expectedError));
+}
 const server = createSimulatorServer();
 let browser;
 try {
@@ -19,18 +32,18 @@ try {
     server.listen(0, '127.0.0.1', accept);
   });
   const base = `http://127.0.0.1:${server.address().port}`;
-  const production = await fetch(`${base}/web/union.html`);
+  const production = await fetch(`${base}/web/simulator/union.html`);
   assert.equal(production.status, 200);
   assert.equal(production.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(production.headers.get('cache-control'), 'no-store');
   const productionHtml = await production.text();
   assert.ok(!productionHtml.includes("'unsafe-inline'"));
   assert.ok(productionHtml.includes("style-src-attr 'none'"));
-  const configResponse = await fetch(`${base}/web/union.config.json`);
+  const configResponse = await fetch(`${base}/web/simulator/union.config.json`);
   assert.equal(configResponse.status, 200);
   assert.ok(configResponse.headers.get('content-type').startsWith('application/json'));
   const defaultConfig = await configResponse.json();
-  const review = await fetch(`${base}/web/union-review.html`);
+  const review = await fetch(`${base}/web/simulator/union-review.html`);
   const reviewHtml = await review.text();
   assert.equal(review.status, 200);
   assert.equal(review.headers.get('x-robots-tag'), 'noindex');
@@ -38,11 +51,11 @@ try {
   assert.ok(reviewHtml.includes("script-src 'self' 'wasm-unsafe-eval'"));
   assert.ok(reviewHtml.includes("style-src-attr 'none'"));
   assert.equal((await fetch(`${base}/code/Cargo.lock`)).status, 404);
-  assert.equal((await fetch(`${base}/web/union.html`, { method: 'POST' })).status, 405);
-  const head = await fetch(`${base}/web/union.html`, { method: 'HEAD' });
+  assert.equal((await fetch(`${base}/web/simulator/union.html`, { method: 'POST' })).status, 405);
+  const head = await fetch(`${base}/web/simulator/union.html`, { method: 'HEAD' });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), '');
-  assert.equal((await fetch(base, { redirect: 'manual' })).headers.get('location'), '/web/index.html');
+  assert.equal((await fetch(base, { redirect: 'manual' })).headers.get('location'), '/web/site/index.html');
 
   let browserChannel;
   if (process.env.NONVERBA_BROWSER_EXECUTABLE) {
@@ -83,7 +96,7 @@ try {
     await page.locator('#day-offset').fill(String(value));
     await page.locator('#day-offset').dispatchEvent('input');
   };
-  await page.goto(`${base}/web/union.html`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}/web/simulator/union.html`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.getElementById('runtime').textContent === 'Local engine ready');
   assert.equal((await state()).terms.minimumPriceMinor, 18_750);
   assert.equal(await page.locator('#votes-body tr').count(), 3);
@@ -166,7 +179,7 @@ try {
   // Configure from visible controls, with no source-file edits. A draft must
   // never mutate the active records, even if validation or an import fails.
   const editor = await context.newPage();
-  await editor.goto(`${base}/web/union.html`);
+  await editor.goto(`${base}/web/simulator/union.html`);
   await editor.waitForFunction(() => document.getElementById('runtime').textContent === 'Local engine ready');
   const editorState = async () => JSON.parse(await editor.locator('#audit-json').textContent());
   const setupField = async path => {
@@ -296,10 +309,10 @@ try {
     configured.limits.demandMinutes = 500;
     configured.limits.decayDays = 90;
     const currencyPage = await context.newPage();
-    await currencyPage.route('**/web/union.config.json', route => route.fulfill({
+    await currencyPage.route('**/web/simulator/union.config.json', route => route.fulfill({
       status: 200, contentType: 'application/json', body: JSON.stringify(configured),
     }));
-    await currencyPage.goto(`${base}/web/union.html`);
+    await currencyPage.goto(`${base}/web/simulator/union.html`);
     await currencyPage.waitForFunction(() => document.getElementById('runtime').textContent === 'Local engine ready');
     const current = async () => JSON.parse(await currencyPage.locator('#audit-json').textContent()).current;
     const change = async (selector, value) => {
@@ -360,8 +373,8 @@ try {
     { status: 200, contentType: 'application/json', body: JSON.stringify({ ...defaultConfig, currency: 'ZZZ' }) },
   ]) {
     const invalid = await context.newPage();
-    await invalid.route('**/web/union.config.json', route => route.fulfill(response));
-    await invalid.goto(`${base}/web/union.html`);
+    await invalid.route('**/web/simulator/union.config.json', route => route.fulfill(response));
+    await invalid.goto(`${base}/web/simulator/union.html`);
     await invalid.waitForFunction(() => document.getElementById('runtime').textContent === 'Local engine unavailable');
     assert.ok(await invalid.locator('#complete-task').isDisabled(), 'Invalid configuration must not activate defaults');
     assert.equal(await invalid.locator('#collective-price').textContent(), '—');
@@ -370,7 +383,7 @@ try {
 
   const failed = await context.newPage();
   await failed.route('**/*.wasm', route => route.abort());
-  await failed.goto(`${base}/web/union.html`);
+  await failed.goto(`${base}/web/simulator/union.html`);
   await failed.waitForFunction(() => document.getElementById('runtime').textContent === 'Local engine unavailable');
   assert.ok(await failed.locator('#complete-task').isDisabled(), 'No JS pricing fallback may run when WASM fails');
   await context.close();

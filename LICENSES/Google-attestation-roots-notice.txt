@@ -1,0 +1,17 @@
+Google public Android attestation trust anchors
+
+File: code/crates/nonverba-core/src/android_attestation/google-roots-2026.json
+
+The certificates were retrieved on 27 September 2026 from Google's official
+Android attestation root endpoint:
+https://android.googleapis.com/attestation/root
+
+Android documentation:
+https://developer.android.com/privacy-and-security/security-key-attestation
+
+These are external public verification certificates retained for reproducible
+trust-anchor tests. They contain no device private key and are not project-owned
+AGPL source. Their inclusion does not establish Google endorsement, device sensor
+authenticity, current revocation status or that the running application matches
+reviewed source. Trust-anchor updates require independent review; caller-supplied
+roots cannot silently replace the compiled production anchors.

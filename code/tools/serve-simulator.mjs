@@ -8,17 +8,17 @@ import { fileURLToPath } from 'node:url';
 const scriptPath = fileURLToPath(import.meta.url);
 const root = resolve(dirname(scriptPath), '../..');
 const assets = new Map([
-  ['/web/index.html', ['web/index.html', 'text/html; charset=utf-8']],
-  ['/web/index.css', ['web/index.css', 'text/css; charset=utf-8']],
-  ['/web/index.js', ['web/index.js', 'text/javascript; charset=utf-8']],
-  ['/web/branding/sprout.svg', ['web/branding/sprout.svg', 'image/svg+xml']],
-  ['/web/branding/waajacu-favicon.png', ['web/branding/waajacu-favicon.png', 'image/png']],
-  ['/web/branding/individual/01-sprout.png', ['web/branding/individual/01-sprout.png', 'image/png']],
-  ['/web/union.html', ['web/union.html', 'text/html; charset=utf-8']],
-  ['/web/union.css', ['web/union.css', 'text/css; charset=utf-8']],
-  ['/web/union.mjs', ['web/union.mjs', 'text/javascript; charset=utf-8']],
-  ['/web/setup.mjs', ['web/setup.mjs', 'text/javascript; charset=utf-8']],
-  ['/web/union.config.json', ['web/union.config.json', 'application/json; charset=utf-8']],
+  ['/web/site/index.html', ['web/site/index.html', 'text/html; charset=utf-8']],
+  ['/web/site/index.css', ['web/site/index.css', 'text/css; charset=utf-8']],
+  ['/web/site/index.js', ['web/site/index.js', 'text/javascript; charset=utf-8']],
+  ['/web/site/branding/sprout.svg', ['web/site/branding/sprout.svg', 'image/svg+xml']],
+  ['/web/site/branding/waajacu-favicon.png', ['web/site/branding/waajacu-favicon.png', 'image/png']],
+  ['/web/site/branding/individual/01-sprout.png', ['web/site/branding/individual/01-sprout.png', 'image/png']],
+  ['/web/simulator/union.html', ['web/simulator/union.html', 'text/html; charset=utf-8']],
+  ['/web/simulator/union.css', ['web/simulator/union.css', 'text/css; charset=utf-8']],
+  ['/web/simulator/union.mjs', ['web/simulator/union.mjs', 'text/javascript; charset=utf-8']],
+  ['/web/simulator/setup.mjs', ['web/simulator/setup.mjs', 'text/javascript; charset=utf-8']],
+  ['/web/simulator/union.config.json', ['web/simulator/union.config.json', 'application/json; charset=utf-8']],
   ['/code/simulator/config.mjs', ['code/simulator/config.mjs', 'text/javascript; charset=utf-8']],
   ['/code/simulator/model.mjs', ['code/simulator/model.mjs', 'text/javascript; charset=utf-8']],
   ['/code/protocol/cooperation.mjs', ['code/protocol/cooperation.mjs', 'text/javascript; charset=utf-8']],
@@ -26,8 +26,8 @@ const assets = new Map([
   ['/code/pkg/nonverba_cooperation_bg.wasm', ['code/pkg/nonverba_cooperation_bg.wasm', 'application/wasm']],
 ]);
 const reviewPages = new Map([
-  ['/web/index-review.html', '/web/index.html'],
-  ['/web/union-review.html', '/web/union.html'],
+  ['/web/site/index-review.html', '/web/site/index.html'],
+  ['/web/simulator/union-review.html', '/web/simulator/union.html'],
 ]);
 
 function localReviewHtml(html) {
@@ -86,7 +86,7 @@ export function createSimulatorServer() {
     // Do not decode or resolve user paths. A query does not change the asset.
     const path = (request.url || '').split('?', 1)[0];
     if (path === '/') {
-      response.setHeader('Location', '/web/index.html');
+      response.setHeader('Location', '/web/site/index.html');
       send(request, response, 302, '');
       return;
     }
@@ -119,13 +119,21 @@ if (process.argv[1] && resolve(process.argv[1]) === scriptPath) {
   if (!/^\d+$/.test(configuredPort) || Number(configuredPort) > 65_535) {
     throw new Error('NONVERBA_UNION_PORT must be an integer from 0 to 65535');
   }
+  const configuredHost = process.env.NONVERBA_BIND ?? '127.0.0.1';
+  if (!['127.0.0.1', '0.0.0.0'].includes(configuredHost)) {
+    throw new Error('NONVERBA_BIND must be 127.0.0.1 or 0.0.0.0');
+  }
+  if (configuredHost === '0.0.0.0'
+      && (process.platform !== 'linux' || process.env.NONVERBA_CONTAINER !== '1')) {
+    throw new Error('NONVERBA_BIND=0.0.0.0 is allowed only inside the managed Linux container');
+  }
   const server = createSimulatorServer();
   await new Promise((accept, reject) => {
     server.once('error', reject);
-    server.listen(Number(configuredPort), '127.0.0.1', accept);
+    server.listen(Number(configuredPort), configuredHost, accept);
   });
-  console.log(`Homepage: http://127.0.0.1:${server.address().port}/web/index.html`);
-  console.log(`Union simulator: http://127.0.0.1:${server.address().port}/web/union.html`);
+  console.log(`Homepage: http://127.0.0.1:${server.address().port}/web/site/index.html`);
+  console.log(`Union simulator: http://127.0.0.1:${server.address().port}/web/simulator/union.html`);
   const stop = () => server.close();
   process.once('SIGINT', stop);
   process.once('SIGTERM', stop);

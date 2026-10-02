@@ -1,0 +1,11 @@
+# Dependency-image context only. Never send project sources, evidence or vaults.
+**
+!setup.sh
+!dev.sh
+!container/
+!container/Dockerfile
+!container/env.sh
+!container/debian-packages.lock
+!container/cuda-packages.lock
+!tools/
+!tools/check-gpu.cpp

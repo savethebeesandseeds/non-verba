@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["issues", "questions", "prior_comparisons", "alternatives", "unresolved_reasons"],
+  "properties": {
+    "issues": {"type":"array","maxItems":16,"items":{"type":"object","additionalProperties":false,"required":["id","description","evidence_refs","requester_argument","operator_argument","uncertainties"],"properties":{"id":{"type":"string","minLength":1,"maxLength":64},"description":{"type":"string","minLength":1,"maxLength":2000},"evidence_refs":{"type":"array","maxItems":32,"items":{"type":"string","maxLength":128}},"requester_argument":{"type":"string","minLength":1,"maxLength":2000},"operator_argument":{"type":"string","minLength":1,"maxLength":2000},"uncertainties":{"type":"array","maxItems":8,"items":{"type":"string","minLength":1,"maxLength":1000}}}}},
+    "questions": {"type":"array","maxItems":16,"items":{"type":"object","additionalProperties":false,"required":["addressee","purpose","text","evidence_refs"],"properties":{"addressee":{"type":"string","enum":["R","O","BOTH"]},"purpose":{"type":"string","minLength":1,"maxLength":512},"text":{"type":"string","minLength":1,"maxLength":1024},"evidence_refs":{"type":"array","maxItems":32,"items":{"type":"string","maxLength":128}}}}},
+    "prior_comparisons": {"type":"array","maxItems":5,"items":{"type":"object","additionalProperties":false,"required":["dimension_id","requester_emphasis","operator_emphasis","unresolved_tradeoff","evidence_refs"],"properties":{"dimension_id":{"type":"string","enum":["result","effort","reliance","responsibility","remedy"]},"requester_emphasis":{"type":"string","minLength":1,"maxLength":1000},"operator_emphasis":{"type":"string","minLength":1,"maxLength":1000},"unresolved_tradeoff":{"type":"string","minLength":1,"maxLength":1024},"evidence_refs":{"type":"array","maxItems":32,"items":{"type":"string","maxLength":128}}}}},
+    "alternatives": {"type":"array","maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["kind","source_offer_ref"],"properties":{"kind":{"type":"string","enum":["CLARIFICATION","VOLUNTARY_REPAIR","PARTY_OFFER"]},"source_offer_ref":{"type":["string","null"],"maxLength":128}}}},
+    "unresolved_reasons": {"type":"array","minItems":1,"maxItems":16,"items":{"type":"string","minLength":1,"maxLength":1024}}
+  }
+}

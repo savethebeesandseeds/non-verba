@@ -1,0 +1,170 @@
+[
+  {
+    "file": "late-context-extension.json",
+    "sha256": "d2cc66b56f49ece701cb09c385a9be7bac3cb0f9aa46f79ebe1aea4f82be5cfc",
+    "bytes": 23065,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "late-context-extension-native-report.json",
+    "sha256": "25adc59ce4802d1dd81d9e1529955e59914eb4c025be22e19dfe938db529a48d",
+    "bytes": 13415,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "late-context-prefix.json",
+    "sha256": "8253f62187a62021a28e121ad95c27da44377eb90bb82df0edb1b32421d40ccc",
+    "bytes": 18925,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "late-context-prefix-native-report.json",
+    "sha256": "a38cc6b82bf1a3c18da66ce97775b274c8d1718218054a357c79af9a89af3c62",
+    "bytes": 10282,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "partial-authorization-prefix.json",
+    "sha256": "180854763fd302a178c7c5f400cad1925d3944267ca9b950fde815847309f6f3",
+    "bytes": 22063,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "partial-authorization-prefix-native-report.json",
+    "sha256": "2d3e5386166547ebf683ae7b1c5be3cb8441667f92d5042ddff845a2c7ffb8a7",
+    "bytes": 10836,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case0-paid-baseline-bundle.json",
+    "sha256": "65a732a6f07f8e7d3a521020feb9c987fe32b3e0225c09bc8b348a2f76776f43",
+    "bytes": 17936,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case0-paid-baseline-report.json",
+    "sha256": "a390456e913a6cd11d3f208d88d460ac8b7add78c0e89702e1a4611c32c5bf5b",
+    "bytes": 10713,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case0-paid-baseline-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case1-mediator-slot-poison-bundle.json",
+    "sha256": "195e66d21744bc1772647f64c4242dc8b0620c8c9a65d5623d1ddeeb3957a765",
+    "bytes": 19782,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case1-mediator-slot-poison-report.json",
+    "sha256": "8630025e270831ce24bea51e4160ecf9bed59872e7a8b69e7a9cf97375cae3b1",
+    "bytes": 11029,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case1-mediator-slot-poison-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case2-payee-equivocation-bundle.json",
+    "sha256": "0ce552d040a4ad74c3bd1df2ec8fdf58b902adc608aaa2c4bebf0d64f7a589e6",
+    "bytes": 19769,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case2-payee-equivocation-report.json",
+    "sha256": "222d8cbf2cf32828604f4faef07ea5c824e290cea091f93630ad781a756374db",
+    "bytes": 13178,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case2-payee-equivocation-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case3-unordered-overpayment-bundle.json",
+    "sha256": "fd33c56ca6f6951571dc2349832e8d3311e5fa060fe3e201e331921179b89474",
+    "bytes": 19787,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case3-unordered-overpayment-report.json",
+    "sha256": "3a59135a79ebd8a8ff080e9cb8b2f3c132d70290fff59e15d1a8c6941dcb6f0c",
+    "bytes": 12518,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case3-unordered-overpayment-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case4-mediator-stream-fork-bundle.json",
+    "sha256": "22cee50f9e72a869f1956fc780abbce0120488556e06e511652c08e4335684f7",
+    "bytes": 18608,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case4-mediator-stream-fork-report.json",
+    "sha256": "674832048df3dcf8b09e9bde92564c031fb3aefd26b0a2796cd0055e609600e4",
+    "bytes": 14746,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case4-mediator-stream-fork-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case5-retired-rule-bundle.json",
+    "sha256": "db0e40e446eafefc3069dc4e3c3312e361c48d079de518014ad200d17c28ab97",
+    "bytes": 30087,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case5-retired-rule-report.json",
+    "sha256": "ce3e5a40a56933b1cc3afccf4c8b1fd41728cfd61dd1e0f960200ff591004b78",
+    "bytes": 12706,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case5-retired-rule-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case6-manifest-length-bundle.json",
+    "sha256": "85ab6ca4409042c155fa7d07618454da7e540af3b0c9a2ce872db138d0e5024e",
+    "bytes": 14694,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case6-manifest-length-report.json",
+    "sha256": "7f41e4728d62aca1568199c7de668de44281422b503b716b8318e5f75ae63003",
+    "bytes": 8325,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  },
+  {
+    "file": "case6-manifest-length-trust.json",
+    "sha256": "cfdb58e46c79fa7f988db15783e7b52a072272b6e9ceacea3e00ac2bbb0b7c27",
+    "bytes": 1366,
+    "source_snapshot": "reviews/nv2-01-final-vectors-2026-09-28"
+  }
+]

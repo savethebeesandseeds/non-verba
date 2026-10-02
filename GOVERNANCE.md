@@ -2,7 +2,7 @@
 
 **Status:** Draft constitutional design  
 **Version:** 0.1  
-**Intended use:** Public and private repositories
+**Intended use:** Unified public project
 
 > This document states the governance principles Non Verba intends to preserve as it develops. It is not itself a legal charter. Where these principles need legal force, they must eventually be implemented through the appropriate contracts, corporate documents, ownership structures, and applicable law.
 

@@ -1,0 +1,110 @@
+[
+  {
+    "file": "happy-lifecycle-bundle.json",
+    "sha256": "91bdc17358466fb38585fc6049ea615ea1af8888f99ce736cb2561dbe67c39ff",
+    "bytes": 14811,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "happy-lifecycle-report.json",
+    "sha256": "852ce023c875e9b62d6890da49ef44f3d91e36c76887cf8eba48aa56db15d058",
+    "bytes": 16579,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "happy-lifecycle-trust.json",
+    "sha256": "a2f535a2dfa98dd4447432e1af89c0c9c453821abfc0409caab13d1ec2fdc91e",
+    "bytes": 960,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "late-context-bundle.json",
+    "sha256": "bacd72cb6fc6cabf3306c0af3f494dca8dd805a81baff2893c1bd1a5286f630e",
+    "bytes": 16503,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "late-context-report.json",
+    "sha256": "25adc59ce4802d1dd81d9e1529955e59914eb4c025be22e19dfe938db529a48d",
+    "bytes": 13415,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "late-context-trust.json",
+    "sha256": "e78f1f1eda594008582e4ed277336b6249542663153526e3278c1d0b95a57189",
+    "bytes": 972,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "partial-bundle.json",
+    "sha256": "2c9bd63615d315f6e9f1c6db16fae32fb32de9330689b60430458d645077746b",
+    "bytes": 8866,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "partial-report.json",
+    "sha256": "d0e359411202f039547ef07d5158f60bdc85ae99e8710a7d530d4687fc821e24",
+    "bytes": 2040,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "partial-trust.json",
+    "sha256": "e78f1f1eda594008582e4ed277336b6249542663153526e3278c1d0b95a57189",
+    "bytes": 972,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "physical-bundle.json",
+    "sha256": "bccd222d0f1461923bf336565a1f5d1a153708f9b0cab0263c90bc5207bd6e20",
+    "bytes": 12710,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "physical-report.json",
+    "sha256": "2d566c1cc21a31389d0c396fe3ac1c6b00ad5581f4ad4c7b2862ac7191a883d7",
+    "bytes": 13985,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "physical-trust.json",
+    "sha256": "e78f1f1eda594008582e4ed277336b6249542663153526e3278c1d0b95a57189",
+    "bytes": 972,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "reversal-bundle.json",
+    "sha256": "ee3ea1c45edf43553e08827019da637c9c93dcb6086a1eefb2d2f46ede481604",
+    "bytes": 16271,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "reversal-report.json",
+    "sha256": "69051858aea497ac3276e97a8d534b3b1f780c07201c38d68fce496af0fb6a02",
+    "bytes": 13706,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "reversal-trust.json",
+    "sha256": "e78f1f1eda594008582e4ed277336b6249542663153526e3278c1d0b95a57189",
+    "bytes": 972,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "settlement-bundle.json",
+    "sha256": "944d563266426152b8530349a6f542699e2c88614ba2c31678249fc355530050",
+    "bytes": 15723,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "settlement-report.json",
+    "sha256": "2ed65b1349383fd0db52152fe937f326a2ce4281397f51643b04e0dd0439d149",
+    "bytes": 11602,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  },
+  {
+    "file": "settlement-trust.json",
+    "sha256": "e78f1f1eda594008582e4ed277336b6249542663153526e3278c1d0b95a57189",
+    "bytes": 972,
+    "source_snapshot": "reviews/integration-final-vectors-2026-09-28"
+  }
+]

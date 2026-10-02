@@ -1,0 +1,83 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Location evidence</title><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./location.css">
+  <script type="module" src="./location-ui.js"></script>
+<script type="module" src="./screen-awake.js"></script>
+<script type="module" src="gps-warmup.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="./index.html"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">LOCATION / 03</span></a><nav class="location-links" aria-label="Evidence types"><a href="./index.html">Camera ↗</a><a href="./audio.html">Audio ↗</a><a href="./live-location.html">Live receipt ↗</a><a href="./key-enrollment.html">Signing keys ↗</a></nav></header>
+  <main>
+    <div id="screen-awake" class="screen-awake" hidden><button id="screen-awake-toggle" type="button" class="secondary" aria-pressed="false" aria-describedby="screen-awake-note">Keep screen awake</button><div><p id="screen-awake-status" role="status" aria-live="polite">Off — normal screen timeout.</p><p id="screen-awake-note">For this app session only. Tap again to turn off; restarting the app resets it. Android lock settings stay unchanged.</p></div></div>
+    <div class="intro location-intro"><div><p class="eyebrow">LOCATION, WITH A RECORD</p><h1>Be there.<br>Keep the evidence<span>.</span></h1><p class="lede">Collect a short series of device location reports and sign them with a fresh requester challenge.</p></div><span class="pill" id="location-runtime">STARTING LOCAL ENGINE</span></div>
+    <aside class="location-demo"><div><h3>Try it where you are.</h3><p>A ten-second demo using your device’s real location. No operator ID or pairing needed.</p></div><button id="location-demo" class="primary" disabled>Try location demo →</button></aside>
+    <nav class="tabs" aria-label="Location workflow"><button data-location-view="requester" aria-current="page">01 Requester</button><button data-location-view="operator">02 Operator</button><button data-location-view="verify">03 Verify location</button></nav>
+    <div id="location-notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <p id="location-demo-active" class="location-demo-label" hidden>LOCAL DEMO · This device is both requester and operator. The signed record retains this demo label.</p>
+    <div class="location-session"><div><span class="tiny-label">COLLECTION STATUS</span><p id="location-status" role="status" aria-live="polite">Ready to create or load a request.</p></div><button id="location-cancel" class="secondary" disabled>Cancel collection</button></div>
+    <section id="location-requester" class="location-view">
+      <div class="two-column">
+        <div class="panel roomy"><h2>Request a location record.</h2><p class="muted">New raw-GPS requests use a two-second minimum observation span with at least three fixes and three raw epochs. This is not a completion deadline: startup and usable observations can take longer. The original request separately specifies freshness, delivery and sealing limits. Keep it for verification.</p>
+          <label for="location-requester-name">Requester name or reference</label><input id="location-requester-name" maxlength="120" placeholder="Field operations">
+          <label for="location-task">What should the operator document?</label><textarea id="location-task" rows="3" maxlength="1000" placeholder="Record your location at the delivery entrance."></textarea>
+          <p id="location-request-preset-summary" class="muted">Complete location package: a 2-second Android location record with native acquisition metadata and required raw satellite measurements.</p>
+          <p class="fineprint">The complete package requires a compatible Android 10+ phone. Missing required raw measurements stops collection without falling back to ordinary fixes. Camera and microphone are not activated.</p>
+          <details><summary>Details and reduced profiles</summary>
+            <label for="location-profile">Collection platform</label><select id="location-profile"><option value="browser-or-native">Browser or Android app</option><option value="native-required">Android native collection required</option><option value="native-gnss">Android satellite location required</option><option value="raw-gnss" selected>Android raw satellite measurements required</option></select>
+          </details>
+          <p class="fineprint">Browser collection cannot report Android mock-location status. Native collection adds operating-system observations; it still does not independently prove physical location.</p>
+          <button id="location-create-request" class="primary wide spaced" disabled>Create fresh request →</button>
+        </div>
+        <div class="panel roomy"><h3>Share the request.</h3><p class="muted">Exchange files through your own channel. This workflow has no live requester connection or online attestation service.</p>
+          <label for="location-created-request">Original requester challenge</label><textarea id="location-created-request" rows="10" readonly spellcheck="false"></textarea>
+          <div class="button-row"><button id="location-save-request" class="primary" disabled>Save request</button><button id="location-use-request" class="secondary" disabled>Use on this device</button></div>
+          <p class="fineprint">A nonce binds the resulting record to this request. Device times and coordinates remain reported observations.</p>
+        </div>
+      </div>
+    </section>
+    <section id="location-operator" class="location-view" hidden>
+      <div class="two-column">
+        <div class="panel roomy"><h2>Load a requester challenge.</h2><label for="location-request-input">Original location request</label><textarea id="location-request-input" rows="7" spellcheck="false" autocomplete="off"></textarea>
+          <div class="button-row"><label class="button secondary file-label" for="location-request-file">Import request<input id="location-request-file" type="file" accept="application/json,.json"></label><button id="location-load-request" class="primary" disabled>Load request →</button></div>
+          <div class="device-block"><span class="tiny-label">LOCATION SIGNING KEY</span><p id="location-key-id" class="mono">Available when the local engine is ready.</p><button id="location-save-key" class="text-button" disabled>Save public location key ID ↗</button><p class="fineprint">This is a SHA-256 fingerprint of the signing public key, not the camera’s certificate fingerprint. Share it through a trusted channel.</p></div>
+        </div>
+        <div class="panel roomy"><span class="tiny-label" id="location-platform-label">DEVICE-REPORTED OBSERVATIONS</span><h3 id="location-loaded-task" class="spaced">Awaiting a request.</h3><p id="location-policy-summary" class="muted">Allow location access, keep this screen open, and give the device a clear view of the sky where possible.</p>
+          <button id="location-collect" class="primary wide spaced" disabled>Collect &amp; sign location</button>
+          <div id="location-progress-panel" class="location-progress-panel" hidden><label for="location-progress">Device observation coverage</label><progress id="location-progress" max="10000" value="0"></progress><p id="location-progress-details" aria-live="polite">Waiting for the first location update…</p><p id="location-raw-evaluation" class="muted" hidden></p><p id="location-raw-clock-diagnostics" class="muted" hidden></p><p id="location-raw-measurement-diagnostics" class="muted" hidden></p><p id="location-satellite-status" class="muted" hidden></p><p id="location-current-fix" class="mono"></p></div>
+          <div id="location-result" class="challenge-summary" hidden><h3 id="location-result-title">Location record ready.</h3><p id="location-result-description"></p><button id="location-save-proof" class="primary wide">Save signed location proof ↗</button><button id="location-save-proof-request" class="secondary wide spaced">Save its original request</button><button id="location-inspect-proof" class="secondary wide spaced">Inspect this record</button></div>
+        </div>
+      </div>
+    </section>
+    <section id="location-verify" class="location-view" hidden>
+      <div class="two-column">
+        <div class="panel roomy"><h2>Inspect the location evidence.</h2><label class="dropzone" for="location-proof-file"><strong>Choose a signed location proof</strong><span id="location-proof-filename">COSE proof in a JSON envelope</span><input id="location-proof-file" type="file" accept="application/json,.json,application/cose,.cose"></label>
+          <label for="location-verify-request">Original requester challenge</label><textarea id="location-verify-request" rows="5" spellcheck="false"></textarea><label class="button secondary file-label" for="location-verify-request-file">Import original request<input id="location-verify-request-file" type="file" accept="application/json,.json"></label>
+          <label for="location-verify-key">Expected public location key ID</label><input id="location-verify-key" class="mono" spellcheck="false" autocomplete="off" placeholder="64-character fingerprint from a trusted channel">
+          <label for="location-bound-media">Bound photo, if this proof references one</label><input id="location-bound-media" type="file" accept="image/jpeg,.jpg,.jpeg"><p class="fineprint">Choose the exact file to check its binding. A standalone location proof has no photo.</p>
+          <button id="location-verify-button" class="primary wide spaced" disabled>Verify location proof</button>
+        </div>
+        <div class="panel roomy"><span class="tiny-label">VERIFICATION RESULT</span><h3 id="location-verdict" class="spaced">No record checked.</h3><p id="location-verification-note" class="muted"></p><div id="location-checks"></div><div id="location-verification-dimensions"></div><button id="location-save-report" class="secondary wide spaced" disabled>Save verification report</button><details><summary>Full verification record</summary><pre id="location-report-json"></pre></details></div>
+      </div>
+    </section>
+    <details id="gps-attempt-panel" class="panel roomy spaced"><summary>GPS failed attempts — retain, export and verify</summary>
+      <p class="muted">Native raw-GNSS policy rejections and collection timeouts with zero raw callbacks have separate reports. Other failures may have no signed report. Retries preserve up to 32 attempts without automatic deletion; full storage is reported. No successful measurement or acceptance is implied.</p>
+      <button id="gps-attempt-refresh" class="secondary">Refresh retained attempts</button>
+      <label for="gps-attempt-id">Retained attempt ID</label><select id="gps-attempt-id"></select>
+      <button id="gps-attempt-save" class="secondary spaced">Save attempt and its original request</button>
+      <button id="gps-attempt-save-all" class="secondary spaced">Save all retained attempts and requests</button>
+      <label for="gps-attempt-file">Attempt export to verify</label><input id="gps-attempt-file" type="file" accept="application/json,.json">
+      <label for="gps-attempt-original">Exact independently retained original request</label><input id="gps-attempt-original" type="file" accept="application/json,.json">
+      <label for="gps-attempt-key">Independently trusted location key ID</label><input id="gps-attempt-key" class="mono" spellcheck="false" autocomplete="off">
+      <button id="gps-attempt-verify" class="primary spaced">Verify GPS failure report</button>
+      <p id="gps-attempt-status" role="status">No GPS attempt report inspected.</p><pre id="gps-attempt-result"></pre>
+      <p class="fineprint">The signature authenticates the reporting key and unchanged claims. Physical collection, effort, weather, hardware faults, responsibility and compensation are separate matters. Device timestamps supply no independent arrival witness.</p>
+    </details>
+    <div class="trust-note spaced"><h4>What this establishes</h4><p>A valid proof binds a location sampling record to the expected signing key and your exact challenge. Sampling and mock-location signals help assess the record, but do not independently certify the device’s physical position. Browser collection uses a software key. An unavailable platform signal is reported as unknown.</p></div>
+  </main><footer><span>non-verba / location evidence</span><span>RUST + WEBASSEMBLY · COSE · DEVICE-REPORTED LOCATION</span></footer>
+</body>
+</html>

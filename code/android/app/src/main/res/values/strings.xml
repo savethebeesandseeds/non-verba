@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Non-verba</string>
+    <string name="artifact_saved">Saved to %1$s</string>
+    <string name="picker_failed">No file picker is available on this device.</string>
+    <string name="camera_title">Non-verba camera</string>
+    <string name="camera_opening">Opening camera…</string>
+    <string name="camera_shutter">Take photo</string>
+    <string name="camera_cancel">Cancel</string>
+    <string name="camera_location_pending">Waiting for a fresh location fix…</string>
+    <string name="camera_ready">Position the camera, then take photo.</string>
+    <string name="camera_capturing">Capturing photo…</string>
+</resources>

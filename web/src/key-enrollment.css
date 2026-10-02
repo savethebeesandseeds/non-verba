@@ -1,0 +1,9 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.enrollment-view .mono { overflow-wrap: anywhere; white-space: pre-wrap; }
+.enrollment-view select, .enrollment-view input { max-width: 100%; }
+.location-links { flex-wrap: wrap; }
+@media (max-width: 650px) {
+  .masthead { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .location-intro { gap: 20px; }
+  #enrollment-runtime { white-space: normal; }
+}

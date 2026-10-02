@@ -1,0 +1,337 @@
+{
+  "financial_projection": "UNIT_GRANTS_V2",
+  "recognized_legacy_proofs": [],
+  "unresolved_rights": [],
+  "evidence_integrity": [
+    {
+      "event_hash": "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6",
+      "event_type": "COMPLETION_CLAIM",
+      "signature_valid": true,
+      "body_valid": true,
+      "commitment_opening": null,
+      "commitment_status": "NOT_APPLICABLE",
+      "transcript_status": "ACCEPTED",
+      "manifest": {
+        "manifest_digest": "5184d117cd0ba51fe2a1c7e96ad0d36d80f6e49bee5d994f70c0eda3b09cd042",
+        "schema_valid": true,
+        "status": "INTEGRITY_VALID",
+        "artifacts": [
+          {
+            "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+            "declared_byte_length": "77",
+            "actual_byte_length": "77",
+            "availability": "SUPPLIED_VALID",
+            "digest_match": true,
+            "length_match": true,
+            "media_type": "text/plain",
+            "media_type_status": "DECLARED_UNVERIFIED"
+          }
+        ],
+        "diagnostics": []
+      }
+    }
+  ],
+  "agreement": {
+    "agreement_hash": "726c659dd3f0d0f1d98653fdaefe4da2d9318e391a50051c88b62fe961354d4f",
+    "bound": true,
+    "valid_signers": [
+      "R",
+      "O",
+      "M"
+    ],
+    "diagnostics": []
+  },
+  "current_agreement_hash": "eb5812cd99392cd4f55e41ef6f231d1a6a84223e64ca2700db8f3ff6d100a6ec",
+  "ready_to_start": true,
+  "readiness_reasons": [],
+  "performance": "COMPLETION_CLAIMED",
+  "mediation": "NO_OPEN_CASE",
+  "assurance": "DISABLED",
+  "obligations": [],
+  "effects": [
+    {
+      "certificate_id": "1040bcb1e3f94706452590aa453dbd0133264fdde0b11c6d12352e51f3936c20",
+      "rule_id": "ALL_PARTY_AMENDMENT",
+      "authorizers": [
+        "R",
+        "O",
+        "M"
+      ],
+      "proof_references": [],
+      "obligation_ids": [],
+      "explanation": "Prospective all-party Agreement revision; established receivables and disputed claims are retained."
+    }
+  ],
+  "payments": [],
+  "diagnostics": [
+    {
+      "code": "RETIRED_AUTHORITY",
+      "subject": "f81dafb8ab0c841ed6e5b8a5390709a048c400794b3dc800db5eff833899e0d1",
+      "message": "causal context knows the successor; retired powers cannot create a fresh effect"
+    }
+  ],
+  "action_status": {
+    "1040bcb1e3f94706452590aa453dbd0133264fdde0b11c6d12352e51f3936c20": "APPLIED",
+    "f81dafb8ab0c841ed6e5b8a5390709a048c400794b3dc800db5eff833899e0d1": "REJECTED"
+  },
+  "transcript": {
+    "accepted": {
+      "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "726c659dd3f0d0f1d98653fdaefe4da2d9318e391a50051c88b62fe961354d4f",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "1",
+          "previous_event_hash": "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4",
+          "nonce": "review-regress-to-retired-revision",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "77",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "Synthetic bytes, no truthful-physical-performance assertion."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "ExSDISteXpcHZon-GJk6DQ91rYgX9XQeEIGIStD10zlQ4G-oi-TOwPIsOuYUCUP89FP4hktehc8P_0feuQuMBA"
+        }
+      },
+      "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "eb5812cd99392cd4f55e41ef6f231d1a6a84223e64ca2700db8f3ff6d100a6ec",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "BYK7XVHuOsDKBO8XZqfXPRyVS9LOHZLd-_Wx3OdwkKRw3_h7GtMZyLJMylVITSWF56SK8Ups7ttmmAKtXJyznQ"
+        }
+      }
+    },
+    "retained_events": {
+      "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "726c659dd3f0d0f1d98653fdaefe4da2d9318e391a50051c88b62fe961354d4f",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "1",
+          "previous_event_hash": "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4",
+          "nonce": "review-regress-to-retired-revision",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "77",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "Synthetic bytes, no truthful-physical-performance assertion."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "ExSDISteXpcHZon-GJk6DQ91rYgX9XQeEIGIStD10zlQ4G-oi-TOwPIsOuYUCUP89FP4hktehc8P_0feuQuMBA"
+        }
+      },
+      "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "eb5812cd99392cd4f55e41ef6f231d1a6a84223e64ca2700db8f3ff6d100a6ec",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "BYK7XVHuOsDKBO8XZqfXPRyVS9LOHZLd-_Wx3OdwkKRw3_h7GtMZyLJMylVITSWF56SK8Ups7ttmmAKtXJyznQ"
+        }
+      }
+    },
+    "proof_events": {
+      "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "726c659dd3f0d0f1d98653fdaefe4da2d9318e391a50051c88b62fe961354d4f",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "1",
+          "previous_event_hash": "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4",
+          "nonce": "review-regress-to-retired-revision",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "COMPLETION_CLAIM",
+            "milestone_id": "work",
+            "manifest": {
+              "artifacts": [
+                {
+                  "sha256": "e7c32af2f0ffb99d2066abdb8f4074d972633c70fd182192f20943ec27d0c18f",
+                  "byte_length": "77",
+                  "media_type": "text/plain",
+                  "capture_reference": null
+                }
+              ],
+              "description": "Synthetic bytes, no truthful-physical-performance assertion."
+            }
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "ExSDISteXpcHZon-GJk6DQ91rYgX9XQeEIGIStD10zlQ4G-oi-TOwPIsOuYUCUP89FP4hktehc8P_0feuQuMBA"
+        }
+      },
+      "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4": {
+        "envelope": {
+          "protocol_version": "2",
+          "deployment_domain": "nonverba.test",
+          "assignment_id": "test-assignment-1",
+          "agreement_hash": "eb5812cd99392cd4f55e41ef6f231d1a6a84223e64ca2700db8f3ff6d100a6ec",
+          "author_role": "O",
+          "key_id": "public-test-key-O",
+          "key_epoch": "1",
+          "sequence": "0",
+          "previous_event_hash": null,
+          "nonce": "event-O-0",
+          "causal_references": [],
+          "claimed_creation_time": null,
+          "body": {
+            "type": "START_CLAIM"
+          }
+        },
+        "authorization": {
+          "claims": {
+            "protocol_version": "2",
+            "deployment_domain": "nonverba.test",
+            "assignment_id": "test-assignment-1",
+            "content_hash": "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4",
+            "role": "O",
+            "key_id": "public-test-key-O",
+            "purpose": "EVENT"
+          },
+          "signature": "BYK7XVHuOsDKBO8XZqfXPRyVS9LOHZLd-_Wx3OdwkKRw3_h7GtMZyLJMylVITSWF56SK8Ups7ttmmAKtXJyznQ"
+        }
+      }
+    },
+    "pending": [],
+    "rejected": [],
+    "warnings": [],
+    "conflicts": [],
+    "event_status": {
+      "90135f3d840fc833fab02940e9325fa84585aaa87bca3ae1966f4d7100e544e6": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": true,
+        "status": "ACCEPTED"
+      },
+      "fc43cf1650692353dbed1f04e8e983a6e0d556864acd2819c94b97be525454f4": {
+        "signature_valid": true,
+        "policy_valid": true,
+        "causal_complete": true,
+        "status": "ACCEPTED"
+      }
+    },
+    "rounds": [],
+    "delivery_acknowledgments": {},
+    "duplicate_count": 0,
+    "completeness_unknown": true
+  },
+  "unresolved_claims": [],
+  "history_completeness": "UNKNOWN: this report describes only the supplied local view; omitted records may exist",
+  "assumptions": [
+    "Role-key bindings supplied independently; excluded participant's key and verifier uncompromised",
+    "No hardware/distribution trust claim is supplied by this package",
+    "Payee receipts are attributed acknowledgments, not independently observed or irreversible bank settlement",
+    "Physical truth, solvency, timely delivery, hidden transcript branches and universal dispute resolution are not established"
+  ]
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Live audio evidence</title><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./audio.css">
+  <script type="module" src="./audio-ui.js"></script>
+<script type="module" src="./screen-awake.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="./index.html"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">AUDIO / 02</span></a><div class="workflow-links"><a class="secondary" href="./index.html">Camera ↗</a><a class="secondary" href="./location.html">Location ↗</a><a class="secondary" href="./live-location.html">Live location ↗</a><a class="secondary" href="./key-enrollment.html">Signing keys ↗</a></div></header>
+  <main>
+    <div id="screen-awake" class="screen-awake" hidden><button id="screen-awake-toggle" type="button" class="secondary" aria-pressed="false" aria-describedby="screen-awake-note">Keep screen awake</button><div><p id="screen-awake-status" role="status" aria-live="polite">Off — normal screen timeout.</p><p id="screen-awake-note">For this app session only. Tap again to turn off; restarting the app resets it. Android lock settings stay unchanged.</p></div></div>
+    <div class="intro"><div><p class="eyebrow">LIVE ACOUSTIC CHALLENGES</p><h1>Listen with evidence<span>.</span></h1><p class="lede">Record an external sound while your phone responds to fresh challenges from the requester.</p></div><span class="pill" id="audio-runtime">STARTING LOCAL ENGINE</span></div>
+    <aside class="audio-demo"><div><h3>Try it on this device.</h3><p>No operator ID or pairing needed. Use your microphone and speaker for a four-second demo.</p></div><button id="audio-demo" class="primary">Try demo →</button></aside>
+    <p class="muted">For a live request, connect two devices on the same local network. The operator’s phone plays the high-frequency sequence and records continuously. Keep both screens open. Audio is sent directly to the requester during the session.</p>
+    <nav class="tabs" aria-label="Audio workflow"><button data-audio-view="requester" aria-current="page">01 Requester</button><button data-audio-view="operator">02 Operator</button><button data-audio-view="verify">03 Verify audio</button></nav>
+    <div id="audio-notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <p id="audio-demo-active" class="audio-demo-label" hidden>LOCAL DEMO · This device is both requester and operator. Demo evidence has no independent requester.</p>
+    <div class="audio-session"><div><span class="tiny-label">LIVE SESSION</span><p id="audio-status" role="status" aria-live="polite">No active connection.</p></div><button id="audio-cancel" class="secondary" disabled>Stop session</button></div>
+    <section id="audio-requester" class="audio-view">
+      <div class="two-column">
+        <div class="panel roomy"><h2>Request a recording.</h2><label for="audio-requester-name">Requester name or reference</label><input id="audio-requester-name" maxlength="120" placeholder="Field operations">
+          <label for="audio-task">What sound should be recorded?</label><textarea id="audio-task" rows="3" maxlength="1000" placeholder="Record the motor running steadily."></textarea>
+          <label for="audio-duration">Continuous recording duration</label><select id="audio-duration"><option value="4">4 seconds</option><option value="10" selected>10 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select>
+          <p id="audio-request-preset-summary" class="muted">Complete audio package: a 10-second Android monitored recording with native timing, audio route and recording configuration checks.</p>
+          <p class="fineprint">The complete package requires a compatible Android 10+ phone with the built-in microphone and speaker. Unsupported or failed requirements stop capture. Calibration and live challenges play high-frequency sound; inaudibility is not guaranteed. Camera and location are not activated.</p>
+          <details><summary>Details and reduced profiles</summary>
+            <label for="audio-assurance">Recording assurance</label><select id="audio-assurance"><option value="browser-or-android">Browser or Android</option><option value="android-monitored" selected>Android monitored recording</option></select>
+          </details>
+          <label for="audio-operator-pin">Expected operator device ID</label><input id="audio-operator-pin" class="mono" autocomplete="off" spellcheck="false" placeholder="64-character fingerprint received through a trusted channel">
+          <button id="audio-create" class="primary wide spaced">Create pairing offer</button>
+          <p class="tiny-label spaced">YOUR REQUESTER SPKI ID — SHARE THROUGH A TRUSTED CHANNEL</p><p id="audio-requester-id" class="mono">Available after creating an offer.</p>
+          <label for="audio-offer">Send this offer to the operator</label><textarea id="audio-offer" readonly rows="4" spellcheck="false"></textarea><button id="audio-save-offer" class="secondary spaced" disabled>Save offer JSON</button>
+        </div>
+        <div class="panel roomy"><h3>Connect, then start.</h3><p class="muted">Exchange pairing files through your own trusted channel. Pairing includes network connection details. No public relay is configured.</p>
+          <label for="audio-answer-input">Operator’s pairing answer</label><textarea id="audio-answer-input" rows="4" spellcheck="false"></textarea><div class="button-row"><label class="button secondary file-label" for="audio-answer-file">Import answer<input id="audio-answer-file" type="file" accept="application/json,.json"></label><button id="audio-connect" class="primary">Connect operator</button></div>
+          <p class="muted spaced">A fresh signed request is sent after connection. The operator must enable the microphone and pass the speaker test before you start. The three-minute delivery window includes setup, recording and the final signed WAV. Each new acoustic challenge follows receipt of the preceding segment.</p>
+          <button id="audio-start" class="primary wide" disabled>Start live recording</button>
+          <button id="audio-save-transcript" class="secondary wide spaced" disabled>Save original audio transcript</button><p class="fineprint">The transcript records received microphone segments. Completion additionally requires receipt and verification of the exact final signed WAV.</p>
+          <div id="audio-session-result" class="challenge-summary" hidden><h3 id="audio-session-verdict">Waiting for final evidence.</h3><button id="audio-save-received-wav" class="primary wide" disabled>Save received signed WAV ↗</button><button id="audio-save-session" class="secondary wide spaced" disabled>Save final requester receipt</button><button id="audio-accept" class="primary wide spaced" disabled>Accept once on this requester</button><p class="fineprint">Acceptance is recorded in this browser’s local ledger. Clearing its storage clears replay protection; no global acceptance service is claimed.</p><details><summary>Requester evidence record</summary><pre id="audio-session-report"></pre></details></div>
+        </div>
+      </div>
+    </section>
+    <section id="audio-operator" class="audio-view" hidden>
+      <div class="two-column">
+        <div id="audio-operator-pairing" class="panel roomy"><h2>Connect to a requester.</h2><div class="device-block"><span class="tiny-label">THIS DEVICE’S SIGNING IDENTITY</span><p id="audio-device-id" class="mono">Loading…</p><button id="audio-save-device" class="text-button" disabled>Save public device ID ↗</button></div>
+          <label for="audio-requester-pin">Expected requester SPKI ID</label><input id="audio-requester-pin" class="mono" autocomplete="off" spellcheck="false" placeholder="64-character ID received through a trusted channel">
+          <label for="audio-offer-input">Requester’s pairing offer</label><textarea id="audio-offer-input" rows="5" spellcheck="false"></textarea><div class="button-row"><label class="button secondary file-label" for="audio-offer-file">Import offer<input id="audio-offer-file" type="file" accept="application/json,.json"></label><button id="audio-join" class="primary">Create pairing answer</button></div>
+          <label for="audio-answer">Return this answer to the requester</label><textarea id="audio-answer" readonly rows="4"></textarea><button id="audio-save-answer" class="secondary spaced" disabled>Save answer JSON</button>
+        </div>
+        <div class="panel roomy"><h3 id="audio-operator-task">Awaiting a request.</h3><p class="muted">Use the phone’s built-in speaker and microphone. Disconnect headphones and Bluetooth audio. Keep the screen open and media volume at a comfortable level.</p>
+          <button id="audio-arm" class="primary wide" disabled>Enable microphone &amp; test speaker</button><p class="fineprint">The test uses 20.25–20.75 kHz. Support varies by device; a failed test stops capture. Inaudibility is not guaranteed for every listener or device.</p>
+          <div id="audio-result" class="challenge-summary" hidden><h3 id="audio-result-title">Signed recording ready.</h3><p id="audio-result-description"></p><button id="audio-save-wav" class="primary wide">Save signed WAV ↗</button><button id="audio-save-demo-receipt" class="secondary wide spaced" hidden>Save demo receipt</button><audio id="audio-playback" controls preload="none"></audio></div>
+          <p class="muted spaced">The original preserves the recorded sound and acoustic sequence. C2PA Content Credentials travel inside the WAV.</p>
+        </div>
+      </div>
+    </section>
+    <section id="audio-verify" class="audio-view" hidden>
+      <div class="two-column">
+        <div class="panel roomy"><h2>Inspect the recording.</h2><label class="dropzone" for="audio-verify-file"><strong>Choose the original signed WAV</strong><span id="audio-verify-filename">Maximum 8 MiB</span><input id="audio-verify-file" type="file" accept="audio/wav,audio/x-wav,.wav"></label>
+          <label for="audio-original">Original receipt retained by the requester</label><textarea id="audio-original" rows="5" spellcheck="false"></textarea><label class="button secondary file-label" for="audio-original-file">Import original receipt<input id="audio-original-file" type="file" accept="application/json,.json"></label>
+          <label for="audio-verify-pin">Expected operator device ID</label><input id="audio-verify-pin" class="mono" spellcheck="false" autocomplete="off"><label for="audio-verify-requester-pin">Expected requester SPKI ID (for a final requester receipt)</label><input id="audio-verify-requester-pin" class="mono" spellcheck="false" autocomplete="off"><button id="audio-verify-button" class="primary wide spaced">Verify recording</button>
+        </div>
+        <div class="panel roomy"><span class="tiny-label">VERIFICATION RESULT</span><h3 id="audio-verdict" class="spaced">No recording checked.</h3><div id="audio-checks"></div><p id="audio-verification-note" class="muted"></p><button id="audio-save-report" class="secondary wide spaced" disabled>Save verification report</button><details><summary>Full verification record</summary><pre id="audio-report-json"></pre></details></div>
+      </div>
+    </section>
+    <div class="trust-note spaced"><h4>What this checks</h4><p>Signed file integrity, the expected operator key, and acoustic responses to successive requester challenges. A valid recording does not establish that every sound happened live, that the microphone path was uncompromised, or that the scene was authentic. Signal thresholds are experimental pending physical-device testing.</p></div>
+  </main><footer><span>non-verba / audio evidence</span><span>RUST + WEBASSEMBLY · C2PA · PREVIEW 0.7.0</span></footer>
+</body>
+</html>
