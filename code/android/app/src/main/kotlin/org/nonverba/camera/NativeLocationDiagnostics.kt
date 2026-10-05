@@ -60,6 +60,16 @@ internal object NativeLocationDiagnostics {
     }
     const val MAX_RAW_DIAGNOSTIC_COUNT = 1_000_000
 
+    // Android 11 maps unavailable/unsupported AND internal receiver startup errors
+    // to STATUS_NOT_SUPPORTED (0). Preserve the OS code without claiming a cause.
+    fun rawStatusFailure(code: Int): String? = when (code) {
+        0 -> "Android could not provide raw GNSS measurements (status 0: unsupported, unavailable, or receiver startup failed); cause is unknown"
+        1 -> null
+        2 -> "Location services were disabled during raw GNSS collection"
+        3 -> "Raw GNSS measurement access was denied"
+        else -> "Unknown raw GNSS receiver status ($code)"
+    }
+
     fun spanMs(first: Timing, last: Timing): Long {
         fun span(start: Long, end: Long) = if (start < 0 || end < start) 0L else end - start
         return minOf(span(first.fixElapsedMs, last.fixElapsedMs),
@@ -67,10 +77,14 @@ internal object NativeLocationDiagnostics {
     }
 
     fun timeoutReason(stage: String, eligible: Int, rejected: Int, minimumSamples: Int,
-        spanMs: Long, requiredSpanMs: Long, rawRequired: Boolean): String = when {
+        spanMs: Long, requiredSpanMs: Long, rawRequired: Boolean, rawCallbacks: Int? = null): String = when {
         stage == "requesting-permission" -> "Location session timed out while waiting for precise location permission"
         stage == "ready" -> "Location evidence was ready but was not finalized before the session timed out"
         stage != "collecting" -> "Native location session timed out; request a new session"
+        rawRequired && rawCallbacks == 0 && rejected > 0 ->
+            "GPS position updates arrived, but Android delivered no raw GNSS measurements before the session timed out"
+        rawRequired && rawCallbacks == 0 ->
+            "No raw GNSS measurements arrived before the session timed out"
         eligible == 0 && rejected == 0 -> "No native location callbacks arrived before the session timed out"
         eligible == 0 -> "Native location callbacks arrived, but no updates met the requested policy before timeout"
         eligible < minimumSamples -> "Location session timed out with insufficient eligible samples ($eligible of $minimumSamples)"

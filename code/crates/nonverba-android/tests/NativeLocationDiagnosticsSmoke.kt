@@ -18,8 +18,8 @@ fun main() {
     equal(NativeLocationDiagnostics.spanMs(NativeLocationDiagnostics.Timing(-1, 0, 0),
         NativeLocationDiagnostics.Timing(Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE)), 0L)
     fun reason(stage: String = "collecting", eligible: Int = 0, rejected: Int = 0,
-        span: Long = 0, raw: Boolean = false) = NativeLocationDiagnostics.timeoutReason(stage,
-        eligible, rejected, 3, span, 10000, raw)
+        span: Long = 0, raw: Boolean = false, callbacks: Int? = null) = NativeLocationDiagnostics.timeoutReason(stage,
+        eligible, rejected, 3, span, 10000, raw, callbacks)
     equal(reason(stage = "requesting-permission"),
         "Location session timed out while waiting for precise location permission")
     equal(reason(stage = "ready", eligible = 3, span = 10000),
@@ -27,6 +27,20 @@ fun main() {
     equal(reason(), "No native location callbacks arrived before the session timed out")
     equal(reason(rejected = 12),
         "Native location callbacks arrived, but no updates met the requested policy before timeout")
+    equal(reason(rejected = 39, raw = true, callbacks = 0),
+        "GPS position updates arrived, but Android delivered no raw GNSS measurements before the session timed out")
+    equal(reason(raw = true, callbacks = 0),
+        "No raw GNSS measurements arrived before the session timed out")
+    equal(reason(rejected = 39, raw = true, callbacks = 1),
+        "Native location callbacks arrived, but no updates met the requested policy before timeout")
+    equal(reason(stage = "requesting-permission", raw = true, callbacks = 0),
+        "Location session timed out while waiting for precise location permission")
+    equal(NativeLocationDiagnostics.rawStatusFailure(0),
+        "Android could not provide raw GNSS measurements (status 0: unsupported, unavailable, or receiver startup failed); cause is unknown")
+    equal(NativeLocationDiagnostics.rawStatusFailure(1), null)
+    equal(NativeLocationDiagnostics.rawStatusFailure(2), "Location services were disabled during raw GNSS collection")
+    equal(NativeLocationDiagnostics.rawStatusFailure(3), "Raw GNSS measurement access was denied")
+    equal(NativeLocationDiagnostics.rawStatusFailure(127), "Unknown raw GNSS receiver status (127)")
     equal(reason(eligible = 2, span = 10000),
         "Location session timed out with insufficient eligible samples (2 of 3)")
     equal(reason(eligible = 3, span = 9999),

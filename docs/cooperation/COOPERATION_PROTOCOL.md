@@ -4,6 +4,10 @@ Status: executable reference specification, 26 September 2026. Not a live
 marketplace or a declaration of regulatory compliance. See
 [the regulatory boundary](REGULATORY_BOUNDARY.md) before integration.
 
+The [operators union notes](../notes/cooperation/OPERATORS_UNION_NOTES.md) connect
+this reference behavior to the broader union idea and its unfinished membership,
+collective decisions and Assignment integration.
+
 ## Purpose and authority
 
 Operators directly influence the minimum remuneration for a defined task through

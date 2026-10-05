@@ -10,6 +10,7 @@ import {nativeCameraPlatform,collectNativeCamera} from './camera-platform.js';
 import {CameraCaptureHandoff,sameCaptureRequest} from './camera-session-capture.js';
 import {installCameraSessionUI} from './camera-session-ui.js';
 import {installRetainedEvidenceUI} from './retained-evidence-ui.js';
+import {installCameraQualityUI} from './camera-quality.js';
 import {prepareCameraPermissions} from './camera-session-preflight.js';
 import {newRequestPreset, installRequestPresetSummary} from './request-presets.js';
 const $=id=>document.getElementById(id);
@@ -46,6 +47,7 @@ const engineReady=new Promise((resolve,reject)=>{
 async function core(method,...args){await engineReady;return new Promise((resolve,reject)=>{const id=++sequence;pending.set(id,{resolve,reject});worker.postMessage({id,method,args});});}
 async function jsonCore(method,...args){return JSON.parse(await core(method,...args));}
 const locationEngine={call:core,json:jsonCore,ready:engineReady};
+installCameraQualityUI({engine:locationEngine,saveArtifact});
 function notify(message,type=''){const n=$('notice');n.textContent=message;n.className=`notice ${type}`;n.hidden=false;}
 function errorMessage(error){return String(error?.message||error);}
 const actionRuns=new WeakMap();

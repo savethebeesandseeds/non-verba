@@ -23,7 +23,7 @@ controls R-to-O task money.
 The AN-2 clarification pass adds signing-consequence explanations and qualifies
 the inspection labels. The adapter record format remains version 1 and the
 protocol remains version 2. No fixture terms, payer schema or authority rule is
-changed. The [Contract notes](CONTRACT_NOTES.md) separately record the
+changed. The [Contract notes](../notes/assignments/CONTRACT_NOTES.md) separately record the
 requester-funded product direction, free Operator registration and unselected
 Request-creation/service billing terms. The synthetic draft template keeps its
 optional service disabled; this is not a billing implementation.

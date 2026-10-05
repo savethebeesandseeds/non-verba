@@ -94,10 +94,12 @@ renew freshness or measure preparation savings. Actual device timings need to
 separate preparation, first retained fix/raw epoch, evidence completion and
 finalization. UI and USB transport waits are not GPS acquisition latency.
 
-Completed physical timing measurements and preparation savings remain unverified.
+The dated [4 October checks](VALIDATION.md#gps-startup-and-reporting-validation--4-october-2026)
+include independently verified signed collection durations after receiver
+recovery. They do not establish preparation savings or a completion guarantee.
 Active preparation does not guarantee usable reception, and a failed attempt
-does not identify weather, effort or fault. Native raw-GNSS rejections and
-zero-callback timeouts can produce separate
+does not identify weather, effort or fault. Native raw-GNSS rejections,
+zero-callback timeouts and covered startup refusals can produce separate
 [signed GPS attempt reports](GPS_ATTEMPT_REPORTS.md); these describe failure,
-never a successful measurement. See the dated [physical checkpoint](STATUS.md#physical-checkpoint--1-october-2026)
-for the pending export-verification work.
+never a successful measurement. The dated [sensor status](STATUS.md) separates
+completed physical verification from remaining limits.

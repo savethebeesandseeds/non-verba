@@ -136,7 +136,7 @@ requester-independence flags. MCP authorization is also separate from sensor
 signature trust and hardware attestation.
 
 The owner prioritized signed failure/attempt reporting on 30 September; see the
-[failure-record requirements](../sensors/SENSOR_QUALITY_NOTES.md#priority-recorded-on-30-september-failed-attempts-must-be-inspectable).
+[failure-record requirements](../notes/sensors/SENSOR_QUALITY_NOTES.md#priority-recorded-on-30-september-failed-attempts-must-be-inspectable).
 The bounded [native GPS attempt-report version 1](../sensors/GPS_ATTEMPT_REPORTS.md) now
 covers raw-GNSS policy rejection and collection timeouts with zero raw callbacks,
 with frozen terminal snapshots, Rust signing

@@ -4,7 +4,7 @@ import {loadIdentity, saveIdentity, read, reserveCapture} from './storage.js';
 import {beginLocationCollection, finalizeLocationProof} from './location-capture.js';
 import {locationPolicy, locationTimingSummary, locationSealingSummary} from './location-policy.js';
 import {newRequestPreset, installRequestPresetSummary} from './request-presets.js';
-import {installGpsAttemptUi} from './gps-attempt.js';
+import {installGpsAttemptUi, gpsAttemptValidationAvailable} from './gps-attempt.js';
 import {locationPlatform, getLocationIdentity, locationProofEnvelope, readLocationProofEnvelope,
   bytesToBase64, MAX_LOCATION_PROOF, MAX_LOCATION_MEDIA, rawGnssDiagnosticSummary, satelliteStatusDiagnosticSummary, rawGnssFieldDiagnosticSummary,
   locationReportPresentation, rawGnssTimingQualitySummary} from './location-platform.js';
@@ -17,11 +17,14 @@ let active = null, collectionRevision = 0, requestIntent = 0, verifyRevision = 0
 let acquisitionDiagnostics = null;
 const busy = new Set();
 const RAW_REQUEST_HELP = 'This request requires raw satellite measurements. Unsupported collection stops; a reduced profile requires the requester to explicitly issue a fresh request.';
+const validationAvailable = gpsAttemptValidationAvailable(window.NativeLocation);
+$('location-rejection-validation').hidden = !validationAvailable;
 
 function notice(message, error = false) { $('location-notice').hidden = false; $('location-notice').className = `notice ${error ? 'error' : ''}`; $('location-notice').textContent = message; }
 function status(message) { $('location-status').textContent = message; }
 function updateButtons() {
   for (const id of ['location-demo', 'location-create-request', 'location-load-request']) $(id).disabled = !ready || !!active;
+  $('location-create-rejection-request').disabled = !ready || !!active || !validationAvailable;
   $('location-collect').disabled = !ready || !loaded || !!active || !!artifact;
   $('location-cancel').disabled = !active;
   $('location-save-request').disabled = !issued; $('location-use-request').disabled = !issued || !!active;
@@ -181,6 +184,16 @@ action('location-create-request', async () => {
   const policy = locationPolicy(preset.profile, preset.duration_ms);
   issued = await engine.json('create_location_request', $('location-requester-name').value.trim(), $('location-task').value.trim(), now(), 900, json(policy), 'null');
   $('location-created-request').value = json(issued); notice('Fresh request created. Keep the original and send a copy to the operator.' + (policy.raw_gnss ? ' ' + RAW_REQUEST_HELP : ''));
+});
+action('location-create-rejection-request', async () => {
+  if (!validationAvailable) throw new Error('Strict validation requests require the debug Android app.');
+  const policy = locationPolicy('raw-gnss', 2000);
+  // A new, explicitly tighter request; actual native observations remain untouched.
+  policy.raw_gnss.max_elapsed_realtime_uncertainty_ns = 1;
+  policy.max_delivery_delay_ms = 1;
+  issued = await engine.json('create_location_request', $('location-requester-name').value.trim(), $('location-task').value.trim(), now(), 900, json(policy), 'null');
+  $('location-created-request').value = json(issued);
+  notice('Fresh strict GPS validation request created: Android clock alignment uncertainty at most 1 ns and delivery at most 1 ms. Save the original before collection. This deliberately tests policy refusal using actual observations.');
 });
 installRequestPresetSummary(document,'location','location-request-preset-summary',['location-profile'],()=>({profile:$('location-profile').value}));
 action('location-save-request', async () => { if (!issued) return; await save(`nonverba-location-request-${issued.challenge.id.slice(0, 12)}.json`, 'application/json', json(issued)); });

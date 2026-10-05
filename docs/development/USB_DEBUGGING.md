@@ -54,9 +54,12 @@ For the existing authorized setup, from `C:\Work\Non-verba\private-source` on Wi
 ./code/tools/usb-device.ps1 Status
 ./code/tools/usb-device.ps1 DeviceInfo
 ./code/tools/usb-device.ps1 AppStatus
+# Read-only GNSS startup diagnosis while Non-verba has user-0 focus:
+./code/tools/usb-device.ps1 GpsDiagnostics
 # After a successful Linux package verification, using its exact JSON path:
 ./code/tools/usb-device.ps1 InstallVerified -VerificationReport C:\Work\Non-verba\private-source\code\artifacts\qa\REPORT.json
 ./code/tools/usb-device.ps1 Launch
+./code/tools/usb-device.ps1 RestartApp
 ./code/tools/usb-device.ps1 AppScreenshot
 ./code/tools/usb-device.ps1 ExportEnrollments
 ./code/tools/usb-device.ps1 ExportLocations
@@ -92,6 +95,29 @@ or storage-failure exports must not be relabeled as signed reports. See
 `Launch` opens the app's normal bundled home page. Capture, permissions and
 sound-producing actions still require separate UI interactions. Installation
 and launch are explicit commands, never a side effect of status checks.
+
+`RestartApp` is an explicit process-recovery check for the already installed app.
+First finish collection, export/verify evidence and turn preparation and awake
+controls off. It requires focused user-0 Non-verba, stops only its fixed package,
+verifies process absence, launches its fixed MainActivity, and checks unchanged
+APK, user and own-app focus. It preserves app data, keys, journals, caches and OS
+settings; it does not grant permissions. Its unique report retains each completed
+stage and any failure without an automatic retry. Check preparation and a fresh
+awake lease after relaunch. This tests process stop/relaunch, not arbitrary
+mid-transaction death or a phone reboot; no collection is explicitly invoked.
+
+Authorized public-source updates use the reviewed
+[bounded snapshot APK export](CONTAINER_MIGRATION.md#bounded-snapshot-apk-export-for-an-authorized-phone-update).
+The original `InstallVerified` checks and USB helper path remain unchanged.
+
+`GpsDiagnostics` requires focused user-0 Non-verba before and after its fixed
+read-only queries. It records Android build metadata, the developer/full-tracking
+settings, bounded scalar receiver flags, dump field names without their values,
+and bounded measurement-only framework/vendor error logs. It starts no sensor,
+changes no setting, clears no logs and accepts no arbitrary shell command.
+Results are unsigned local diagnostics, retained privately. Empty/missing logs
+or flags are inconclusive; vendor formats and logging differ. The action cannot
+operate Android settings, restart the phone or establish physical cause.
 
 `AppScreenshot` reads a bounded PNG only while the focused window is Non-verba's
 user-0 activity, and rechecks focus before saving it uniquely under device
@@ -425,3 +451,21 @@ location-save-key; location-save-proof-request saves the original request
 belonging to the completed location proof.
 
 When a batch stops, its report retains the last successfully observed own-app state and a compact node summary. These are explicitly labelled with their step number as observations before that step input, never as the final or current app state. Missing/offscreen selector failures therefore provide useful controls without another phone query. Numeric pixel locals are distinct from the standalone string coordinate parameters; the original bounds checks remain unchanged.
+
+## Unsigned camera quality export retrieval
+
+Use the original approved `private-source/code/tools/usb-device.ps1
+ExportCameraQuality` action after explicitly saving a quality record in the app.
+It reads only owned cache exports named
+`nonverba-camera-quality-<12 lowercase image-hash characters>.json`, with
+128 KiB/report and at most 128 files. It preserves original bytes and rejects
+unexpected paths, malformed root JSON, forbidden authenticity/acceptance claims
+and filename/image-prefix disagreement. Its separate retrieval type and `quality`
+kind cannot be counted as a camera photo, original challenge or GPS artifact.
+
+This is unsigned guidance transport. Its digest checks do not authenticate the
+sender or establish metric correctness, task usability, effort or responsibility.
+Recompute in Rust/WASM against independently retained JPEG and profile bytes.
+The existing `ExportCamera` and `VerifySavedDownloads` allowlists are unchanged.
+See [camera quality validation](../sensors/VALIDATION.md#camera-quality-phone-deployment-preparation--5-october-2026)
+for the separate package, parser and device coverage.

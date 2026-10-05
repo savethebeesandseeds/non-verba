@@ -4,7 +4,9 @@ Implemented 1 October 2026. This bounded version covers a native collector's
 **raw-GNSS policy rejection during collection**, including zero eligible GPS
 fixes and partial raw epochs, and **the existing collection timer expiring with
 zero raw callbacks**. The timeout extension was authorized after the first phone
-follow-up on 1 October. Permission denial, cancellation, timeouts after callbacks
+follow-up on 1 October. The 4 October extension also covers **Android raw-GNSS
+startup refusal (status 0) before any raw observations**. Permission denial,
+cancellation, timeouts after callbacks
 but without a raw policy rejection, provider loss, process death before terminal capture and
 other failure classes do not yet produce this signed artifact. Their absence is
 not a successful measurement. All terminal sessions now freeze their status
@@ -53,6 +55,15 @@ measurement time. Timeout cannot be inferred from a pending/empty trace alone;
 native supplies the actual timer trigger. Unknown triggers, early timeout,
 cancellation and successful traces cannot use this signer. Old raw-rejection
 reports remain verifiable, while old verifiers reject the new timeout case.
+An explicit `raw-gnss-startup-unavailable` trigger requires recorded fine
+permission, collecting stage, a registered collector and its frozen OS status
+0 (`not-supported`), with zero raw callbacks/epochs, no rejected epochs or
+eligible fixes, and consistent empty callback diagnostics. Rejected ordinary
+GPS updates may remain as diagnostics. Its reasons are
+`RAW_GNSS_STARTUP_UNAVAILABLE` and `RAW_GNSS_NO_CALLBACKS`; raw evaluation is
+null. This records the OS refusal, not permanent hardware incompatibility or
+physical cause. Old verifiers reject the unknown trigger rather than accepting
+it as a successful or older failure class.
 The verifier separately returns signature, original-request/key binding,
 claim consistency and raw evaluation. `successful_measurement`,
 `measurement_policy_satisfied`, `successful_acceptance_eligible`,
@@ -111,15 +122,55 @@ Transfer/Downloads checks do not verify signatures, original authority or
 physical sensing. A repeated filename can be suffixed by MediaStore; the existing
 unsuffixed-file ambiguity reporting still applies.
 
-Yesterday's unsigned logs, including request prefix `c1a5a22c4de3`, remain
+The 30 September unsigned logs, including request prefix `c1a5a22c4de3`, remain
 unchanged historical observations. They are never inputs to native signing and
 are not converted to contemporaneous signed reports.
 
 ## Validation
 
+Debug builds expose fixed, one-shot reporting-fault modes: signing, initial
+storage and final storage. They bind to the next native session and affect only
+report finalization after a real covered collector failure. They accept no
+observations or signing payload. Unused modes clear on pause/navigation; release
+builds reject them. The signing mode completes actual Keystore signing then
+discards the signature before JNI receives it. Storage modes interrupt an actual
+AtomicFile transaction and run rollback. Triggered errors explicitly say
+`SIMULATED validation fault`; signed collector diagnostics retain the test scope.
+These checks exercise failure handling, not a demonstrated real hardware outage.
+
+A separate debug requester button creates a fresh validation request with
+1 ns reported Android clock alignment uncertainty and 1 ms delivery limits.
+These intentionally strict limits exercise Rust policy refusal using actual
+observations. Normal presets, old requests, collection deadlines and successful
+acceptance are unchanged. Independently retain the strict original before
+collection; such a test is not a performance or natural-environment benchmark.
+
 The dated [validation record](VALIDATION.md) records software, package and phone
 results separately, including failed harness runs. Synthetic Rust/JCA/JNI/WASM
 tests exercise real signatures with synthetic observations; they do not establish
 Android Keystore or physical collector production. Physical testing is limited
-to authorized quiet GPS checks with the phone stationary. Microphone recording,
+to authorized quiet GPS checks with the phone stationary. The
+[4 October follow-up](VALIDATION.md#gps-attempt-report-follow-up--4-october-2026)
+verified the saved no-callback timeout report and its retention across an
+unsupported retry and page reload. The later
+[startup/reporting checks](VALIDATION.md#gps-startup-and-reporting-validation--4-october-2026)
+verified real phone-signed policy rejection under an explicitly strict fresh
+request and all three simulated Android reporting faults. A controlled app
+restart recovered three retained records byte for byte and the final-write-fault
+attempt's earlier `unsigned-pending` record. Its exact comparison with the
+pre-restart signed snapshot exposed a one-ULP JSON floating-point parsing
+difference; that failed result is preserved. Enabling `float_roundtrip` in the
+already pinned `serde_json` passed 245 core tests plus JNI/WASM and legacy
+compatibility checks. The corrected package's installation and affected exact
+phone-retention recheck were deferred when the phone was disconnected on
+4 October. The [5 October exact retention recheck](VALIDATION.md#gps-exact-retention-recheck--5-october-2026)
+installed the corrected package and passed on the phone. A fresh actual policy
+rejection with a simulated final-write fault produced a verified signed report;
+after a verified app process restart, its recovered pending snapshot matched
+the signed snapshot exactly, including floating-point values. Existing records
+retained their exact bytes; the initial-write-failed memory-only outcome remained
+absent. The 4 October failure and original artifacts were preserved.
+These controlled restarts do not establish crash-during-write or power-loss
+durability. Naturally occurring status-0 report production and the receiver's
+original cause or permanent recovery remain unverified. Microphone recording,
 tones, playback and calibration remain held.

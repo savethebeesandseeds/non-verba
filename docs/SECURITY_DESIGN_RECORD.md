@@ -263,7 +263,7 @@ retain contradictory records, and permit independent inspection. Do not replace
 missing evidence with a model's confident conclusion. A future audit process
 needs rules for required records, access, retention, omissions and investigation.
 No universal completeness or automatic punishment mechanism is implemented.
-The [candidate deterrents](requests/research/PRINCIPLES_OF_DISPUTE_RESOLUTION.md#4-candidate-deterrents-outside-the-payment-flow)
+The [candidate deterrents](notes/research/DISPUTE_RESOLUTION_NOTES.md#candidate-deterrents-outside-the-payment-flow)
 remain proposed and supply no new financial authority.
 
 Evidence: [transcript reports](../code/requests/src/transcript.rs),

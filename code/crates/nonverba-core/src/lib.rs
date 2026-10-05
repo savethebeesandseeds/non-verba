@@ -11,6 +11,7 @@ pub mod audio_capture;
 pub mod audio_signal;
 pub mod camera_capture;
 pub mod camera_location;
+pub mod camera_quality;
 pub mod evidence_session;
 pub mod key_enrollment;
 pub mod live_session;

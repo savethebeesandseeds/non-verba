@@ -25,6 +25,31 @@ fun main() {
     expect(!eligible(callbacks = 1))
     expect(!eligible(epochs = 1))
     expect(!eligible(rejected = 1))
+    fun startup(stage: String? = "collecting", raw: Boolean = true, permission: Boolean = true,
+        registration: String = "registered", status: String? = "not-supported", code: Int? = 0,
+        callbacks: Int = 0, last: Long? = null, epochs: Int = 0, rejected: Int = 0, fixes: Int = 0,
+        admitted: Long? = null, cadence: Int = 0, warmup: Boolean = false) =
+        NativeGpsAttemptEligibility.startupUnavailable(stage, raw, permission, registration, status, code,
+            callbacks, last, epochs, rejected, fixes, admitted, cadence, warmup)
+    expect(startup())
+    expect(!startup(stage = "requesting-permission"))
+    expect(!startup(stage = "ready"))
+    expect(!startup(raw = false))
+    expect(!startup(permission = false))
+    expect(!startup(registration = "attempting"))
+    expect(!startup(registration = "refused"))
+    expect(!startup(status = "ready"))
+    expect(!startup(status = null))
+    expect(!startup(code = 1))
+    expect(!startup(code = null))
+    expect(!startup(callbacks = 1))
+    expect(!startup(last = 0))
+    expect(!startup(epochs = 1))
+    expect(!startup(rejected = 1))
+    expect(!startup(fixes = 1))
+    expect(!startup(admitted = 0))
+    expect(!startup(cadence = 1))
+    expect(!startup(warmup = true))
     val root = Files.createTempDirectory("gps-attempt-journal-").toFile()
     fun journal(write: (File, ByteArray) -> Unit = { f,b -> f.writeBytes(b) }) =
         NativeGpsAttemptJournal(root, { it.readBytes() }, write)

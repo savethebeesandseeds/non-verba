@@ -1803,6 +1803,8 @@ dependencies = [
  "wasm-bindgen-futures",
  "x509-parser",
  "zeroize",
+ "zune-core",
+ "zune-jpeg",
 ]
 
 [[package]]

@@ -42,26 +42,30 @@ advance. `ANALYSIS_ONLY` is this increment's authority boundary, not a permanent
 decision to stop at commentary. Formula, authority, evidence requirements,
 challenge procedure and economic fallback require separate design and review.
 
-The [dispute settlement notes](research/DISPUTE_SETTLEMENT_NOTES.md)
-distinguish derivation of the vocabulary, incorporation of declarations, and
-evaluation of both. They leave the future dimensions and their number open.
-The [research context](research/README.md) connects these ideas to this baseline;
-filing the note changes no implementation or selected policy and starts no new work.
+The [priors research notes](../notes/research/DISPUTE_PRIORS_NOTES.md) distinguish
+derivation, inclusion, processing and evaluation. The 4 October clarification
+separates supplying the declarations in context from reasoning with that context.
+The future dimensions and their number remain open. Honest declaration,
+consistency over time and the catalog as a possible commitment remain discussion
+aims, with no selected credibility mechanism.
 
-The later [declaration and commitment notes](research/PRINCIPLES_OF_DISPUTE_RESOLUTION.md)
-preserve ideas about honest declaration, consistency over time and the catalog
-of values as a possible commitment. Their elaborations remain discussion notes, not
-additional implementation decisions or a selected credibility mechanism.
+The [dispute resolution notes](../notes/research/DISPUTE_RESOLUTION_NOTES.md)
+develop the operational procedure, legal review, evidence access, consequences,
+deterrents and accountability. The priors note retains the candidate multimodal
+resolver and distinct inspection harness; an external model API is a possibility,
+rather than a change to the retained runtime.
 
-The later [2 October research note](research/RESOLUTION_INCIDENTS_AND_PRIORS.md)
-connects those commitments to a candidate multimodal resolver and a distinct
-inspection harness. It adds the provisional material-incident route, external
-insurance as a possible initial path and jurisdiction selection as a way to bound
-the problem. It clarifies that priors are not sensor reliability weights. Outcome
-amounts, deterrents, materiality criteria, coverage checks, privacy, legal authority
-and evaluation methods remain open. An external model API and later insurance
-institution are possible branches, not changes to the retained runtime or selected
-dependencies. These additions do not reopen DP-2 or confer financial authority.
+The [incident handling and insurance notes](../notes/research/INCIDENT_HANDLING_AND_INSURANCE.md)
+retain the provisional material-incident route, external coverage as a possible
+initial path and a future insurance institution as a direction to develop.
+Materiality criteria, coverage checks, privacy, legal authority and the
+institutional form remain open; no insurance dependency or launch jurisdiction
+has been selected.
+
+The [research context](../notes/research/README.md) connects these subjects to
+this baseline. Priors are not sensor reliability weights. Reorganizing the notes
+selects no outcome amounts, deterrents, model or evaluation method, reopens no
+DP-2 acceptance condition and confers no financial authority.
 
 An unresolved status is not necessarily economically neutral: after work has
 occurred, a Requester retaining money and an Operator retaining only future labor

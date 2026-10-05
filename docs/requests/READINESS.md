@@ -29,8 +29,8 @@ marketplace, financial guarantee, security proof, legal contract review or
 jurisdiction-specific compliance determination. The constitutional principle and
 the exact corrective non-retraction clause appear in [the specification](SPECIFICATION.md).
 
-[Participant notes](PARTICIPANT_NOTES.md) explain this boundary in plain language.
-[Contract notes AN-2](CONTRACT_NOTES.md) map proposed wording to the code, separate
+[Participant notes](../notes/assignments/PARTICIPANT_NOTES.md) explain this boundary in plain language.
+[Contract notes AN-2](../notes/assignments/CONTRACT_NOTES.md) map proposed wording to the code, separate
 signed commitments from executable rules, and retain the remaining deployment
 decisions. They are documentation for review, not adopted terms or new guarantees.
 
@@ -324,7 +324,7 @@ the old signed inputs. Four synthetic signing reviews were cancelled before any
 vault was opened or signature produced. These checks establish the described
 presentation behavior, not service fulfillment, legal validity or operational
 robot readiness. See AN-2 captures (local review record, not included in this source release)
-and [the updated notes](CONTRACT_NOTES.md).
+and [the updated notes](../notes/assignments/CONTRACT_NOTES.md).
 
 ## Unsupported or unreviewed capabilities
 

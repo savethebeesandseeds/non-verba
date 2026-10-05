@@ -126,6 +126,14 @@ SHA-256 as `NONVERBA_SOURCE_REVISION`, `NONVERBA_SOURCE_DIRTY` and
 Android notices live separately in `assets/nonverba-license/`; its bundled
 document/origin allowlists are unchanged.
 
+Follow-up commands in the same snapshot must receive those same three source
+metadata variables. `dev.sh` preserves supplied values but does not reconstruct
+them when a later `docker exec` omits the launcher's environment. Record the
+original values and pass them explicitly for package inspection; otherwise the
+inspector correctly rejects a different expected `SOURCE.txt`. Reinspect the
+unchanged APK with the original snapshot metadata rather than editing notices,
+rewriting reports or rebuilding/exporting another package.
+
 Dirty or unspecified development builds explicitly say that their base revision
 may not contain the exact matching source. Before distributing such binaries,
 provide their complete corresponding source. A clean identified build points
@@ -147,11 +155,40 @@ to extend that exception from a new path. Source unification does not authorize
 phone actions, wireless debugging, host Java or automatic driver installation.
 See [the USB procedure](USB_DEBUGGING.md).
 
-Snapshot APK outputs are not eligible for the original helper's strict
+Direct snapshot APK paths are outside the original helper's strict
 `/workspace/code/artifacts/container-builds/` installation-report boundary.
-Do not bypass it or claim a phone installation/test from a container build.
-A permanent bind/transport transition needs a separately reviewed lifecycle
-procedure that preserves the original container, volumes, host data and signer.
+The reviewed bounded export bridge below permits an authorized phone update
+without changing that boundary or the existing container bind.
+
+### Bounded snapshot APK export for an authorized phone update
+
+Reviewed 4 October 2026. Use the same launcher-validated source snapshot for
+the build, export and package inspection. This procedure does not rebuild the
+container, migrate its bind, rewrite a verification report or change a signer.
+
+1. Build in the existing managed container through the snapshot launcher. Keep
+   the exact printed snapshot and build output paths. Check that the APK and
+   every parent component are regular/unlinked, then record its size and hash.
+2. Create one new, exclusive UTC-named directory under the existing original
+   `/workspace/code/artifacts/container-builds/` bind. Verify that the parent
+   resolves to that exact path and no component is linked. Fail if the target
+   already exists. Copy only `nonverba-debug.apk`; compare its bytes/hash with
+   the snapshot output. Keep both outputs and any failed evidence.
+3. From the same public snapshot, run the unmodified Linux package inspector
+   against that exact `/workspace/code/artifacts/container-builds/<UTC>/nonverba-debug.apk`
+   copy, with the independently retained original signer baseline. Require
+   `passed`, current-build verification, no reported gaps and the retained signer.
+   The inspector must genuinely produce this path in its report; never edit it.
+4. Copy only the authentic inspector report, unchanged, to a new file in the
+   original host private QA directory and compare its hash. The APK already
+   resides in the original host bind. Invoke the original approved USB helper's
+   `InstallVerified` with this report; retain its exact installed-hash readback.
+
+No cache, build-tree, signing-key or whole-snapshot copy is part of this bridge.
+Apply the working-boundary size limits before large transfers. Build/inspection
+success remains separate from installation and subsequent physical validation.
+A permanent bind/transport transition still needs a separately reviewed
+lifecycle procedure preserving the original container, volumes, data and signer.
 
 Provisioning source changes also change the image-input hash. `Prepare` can
 therefore require an explicit image rebuild even while the verified existing

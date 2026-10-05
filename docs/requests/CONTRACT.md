@@ -5,8 +5,8 @@ Note revision AN-2 · 28 September 2026 · package 0.2.1 · protocol 2 · termin
 This is a protocol record specification and proposed drafting input. It is not
 adopted legal terms or a jurisdiction-specific determination of enforceability.
 
-For the plain-language explanation, read [the participant notes](PARTICIPANT_NOTES.md).
-[The detailed implementation record](CONTRACT_NOTES.md) distinguishes executable
+For the plain-language explanation, read [the participant notes](../notes/assignments/PARTICIPANT_NOTES.md).
+[The detailed implementation record](../notes/assignments/CONTRACT_NOTES.md) distinguishes executable
 rules from signed descriptions and commitments, and records unresolved deployment
 decisions against the current code.
 
@@ -137,7 +137,7 @@ and unallocated excess. A scoped settlement identifies only its released claims
 and preserves M's separate rights. Evidence availability/integrity remains
 separate from these consequential authorizations. Explanatory display text is
 not an additional signed authorization or an unstated waiver of remedies; see
-[the display contract](CONTRACT_NOTES.md#consequential-signing-display).
+[the display contract](../notes/assignments/CONTRACT_NOTES.md#consequential-signing-display).
 
 ## Amendment and settlement
 

@@ -58,6 +58,16 @@ internal class NativeLocationTerminal {
 
 /** Route only the native timer's no-callback case; Rust independently checks the snapshot. */
 internal object NativeGpsAttemptEligibility {
+    /** Only the actual legacy Android status callback can supply this trigger. */
+    fun startupUnavailable(stage: String?, rawRequired: Boolean, permissionGranted: Boolean,
+        registration: String, status: String?, statusCode: Int?, callbacks: Int, lastCallback: Long?,
+        epochs: Int, rejectedEpochs: Int, eligibleFixes: Int, firstAdmitted: Long?, cadenceSkipped: Int,
+        hasWarmupReasons: Boolean): Boolean =
+        stage == "collecting" && rawRequired && permissionGranted && registration == "registered" &&
+            status == "not-supported" && statusCode == 0 && callbacks == 0 && lastCallback == null &&
+            epochs == 0 && rejectedEpochs == 0 && eligibleFixes == 0 && firstAdmitted == null &&
+            cadenceSkipped == 0 && !hasWarmupReasons
+
     fun noCallbackTimeout(stage: String?, rawRequired: Boolean, elapsed: Long, timeout: Long,
         callbacks: Int, epochs: Int, rejectedEpochs: Int): Boolean =
         stage == "collecting" && rawRequired && timeout == 60_000L && elapsed >= timeout &&

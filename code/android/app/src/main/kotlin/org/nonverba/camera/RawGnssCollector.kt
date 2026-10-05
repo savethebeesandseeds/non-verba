@@ -28,7 +28,7 @@ internal class RawGnssCollector(
     private val diagnostics: NativeLocationDiagnostics.Raw,
     private val onEpoch: (JSONObject) -> Boolean,
     private val onWarmupRejected: () -> Unit,
-    private val onFailure: (String) -> Unit
+    private val onFailure: (String, Int?) -> Unit
 ) {
     private var callback: GnssMeasurementsEvent.Callback? = null
     private var active = false
@@ -48,9 +48,9 @@ internal class RawGnssCollector(
                 diagnostics.callback((callbackNs - anchorNs) / 1_000_000)
                 try {
                     if (Build.VERSION.SDK_INT >= 29) collect(event, callbackNs)
-                    else onFailure("Raw GNSS evidence requires Android 10 or later")
+                    else onFailure("Raw GNSS evidence requires Android 10 or later", null)
                 } catch (error: Throwable) {
-                    onFailure((error.message ?: "Native raw GNSS collection failed").take(400))
+                    onFailure((error.message ?: "Native raw GNSS collection failed").take(400), null)
                 }
             }
 
@@ -65,13 +65,7 @@ internal class RawGnssCollector(
                     STATUS_READY -> NativeLocationDiagnostics.RawStatus.READY
                     else -> NativeLocationDiagnostics.RawStatus.UNKNOWN
                 }, status)
-                when (status) {
-                    STATUS_NOT_SUPPORTED -> onFailure("This receiver does not support raw GNSS measurements")
-                    STATUS_LOCATION_DISABLED -> onFailure("Location services were disabled during raw GNSS collection")
-                    STATUS_NOT_ALLOWED -> onFailure("Raw GNSS measurement access was denied")
-                    STATUS_READY -> Unit
-                    else -> onFailure("Unknown raw GNSS receiver status")
-                }
+                NativeLocationDiagnostics.rawStatusFailure(status)?.let { onFailure(it, status) }
             }
         }
         callback = listener

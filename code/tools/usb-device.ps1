@@ -6,7 +6,7 @@ No wireless pairing, TCP device connections, unrestricted shell or driver instal
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Status','DeviceInfo','AppStatus','InstallVerified','Launch','AppUiState','AppUiBatch','AppCameraChallenge','StageCameraOffer','AppScreenshot','AppTap','AppSwipe','AppBack','AppText','AppDismissShare','ExportEnrollments','ExportLocations','ExportCamera','ExportCameraPairing','VerifySavedDownloads','Preview','Stop')]
+    [ValidateSet('Status','DeviceInfo','AppStatus','GpsDiagnostics','InstallVerified','Launch','RestartApp','AppUiState','AppUiBatch','AppCameraChallenge','StageCameraOffer','AppScreenshot','AppTap','AppSwipe','AppBack','AppText','AppDismissShare','ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing','VerifySavedDownloads','Preview','Stop')]
     [string]$Action = 'Status',
     [string]$VerificationReport,
     [string]$RetrievalManifest,
@@ -51,6 +51,10 @@ if ($PSBoundParameters.ContainsKey('CameraOfferFile') -and $Action -cne 'StageCa
 if ($Action -cin @('StageCameraOffer','ExportCameraPairing')) {
     if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Camera pairing transfer requires PowerShell 7.' }
     . (Join-Path $PSScriptRoot 'usb-camera-pairing.ps1')
+}
+if ($Action -ceq 'ExportCameraQuality') {
+    if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Unsigned camera quality retrieval requires PowerShell 7.' }
+    . (Join-Path $PSScriptRoot 'usb-camera-quality.ps1')
 }
 if ($Action -ceq 'StageCameraOffer') {
     if ([string]::IsNullOrEmpty($CameraOfferFile)) { throw 'StageCameraOffer requires CameraOfferFile.' }
@@ -387,6 +391,44 @@ try {
                 package='org.nonverba.camera';installed=[bool]$packagePath;installed_apk_sha256=$installedHash;
                 sensor_tests_run=$false;attestation_verified=$false} | ConvertTo-Json -Depth 5
         }
+        'GpsDiagnostics' {
+            # Fixed read-only queries; no sensor start, settings mutation, log clear,
+            # caller-supplied shell, full location dump, or other-app log inventory.
+            $focus = Get-OwnUiFocus
+            $properties = [ordered]@{}
+            foreach ($name in @('ro.build.version.sdk','ro.build.version.security_patch','ro.build.version.incremental')) {
+                $properties[$name] = ((Invoke-Bridge @('-d','shell','getprop',$name)) -join '').Trim()
+            }
+            $settings = [ordered]@{}
+            foreach ($name in @('development_settings_enabled','enable_gnss_raw_meas_full_tracking')) {
+                $value = ((Invoke-Bridge @('-d','shell','settings','get','global',$name)) -join '').Trim()
+                if ($value -cnotmatch '^(?:null|[0-9]{1,8})$') { throw 'Unexpected GNSS diagnostic setting format.' }
+                $settings[$name] = $value
+            }
+            # Only scalar receiver flags are retained, never coordinates/listeners.
+            $flagsCommand = @'
+'dumpsys location | grep -iE "^[[:space:]]*m?(Started|Enabled|TopHalCapabilities|GnssCapabilities|Capabilities|SupportsGnssMeasurements|IsRegistered|StartedCollection|StartedFullTracking|IsCollectionStarted|MeasurementsSupported)[=:][[:space:]]*(true|false|0x[0-9a-fA-F]+|[0-9]+)" | sed -E "s/([=:][[:space:]]*(true|false|0x[0-9a-fA-F]+|[0-9]+)).*$/\1/" | head -c 16384'
+'@
+            $flags = ((Invoke-Bridge @('-d','shell','sh','-c',$flagsCommand)) -join "`n").Trim()
+            # Vendor dumps differ: keep field names only to diagnose a missing
+            # scalar format, never their location values or client identities.
+            $namesCommand = @'
+'dumpsys location | grep -E "^[[:space:]]*[A-Za-z_][A-Za-z_ ]{0,70}[=:]" | sed -E "s/[=:].*$//" | head -c 4096'
+'@
+            $names = ((Invoke-Bridge @('-d','shell','sh','-c',$namesCommand)) -join "`n").Trim()
+            # These framework tags report measurement startup/delivery errors. An
+            # empty result means no matching retained logs, not a healthy receiver.
+            $logCommand = "'logcat -d -v epoch -t 1000 GnssMeasProvider:V GnssLocationProvider:W LocationManagerService:W LocSvc_GnssAdapter:W LocSvc_GnssInterface:W LocSvc_ApiV02:W LocSvc_HIDL_GnssMeasurement:W *:S | grep -i measurement | head -c 32768'"
+            $logs = ((Invoke-Bridge @('-d','shell','sh','-c',$logCommand)) -join "`n").Trim()
+            if ($flags.Length -gt 16384 -or $logs.Length -gt 32768 -or $names.Length -gt 4096) { throw 'GNSS diagnostic output exceeded its bound.' }
+            if ((Get-OwnUiFocus) -cne $focus) { throw 'Non-verba focus changed during GNSS diagnostics.' }
+            $record = [ordered]@{type='nonverba-usb-gps-diagnostics';version=1;checked_at_utc=[DateTime]::UtcNow.ToString('o');
+                android_user_id=0;unsigned=$true;properties=$properties;settings=$settings;
+                receiver_flags=$flags;receiver_diagnostic_field_names=$names;measurement_framework_logs=$logs;logs_may_be_incomplete=$true;
+                sensor_started=$false;settings_changed=$false;physical_cause='unknown'}
+            $path = Save-AppUiJson $record 'gps-diagnostics'
+            [ordered]@{report=$path;diagnostics=$record} | ConvertTo-Json -Depth 6
+        }
         'InstallVerified' {
             # Only transfer this project's already inspected Linux build. No
             # host package tooling, downgrade, uninstall, data clear or grants.
@@ -427,6 +469,61 @@ try {
             # requesting permissions or playing an acoustic challenge.
             Invoke-Bridge @('-d','shell','am','start','-W','--user',[string]$app.android_user_id,
                 '-n','org.nonverba.camera/.MainActivity')
+        }
+        'RestartApp' {
+            # Explicit process stop/relaunch for already persisted reports. The
+            # caller must first finish collection, save/export evidence and turn
+            # preparation/awake controls off. Never clear app data or OS settings.
+            $record = [ordered]@{type='nonverba-app-process-restart';version=1;status='checking';
+                package='org.nonverba.camera';android_user_id=0;started_at_utc=[DateTime]::UtcNow.ToString('o');
+                before_apk_sha256=$null;after_apk_sha256=$null;before_process_ids=@();after_process_ids=@();
+                stop_attempted=$false;process_stop_verified=$false;launch_attempted=$false;own_focus_verified=$false;
+                collection_invoked=$false;preparation_after_restart='unknown';app_data_cleared=$false;settings_changed=$false;error=$null}
+            try {
+                $before = (& $PSCommandPath -Action AppStatus) | ConvertFrom-Json
+                if (-not $before.installed -or $before.android_user_id -ne 0 -or
+                    $before.installed_apk_sha256 -cnotmatch '\A[a-f0-9]{64}\z') {
+                    throw 'RestartApp requires installed Non-verba for foreground Android user 0.'
+                }
+                $record.before_apk_sha256 = $before.installed_apk_sha256
+                $focus = Get-OwnUiFocus
+                # pidof exits 1 when absent; only that fixed package is queried.
+                $pidCommand = "'pidof org.nonverba.camera || true'"
+                $pids = ((Invoke-Bridge @('-d','shell','sh','-c',$pidCommand)) -join ' ').Trim()
+                if ($pids.Length -gt 256 -or $pids -cnotmatch '\A[1-9][0-9]{0,9}(?: [1-9][0-9]{0,9}){0,3}\z') {
+                    throw 'Could not identify the focused Non-verba process before restart.'
+                }
+                $record.before_process_ids = @($pids -split ' ')
+                if ((Get-OwnUiFocus) -cne $focus) { throw 'Non-verba focus changed before process stop.' }
+                $record.stop_attempted = $true
+                Invoke-Bridge @('-d','shell','am','force-stop','--user','0','org.nonverba.camera') | Out-Null
+                $stoppedPids = ((Invoke-Bridge @('-d','shell','sh','-c',$pidCommand)) -join ' ').Trim()
+                if ($stoppedPids.Length -ne 0) { throw 'Non-verba process stop was not verified; no launch was attempted.' }
+                $record.process_stop_verified = $true
+                $user = ((Invoke-Bridge @('-d','shell','am','get-current-user')) -join '').Trim()
+                if ($user -cne '0') { throw 'Foreground Android user changed after process stop; no launch was attempted.' }
+                $record.launch_attempted = $true
+                Invoke-Bridge @('-d','shell','am','start','-W','--user','0',
+                    '-n','org.nonverba.camera/.MainActivity') | Out-Null
+                $after = (& $PSCommandPath -Action AppStatus) | ConvertFrom-Json
+                $record.after_apk_sha256 = $after.installed_apk_sha256
+                if (-not $after.installed -or $after.android_user_id -ne 0 -or
+                    $after.installed_apk_sha256 -cne $record.before_apk_sha256) {
+                    throw 'App installation or foreground user changed during restart.'
+                }
+                $null = Get-OwnUiFocus
+                $record.own_focus_verified = $true
+                $afterPids = ((Invoke-Bridge @('-d','shell','sh','-c',$pidCommand)) -join ' ').Trim()
+                if ($afterPids.Length -gt 256 -or $afterPids -cnotmatch '\A[1-9][0-9]{0,9}(?: [1-9][0-9]{0,9}){0,3}\z') {
+                    throw 'Could not identify the relaunched Non-verba process.'
+                }
+                $record.after_process_ids = @($afterPids -split ' ')
+                $null = Get-OwnUiFocus
+                $record.status = 'verified-process-restart'
+            } catch { $record.status = 'stopped-user-needed'; $record.error = $_.Exception.Message }
+            $record.completed_at_utc = [DateTime]::UtcNow.ToString('o')
+            $path = Save-AppUiJson $record 'app-process-restart'
+            [ordered]@{report=$path;restart=$record} | ConvertTo-Json -Depth 6
         }
         'AppUiState' {
             $state = Get-AppUiState
@@ -752,18 +849,21 @@ try {
                 user_action_required=(-not $stillInApp);focus_before=$focus;focus_after=$focusAfter;screen=$screen;
                 instruction='Observe a fresh AppScreenshot before any next input. If focus left Non-verba, stop and ask the user; do not follow into another app or permission screen.'} | ConvertTo-Json -Depth 5
         }
-        { $_ -cin @('ExportEnrollments','ExportLocations','ExportCamera','ExportCameraPairing') } {
+        { $_ -cin @('ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing') } {
             # These fixed actions share the bounded transfer path. Only their
             # explicit UI-export filename/shape/size allowlists differ.
             # No caller-supplied command/path, private app files or keys.
             $enrollments = $Action -ceq 'ExportEnrollments'
             $camera = $Action -ceq 'ExportCamera'
+            $cameraQuality = $Action -ceq 'ExportCameraQuality'
             $pairing = $Action -ceq 'ExportCameraPairing'
-            $category = if ($enrollments) { 'enrollment' } elseif ($camera) { 'camera' } elseif ($pairing) { 'camera-pairing' } else { 'location' }
+            $category = if ($enrollments) { 'enrollment' } elseif ($camera) { 'camera' } elseif ($cameraQuality) { 'camera-quality' } elseif ($pairing) { 'camera-pairing' } else { 'location' }
             $names = if ($enrollments) {
                 @('nonverba-key-enrollment-request.json','nonverba-key-enrollment-response.json')
             } elseif ($camera) {
                 @('nonverba-????????????.jpg','nonverba-challenge-????????????.json','nonverba-public-device-id.txt')
+            } elseif ($cameraQuality) {
+                @('nonverba-camera-quality-????????????.json')
             } elseif ($pairing) {
                 @('nonverba-camera-offer.json','nonverba-camera-answer.json')
             } else {
@@ -776,6 +876,8 @@ try {
                 '^cache/exports/(' + $uuidPattern + ')/(nonverba-key-enrollment-(request|response)\.json)$'
             } elseif ($camera) {
                 '^cache/exports/(' + $uuidPattern + ')/((?:nonverba-[a-f0-9]{12}\.jpg|nonverba-challenge-[a-f0-9]{12}\.json|nonverba-public-device-id\.txt))$'
+            } elseif ($cameraQuality) {
+                '\Acache/exports/(' + $uuidPattern + ')/(nonverba-camera-quality-[a-f0-9]{12}\.json)\z'
             } elseif ($pairing) {
                 '^cache/exports/(' + $uuidPattern + ')/(nonverba-camera-(offer|answer)\.json)$'
             } else {
@@ -801,6 +903,7 @@ try {
             if ($paths.Count -gt 128 -or @($paths | Select-Object -Unique).Count -ne $paths.Count) {
                 throw 'Unexpected or excessive public export inventory; no files were read.'
             }
+            if ($cameraQuality) { Assert-CameraQualityExportInventory $paths }
             foreach ($remotePath in $paths) {
                 if ($remotePath -cnotmatch $exportPattern) { throw 'Unexpected public export path; no files were read.' }
             }
@@ -815,6 +918,12 @@ try {
             if ($camera) {
                 $record.context_note = 'Operator-exported camera artifacts. Retrieval does not verify C2PA, the scene, GPS, request freshness or signing-key trust; independent Linux verification is required.'
                 $record.camera_evidence_verified = $false
+            } elseif ($cameraQuality) {
+                $record.context_note = 'Explicitly exported unsigned image quality guidance only. Retrieval checks bytes and bounded shape, not authenticity, metric correctness, task usability, operator effort or responsibility. Recompute independently retained JPEG/profile bytes with Rust/WASM.'
+                $record.guidance_only = $true
+                $record.authenticity_proven = $false
+                $record.quality_metrics_verified = $false
+                $record.successful_measurement_acceptance_available = $false
             } elseif ($pairing) {
                 $record.context_note = 'Public pre-challenge camera signaling only. Retrieval does not authenticate peer identities, prove ICE connectivity, create a challenge or verify evidence.'
             } elseif (-not $enrollments) {
@@ -837,6 +946,9 @@ try {
                         } elseif ($name -cmatch '^nonverba-challenge-([a-f0-9]{12})\.json$') {
                             $kind = 'request'; $challengePrefix = $Matches[1]; $maximum = 16 * 1024
                         } else { $kind = 'key'; $maximum = 1024 }
+                    } elseif ($cameraQuality) {
+                        $qualitySpec = Get-CameraQualityExportSpec $name
+                        $kind = $qualitySpec.kind; $maximum = $qualitySpec.maximum
                     } elseif ($name -cmatch ('^nonverba-gps-attempt-request-(' + $uuidPattern + ')\.json$')) {
                         $kind = 'attempt-request'; $attemptId = $Matches[1]; $maximum = 64 * 1024
                     } elseif ($name -cmatch ('^nonverba-gps-attempt-(' + $uuidPattern + ')\.json$')) {
@@ -883,6 +995,8 @@ try {
                     # independent Rust protocol/signature/chain verification.
                     if ($camera) {
                         Assert-CameraPublicExport -Bytes $bytes -Kind $kind -ChallengePrefix $challengePrefix
+                    } elseif ($cameraQuality) {
+                        $publicRecord = Assert-CameraQualityPublicExport -Bytes $bytes -Name $name
                     } elseif ($pairing) {
                         $publicRecord = Assert-CameraPairingRecord -Bytes $bytes -Kind $kind
                     } else {
@@ -966,6 +1080,11 @@ try {
                         sha256=$actualHash;retrieved_at_utc=$retrievedAt;purpose='location'}
                     if ($enrollments) { $entry.purpose = $publicRecord.purpose }
                     elseif ($camera) { $entry.purpose = 'camera'; $entry.challenge_id_prefix = $challengePrefix }
+                    elseif ($cameraQuality) {
+                        $entry.purpose = 'camera-quality'; $entry.artifact_type = 'nonverba-camera-quality-report'
+                        $entry.image_sha256 = $publicRecord.image_sha256; $entry.analysis_profile_sha256 = $publicRecord.analysis_profile_sha256
+                        $entry.guidance_only = $true; $entry.signed = $false
+                    }
                     elseif ($pairing) { $entry.purpose = 'camera-pairing'; $entry.pairing_id = $publicRecord.pairing_id }
                     elseif ($kind -in @('attempt','attempt-request')) { $entry.attempt_id = $attemptId }
                     else { $entry.challenge_id_prefix = $challengePrefix; $entry.unverified_demo_claim = $demoClaim }

@@ -32,6 +32,10 @@
           </details>
           <p class="fineprint">Browser collection cannot report Android mock-location status. Native collection adds operating-system observations; it still does not independently prove physical location.</p>
           <button id="location-create-request" class="primary wide spaced" disabled>Create fresh request →</button>
+          <div id="location-rejection-validation" hidden>
+            <p class="fineprint">Debug validation only: create a separate fresh request with intentionally strict 1 ns Android clock alignment and 1 ms delivery limits. This tests policy refusal using actual observations; it does not alter a previous request or simulate satellite data.</p>
+            <button id="location-create-rejection-request" class="secondary wide spaced" disabled>Create strict GPS validation request</button>
+          </div>
         </div>
         <div class="panel roomy"><h3>Share the request.</h3><p class="muted">Exchange files through your own channel. This workflow has no live requester connection or online attestation service.</p>
           <label for="location-created-request">Original requester challenge</label><textarea id="location-created-request" rows="10" readonly spellcheck="false"></textarea>
@@ -65,7 +69,7 @@
       </div>
     </section>
     <details id="gps-attempt-panel" class="panel roomy spaced"><summary>GPS failed attempts — retain, export and verify</summary>
-      <p class="muted">Native raw-GNSS policy rejections and collection timeouts with zero raw callbacks have separate reports. Other failures may have no signed report. Retries preserve up to 32 attempts without automatic deletion; full storage is reported. No successful measurement or acceptance is implied.</p>
+      <p class="muted">Native raw-GNSS policy rejections, collection timeouts with zero raw callbacks and Android raw-measurement startup refusals have separate reports. Other failures may have no signed report. Retries preserve up to 32 attempts without automatic deletion; full storage is reported. No successful measurement or acceptance is implied.</p>
       <button id="gps-attempt-refresh" class="secondary">Refresh retained attempts</button>
       <label for="gps-attempt-id">Retained attempt ID</label><select id="gps-attempt-id"></select>
       <button id="gps-attempt-save" class="secondary spaced">Save attempt and its original request</button>
@@ -76,6 +80,15 @@
       <button id="gps-attempt-verify" class="primary spaced">Verify GPS failure report</button>
       <p id="gps-attempt-status" role="status">No GPS attempt report inspected.</p><pre id="gps-attempt-result"></pre>
       <p class="fineprint">The signature authenticates the reporting key and unchanged claims. Physical collection, effort, weather, hardware faults, responsibility and compensation are separate matters. Device timestamps supply no independent arrival witness.</p>
+      <div id="gps-attempt-validation" hidden>
+        <h4>Debug reporting fault validation</h4>
+        <p class="fineprint">One-shot simulated failures affect report finalization after a real collector failure. They never supply observations, change collection policy, clear old records or rotate keys. Navigation or pause clears an unused fault. An injected error does not establish a real hardware or storage outage.</p>
+        <button id="gps-attempt-fault-signing" class="secondary spaced">Arm simulated signing failure</button>
+        <button id="gps-attempt-fault-initial-storage" class="secondary spaced">Arm simulated initial storage failure</button>
+        <button id="gps-attempt-fault-final-storage" class="secondary spaced">Arm simulated final storage failure</button>
+        <button id="gps-attempt-fault-clear" class="secondary spaced">Clear validation fault</button>
+        <p id="gps-attempt-fault-status" role="status">No validation fault armed.</p>
+      </div>
     </details>
     <div class="trust-note spaced"><h4>What this establishes</h4><p>A valid proof binds a location sampling record to the expected signing key and your exact challenge. Sampling and mock-location signals help assess the record, but do not independently certify the device’s physical position. Browser collection uses a software key. An unavailable platform signal is reported as unknown.</p></div>
   </main><footer><span>non-verba / location evidence</span><span>RUST + WEBASSEMBLY · COSE · DEVICE-REPORTED LOCATION</span></footer>

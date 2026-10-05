@@ -7,8 +7,9 @@ prototype into a deployed marketplace or make sensor claims physically true.
 
 | Area | Start here | Scope |
 | --- | --- | --- |
+| Notes and research | [Notes index](notes/README.md) | Research discussions, operators union development, assignment explanations and sensor proposals grouped by purpose |
 | Security design | [Security properties and design record](SECURITY_DESIGN_RECORD.md) | CIA triad, authentication, authorization, non-repudiation, accountability and assumption failures |
-| Cooperation | [Protocol](cooperation/COOPERATION_PROTOCOL.md), [simulator](cooperation/SIMULATOR.md) | Deterministic remuneration calculations and fictional simulations |
+| Cooperation | [Union notes](notes/cooperation/OPERATORS_UNION_NOTES.md), [protocol](cooperation/COOPERATION_PROTOCOL.md), [simulator](cooperation/SIMULATOR.md) | Union development questions, deterministic remuneration calculations and fictional simulations |
 | Assignments | [Assignment guide](requests/README.md), [specification](requests/SPECIFICATION.md) | Exact Contract terms, scoped authority, evidence and protected rights |
 | Disputes | [Priorities and local analysis](requests/DISPUTE_PRIORS.md), [settlement handling](requests/SETTLEMENT_HANDLING.md) | Analysis and reports; binding settlement requires its separate authorization |
 | Sensors | [Evidence app](sensors/README.md), [security](sensors/SECURITY.md), [status](sensors/STATUS.md) | Camera, microphone, location, enrollment and requester verification |

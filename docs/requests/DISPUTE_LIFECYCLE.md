@@ -2,7 +2,7 @@
 
 Process specification · 30 September 2026
 
-This document turns the owner's [mutual closure and escalation notes](research/DISPUTE_SETTLEMENT_NOTES.md#mutual-closure-and-escalation)
+This document turns the owner's [mutual closure and escalation notes](../notes/research/DISPUTE_RESOLUTION_NOTES.md#mutual-closure-and-escalation)
 into a reviewable workflow. It separates implemented records from requirements
 for a future negotiation interface. It does not add executable states, a new
 signature format, a settlement formula or an escalation procedure.

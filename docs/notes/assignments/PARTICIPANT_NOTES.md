@@ -48,7 +48,7 @@ execution or correct reasoning. No funded assurance service has been activated.
 DP-2 is closed as an accepted synthetic workflow-integration increment. The local
 Qwen model remains a workflow test component; its recorded reasoning failures
 remain failures. Reliable reasoning and the translation of priors into
-settlement are separate future work. See [the current explanation](DISPUTE_PRIORS.md)
+settlement are separate future work. See [the current explanation](../../requests/DISPUTE_PRIORS.md)
 and retained closeout (local review record, not included in this source release).
 The optional participant walkthrough remains deferred.
 
@@ -218,7 +218,7 @@ erase a balance in this profile.
 Keep any agreed work change on the amendment path and any actual payment on the
 direct-payment and payee-receipt path. Neither a model interpretation nor a
 settlement proposal can substitute for those separate authorizations.
-See [settlement handling](SETTLEMENT_HANDLING.md) for the full path and an example.
+See [settlement handling](../../requests/SETTLEMENT_HANDLING.md) for the full path and an example.
 
 The protocol's protection is bounded authorization: an unrelated allegation or
 later disagreement is not authority to revoke an established right. Contradictions
@@ -251,7 +251,7 @@ explicit exchange/export files can contain readable evidence and terms. The
 prototype does not enforce recipient lists, retention periods or deletion of
 other parties' copies; those promises need an actual operating process.
 
-See the [terminal guide](INTEGRATION.md) for the actual steps,
+See the [terminal guide](../../requests/INTEGRATION.md) for the actual steps,
 [detailed Contract notes](CONTRACT_NOTES.md) for promises and code evidence,
-[Contract drafting specification](CONTRACT.md) for the signed content, and
-[readiness record](READINESS.md) for verified checks and remaining limits.
+[Contract drafting specification](../../requests/CONTRACT.md) for the signed content, and
+[readiness record](../../requests/READINESS.md) for verified checks and remaining limits.

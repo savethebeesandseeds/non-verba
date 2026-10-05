@@ -22,6 +22,8 @@ import org.json.JSONObject
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.Executors
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
 
 /**
  * Android collection and lifecycle adapter. Rust validates and signs session-owned records.
@@ -39,6 +41,8 @@ internal class NativeLocation(
     private val worker = Executors.newSingleThreadExecutor()
     private val manager = activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     private val ledger = AtomicFile(File(activity.noBackupFilesDir, "location-capture-ledger-v1.json"))
+    private val attemptValidation = NativeGpsAttemptValidation(BuildConfig.DEBUG)
+    @Volatile private var journalWriteFault: Pair<String, NativeGpsAttemptValidation.Fault>? = null
     private val attempts = NativeGpsAttemptJournal(File(activity.noBackupFilesDir, "gps-attempts-v1"),
         read = { file -> AtomicFile(file).openRead().use { input ->
             val output = java.io.ByteArrayOutputStream()
@@ -54,7 +58,15 @@ internal class NativeLocation(
         commit = { file, bytes ->
             val atomic = AtomicFile(file)
             val stream = atomic.startWrite()
-            try { stream.write(bytes); atomic.finishWrite(stream) }
+            try {
+                val fault = journalWriteFault?.takeIf { file.name == "${it.first}.json" }?.second
+                if (fault?.failStorageWrite() == true) {
+                    stream.write(bytes, 0, minOf(bytes.size, 32))
+                    error(fault.message) // Actual AtomicFile rollback preserves the previous pending record.
+                }
+                stream.write(bytes)
+                atomic.finishWrite(stream)
+            }
             catch (error: Throwable) { atomic.failWrite(stream); throw error }
         })
     private var current: Session? = null
@@ -92,6 +104,7 @@ internal class NativeLocation(
         var attemptExport: String? = null
         var permissionGrantedMs: Long? = null
         var firstRawAdmittedMs: Long? = null
+        var validationFault: NativeGpsAttemptValidation.Fault? = null
     }
 
     @JavascriptInterface
@@ -106,7 +119,7 @@ internal class NativeLocation(
             .put("hardware_attested", false).put("collection_attested", false)
             .put("raw_gnss_api_available", Build.VERSION.SDK_INT >= 29)
             .put("raw_gnss_receiver_verified", false)
-            .put("gps_attempt_reports", "raw-policy-rejection-and-no-callback-timeout-v1")
+            .put("gps_attempt_reports", "raw-policy-rejection-no-callback-timeout-and-startup-unavailable-v1")
             .put("camera_exposure_attested", false).toString()
     } catch (failure: Throwable) {
         JSONObject().put("available", false).put("error", safeError(failure)).toString()
@@ -130,7 +143,10 @@ internal class NativeLocation(
             check(current?.state !in ACTIVE_STATES) { "A native location session is already active" }
             val nonce = validated.getJSONObject("challenge").getString("id")
             check(!readLedger().has(nonce)) { "This challenge was already finalized on this device" }
-            Session(UUID.randomUUID().toString(), validated, requestJson, key, spki, System.currentTimeMillis(), SystemClock.elapsedRealtimeNanos()).also { current = it }
+            Session(UUID.randomUUID().toString(), validated, requestJson, key, spki, System.currentTimeMillis(), SystemClock.elapsedRealtimeNanos()).also {
+                it.validationFault = attemptValidation.take()
+                current = it
+            }
         }
         main.post { start(created) }
         synchronized(lock) { snapshot(created).toString() }
@@ -155,6 +171,51 @@ internal class NativeLocation(
         synchronized(lock) { current?.takeIf { it.id == attemptId }?.attemptExport }
             ?: attempts.get(attemptId).toString(Charsets.UTF_8)
     } catch (error: Throwable) { failure(error) }
+
+    /** Debug builds only. Fixed one-shot fault modes accept no signing material or observations. */
+    @JavascriptInterface fun armAttemptFault(mode: String): String = try {
+        val generation = synchronized(lock) {
+            check(!closed) { "Location collector is closed" }
+            lifecycleGeneration
+        }
+        // JavascriptInterface runs on JavaBridge. Reading Activity/WebView state must run on main.
+        // Never hold lock across the main-thread wait: pause/navigation need it to revoke generation.
+        val available = BuildConfig.DEBUG && validationForeground()
+        synchronized(lock) {
+            check(!closed && lifecycleGeneration == generation) { "Attempt validation was cancelled during foreground check" }
+            attemptValidation.arm(mode, available, current?.state in ACTIVE_STATES)
+            JSONObject().put("ok", true).put("available", available)
+                .put("armed_mode", attemptValidation.mode() ?: JSONObject.NULL)
+                .put("simulated", true).toString()
+        }
+    } catch (error: Throwable) { failure(error) }
+
+    @JavascriptInterface fun debugAttemptValidationStatus(): String = try {
+        val before = synchronized(lock) { lifecycleGeneration to closed }
+        val foregroundNow = BuildConfig.DEBUG && !before.second && validationForeground()
+        synchronized(lock) {
+            val available = foregroundNow && !closed && lifecycleGeneration == before.first
+            JSONObject().put("ok", true).put("available", available)
+                .put("armed_mode", if (available) attemptValidation.mode() ?: JSONObject.NULL else JSONObject.NULL)
+                .put("simulated", true).toString()
+        }
+    } catch (error: Throwable) {
+        JSONObject().put("ok", false).put("available", false).put("armed_mode", JSONObject.NULL)
+            .put("simulated", true).put("error", safeError(error)).toString()
+    }
+
+    /** Bounded UI-owned state query; safe before any collector session has set foreground. */
+    private fun validationForeground(): Boolean {
+        if (Looper.myLooper() == Looper.getMainLooper()) return isForeground()
+        val query = FutureTask { isForeground() }
+        check(main.post(query)) { "Attempt validation foreground check is unavailable" }
+        try { return query.get(1_500, TimeUnit.MILLISECONDS) }
+        catch (error: Throwable) {
+            query.cancel(false)
+            main.removeCallbacks(query)
+            throw IllegalStateException("Attempt validation foreground check did not complete", error)
+        }
+    }
 
 
     /**
@@ -281,6 +342,7 @@ internal class NativeLocation(
         foreground = false
         val session = synchronized(lock) {
             lifecycleGeneration++
+            attemptValidation.clear()
             current?.takeIf { it.state in ACTIVE_STATES }?.also {
                 it.failureStage = it.state
                 it.state = "cancelled"
@@ -307,7 +369,8 @@ internal class NativeLocation(
                     val policy = session.request.getJSONObject("policy")
                     fail(session, NativeLocationDiagnostics.timeoutReason(session.state,
                         session.samples.length(), session.rejectedSamples, policy.getInt("min_samples"),
-                        sampleSpan(session), policy.getLong("duration_ms"), session.rawRequired), "collection-timeout")
+                        sampleSpan(session), policy.getLong("duration_ms"), session.rawRequired,
+                        session.rawDiagnostics.snapshot().callbackCount), "collection-timeout")
                 }
             }
         }
@@ -369,7 +432,8 @@ internal class NativeLocation(
                 val raw = RawGnssCollector(manager, main, session.anchorNs, session.rawDiagnostics,
                     onEpoch = { observeRaw(session, it) },
                     onWarmupRejected = { rejectRawWarmup(session) },
-                    onFailure = { fail(session, it) })
+                    onFailure = { message, statusCode -> fail(session, message,
+                        if (statusCode == 0) "raw-gnss-startup-unavailable" else null) })
                 synchronized(lock) {
                     if (current !== session || session.state != "collecting") return
                     session.rawCollector = raw
@@ -534,6 +598,7 @@ internal class NativeLocation(
         return result.put("attempt_report_status", session.attemptStatus)
             .put("attempt_report_error", session.attemptError ?: JSONObject.NULL)
             .put("attempt_id", session.id)
+            .put("debug_attempt_validation_fault", session.validationFault?.mode ?: JSONObject.NULL)
     }
 
     private fun liveSnapshot(session: Session): JSONObject {
@@ -627,8 +692,16 @@ internal class NativeLocation(
             session.state = "error"
             session.error = message.take(400)
             freezeTerminal(session)
+            val raw = session.rawDiagnostics.snapshot()
             val reportTrigger = when {
                 session.rawPolicyRejected -> "raw-policy-rejection"
+                trigger == "raw-gnss-startup-unavailable" && NativeGpsAttemptEligibility.startupUnavailable(
+                    session.failureStage, session.rawRequired, session.permissionGrantedMs != null,
+                    raw.registration.label, raw.receiverStatus?.label, raw.receiverStatusCode,
+                    raw.callbackCount, raw.lastCallbackElapsedMs, session.rawEpochs.length(),
+                    session.rejectedRawEpochs, session.samples.length(), session.firstRawAdmittedMs,
+                    raw.cadenceSkipped, raw.warmupReasons.isNotEmpty()
+                ) -> "raw-gnss-startup-unavailable"
                 trigger == "collection-timeout" && NativeGpsAttemptEligibility.noCallbackTimeout(
                     session.failureStage, session.rawRequired, elapsed(session), SESSION_TIMEOUT_MS,
                     session.rawDiagnostics.snapshot().callbackCount, session.rawEpochs.length(), session.rejectedRawEpochs
@@ -652,6 +725,8 @@ internal class NativeLocation(
         for (name in listOf("raw_gnss_diagnostics", "gnss_status_diagnostics", "timing_diagnostics")) {
             frozen.optJSONObject(name)?.let { collectorStatus.put(name, it) }
         }
+        session.validationFault?.let { fault -> collectorStatus.put("debug_attempt_validation",
+            JSONObject().put("mode", fault.mode).put("simulated", true).put("scope", "report-finalization-only")) }
         val snapshot = JSONObject().put("version", 1).put("type", "nonverba-gps-attempt-snapshot")
             .put("attempt_id", session.id).put("original_request_json", session.originalRequest)
             .put("stopping_stage", session.failureStage).put("local_timeout_ms", SESSION_TIMEOUT_MS)
@@ -673,28 +748,40 @@ internal class NativeLocation(
                 synchronized(lock) { session.attemptExport = text }
                 attempts.put(session.id, text.toByteArray(Charsets.UTF_8))
             }
-            try { publish() }
-            catch (error: Throwable) {
-                record.put("status", "unsigned-storage-failed").put("error", safeError(error))
-                synchronized(lock) { session.attemptExport = record.toString(); session.attemptStatus = "storage-failed"; session.attemptError = safeError(error) }
-                return@execute // Do not claim a durable report if the initial journal write failed.
-            }
             try {
-                val signer = LocationEvidenceSigner(session.key) { true } // Immutable failed snapshot capability, no sensor authority.
-                val signed = JSONObject(NativeLocationCore.sealAttempt(snapshot, session.spki, System.currentTimeMillis(), signer))
-                record.put("report_base64", signed.getString("report_base64"))
-                    .put("native_snapshot_json", JSONObject.NULL).put("status", "signed")
-            } catch (error: Throwable) {
-                record.put("status", "unsigned-signing-failed").put("error", safeError(error))
-            }
-            try {
-                publish()
-                synchronized(lock) { session.attemptStatus = record.getString("status"); session.attemptError = record.optString("error").takeIf { it != "null" } }
-            } catch (error: Throwable) {
-                record.put("status", if (record.getString("status") == "signed") "signed-storage-failed" else "unsigned-storage-failed")
-                    .put("error", safeError(error))
-                synchronized(lock) { session.attemptExport = record.toString(); session.attemptStatus = "storage-failed"; session.attemptError = safeError(error) }
-            }
+                journalWriteFault = session.validationFault?.let { session.id to it }
+                fun storageFailed(error: Throwable, final: Boolean) {
+                    record.put("status", if (final && record.getString("status") == "signed") "signed-storage-failed" else "unsigned-storage-failed")
+                        .put("error", safeError(error))
+                    synchronized(lock) {
+                        session.attemptExport = record.toString()
+                        session.attemptStatus = "storage-failed"
+                        session.attemptError = safeError(error)
+                    }
+                }
+                NativeGpsAttemptFinalization.run(writePending = ::publish,
+                    sign = {
+                        // Immutable failed snapshot capability; no active sensor authority.
+                        val signer = LocationEvidenceSigner(session.key,
+                            afterSign = { session.validationFault?.afterKeystoreSigning() }) { true }
+                        val signed = JSONObject(NativeLocationCore.sealAttempt(snapshot, session.spki, System.currentTimeMillis(), signer))
+                        record.put("report_base64", signed.getString("report_base64"))
+                            .put("native_snapshot_json", JSONObject.NULL).put("status", "signed")
+                    }, writeFinal = ::publish,
+                    initialStorageFailed = { storageFailed(it, false) },
+                    signingFailed = { error ->
+                        val fault = session.validationFault
+                        val message = if (fault?.mode == "signing" && fault.triggered())
+                            "${fault.message}; signature discarded after Android Keystore signing; ${safeError(error)}".take(400)
+                        else safeError(error)
+                        record.put("status", "unsigned-signing-failed").put("error", message)
+                    },
+                    finalStorageFailed = { storageFailed(it, true) },
+                    durable = { synchronized(lock) {
+                        session.attemptStatus = record.getString("status")
+                        session.attemptError = record.optString("error").takeIf { it != "null" }
+                    } })
+            } finally { journalWriteFault = null }
         }
     }
 

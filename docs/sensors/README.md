@@ -11,6 +11,15 @@ delegation, sensor independence, retry, transport and evidence-trust boundaries.
 
 The [implementation status](STATUS.md) summarizes native location, camera and microphone acquisition and the remaining assurance limits. The [physical acceptance checklist](DEVICE_ACCEPTANCE.md) describes an ordered phone test plan; it records no new physical result by itself.
 
+The [notes index](../notes/README.md) groups the research and explanatory documents.
+The [sensor quality notes](../notes/sensors/SENSOR_QUALITY_NOTES.md) collect proposals
+for evidence usability and fair handling of sensing failures.
+
+[Camera quality guidance](CAMERA_QUALITY.md) describes the independent Rust
+resolution, exposure and regional sharpness inspection. The verifier workspace
+can analyze a selected delivered JPEG and export an unsigned quality record;
+calibrated quality requirements and signed request binding remain future work.
+
 The shared Rust core runs as WebAssembly in the browser and Android WebView, and through JNI for native Android sensor evidence. Kotlin adapts permissions, GNSS and Camera2 callbacks, lifecycle, Keystore signing, protected storage and file import/export. C++ owns the realtime AAudio buffers; Rust owns protocol, DSP and verification. There are **no Java source files**, server signing keys, remote signing services, CDN assets, or photo uploads.
 
 The 0.7.0 implementation connects live audio to the shared requester API: the

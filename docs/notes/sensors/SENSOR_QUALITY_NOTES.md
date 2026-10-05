@@ -3,11 +3,17 @@
 Recorded: 28 September 2026.
 
 Status: discussion proposal, with failure/attempt reporting prioritized by the
-owner on 30 September 2026. The bounded [native GPS attempt-report version 1](GPS_ATTEMPT_REPORTS.md)
+owner on 30 September 2026. The bounded [native GPS attempt-report version 1](../../sensors/GPS_ATTEMPT_REPORTS.md)
 was implemented on 1 October; it covers raw-GNSS policy rejection and the existing
 collection timer expiring with zero raw callbacks. The
 remaining quality proposals do not establish implemented features or calibrated
 thresholds. Historical unsigned logs remain unsigned.
+
+On 5 October the first [camera quality guidance module](../../sensors/CAMERA_QUALITY.md)
+implements resolution, exposure distribution and regional sharpness inspection
+of delivered JPEGs in Rust and WASM. Its separate unsigned report retains the
+image hash and analysis profile. Calibration, enforced signed quality contracts,
+movement evidence and simultaneous multi-camera capture remain proposals.
 
 ## Purpose and fairness
 
@@ -140,7 +146,7 @@ or operator fault. This remains a proposal for later implementation.
 ### Priority recorded on 30 September: failed attempts must be inspectable
 
 **Deferred to 1 October 2026 at the owner's request.** Resume from the
-[sensor hardening handoff](STATUS.md): freeze terminal timing first, then
+[sensor hardening handoff](../../sensors/STATUS.md): freeze terminal timing first, then
 develop the separate signed GPS attempt report and its negative tests. No further
 implementation or physical testing is planned for 30 September. This is a saved
 handoff, not an automatic scheduled run.
@@ -155,7 +161,7 @@ other's failure. No microphone testing is authorized by this priority.
 The current phone run illustrates the gap: receiver preparation was active,
 but collection ended after a last raw callback at 26.2 seconds with insufficient
 qualifying satellite observations. The original request and diagnostics are
-preserved in the [validation record](VALIDATION.md).
+preserved in the [validation record](../../sensors/VALIDATION.md).
 Those engineering records are unsigned. Neither the reported cloudy conditions
 nor the sensor snapshot establishes a physical cause or operator responsibility.
 Do not retrospectively sign these host observations as if the phone had recorded

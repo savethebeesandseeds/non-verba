@@ -3,7 +3,7 @@
 **Drafting record AN-2 — 28 September 2026.** Applies to
 `nonverba-requests` **0.2.1**, protocol/schema/policy **2**, guided terminal
 adapter **1**. Read [the participant notes](PARTICIPANT_NOTES.md) first for the
-short explanation. [The Contract specification](CONTRACT.md) describes the
+short explanation. [The Contract specification](../../requests/CONTRACT.md) describes the
 signed record; this document explains the promises that record can support today.
 
 ## Status and purpose
@@ -28,8 +28,8 @@ workflow is a development tool. Its templates are not production agreements.
 
 The live notes also cover the separate `nonverba-disputes` 0.1.0 companion.
 The accepted AN-2 snapshot remains unchanged.
-[The companion specification](DISPUTE_PRIORS.md) maps the new records to code;
-[open decisions](DISPUTE_PRIORS_DECISIONS.md) record what is
+[The companion specification](../../requests/DISPUTE_PRIORS.md) maps the new records to code;
+[open decisions](../../requests/DISPUTE_PRIORS_DECISIONS.md) record what is
 still needed before priors could determine settlement. This addition does
 not amend signed terms or activate a service.
 
@@ -267,7 +267,7 @@ proposal and its financial consequence before authorizing it. A work change uses
 the supported all-party amendment path; payment remains direct and its protocol
 credit requires the payee's receipt. An interpretation of priors is not a
 substitute for any of these authorizations. No settlement formula or monetary
-fallback is selected by these notes. [Settlement handling](SETTLEMENT_HANDLING.md)
+fallback is selected by these notes. [Settlement handling](../../requests/SETTLEMENT_HANDLING.md)
 connects these steps and records their code boundaries.
 
 All-party reversal reconciliation names an exact receipt
@@ -329,27 +329,27 @@ bytes; a changed source file requires reassessing the corresponding statement.
 
 | Claim or boundary | Current implementation | Supporting evidence |
 | --- | --- | --- |
-| Roles are R/O/M; execution resources are separate from party authority | [model.rs](../../code/requests/src/model.rs): `Role`, `PartyBinding`, `Service`; [contract.rs](../../code/requests/src/contract.rs): `validate_trust` | `coalitions.rs`: `administrator_key_replacement_cannot_change_existing_agreement_authority` |
+| Roles are R/O/M; execution resources are separate from party authority | [model.rs](../../../code/requests/src/model.rs): `Role`, `PartyBinding`, `Service`; [contract.rs](../../../code/requests/src/contract.rs): `validate_trust` | `coalitions.rs`: `administrator_key_replacement_cannot_change_existing_agreement_authority` |
 | R accepts embedded terms; O accepts their exact digest and supplies the quote | `contract.rs`: `verify_request`, `verify_quote`, `validate_contract` | `coalitions.rs`: `requester_cannot_change_an_operator_quote_even_if_all_root_signatures_are_new` |
-| Same Contract requires all three roles; terms remain exact | `contract.rs`: `verify_contract`; [crypto.rs](../../code/requests/src/crypto.rs): `signing_bytes`, `verify` | `coalitions.rs`: `a_new_platform_policy_or_terms_artifact_cannot_rewrite_old_signatures`; retained partial capture |
-| One Assignment per Request is an honest local signing guard, not global uniqueness proof | [nonverba-assignment.rs](../../code/requests/src/bin/nonverba-assignment.rs): `endorse`, `request-assignment` slot; [local.rs](../../code/requests/src/local.rs): `reserve_signing_slot` | `local.rs` tests: `durable_guard_refuses_conflicts_and_partial_crash_records`; rollback/hidden history remain unsupported |
-| Exact preview and participant authorization; current templates remain synthetic | [review.rs](../../code/requests/src/bin/nonverba-workflow/review.rs): `Review::validate`, `render`; [drafts.rs](../../code/requests/src/bin/nonverba-workflow/drafts.rs): `request`, `contract` | Adapter tests `preview_covers_exact_scope_quote_destinations_exclusions_and_policy`, `formatting_and_later_source_changes_do_not_rewrite_retained_terms` |
+| Same Contract requires all three roles; terms remain exact | `contract.rs`: `verify_contract`; [crypto.rs](../../../code/requests/src/crypto.rs): `signing_bytes`, `verify` | `coalitions.rs`: `a_new_platform_policy_or_terms_artifact_cannot_rewrite_old_signatures`; retained partial capture |
+| One Assignment per Request is an honest local signing guard, not global uniqueness proof | [nonverba-assignment.rs](../../../code/requests/src/bin/nonverba-assignment.rs): `endorse`, `request-assignment` slot; [local.rs](../../../code/requests/src/local.rs): `reserve_signing_slot` | `local.rs` tests: `durable_guard_refuses_conflicts_and_partial_crash_records`; rollback/hidden history remain unsupported |
+| Exact preview and participant authorization; current templates remain synthetic | [review.rs](../../../code/requests/src/bin/nonverba-workflow/review.rs): `Review::validate`, `render`; [drafts.rs](../../../code/requests/src/bin/nonverba-workflow/drafts.rs): `request`, `contract` | Adapter tests `preview_covers_exact_scope_quote_destinations_exclusions_and_policy`, `formatting_and_later_source_changes_do_not_rewrite_retained_terms` |
 | Consequence display authenticates exact context before confirming an amount; repeated acknowledgment is not another charge | `review.rs`: `render_verified`, `action_consequences`, `completion_evidence`; `bundle.rs`: `known_agreement`, `validate_unsigned_action` | Adapter tests `verified_ack_explains_duplicate_amount_and_separates_missing_or_invalid_evidence`, `missing_exact_agreement_never_borrows_root_price_and_partial_formation_stays_incomplete` |
 | Receipt prose separates stated amount, exact allocated coverage, overlap and excess | `review.rs`: `action_consequences`, `existing_grants`; `rights.rs`: `allocation_amount` | Adapter test `receipt_review_separates_statement_coverage_excess_and_existing_grants`; `workflow.rs`: `consent_display_keeps_message_acknowledgment_and_overlapping_receipts_distinct` |
-| Readiness checks only specified record conditions | [bundle.rs](../../code/requests/src/bundle.rs): `verify_assignment_bundle`, readiness construction | Partial and late-context captures; physical-dispute capture is still locally ready |
-| Only a closed set of actions creates effects; no arbitrary text interpreter | [actions.rs](../../code/requests/src/actions.rs): `required_authorizers`, `validate_authorizations`, `prepare_action_signature`; `bundle.rs`: `apply` | `coalitions.rs`, `effect_dependencies.rs`, `review_late_context.rs` |
+| Readiness checks only specified record conditions | [bundle.rs](../../../code/requests/src/bundle.rs): `verify_assignment_bundle`, readiness construction | Partial and late-context captures; physical-dispute capture is still locally ready |
+| Only a closed set of actions creates effects; no arbitrary text interpreter | [actions.rs](../../../code/requests/src/actions.rs): `required_authorizers`, `validate_authorizations`, `prepare_action_signature`; `bundle.rs`: `apply` | `coalitions.rs`, `effect_dependencies.rs`, `review_late_context.rs` |
 | Task entitlement needs R acknowledgment or a valid pre-agreed artifact rule | `bundle.rs`: `apply`, acknowledgment/artifact branches; `contract.rs`: artifact criterion checks | `lifecycle.rs`: `requester_rejection_cannot_erase_preagreed_exact_artifact_entitlement`, `changed_attachment_bytes_never_satisfy_an_exact_artifact_rule` |
-| Exact payee receipts, releases and scoped reversals; no transfer of funds | `actions.rs`: authority matrix; [rights.rs](../../code/requests/src/rights.rs): `grant`, `revoke`, `refresh` | `rights.rs`, `verifier_edges.rs`; settlement and reversal captures |
+| Exact payee receipts, releases and scoped reversals; no transfer of funds | `actions.rs`: authority matrix; [rights.rs](../../../code/requests/src/rights.rs): `grant`, `revoke`, `refresh` | `rights.rs`, `verifier_edges.rs`; settlement and reversal captures |
 | Expense caps cover authorized principal; receipts do not restore the cap | `bundle.rs`: expense application and typed effect dependencies | `effect_dependencies.rs`: `paid_and_released_expenses_still_consume_the_same_category_cap`, `repeated_compatible_expense_certificates_consume_the_cap_once_per_identity` |
 | Financial assurance unsupported; explicit service activation needs R/O/M | `contract.rs`: `validate_contract`, assurance branch; `bundle.rs`: activation branch | `review_late_context.rs`: `service_authority_scope_and_supported_prerequisites_remain_required` |
 | Unrelated contradictory context cannot itself revoke an independent established right | `bundle.rs`: authenticated knowledge and required-effect projection; `rights.rs`: independent grants | `review_late_context.rs`, `effect_dependencies.rs`; late-context capture retains M fee separately |
-| Evidence checks distinguish authenticity, integrity, missing bytes and claims | [evidence.rs](../../code/requests/src/evidence.rs): `index_attachments`, `validate_manifest`, `event_reports`; [transcript.rs](../../code/requests/src/transcript.rs) | `evidence_integrity.rs`, `transcript.rs`, physical-dispute capture |
+| Evidence checks distinguish authenticity, integrity, missing bytes and claims | [evidence.rs](../../../code/requests/src/evidence.rs): `index_attachments`, `validate_manifest`, `event_reports`; [transcript.rs](../../../code/requests/src/transcript.rs) | `evidence_integrity.rs`, `transcript.rs`, physical-dispute capture |
 | Narrative timing, safety, remedies, privacy and legal choices do not become executable authority | `model.rs`: respective record fields; `contract.rs`: text/shape checks; `bundle.rs`: closed effect branches | Closed action matrix and source inspection; no legal, safety, deletion or deadline enforcement adapter exists |
 | Encrypted retention and immutable writes are local capabilities | `local.rs`: `seal_evidence`, `write_immutable`, `store_encrypted_snapshot`, `merge_bundles` | `local.rs` tests: `evidence_bundle_defaults_to_authenticated_encrypted_retention`, `bundle_merge_combines_partial_signatures_and_preserves_conflicting_records` |
-| Reports preserve independent statuses and conditional claims | `bundle.rs`: `BundleReport` construction; [inspection.rs](../../code/requests/src/bin/nonverba-workflow/inspection.rs): `render` | `workflow.rs`: `disputed_and_scoped_fixture_views_preserve_every_core_distinction` |
+| Reports preserve independent statuses and conditional claims | `bundle.rs`: `BundleReport` construction; [inspection.rs](../../../code/requests/src/bin/nonverba-workflow/inspection.rs): `render` | `workflow.rs`: `disputed_and_scoped_fixture_views_preserve_every_core_distinction` |
 
 Test names in this table refer to files under
-[`code/requests/tests`](../../code/requests/tests), except the adapter unit tests
+[`code/requests/tests`](../../../code/requests/tests), except the adapter unit tests
 in the linked binary modules. The existence of a test name is not itself a pass
 claim; preserved execution evidence is identified below.
 
@@ -524,6 +524,6 @@ For each future change:
    review for real deployment, and only then make corresponding service claims.
 
 The exact core and non-retraction clauses remain in
-[the Contract specification](CONTRACT.md#core-clause-for-legal-review). These
+[the Contract specification](../../requests/CONTRACT.md#core-clause-for-legal-review). These
 notes neither replace their wording nor turn their design aims into an absolute
 guarantee of outcomes.

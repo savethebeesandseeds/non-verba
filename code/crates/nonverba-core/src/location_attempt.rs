@@ -40,7 +40,7 @@ pub struct Snapshot {
     /// Exact UTF-8 bridge request, including its serialization, retained at begin.
     pub original_request_json: String,
     pub stopping_stage: String,
-    /// Absent in the original v1 raw-policy reports. Timeout must be explicit.
+    /// Absent in the original v1 raw-policy reports. Other terminal causes must be explicit.
     #[serde(default, skip_serializing_if = "TerminalTrigger::is_raw_rejection")]
     pub terminal_trigger: TerminalTrigger,
     pub local_timeout_ms: u64,
@@ -55,6 +55,9 @@ pub enum TerminalTrigger {
     #[default]
     RawPolicyRejection,
     CollectionTimeout,
+    /// Android reported status 0 before any raw measurements were received.
+    /// This OS status does not distinguish unsupported hardware from startup failure.
+    RawGnssStartupUnavailable,
 }
 impl TerminalTrigger {
     fn is_raw_rejection(&self) -> bool {
@@ -64,6 +67,7 @@ impl TerminalTrigger {
         match self {
             Self::RawPolicyRejection => "raw-gnss-policy-rejected",
             Self::CollectionTimeout => "raw-gnss-no-callback-timeout",
+            Self::RawGnssStartupUnavailable => "raw-gnss-startup-unavailable",
         }
     }
 }
@@ -205,6 +209,40 @@ fn reasons(snapshot: &Snapshot) -> Result<Vec<String>, String> {
         }
         return Ok(vec![
             "COLLECTION_TIMEOUT".into(),
+            "RAW_GNSS_NO_CALLBACKS".into(),
+        ]);
+    }
+    if snapshot.terminal_trigger == TerminalTrigger::RawGnssStartupUnavailable {
+        // Read collector-owned fields from the immutable native status snapshot.
+        // Neither empty data alone nor a caller's prose is a terminal OS trigger.
+        let diagnostic = &status["raw_gnss_diagnostics"];
+        if d.raw_callback_count != 0
+            || d.first_raw_admitted_elapsed_ms.is_some()
+            || d.permission_granted_elapsed_ms.is_none()
+            || !raw.epochs.is_empty()
+            || raw.rejected_epoch_count != 0
+            || !trace.samples.is_empty()
+            || raw.version != 1
+            || raw.kind != "android-raw-gnss"
+            || raw.collection_interval_ms != 1000
+            || !raw
+                .anchor_elapsed_realtime_ns
+                .parse::<u64>()
+                .is_ok_and(|v| v > 0)
+            || diagnostic["registration"].as_str() != Some("registered")
+            || diagnostic["receiver_status"].as_str() != Some("not-supported")
+            || diagnostic["receiver_status_code"].as_i64() != Some(0)
+            || diagnostic["callback_count"].as_u64() != Some(0)
+            || diagnostic.get("last_callback_elapsed_ms") != Some(&serde_json::Value::Null)
+            || diagnostic["cadence_skipped"].as_u64() != Some(0)
+            || !diagnostic["warmup_reasons"]
+                .as_object()
+                .is_some_and(serde_json::Map::is_empty)
+        {
+            return Err("Snapshot does not show a raw GNSS startup-unavailable status before callbacks".into());
+        }
+        return Ok(vec![
+            "RAW_GNSS_STARTUP_UNAVAILABLE".into(),
             "RAW_GNSS_NO_CALLBACKS".into(),
         ]);
     }

@@ -8,6 +8,10 @@ fictional Operators, work and agreements. `web/simulator/union.mjs` controls the
 Rust/WebAssembly protocol. Voting, prices, support thresholds and settlement use
 that shared core.
 
+The [operators union notes](../notes/cooperation/OPERATORS_UNION_NOTES.md) explain
+the larger idea, distinguish this simulation from an operational union and
+preserve questions for its further development.
+
 ## Launch
 
 Run builds and previews inside the [managed Debian environment](../development/CONTAINER_PLAN.md).

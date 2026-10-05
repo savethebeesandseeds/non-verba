@@ -75,8 +75,11 @@ internal class LocationCaptureKey(private val context: Context, val profile: Str
 }
 
 /** A per-finalization capability, held only by the native session controller. */
-internal class LocationEvidenceSigner(private val key: LocationCaptureKey, private val active: () -> Boolean) {
+internal class LocationEvidenceSigner(private val key: LocationCaptureKey,
+    private val afterSign: () -> Unit = {}, private val active: () -> Boolean) {
     fun signEvidence(message: ByteArray): ByteArray {
-        return key.sign(message, active)
+        val signature = key.sign(message, active)
+        afterSign()
+        return signature
     }
 }

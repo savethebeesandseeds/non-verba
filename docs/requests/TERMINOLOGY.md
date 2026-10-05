@@ -1,7 +1,7 @@
 # Terminology
 
 Living vocabulary for the Assignment protocol and dispute-resolution discussion.
-Updated 2 October 2026.
+Updated 4 October 2026.
 
 This is the separate home for naming conventions. It distinguishes agreed working
 language, proposed terms still under discussion, and existing implementation names.
@@ -33,7 +33,7 @@ services, with appropriate Operator business costs reflected in pricing. Legal
 enforceability, employment classification and tax, insurance or other statutory
 responsibilities remain questions for separate review.
 
-### Priors and the three research questions
+### Priors and the four research stages
 
 | Term | Working meaning |
 | --- | --- |
@@ -41,12 +41,16 @@ responsibilities remain questions for separate review.
 | Catalog of priors | The shared vocabulary of priors and their meanings |
 | Declared priors | A party's expression using that shared vocabulary |
 | Derivation | Developing and defining the priors; the earlier notes use selection for this question |
-| Incorporation | Bringing each party's declared priors into resolution and exploring how processing uses them with the Contract, claims and evidence |
-| Evaluation | Examining the automatic dispute-resolution system, including the priors, their incorporation and resulting resolutions |
+| Inclusion | Supplying the exact prior definitions and both parties' declarations in the case context alongside the Contract, claims, evidence and procedure |
+| Processing | Studying how the resolver reasons with that context and how the priors influence interpretation and possible outcomes |
+| Incorporation | Earlier umbrella term covering questions now distinguished as inclusion and processing |
+| Evaluation | Examining the catalog, inclusion, processing and their interaction in dispute resolution, with findings feeding back into their design |
 
 Catalog and declaration are a practical distinction within priors, not additional
-layers of priors. Processing is considered alongside incorporation for now;
-its method remains open.
+layers of priors. The owner clarified inclusion and processing as separate
+research stages on 4 October. Earlier notes use incorporation across both
+questions. Their methods remain open; this terminology changes no signed
+catalog, processing implementation or settlement authority.
 
 The working role framing reads Requester priors as a **warranty of conduct**
 and Operator priors as a **standing offer of treatment**. The latter concerns
@@ -59,7 +63,7 @@ reliability weights for GPS, photographs, audio or other evidence types. They do
 not establish facts, certify good faith or override protected rights. Their
 precise influence on ambiguity, established shortfalls and remedies remains open;
 this wording does not reinterpret the current signed five-prior catalog. See the
-[connected research note](research/RESOLUTION_INCIDENTS_AND_PRIORS.md#priors-as-principles-for-interpreting-ambiguity).
+[priors research note](../notes/research/DISPUTE_PRIORS_NOTES.md#priors-as-principles-for-interpreting-ambiguity).
 
 ## Dispute vocabulary under discussion
 
@@ -94,8 +98,9 @@ disclosing identification information remain to be defined.
 
 A material incident and a contractual dispute may coexist within one Assignment.
 Neither the notice nor its classification would by itself settle either claim.
-The [incident and evidence-access discussion](research/RESOLUTION_INCIDENTS_AND_PRIORS.md)
-develops the provisional route and scrutiny-package aims. Existing local replay
+The [incident handling notes](../notes/research/INCIDENT_HANDLING_AND_INSURANCE.md)
+develop the provisional route; the [evidence-access discussion](../notes/research/DISPUTE_RESOLUTION_NOTES.md#evidence-access-and-privacy)
+retains the scrutiny-package aims. Existing local replay
 exports do not implement that production privacy design.
 
 The current core's **bilateral settlement** operation is a specific, limited

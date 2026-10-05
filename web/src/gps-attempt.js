@@ -2,6 +2,15 @@
 import {base64ToBytes} from './location-platform.js';
 export const MAX_ATTEMPT_EXPORT = 4 * 1024 * 1024 + 32 * 1024;
 export const ATTEMPT_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+const FAULT_MODES = ['signing', 'initial-storage', 'final-storage'];
+
+export function gpsAttemptValidationAvailable(native) {
+  try {
+    const value = JSON.parse(native?.debugAttemptValidationStatus?.());
+    return value?.ok === true && value.available === true && value.simulated === true
+      && (value.armed_mode === null || FAULT_MODES.includes(value.armed_mode));
+  } catch { return false; }
+}
 
 export function readGpsAttemptExport(text) {
   if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_ATTEMPT_EXPORT) throw new Error('GPS attempt export exceeds its limit.');
@@ -35,6 +44,20 @@ export function installGpsAttemptUi({document, native, engine, save}) {
     try { await fn(); } catch (e) { status(String(e.message || e)); }
     finally { $(id).disabled = false; }
   });
+  const faultPanel = $('gps-attempt-validation');
+  if (faultPanel && gpsAttemptValidationAvailable(native)) {
+    faultPanel.hidden = false;
+    for (const mode of [...FAULT_MODES, 'clear']) {
+      on(`gps-attempt-fault-${mode}`, async () => {
+        const value = JSON.parse(native.armAttemptFault(mode));
+        if (value.ok !== true || value.available !== true
+            || value.armed_mode !== (mode === 'clear' ? null : mode)) throw new Error(value.error || 'Validation fault was not armed.');
+        $('gps-attempt-fault-status').textContent = mode === 'clear'
+          ? 'No validation fault armed.'
+          : `SIMULATED ${mode} failure armed for the next native GPS session only. It affects reporting after a real covered failure; observations and successful-proof rules are unchanged.`;
+      });
+    }
+  }
   on('gps-attempt-refresh', async () => {
     if (!native?.listAttempts) throw new Error('Retained native GPS attempts are available in the Android app.');
     const v = JSON.parse(native.listAttempts());
