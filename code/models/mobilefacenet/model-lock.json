@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "model_id": "qualcomm-foamliu-mobilefacenet-128d",
+  "cache_path": "/opt/nonverba-tools/models/mobilefacenet/foamliu-a6cc9032-qaihub-v0.64.0-ort1.23.2",
+  "profile": {
+    "id": "qualcomm-foamliu-mobilefacenet-128d",
+    "version": "operator-face-mobilefacenet128-qaihub064-v1",
+    "checkpoint_sha256": "90a00ba1d8b0b688af3deb731ed53dca582e6106805d1bc3cfdef55f570493f4",
+    "artifact_sha256": "1efc0e9098b219466bb54c82a971e08da11e29267aee6f7f9c1fd13274b7f7ec",
+    "preprocessing": "rgb112-nchw-f32-imagenet-meanstd-v1",
+    "aggregation": "original-plus-horizontal-flip-sum-then-l2-v1",
+    "dimensions": 128,
+    "runtime": "onnxruntime-web-1.23.2-wasm-cpu-single-thread",
+    "precision": "float32",
+    "alignment": "yunet-2023mar-320-bgr-score0.8-nms0.3-five-point-similarity-bilinear-112-v1"
+  },
+  "checkpoint": {
+    "repository": "https://github.com/foamliu/MobileFaceNet",
+    "revision": "a6cc9032a659b615f477833e1a70b5e7931bcccc",
+    "file": "mobilefacenet.pt",
+    "bytes": 4135271,
+    "sha256": "90a00ba1d8b0b688af3deb731ed53dca582e6106805d1bc3cfdef55f570493f4",
+    "publisher_license": "Apache-2.0"
+  },
+  "encoder": {
+    "file": "mobilefacenet-128d.onnx",
+    "bytes": 4329650,
+    "sha256": "1efc0e9098b219466bb54c82a971e08da11e29267aee6f7f9c1fd13274b7f7ec",
+    "publisher_release": "https://qaihub-public-assets.s3.us-west-2.amazonaws.com/qai-hub-models/models/mobile_facenet/releases/v0.64.0/mobile_facenet-onnx-float.zip",
+    "publisher_source_revision": "53af617346c1a9c51c0cdf9d05540946d02741e5",
+    "transformation": "external-tensor-ranges-to-inline-raw-data-v1",
+    "graph": {
+      "inputs": [
+        {"name": "img1", "elementType": 1, "shape": [1, 3, 112, 112]},
+        {"name": "img2", "elementType": 1, "shape": [1, 3, 112, 112]}
+      ],
+      "outputs": [{"name": "embeddings", "elementType": 1, "shape": [2, 128]}],
+      "opsets": [{"domain": "", "version": 21}]
+    }
+  },
+  "detector": {
+    "file": "face_detection_yunet_2023mar_320.onnx",
+    "bytes": 229653,
+    "sha256": "d4914077f9b91524e9c52e34507abe9ea7fe274ad484038af8d16eede887803c",
+    "repository": "https://github.com/opencv/opencv_zoo",
+    "revision": "47534e27c9851bb1128ccc0102f1145e27f23f98",
+    "original_file": "face_detection_yunet_2023mar.onnx",
+    "original_sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+    "transformation": "640-to-320-input-output-dimensions-remove-derived-value-info-v1",
+    "publisher_license": "MIT",
+    "graph": {
+      "inputs": [{"name": "input", "elementType": 1, "shape": [1, 3, 320, 320]}],
+      "outputs": [
+        {"name": "cls_8", "elementType": 1, "shape": [1, 1600, 1]},
+        {"name": "cls_16", "elementType": 1, "shape": [1, 400, 1]},
+        {"name": "cls_32", "elementType": 1, "shape": [1, 100, 1]},
+        {"name": "obj_8", "elementType": 1, "shape": [1, 1600, 1]},
+        {"name": "obj_16", "elementType": 1, "shape": [1, 400, 1]},
+        {"name": "obj_32", "elementType": 1, "shape": [1, 100, 1]},
+        {"name": "bbox_8", "elementType": 1, "shape": [1, 1600, 4]},
+        {"name": "bbox_16", "elementType": 1, "shape": [1, 400, 4]},
+        {"name": "bbox_32", "elementType": 1, "shape": [1, 100, 4]},
+        {"name": "kps_8", "elementType": 1, "shape": [1, 1600, 10]},
+        {"name": "kps_16", "elementType": 1, "shape": [1, 400, 10]},
+        {"name": "kps_32", "elementType": 1, "shape": [1, 100, 10]}
+      ],
+      "opsets": [{"domain": "", "version": 11}]
+    }
+  },
+  "inference_contract": {
+    "input": "Aligned 112x112 RGB, float32 NCHW, values 0..1. Both paired inputs receive the same crop for single-face inference.",
+    "normalization_location": "inside_encoder_graph",
+    "mean": [0.485, 0.456, 0.406],
+    "standard_deviation": [0.229, 0.224, 0.225],
+    "flip_axis": "width",
+    "selection": "embeddings first row (128 values)",
+    "aggregation": "backbone(original)+backbone(horizontal_flip), followed by caller L2 normalization",
+    "comparison": "cosine similarity of finite nonzero normalized 128D features",
+    "face_detector": "separate YuNet BGR float32 320x320; no RGB/ImageNet normalization for detection",
+    "threshold": "unconfigured; illustrative evaluation thresholds do not establish authentication accuracy",
+    "liveness": "unresolved",
+    "trusted_capture": "unresolved",
+    "legal_identity": "not_established"
+  },
+  "provenance_limits": {
+    "checkpoint_export_relation": "Qualcomm attributes its released MobileFaceNet model to the foamliu checkpoint. This recipe pins both exact files; it does not load the PyTorch checkpoint or independently reproduce the publisher Torch export.",
+    "license": "Publisher license declarations are recorded separately from training-data or dependency clearance. Qualcomm wrapper source is BSD-3-Clause; foamliu repository and Qualcomm weight card declare Apache-2.0.",
+    "validation": "Synthetic WASM inference establishes packaging and paired-input parity only; no measured face recognition, PAD, demographic error rate, camera integrity or phone latency is claimed."
+  },
+  "runtime": {
+    "package": "onnxruntime-web",
+    "version": "1.23.2",
+    "integrity": "sha512-T09JUtMn+CZLk3mFwqiH0lgQf+4S7+oYHHtk6uhaYAAJI95bTcKi5bOOZYwORXfS/RLZCjDDEXGWIuOCAFlEjg==",
+    "execution_providers": ["wasm"],
+    "num_threads": 1,
+    "proxy": false
+  },
+  "browser_assets": {
+    "encoder": {"file": "mobilefacenet-128d.onnx", "cache_file": "mobilefacenet-128d.onnx", "bytes": 4329650, "sha256": "1efc0e9098b219466bb54c82a971e08da11e29267aee6f7f9c1fd13274b7f7ec"},
+    "detector": {"file": "face_detection_yunet_2023mar_320.onnx", "cache_file": "face_detection_yunet_2023mar_320.onnx", "bytes": 229653, "sha256": "d4914077f9b91524e9c52e34507abe9ea7fe274ad484038af8d16eede887803c"},
+    "runtime_module": {"file": "ort.wasm.min.mjs", "cache_file": "ort/ort.wasm.min.mjs", "bytes": 49856, "sha256": "69751720f611e37d1ce2fa3c6ebaa80f949014752636c5f8887a63d40feadcc7"},
+    "runtime_wasm_module": {"file": "ort-wasm-simd-threaded.mjs", "cache_file": "ort/ort-wasm-simd-threaded.mjs", "bytes": 20321, "sha256": "90a557d15c02bac4504d95b67f431d8594635ed2a0a62a7f2cd83d090ff91d3e"},
+    "runtime_wasm": {"file": "ort-wasm-simd-threaded.wasm", "cache_file": "ort/ort-wasm-simd-threaded.wasm", "bytes": 11905541, "sha256": "45eaee27761ad883742a8d4b8fce1538d60ce43b51adf1726fafccc59b8c1a15"}
+  },
+  "browser_notices": [
+    {"file": "LICENSE.foamliu.txt", "cache_file": "LICENSE.foamliu.txt", "bytes": 11357, "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"file": "LICENSE.yunet.txt", "cache_file": "LICENSE.yunet.txt", "bytes": 1085, "sha256": "c83b8120c50ccbd4c4f96edf53141bdd566ebb8f8e9227e415326aa1b1aba958"},
+    {"file": "LICENSE.onnxruntime.txt", "cache_file": "LICENSE.onnxruntime.txt", "bytes": 1073, "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"},
+    {"file": "ThirdPartyNotices.onnxruntime.txt", "cache_file": "ThirdPartyNotices.onnxruntime.txt", "bytes": 326866, "sha256": "e9e90971a8e75a9a8ac0c6412e29c1202d079998389915aa485f46c816c3b4cc"}
+  ],
+  "files": [
+    {"file": "mobilefacenet.pt", "bytes": 4135271, "sha256": "90a00ba1d8b0b688af3deb731ed53dca582e6106805d1bc3cfdef55f570493f4", "url": "https://raw.githubusercontent.com/foamliu/MobileFaceNet/a6cc9032a659b615f477833e1a70b5e7931bcccc/weights/mobilefacenet.pt"},
+    {"file": "mobile_facenet-onnx-float.zip", "bytes": 3730656, "sha256": "0e347a0b4084dfdf6a08e60b05d9c7bc0f57c5969c67ca8398e52c9c87dff273", "url": "https://qaihub-public-assets.s3.us-west-2.amazonaws.com/qai-hub-models/models/mobile_facenet/releases/v0.64.0/mobile_facenet-onnx-float.zip"},
+    {"file": "publisher/mobile_facenet.onnx", "bytes": 387359, "sha256": "3ac0b9597efd5dc49c5397e5c21269f98cceb42e7193fcc1afbb0fa992c88e4e", "archive": "mobile_facenet-onnx-float.zip", "member": "mobile_facenet-onnx-float/mobile_facenet.onnx"},
+    {"file": "publisher/mobile_facenet.data", "bytes": 3947008, "sha256": "5164ee5cdd52328da0b1959913e23fd1866b1696b690fc4ad0bbc5cd32ae319c", "archive": "mobile_facenet-onnx-float.zip", "member": "mobile_facenet-onnx-float/mobile_facenet.data"},
+    {"file": "publisher/metadata.json", "bytes": 1501, "sha256": "2639a8261232328665a2a6204abc8e41805730f323feda1a1c147006685fe92e", "archive": "mobile_facenet-onnx-float.zip", "member": "mobile_facenet-onnx-float/metadata.json"},
+    {"file": "mobilefacenet-128d.onnx", "bytes": 4329650, "sha256": "1efc0e9098b219466bb54c82a971e08da11e29267aee6f7f9c1fd13274b7f7ec", "inlineFrom": {"graph": "publisher/mobile_facenet.onnx", "data": "publisher/mobile_facenet.data"}},
+    {"file": "face_detection_yunet_2023mar.onnx", "bytes": 232589, "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4", "url": "https://github.com/opencv/opencv_zoo/raw/47534e27c9851bb1128ccc0102f1145e27f23f98/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"},
+    {"file": "face_detection_yunet_2023mar_320.onnx", "bytes": 229653, "sha256": "d4914077f9b91524e9c52e34507abe9ea7fe274ad484038af8d16eede887803c", "retargetFrom": "face_detection_yunet_2023mar.onnx"},
+    {"file": "onnxruntime-web-1.23.2.tgz", "bytes": 25592749, "sha256": "0b8707d7efab9a2bea63564d66cad79e897cfd0bd627e5ae000488ffc1c45c7d", "sha512": "4f4f4952d327f8264b937985c2a887d258107fee12efea181c7b64eae85a60000923de5b4dc2a2e5b38e658c0e4577d2fd12d90a30c311719622e3820059448e", "url": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.23.2.tgz"},
+    {"file": "ort/ort.wasm.min.mjs", "bytes": 49856, "sha256": "69751720f611e37d1ce2fa3c6ebaa80f949014752636c5f8887a63d40feadcc7", "archive": "onnxruntime-web-1.23.2.tgz", "member": "package/dist/ort.wasm.min.mjs"},
+    {"file": "ort/ort-wasm-simd-threaded.mjs", "bytes": 20321, "sha256": "90a557d15c02bac4504d95b67f431d8594635ed2a0a62a7f2cd83d090ff91d3e", "archive": "onnxruntime-web-1.23.2.tgz", "member": "package/dist/ort-wasm-simd-threaded.mjs"},
+    {"file": "ort/ort-wasm-simd-threaded.wasm", "bytes": 11905541, "sha256": "45eaee27761ad883742a8d4b8fce1538d60ce43b51adf1726fafccc59b8c1a15", "archive": "onnxruntime-web-1.23.2.tgz", "member": "package/dist/ort-wasm-simd-threaded.wasm"},
+    {"file": "LICENSE.foamliu.txt", "bytes": 11357, "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4", "url": "https://raw.githubusercontent.com/foamliu/MobileFaceNet/a6cc9032a659b615f477833e1a70b5e7931bcccc/LICENSE"},
+    {"file": "LICENSE.yunet.txt", "bytes": 1085, "sha256": "c83b8120c50ccbd4c4f96edf53141bdd566ebb8f8e9227e415326aa1b1aba958", "url": "https://raw.githubusercontent.com/opencv/opencv_zoo/47534e27c9851bb1128ccc0102f1145e27f23f98/models/face_detection_yunet/LICENSE"},
+    {"file": "LICENSE.onnxruntime.txt", "bytes": 1073, "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c", "url": "https://raw.githubusercontent.com/microsoft/onnxruntime/v1.23.2/LICENSE"},
+    {"file": "ThirdPartyNotices.onnxruntime.txt", "bytes": 326866, "sha256": "e9e90971a8e75a9a8ac0c6412e29c1202d079998389915aa485f46c816c3b4cc", "url": "https://raw.githubusercontent.com/microsoft/onnxruntime/v1.23.2/ThirdPartyNotices.txt"}
+  ],
+  "validation": {
+    "fixtures": "two distinct synthetic non-face RGB tensors and synthetic BGR detector tensor; no person image or physical sensor",
+    "runtime": "onnxruntime-web1.23.2 WASM CPU single thread in managed Linux container",
+    "source_external_vs_inline_max_abs": 0,
+    "paired_a_vs_duplicate_a_max_abs": 0,
+    "paired_b_vs_duplicate_b_max_abs": 0,
+    "detector320_output_counts": [1600, 400, 100],
+    "detector320_all_outputs_finite": true
+  }
+}

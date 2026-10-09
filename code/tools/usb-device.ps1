@@ -6,7 +6,7 @@ No wireless pairing, TCP device connections, unrestricted shell or driver instal
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Status','DeviceInfo','AppStatus','GpsDiagnostics','InstallVerified','Launch','RestartApp','AppUiState','AppUiBatch','AppCameraChallenge','StageCameraOffer','AppScreenshot','AppTap','AppSwipe','AppBack','AppText','AppDismissShare','ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing','VerifySavedDownloads','Preview','Stop')]
+    [ValidateSet('Status','DeviceInfo','AppStatus','GpsDiagnostics','InstallVerified','Launch','RestartApp','AppUiState','AppUiBatch','AppCameraChallenge','StageCameraOffer','AppScreenshot','AppTap','AppSwipe','AppBack','AppText','AppDismissShare','ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing','ExportAudio','VerifySavedDownloads','Preview','Stop')]
     [string]$Action = 'Status',
     [string]$VerificationReport,
     [string]$RetrievalManifest,
@@ -55,6 +55,10 @@ if ($Action -cin @('StageCameraOffer','ExportCameraPairing')) {
 if ($Action -ceq 'ExportCameraQuality') {
     if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Unsigned camera quality retrieval requires PowerShell 7.' }
     . (Join-Path $PSScriptRoot 'usb-camera-quality.ps1')
+}
+if ($Action -ceq 'ExportAudio') {
+    if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Local audio demo retrieval requires PowerShell 7.' }
+    . (Join-Path $PSScriptRoot 'usb-audio-export.ps1')
 }
 if ($Action -ceq 'StageCameraOffer') {
     if ([string]::IsNullOrEmpty($CameraOfferFile)) { throw 'StageCameraOffer requires CameraOfferFile.' }
@@ -849,7 +853,7 @@ try {
                 user_action_required=(-not $stillInApp);focus_before=$focus;focus_after=$focusAfter;screen=$screen;
                 instruction='Observe a fresh AppScreenshot before any next input. If focus left Non-verba, stop and ask the user; do not follow into another app or permission screen.'} | ConvertTo-Json -Depth 5
         }
-        { $_ -cin @('ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing') } {
+        { $_ -cin @('ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing','ExportAudio') } {
             # These fixed actions share the bounded transfer path. Only their
             # explicit UI-export filename/shape/size allowlists differ.
             # No caller-supplied command/path, private app files or keys.
@@ -857,7 +861,8 @@ try {
             $camera = $Action -ceq 'ExportCamera'
             $cameraQuality = $Action -ceq 'ExportCameraQuality'
             $pairing = $Action -ceq 'ExportCameraPairing'
-            $category = if ($enrollments) { 'enrollment' } elseif ($camera) { 'camera' } elseif ($cameraQuality) { 'camera-quality' } elseif ($pairing) { 'camera-pairing' } else { 'location' }
+            $audio = $Action -ceq 'ExportAudio'
+            $category = if ($enrollments) { 'enrollment' } elseif ($camera) { 'camera' } elseif ($cameraQuality) { 'camera-quality' } elseif ($pairing) { 'camera-pairing' } elseif ($audio) { 'audio-demo' } else { 'location' }
             $names = if ($enrollments) {
                 @('nonverba-key-enrollment-request.json','nonverba-key-enrollment-response.json')
             } elseif ($camera) {
@@ -866,6 +871,8 @@ try {
                 @('nonverba-camera-quality-????????????.json')
             } elseif ($pairing) {
                 @('nonverba-camera-offer.json','nonverba-camera-answer.json')
+            } elseif ($audio) {
+                @('nonverba-demo-audio-????????????.wav','nonverba-demo-receipt-????????????.json')
             } else {
                 @('nonverba-location-????????????.json','nonverba-location-request-????????????.json','nonverba-public-location-key.json',
                     'nonverba-gps-attempt-????????-????-????-????-????????????.json',
@@ -880,6 +887,8 @@ try {
                 '\Acache/exports/(' + $uuidPattern + ')/(nonverba-camera-quality-[a-f0-9]{12}\.json)\z'
             } elseif ($pairing) {
                 '^cache/exports/(' + $uuidPattern + ')/(nonverba-camera-(offer|answer)\.json)$'
+            } elseif ($audio) {
+                '\Acache/exports/(' + $uuidPattern + ')/(nonverba-demo-(?:audio-[a-f0-9]{12}\.wav|receipt-[a-f0-9]{12}\.json))\z'
             } else {
                 '^cache/exports/(' + $uuidPattern + ')/((?:nonverba-location-(?:request-)?[a-f0-9]{12}|nonverba-public-location-key|nonverba-gps-attempt-(?:request-)?' + $uuidPattern + ')\.json)$'
             }
@@ -887,6 +896,8 @@ try {
             if (-not $before.installed -or $before.android_user_id -ne 0) {
                 throw 'Public export retrieval currently requires the installed debug app and foreground Android user 0.'
             }
+            $audioFocus = if ($audio) { Get-OwnUiFocus } else { $null }
+            $inventoryLimit = if ($audio) { 17 } else { 129 }
             $rootGuard = 'test -d cache/exports && test ! -L cache && test ! -L cache/exports'
             $paths = @()
             foreach ($name in $names) {
@@ -895,7 +906,7 @@ try {
                 # Escape the fixed glob for the remote shell; find alone should
                 # interpret its question marks. Avoid nested native-CLI quotes.
                 $findName = $name.Replace('?', '\?')
-                $command = "$rootGuard && find cache/exports -mindepth 2 -maxdepth 2 -type f -name $findName | head -n 129"
+                $command = "$rootGuard && find cache/exports -mindepth 2 -maxdepth 2 -type f -name $findName | head -n $inventoryLimit"
                 $paths += @((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) |
                     ForEach-Object { $_.Trim() } | Where-Object { $_ })
             }
@@ -904,12 +915,24 @@ try {
                 throw 'Unexpected or excessive public export inventory; no files were read.'
             }
             if ($cameraQuality) { Assert-CameraQualityExportInventory $paths }
+            if ($audio) { Assert-AudioExportInventory $paths }
             foreach ($remotePath in $paths) {
                 if ($remotePath -cnotmatch $exportPattern) { throw 'Unexpected public export path; no files were read.' }
             }
             $runName = $category + '-exports-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffffffZ') + '-' + [Guid]::NewGuid().ToString('N')
             $output = Join-Path (Join-Path $codeRoot 'artifacts/device-acceptance') $runName
+            if ($audio) {
+                # Refuse linked local ancestors before storing phone bytes.
+                $ancestor = [IO.DirectoryInfo][IO.Path]::GetDirectoryName($output)
+                while ($null -ne $ancestor) {
+                    $info = Get-Item -LiteralPath $ancestor.FullName
+                    if (-not $info.PSIsContainer -or ($info.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Linked audio retrieval directories are not accepted.' }
+                    $ancestor = $ancestor.Parent
+                }
+                if (Test-Path -LiteralPath $output) { throw 'Audio retrieval output already exists.' }
+            }
             [IO.Directory]::CreateDirectory($output) | Out-Null
+            if ($audio -and (((Get-Item -LiteralPath $output).Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) { throw 'Linked audio retrieval output is not accepted.' }
             $record = [ordered]@{type=('nonverba-public-' + $category + '-retrieval');version=1;status='incomplete';
                 started_at_utc=[DateTime]::UtcNow.ToString('o');usb_transport=$true;android_user_id=0;
                 package='org.nonverba.camera';installed_apk_sha256=$before.installed_apk_sha256;
@@ -926,11 +949,17 @@ try {
                 $record.successful_measurement_acceptance_available = $false
             } elseif ($pairing) {
                 $record.context_note = 'Public pre-challenge camera signaling only. Retrieval does not authenticate peer identities, prove ICE connectivity, create a challenge or verify evidence.'
+            } elseif ($audio) {
+                $record.context_note = 'Explicitly saved local demo WAV and unsigned demo receipt. Retrieval checks bounded original bytes only. Rust verification requires a separately retained device pin; the receipt is not independently retained requester history.'
+                $record.audio_evidence_verified = $false
+                $record.successful_measurement_acceptance_available = $false
+                $record.demo = $true
             } elseif (-not $enrollments) {
                 $record.context_note = 'Operator-exported location records. Local demos remain local demos; signatures, coordinates, request binding and any demo labels require independent Rust verification.'
                 $record.location_evidence_verified = $false
             }
             try {
+                $audioTotalBytes = 0L
                 foreach ($remotePath in ($paths | Sort-Object)) {
                     if ($remotePath -cnotmatch $exportPattern) { throw 'Unexpected public export path.' }
                     $exportId = $Matches[1]; $name = $Matches[2]
@@ -949,6 +978,9 @@ try {
                     } elseif ($cameraQuality) {
                         $qualitySpec = Get-CameraQualityExportSpec $name
                         $kind = $qualitySpec.kind; $maximum = $qualitySpec.maximum
+                    } elseif ($audio) {
+                        $audioSpec = Get-AudioExportSpec $name
+                        $kind = $audioSpec.kind; $maximum = $audioSpec.maximum
                     } elseif ($name -cmatch ('^nonverba-gps-attempt-request-(' + $uuidPattern + ')\.json$')) {
                         $kind = 'attempt-request'; $attemptId = $Matches[1]; $maximum = 64 * 1024
                     } elseif ($name -cmatch ('^nonverba-gps-attempt-(' + $uuidPattern + ')\.json$')) {
@@ -967,12 +999,19 @@ try {
                     $guard = "$rootGuard && test -d $folder && test ! -L $folder && test -f $remotePath && test ! -L $remotePath"
                     $userId = ((Invoke-Bridge @('-d','shell','am','get-current-user')) -join '').Trim()
                     if ($userId -cne '0') { throw 'Foreground user changed; retrieval stopped.' }
+                    if ($audio -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; audio retrieval stopped.' }
                     $command = "$guard && stat -c %s $remotePath"
                     $sizeText = ((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) -join '').Trim()
                     if ($sizeText -cnotmatch '^[1-9][0-9]{0,8}$' -or [long]$sizeText -gt $maximum) { throw 'Public export exceeds its size bound.' }
-                    $command = "$guard && sha256sum $remotePath"
+                    if ($audio) {
+                        $audioTotalBytes += [long]$sizeText
+                        if ($audioTotalBytes -gt 32 * 1024 * 1024) { throw 'Audio demo inventory exceeds the 32 MiB aggregate bound.' }
+                    }
+                    $command = if ($audio) { "$guard && head -c $($maximum + 1) $remotePath | sha256sum" } else { "$guard && sha256sum $remotePath" }
                     $hashBefore = ((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) -join '').Trim()
-                    if ($hashBefore -cnotmatch '^([a-f0-9]{64})  ([A-Za-z0-9/._-]+)$' -or $Matches[2] -cne $remotePath) { throw 'Unexpected public export digest.' }
+                    if ($audio) {
+                        if ($hashBefore -cnotmatch '\A([a-f0-9]{64})  -\z') { throw 'Unexpected bounded audio export digest.' }
+                    } elseif ($hashBefore -cnotmatch '^([a-f0-9]{64})  ([A-Za-z0-9/._-]+)$' -or $Matches[2] -cne $remotePath) { throw 'Unexpected public export digest.' }
                     $expectedHash = $Matches[1]
                     # A bounded head prevents a changed/growing file from
                     # producing an unbounded base64 response. Exact length and
@@ -988,9 +1027,10 @@ try {
                     $sha = [Security.Cryptography.SHA256]::Create()
                     try { $actualHash = ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant() }
                     finally { $sha.Dispose() }
-                    $command = "$guard && sha256sum $remotePath"
+                    $command = if ($audio) { "$guard && head -c $($maximum + 1) $remotePath | sha256sum" } else { "$guard && sha256sum $remotePath" }
                     $hashAfter = ((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) -join '').Trim()
                     if ($actualHash -cne $expectedHash -or $hashAfter -cne $hashBefore) { throw 'Public export bytes changed during retrieval.' }
+                    if ($audio -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; audio bytes were not stored.' }
                     # Transport shape checks only. Preserve original bytes for
                     # independent Rust protocol/signature/chain verification.
                     if ($camera) {
@@ -999,6 +1039,8 @@ try {
                         $publicRecord = Assert-CameraQualityPublicExport -Bytes $bytes -Name $name
                     } elseif ($pairing) {
                         $publicRecord = Assert-CameraPairingRecord -Bytes $bytes -Kind $kind
+                    } elseif ($audio) {
+                        $null = Assert-AudioPublicExport -Bytes $bytes -Name $name
                     } else {
                         $utf8 = New-Object Text.UTF8Encoding($false, $true)
                         $publicRecord = $utf8.GetString($bytes) | ConvertFrom-Json
@@ -1086,6 +1128,7 @@ try {
                         $entry.guidance_only = $true; $entry.signed = $false
                     }
                     elseif ($pairing) { $entry.purpose = 'camera-pairing'; $entry.pairing_id = $publicRecord.pairing_id }
+                    elseif ($audio) { $entry.purpose = 'audio-demo'; $entry.session_id_prefix = $audioSpec.session_prefix; $entry.unverified_demo_claim = $true }
                     elseif ($kind -in @('attempt','attempt-request')) { $entry.attempt_id = $attemptId }
                     else { $entry.challenge_id_prefix = $challengePrefix; $entry.unverified_demo_claim = $demoClaim }
                     $record.files += $entry
@@ -1093,6 +1136,7 @@ try {
                 $after = (& $PSCommandPath -Action AppStatus) | ConvertFrom-Json
                 if ($after.android_user_id -ne 0 -or -not $after.installed -or
                     $after.installed_apk_sha256 -cne $before.installed_apk_sha256) { throw 'Foreground user or installed app changed during retrieval.' }
+                if ($audio -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed during audio retrieval.' }
                 $record.status = 'complete'
             } catch {
                 $record.error = $_.Exception.Message
@@ -1114,10 +1158,20 @@ try {
             $retrievalDirectory = [IO.Path]::GetDirectoryName($manifestPath)
             if ([IO.Path]::GetFileName($manifestPath) -cne 'retrieval.json' -or
                 [IO.Path]::GetDirectoryName($retrievalDirectory) -ine $acceptanceRoot -or
-                [IO.Path]::GetFileName($retrievalDirectory) -cnotmatch '^(enrollment|location|camera)-exports-[0-9]{8}T[0-9]{13}Z-[a-f0-9]{32}$') {
+                [IO.Path]::GetFileName($retrievalDirectory) -cnotmatch '\A(enrollment|location|camera|audio-demo)-exports-[0-9]{8}T[0-9]{13}Z-[a-f0-9]{32}\z') {
                 throw 'Use a public export retrieval.json directly inside its original device-acceptance retrieval directory.'
             }
             $category = $Matches[1]
+            if ($category -ceq 'audio-demo') {
+                if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Local audio demo Downloads verification requires PowerShell 7.' }
+                . (Join-Path $PSScriptRoot 'usb-audio-export.ps1')
+                $ancestor = [IO.DirectoryInfo]$acceptanceRoot
+                while ($null -ne $ancestor) {
+                    $info = Get-Item -LiteralPath $ancestor.FullName
+                    if (-not $info.PSIsContainer -or ($info.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Linked audio retrieval directories are not accepted.' }
+                    $ancestor = $ancestor.Parent
+                }
+            }
             foreach ($localPath in @($acceptanceRoot,$retrievalDirectory,$manifestPath)) {
                 if (((Get-Item -LiteralPath $localPath).Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
                     throw 'Linked retrieval paths are not accepted.'
@@ -1137,6 +1191,8 @@ try {
             $uuid = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'
             $sourcePattern = '\Acache/exports/(' + $uuid + ')/([a-z0-9.-]+)\z'
             $expected = @()
+            $audioTotalBytes = 0L
+            if ($category -ceq 'audio-demo') { Assert-AudioExportInventory @($retrieval.files.source) }
             foreach ($entry in $retrieval.files) {
                 if ($entry -isnot [pscustomobject] -or $entry.source -cnotmatch $sourcePattern -or
                     $entry.sha256 -cnotmatch '\A[a-f0-9]{64}\z' -or
@@ -1156,6 +1212,12 @@ try {
                     elseif ($name -cmatch '\Anonverba-location-request-[a-f0-9]{12}\.json\z') { $kind = 'request'; $maximum = 64 * 1024 }
                     elseif ($name -ceq 'nonverba-public-location-key.json') { $kind = 'key'; $maximum = 16 * 1024 }
                     if ($entry.purpose -cne 'location') { throw 'Invalid public location purpose.' }
+                } elseif ($category -ceq 'audio-demo') {
+                    $audioSpec = Get-AudioExportSpec $name
+                    $kind = $audioSpec.kind; $maximum = $audioSpec.maximum
+                    if ($entry.purpose -cne 'audio-demo') { throw 'Invalid public audio demo purpose.' }
+                    $audioTotalBytes += [long]$entry.bytes
+                    if ($audioTotalBytes -gt 32 * 1024 * 1024) { throw 'Audio demo inventory exceeds the 32 MiB aggregate bound.' }
                 } else {
                     if ($name -cmatch '\Anonverba-[a-f0-9]{12}\.jpg\z') { $kind = 'photo'; $maximum = 32 * 1024 * 1024 }
                     elseif ($name -cmatch '\Anonverba-challenge-[a-f0-9]{12}\.json\z') { $kind = 'request'; $maximum = 16 * 1024 }
@@ -1185,6 +1247,7 @@ try {
                 [int]$before.properties.'ro.build.version.sdk' -lt 29) {
                 throw 'Saved Downloads verification requires user 0, API29+, and the same installed APK as the public retrieval.'
             }
+            $audioFocus = if ($category -ceq 'audio-demo') { Get-OwnUiFocus } else { $null }
             $reportName = 'downloads-check-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffffffZ') + '-' + [Guid]::NewGuid().ToString('N') + '.json'
             $reportPath = Join-Path $acceptanceRoot $reportName
             $report = [ordered]@{type='nonverba-saved-downloads-check';version=1;status='incomplete';
@@ -1202,6 +1265,7 @@ try {
                     }
                     $userId = ((Invoke-Bridge @('-d','shell','am','get-current-user')) -join '').Trim()
                     if ($userId -cne '0') { throw 'Foreground user changed; public Downloads checks stopped.' }
+                    if ($category -ceq 'audio-demo' -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; audio Downloads checks stopped.' }
                     $remoteFile = '/storage/emulated/0/Download/Non-verba/' + $expectedFile.name
                     $result.path = $remoteFile
                     # Filename is from the strict public allowlist above. Read
@@ -1228,6 +1292,7 @@ try {
                 if (-not $after.installed -or $after.android_user_id -ne 0 -or $after.installed_apk_sha256 -cne $before.installed_apk_sha256) {
                     throw 'Foreground user or installed APK changed during saved Downloads verification.'
                 }
+                if ($category -ceq 'audio-demo' -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed during audio Downloads verification.' }
                 $report.all_exact_paths_match = @($report.files | Where-Object { $_.status -cne 'exact-path-matches-original' }).Count -eq 0
                 $report.status = 'complete'
             } catch {

@@ -71,7 +71,7 @@ val verifyWebAssets by tasks.registering {
             "location.html", "location-platform.js", "location-capture.js", "location-ui.js", "location-policy.js", "location.css", "camera-location.js", "camera-platform.js",
             "live-location.html", "live-location-ui.js", "live-location-session.js", "live-session-storage.js", "live-peer.js",
             "agent-requester.js", "agent-evidence-storage.js",
-            "camera-acceptance.js", "audio-session.js",
+            "camera-acceptance.js", "audio-session.js", "audio-controller.js",
             "key-enrollment.html", "key-enrollment-ui.js", "key-enrollment-platform.js", "key-enrollment.css"
         )
         check(requiredAssets.all { webAssets.file(it).asFile.isFile }) {

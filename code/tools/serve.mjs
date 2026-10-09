@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../web/dist');
 const host=process.env.NONVERBA_BIND||'127.0.0.1';
 const port=Number(process.env.NONVERBA_PORT||4173);
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.wasm':'application/wasm','.json':'application/json'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.wasm':'application/wasm','.json':'application/json'};
 const server=http.createServer(async(req,res)=>{
   try{
     if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);return res.end();}

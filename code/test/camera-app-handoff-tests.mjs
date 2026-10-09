@@ -10,6 +10,7 @@ import {CameraCaptureHandoff,sameCaptureRequest} from '../../web/src/camera-sess
 import {splitCameraRequest,CAMERA_LOCATION_REQUEST} from '../../web/src/camera-location.js';
 import {locationPolicy,locationTimingSummary,locationSealingSummary} from '../../web/src/location-policy.js';
 import {newRequestPreset,installRequestPresetSummary} from '../../web/src/request-presets.js';
+import {createCoreClient} from '../../web/src/core-client.js';
 if(process.platform!=='linux'||process.env.NONVERBA_CONTAINER!=='1')throw new Error('Run inside non-verba-dev.');
 const appUrl=new URL('../../web/src/app.js',import.meta.url);
 const source=await readFile(appUrl,'utf8'),html=await readFile(new URL('../../web/src/index.html',import.meta.url),'utf8');
@@ -42,7 +43,7 @@ async function harness(t,{native=true,beginGate,finalizeGate,verifyGate,nativeGa
   const track=Object.assign(new EventTarget(),{stop(){state.calls.push('stop-track');}});
   const stream={getTracks:()=>[track],getVideoTracks:()=>[track]};
   const storedIdentity=JSON.stringify({fingerprint:mediaPin});
-  function message(target,data){const event=new Event('message');Object.defineProperty(event,'data',{value:data});target.dispatchEvent(event);}
+  function message(target,data){target.onmessage?.({data});const event=new Event('message');Object.defineProperty(event,'data',{value:data});target.dispatchEvent(event);}
   class Worker extends EventTarget{
     constructor(){super();setImmediate(()=>message(this,{ready:true}));}
     postMessage({id,method,args}){state.calls.push(method);Promise.resolve().then(async()=>{
@@ -56,6 +57,7 @@ async function harness(t,{native=true,beginGate,finalizeGate,verifyGate,nativeGa
     }).then(value=>message(this,{id,value}),error=>message(this,{id,error:String(error)}));}
   }
   const dependencies={
+    createCoreClient:()=>createCoreClient({Worker}),
     read:async()=>undefined,write:async()=>{},values:async()=>[],reserveCapture:async id=>state.reserved.push(id),
     loadIdentity:async()=>storedIdentity,saveIdentity:async()=>{},retainCameraEvidence:()=>assert.fail('No requester acceptance during acquisition'),
     freshLocation:async()=>location,locationSummary:()=> 'Synthetic location',locationTimingSummary,locationSealingSummary,
@@ -92,6 +94,7 @@ async function harness(t,{native=true,beginGate,finalizeGate,verifyGate,nativeGa
     CameraCaptureHandoff,sameCaptureRequest,
     installCameraSessionUI:options=>{state.ui=options;return {cancel(){}};},prepareCameraPermissions:async()=>{},
     installRetainedEvidenceUI:()=>({clear(){},dispose(){}}),
+    installCameraQualityUI:()=>{},
     newRequestPreset,installRequestPresetSummary,
   };
   const context=createContext({...dependencies,document,window,Worker,Uint8Array,ArrayBuffer,Blob,URL,DOMException,AbortController,

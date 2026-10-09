@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {beginLocationCollection, finalizeLocationProof, startConcurrentLocationCollection} from '../../web/src/location-capture.js';
-import {locationPlatform, locationProofEnvelope, readLocationProofEnvelope, rawGnssDiagnosticSummary, satelliteStatusDiagnosticSummary, rawGnssFieldDiagnosticSummary} from '../../web/src/location-platform.js';
+import {locationPlatform, locationProofEnvelope, readLocationProofEnvelope, bytesToBase64, base64ToBytes, rawGnssDiagnosticSummary, satelliteStatusDiagnosticSummary, rawGnssFieldDiagnosticSummary} from '../../web/src/location-platform.js';
 import {locationPolicy, locationTimingSummary, locationSealingSummary} from '../../web/src/location-policy.js';
 import {createCameraRequest} from '../../web/src/camera-location.js';
 
@@ -190,6 +190,28 @@ test('proof envelope roundtrip rejects malformed and noncanonical base64', () =>
   assert.deepEqual(readLocationProofEnvelope(JSON.stringify(locationProofEnvelope(bytes))), bytes);
   assert.throws(() => readLocationProofEnvelope(JSON.stringify({version: 1, type: 'nonverba-location-proof', proof_base64: 'YQ='})), /encoding/);
   assert.throws(() => readLocationProofEnvelope(JSON.stringify({version: 1, type: 'nonverba-location-proof', proof_base64: 'YR=='})), /Noncanonical/);
+});
+
+test('shared Base64 grammar keeps complete groups, standard alphabet and terminal padding', () => {
+  for (const [encoded, bytes] of [['AA==', [0]], ['AAA=', [0, 0]], ['AAAA', [0, 0, 0]], ['+/8=', [251, 255]], ['////', [255, 255, 255]]]) {
+    assert.deepEqual([...base64ToBytes(encoded)], bytes);
+  }
+  for (const encoded of [undefined, null, 1, {}, [], '', 'A', 'AA', 'AAA', 'AAAA=', 'A===', '====', '=AAA', 'AA=A',
+    'AA==AAAA', 'AAAA====', ' AAA', 'AAA\n', 'AA\tA', 'AAA-', 'AAA_', 'AAAé', 'AA\u0000A']) {
+    assert.throws(() => base64ToBytes(encoded), /Invalid location proof encoding/, `must reject ${JSON.stringify(encoded)}`);
+  }
+  for (const encoded of ['AB==', 'AAB=']) assert.throws(() => base64ToBytes(encoded), /Noncanonical/);
+});
+
+test('shared Base64 transport roundtrips eight MiB without changing explicit or default byte caps', () => {
+  const limit = 8 * 1024 * 1024, bytes = new Uint8Array(limit).fill(255), encoded = bytesToBase64(bytes, limit);
+  assert.deepEqual(base64ToBytes(encoded, limit), bytes);
+  assert.throws(() => base64ToBytes(encoded), /Invalid location proof encoding/, 'the default location proof cap stays smaller');
+  const oversized = new Uint8Array(limit + 1).fill(255);
+  assert.throws(() => bytesToBase64(oversized, limit), /Invalid location artifact size/);
+  const oversizedEncoded = bytesToBase64(oversized, limit + 1);
+  assert.equal(oversizedEncoded.length, encoded.length, 'one extra decoded byte can fit the same encoded length');
+  assert.throws(() => base64ToBytes(oversizedEncoded, limit), /The location proof is too large/);
 });
 
 

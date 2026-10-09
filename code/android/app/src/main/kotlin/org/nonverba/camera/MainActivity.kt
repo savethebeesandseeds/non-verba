@@ -17,6 +17,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.GeolocationPermissions
@@ -82,12 +83,14 @@ class MainActivity : Activity() {
             .build()
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
-                if (::nativeGpsWarmup.isInitialized) nativeGpsWarmup.pageStarted()
-                nativeCameraPairing?.setForeground(false)
-                if (::nativeLocation.isInitialized) nativeLocation.pause()
-                if (::nativeCamera.isInitialized) nativeCamera.pause()
-                if (::nativeAudio.isInitialized) nativeAudio.pause()
-                if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.pause()
+                NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(), listOf(
+                    lifecycleAction("GPS page navigation") { if (::nativeGpsWarmup.isInitialized) nativeGpsWarmup.pageStarted() },
+                    lifecycleAction("pairing page navigation") { nativeCameraPairing?.setForeground(false) },
+                    lifecycleAction("location page navigation") { if (::nativeLocation.isInitialized) nativeLocation.pause() },
+                    lifecycleAction("camera page navigation") { if (::nativeCamera.isInitialized) nativeCamera.pause() },
+                    lifecycleAction("audio page navigation") { if (::nativeAudio.isInitialized) nativeAudio.pause() },
+                    lifecycleAction("enrollment page navigation") { if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.pause() }
+                ), complete = {}, report = ::reportLifecycleFailure)
             }
 
             override fun onPageFinished(view: WebView, url: String?) {
@@ -331,22 +334,25 @@ class MainActivity : Activity() {
 
     override fun onPause() {
         resumed = false
-        nativeCameraPairing?.setForeground(false)
-        nativeScreenAwake.pause()
-        nativeGpsWarmup.pause()
-        nativeKeyEnrollment.pause()
-        if (runtimePermissionInFlight != NATIVE_LOCATION_PERMISSION) nativeLocation.pause()
-        if (runtimePermissionInFlight != NATIVE_CAMERA_PERMISSION) nativeCamera.pause()
-        if (runtimePermissionInFlight != NATIVE_AUDIO_PERMISSION) nativeAudio.pause()
-        if (runtimePermissionInFlight == null) disableGeolocation()
-        // Preserve the camera page's permission-overlay flow. Audio must always be told
-        // to release unattached microphone streams/worklets, even during an OS overlay.
-        stopSensitiveActivity(
-            notifyPage = runtimePermissionInFlight == null ||
-                (Uri.parse(webView.url ?: "").path == AUDIO_DOCUMENT_PATH && runtimePermissionInFlight != NATIVE_AUDIO_PERMISSION)
-        )
-        webView.onPause()
-        super.onPause()
+        val pauseLocation = runtimePermissionInFlight != NATIVE_LOCATION_PERMISSION
+        val pauseCamera = runtimePermissionInFlight != NATIVE_CAMERA_PERMISSION
+        val pauseAudio = runtimePermissionInFlight != NATIVE_AUDIO_PERMISSION
+        NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(pauseLocation, pauseCamera, pauseAudio), listOf(
+            lifecycleAction("pairing pause") { nativeCameraPairing?.setForeground(false) },
+            lifecycleAction("screen lease pause") { nativeScreenAwake.pause() },
+            lifecycleAction("GPS warmup pause") { nativeGpsWarmup.pause() },
+            lifecycleAction("enrollment pause") { nativeKeyEnrollment.pause() },
+            lifecycleAction("location pause") { if (pauseLocation) nativeLocation.pause() },
+            lifecycleAction("camera pause") { if (pauseCamera) nativeCamera.pause() },
+            lifecycleAction("audio pause") { if (pauseAudio) nativeAudio.pause() },
+            lifecycleAction("geolocation pause") { if (runtimePermissionInFlight == null) disableGeolocation() },
+            lifecycleAction("web media pause") {
+                // Preserve native permission overlays and the existing audio page notification.
+                stopSensitiveActivity(notifyPage = runtimePermissionInFlight == null ||
+                    (Uri.parse(webView.url ?: "").path == AUDIO_DOCUMENT_PATH && pauseAudio))
+            },
+            lifecycleAction("WebView pause") { webView.onPause() }
+        ), complete = { super.onPause() }, report = ::reportLifecycleFailure)
     }
 
     private fun stopSensitiveActivity(notifyPage: Boolean = true) {
@@ -380,42 +386,58 @@ class MainActivity : Activity() {
     override fun onStop() {
         visible = false
         resumed = false
-        nativeCameraPairing?.setForeground(false)
-        nativeScreenAwake.pause()
-        nativeGpsWarmup.pause()
-        nativeLocation.pause()
-        nativeCamera.pause()
-        nativeAudio.pause()
-        nativeKeyEnrollment.pause()
-        disableGeolocation()
-        cancelPendingPermissions()
-        stopSensitiveActivity()
-        super.onStop()
+        NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(), listOf(
+            lifecycleAction("pairing stop") { nativeCameraPairing?.setForeground(false) },
+            lifecycleAction("screen lease stop") { nativeScreenAwake.pause() },
+            lifecycleAction("GPS warmup stop") { nativeGpsWarmup.pause() },
+            lifecycleAction("location stop") { nativeLocation.pause() },
+            lifecycleAction("camera stop") { nativeCamera.pause() },
+            lifecycleAction("audio stop") { nativeAudio.pause() },
+            lifecycleAction("enrollment stop") { nativeKeyEnrollment.pause() },
+            lifecycleAction("geolocation stop") { disableGeolocation() },
+            lifecycleAction("permission cancellation") { cancelPendingPermissions() },
+            lifecycleAction("web media stop") { stopSensitiveActivity() }
+        ), complete = { super.onStop() }, report = ::reportLifecycleFailure)
     }
 
     override fun onDestroy() {
-        nativeCameraPairing?.destroy()
-        nativeScreenAwake.destroy()
-        nativeGpsWarmup.destroy()
-        nativeLocation.destroy()
-        nativeCamera.destroy()
-        nativeAudio.destroy()
-        nativeKeyEnrollment.destroy()
-        disableGeolocation()
-        cancelPendingPermissions()
+        visible = false
+        resumed = false
         runtimePermissionInFlight = null
-        finishDocumentPicker(null)
-        webView.removeJavascriptInterface("NativeVault")
-        webView.removeJavascriptInterface("NativeLocation")
-        webView.removeJavascriptInterface("NativeCamera")
-        webView.removeJavascriptInterface("NativeAudio")
-        webView.removeJavascriptInterface("NativeKeyEnrollment")
-        webView.removeJavascriptInterface("NativeScreenAwake")
-        webView.removeJavascriptInterface("NativeGpsWarmup")
-        webView.removeJavascriptInterface("NativeCameraPairing")
-        webView.stopLoading()
-        webView.destroy()
-        super.onDestroy()
+        val releases = listOf(
+            lifecycleAction("pairing destruction") { nativeCameraPairing?.destroy() },
+            lifecycleAction("screen lease destruction") { nativeScreenAwake.destroy() },
+            lifecycleAction("GPS warmup destruction") { nativeGpsWarmup.destroy() },
+            lifecycleAction("location destruction") { nativeLocation.destroy() },
+            lifecycleAction("camera destruction") { nativeCamera.destroy() },
+            lifecycleAction("audio destruction") { nativeAudio.destroy() },
+            lifecycleAction("enrollment destruction") { nativeKeyEnrollment.destroy() },
+            lifecycleAction("geolocation destruction") { disableGeolocation() },
+            lifecycleAction("permission destruction") { cancelPendingPermissions() },
+            lifecycleAction("document picker destruction") { finishDocumentPicker(null) }
+        ) + listOf("NativeVault", "NativeLocation", "NativeCamera", "NativeAudio", "NativeKeyEnrollment",
+            "NativeScreenAwake", "NativeGpsWarmup", "NativeCameraPairing").map { name ->
+                lifecycleAction("$name removal") { webView.removeJavascriptInterface(name) }
+            } + listOf(
+            lifecycleAction("WebView load stop") { webView.stopLoading() },
+            lifecycleAction("WebView destruction") { webView.destroy() }
+        )
+        NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(), releases,
+            complete = { super.onDestroy() }, report = ::reportLifecycleFailure)
+    }
+
+    private fun lifecycleAction(label: String, action: () -> Unit) = NativeLifecycleCleanup.Action(label, action)
+
+    /** Clear cached signing authority before an OS release can block or throw. */
+    private fun revokeNativeAuthority(location: Boolean = true, camera: Boolean = true, audio: Boolean = true) = listOf(
+        lifecycleAction("location authority revocation") { if (location && ::nativeLocation.isInitialized) nativeLocation.revokeAuthority() },
+        lifecycleAction("camera authority revocation") { if (camera && ::nativeCamera.isInitialized) nativeCamera.revokeAuthority() },
+        lifecycleAction("audio authority revocation") { if (audio && ::nativeAudio.isInitialized) nativeAudio.revokeAuthority() },
+        lifecycleAction("enrollment authority revocation") { if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.revokeAuthority() }
+    )
+
+    private fun reportLifecycleFailure(failure: NativeLifecycleCleanup.Failure) {
+        Log.w("NonverbaLifecycle", failure.label, failure.error)
     }
 
     private fun confirmArtifactSaved(destination: String) {
@@ -538,13 +560,18 @@ class MainActivity : Activity() {
     }
 
     private fun cancelPendingPermissions() {
-        mediaRequest?.deny()
+        val media = mediaRequest
+        val location = locationRequest
+        val native = nativePermissionCallback
         mediaRequest = null
-        locationRequest?.let { it.callback.invoke(it.origin, false, false) }
         locationRequest = null
-        nativePermissionCallback?.invoke(false)
         nativePermissionCallback = null
         nativePermission = null
+        NativeLifecycleCleanup.run(listOf(
+            lifecycleAction("media permission refusal") { media?.deny() },
+            lifecycleAction("location permission refusal") { location?.let { it.callback.invoke(it.origin, false, false) } },
+            lifecycleAction("native permission refusal") { native?.invoke(false) }
+        ), ::reportLifecycleFailure)
         // Keep the runtime dialog slot occupied until its OS callback arrives.
     }
 

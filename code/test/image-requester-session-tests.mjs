@@ -2,6 +2,7 @@
 // Real shipped WASM signatures/receipts plus explicit boundary clocks; no phone or audio.
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
+import {syntheticCameraJpeg} from './fixtures/synthetic-camera.mjs';
 import {mkdtemp, readFile, writeFile, readdir, symlink, mkdir} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {spawn} from 'node:child_process';
@@ -13,7 +14,7 @@ const shipped = await loadShippedCore(), core = shipped.core;
 const operator = core.create_identity(), pin = JSON.parse(operator).fingerprint;
 const softwarePolicy = JSON.stringify({...JSON.parse(DEFAULT_POLICY), native_acquisition_required:false,
   correlated_camera_clock_required:false});
-const jpeg = new Uint8Array(await readFile(new URL('../artifacts/qa/native-camera-synthetic.jpg', import.meta.url)));
+const jpeg = await syntheticCameraJpeg();
 const parent = await mkdtemp(resolve(process.env.CARGO_TARGET_DIR, 'image-requester-tests-'));
 let serial = 0;
 async function setup(options = {}) {

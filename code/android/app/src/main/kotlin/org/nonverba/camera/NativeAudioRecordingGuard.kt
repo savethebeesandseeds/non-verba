@@ -11,6 +11,8 @@ internal class NativeAudioRecordingGuard(private val sessionId: Int, private val
         val clientEffects: List<String>, val effects: List<String>
     )
     var baseline: Configuration? = null; private set
+    /** Last own-session observation, including the first refused configuration. */
+    var diagnosticConfiguration: Configuration? = null; private set
     var count = 0; private set
     var firstNs = 0L; private set
     var lastNs = 0L; private set
@@ -33,11 +35,15 @@ internal class NativeAudioRecordingGuard(private val sessionId: Int, private val
                 return false
             }
             val value = matching.single()
+            diagnosticConfiguration = value
             check(!value.silenced) { "Android silenced this microphone recording client" }
             check(value.deviceId == deviceId && value.builtIn) { "Active microphone recording route changed" }
             check(value.clientSource == 9 && value.source == 9) { "Active microphone source is not unprocessed" }
             check(value.clientEffects.isEmpty() && value.effects.isEmpty()) { "Android enabled microphone preprocessing" }
-            check(value.clientFormat == Format(48000, 1, "pcm-f32")) { "Microphone client format differs from the AAudio contract" }
+            check(value.clientFormat == Format(48000, 1, "pcm-f32")) {
+                "Microphone framework client format differs from the required 48000 Hz / 1 channel / pcm-f32: " +
+                    "${value.clientFormat.sampleRate} Hz / ${value.clientFormat.channels} channels / ${value.clientFormat.encoding.take(32)}"
+            }
             check(value.deviceFormat.sampleRate in 8000..192000 && value.deviceFormat.channels in 1..32 &&
                 value.deviceFormat.encoding in setOf("pcm-u8", "pcm-i16", "pcm-i24", "pcm-i32", "pcm-f32")) {
                 "Actual microphone device format is unavailable or unsupported"

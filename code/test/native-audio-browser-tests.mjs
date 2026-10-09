@@ -12,7 +12,9 @@ const request = JSON.parse(await readFile(resolve(out, 'native-audio-synthetic-r
 const transcript = JSON.parse(await readFile(resolve(out, 'native-audio-synthetic-transcript.json'), 'utf8'));
 const wav = await readFile(resolve(out, 'native-audio-synthetic.wav'));
 const pin = (await readFile(resolve(out, 'native-audio-synthetic-key.txt'), 'utf8')).trim();
-const browser = await chromium.launch({headless: true, channel: 'msedge'});
+// Use the already provisioned container browser; never depend on a host channel.
+const browser = await chromium.launch({headless: true,
+  ...(process.env.NONVERBA_BROWSER_EXECUTABLE ? {executablePath: process.env.NONVERBA_BROWSER_EXECUTABLE} : {})});
 try {
   const page = await browser.newPage();
   await page.goto(`${process.env.NONVERBA_TEST_URL || 'http://127.0.0.1:4174'}/audio.html`);

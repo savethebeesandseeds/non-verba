@@ -3,6 +3,7 @@ import {mkdir,copyFile,readdir,readFile,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {stageFaceModel} from './stage-face-model.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const webRoot=path.resolve(root,'../web');
 if(process.platform!=='linux'||process.env.NONVERBA_CONTAINER!=='1')throw new Error('Run the web build through code/dev.ps1 inside non-verba-dev.');
@@ -15,4 +16,5 @@ for(const item of await readdir(path.join(webRoot,'src'))){if(!item.endsWith('.h
 const html=await readFile(path.join(webRoot,'src/index.html'),'utf8');
 const review=html.replace('<title>','<meta name="robots" content="noindex,nofollow"><title>').replace("style-src 'self';", "style-src 'self'; style-src-elem 'self' 'unsafe-inline';");
 await writeFile(path.join(webRoot,'dist/review.html'),review);
+await stageFaceModel();
 console.log('Built ../web/dist (review.html is local-only and excluded from Android packaging).');

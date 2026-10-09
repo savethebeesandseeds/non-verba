@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Registration inspection</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./registration.css">
+  <script type="module" src="./registration-ui.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="./index.html"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">DEVELOPER INSPECTION</span></a><span class="runtime" id="runtime">Starting local Rust policy</span></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">REGISTRATION / OPERATOR &amp; REQUESTER</p><h1>Introduce yourself<span>.</span></h1><p class="lede">A guided local draft, with clear choices about your private information.</p></div></div>
+    <div class="notice warning"><strong>Independent registration inspection.</strong> Nothing here creates an account, signs you in, verifies legal identity or qualifications, publishes a profile or uploads your information. Form details stay in page memory and are discarded on reset, reload or departure. An Operator can separately retain a private face reference on this browser device only after explicit consent and review; that reference needs its own deletion action. Requesters have no face step.</div>
+    <p class="workflow-links"><a class="secondary" href="./index.html">Back to direct developer tools</a><a class="secondary" href="./authentication-privacy.html">Authentication &amp; work privacy inspection</a></p>
+    <p id="registration-status" role="status" aria-live="polite">Choose your role and fill in the details you want to provide.</p>
+    <div id="registration-errors-panel" class="notice error" hidden><h2 class="error-heading" id="registration-errors-heading">Please review these fields</h2><ul id="registration-errors" aria-labelledby="registration-errors-heading"></ul></div>
+    <div class="registration-layout">
+      <aside class="registration-guide" aria-label="Registration progress">
+        <p id="registration-step" class="eyebrow">STEP 1 OF 6</p>
+        <ol id="registration-progress"><li aria-current="step">Your details</li><li>Access &amp; support</li><li>Certifications</li><li>Privacy choices</li><li id="registration-face-progress">Operator face reference</li><li>Final review</li></ol>
+        <p class="muted">Optional fields can stay empty. Accessibility needs and certifications are not requirements for preparing this local draft.</p>
+        <button id="registration-reset" class="secondary" type="button">Reset / discard all details</button>
+      </aside>
+      <form id="registration-form" class="panel roomy" autocomplete="off" novalidate>
+        <section id="registration-personal-step" class="registration-section" aria-labelledby="registration-personal-heading">
+          <h2 id="registration-personal-heading" tabindex="-1">Your details</h2>
+          <p class="muted">Your display name and contact email are required in this inspection. Both start private. Public profile choices come later.</p>
+          <label for="registration-role">Register as</label><select id="registration-role"><option value="operator">Operator — perform tasks</option><option value="requester">Requester — request tasks</option></select>
+          <label for="registration-display-name">Display name <span class="required-note">required</span></label><input id="registration-display-name" maxlength="120" autocomplete="off" aria-describedby="registration-display-name-error"><p id="registration-display-name-error" class="field-error" hidden></p>
+          <label for="registration-contact-email">Contact email <span class="required-note">required</span></label><input id="registration-contact-email" type="email" maxlength="254" autocomplete="off" inputmode="email" aria-describedby="registration-email-note registration-contact-email-error"><p id="registration-email-note" class="fineprint">Private contact details. This page does not send a confirmation email or establish control of the address.</p><p id="registration-contact-email-error" class="field-error" hidden></p>
+          <label for="registration-legal-name">Legal name <span class="optional-note">optional</span></label><input id="registration-legal-name" maxlength="200" autocomplete="off" aria-describedby="registration-legal-name-error"><p id="registration-legal-name-error" class="field-error" hidden></p>
+          <label for="registration-organization">Organization <span class="optional-note">optional</span></label><input id="registration-organization" maxlength="200" autocomplete="off" aria-describedby="registration-organization-error"><p id="registration-organization-error" class="field-error" hidden></p>
+          <div class="registration-columns"><div><label for="registration-country">Country or region <span class="optional-note">optional</span></label><input id="registration-country" maxlength="80" autocomplete="off" aria-describedby="registration-country-error"><p id="registration-country-error" class="field-error" hidden></p></div><div><label for="registration-preferred-language">Preferred language <span class="optional-note">optional</span></label><input id="registration-preferred-language" maxlength="80" autocomplete="off" aria-describedby="registration-preferred-language-error"><p id="registration-preferred-language-error" class="field-error" hidden></p></div></div>
+          <p class="fineprint">Country or region is self-reported text. No location sensor, account provider or Google linking is used.</p>
+        </section>
+        <section id="registration-access-step" class="registration-section" aria-labelledby="registration-access-heading" hidden>
+          <h2 id="registration-access-heading" tabindex="-1">Access &amp; support</h2>
+          <p class="muted">This is optional for both roles. You can describe disability-related access needs or practical accommodations in your own words. You do not need to provide a diagnosis, medical records or proof.</p>
+          <label for="registration-access-note">What support would help you? <span class="optional-note">optional, private</span></label><textarea id="registration-access-note" rows="5" maxlength="2000" autocomplete="off" aria-describedby="registration-access-help registration-access-note-error" placeholder="For example: written instructions, step-free access, or extra time for communication."></textarea><p id="registration-access-help" class="fineprint">This note remains private and never appears in the public profile candidate. Leaving it empty does not prevent registration.</p><p id="registration-access-note-error" class="field-error" hidden></p>
+          <label class="registration-checkbox"><input id="registration-access-share" type="checkbox" aria-describedby="registration-access-share-error"><span>For a future task, I may choose to share this support note with that task's counterparty.</span></label><p id="registration-access-share-error" class="field-error" hidden></p>
+          <p class="fineprint">This records a future preference only. No counterparty receives anything from this page.</p>
+        </section>
+        <section id="registration-certifications-step" class="registration-section" aria-labelledby="registration-certifications-heading" hidden>
+          <h2 id="registration-certifications-heading" tabindex="-1">Certifications</h2>
+          <p class="muted">Optional for Operators and Requesters. Add qualifications relevant to the tasks you perform or request. Every entry remains <strong>self-reported and unverified</strong>; naming an issuer does not verify a certificate.</p>
+          <div id="registration-certifications"></div>
+          <button id="registration-add-certification" type="button" class="secondary">Add a certification</button>
+          <p id="registration-certifications-error" class="field-error" hidden></p>
+          <p class="fineprint">No certificate files or external verification are requested. Dates and references are optional. Each sharing choice starts off.</p>
+        </section>
+        <section id="registration-privacy-step" class="registration-section" aria-labelledby="registration-privacy-heading" hidden>
+          <h2 id="registration-privacy-heading" tabindex="-1">Privacy choices</h2>
+          <p class="muted">Understand the purpose separately from choosing what might be published. These choices are local draft preferences; no storage, publication or sharing is performed.</p>
+          <div class="purpose-card"><h3>Why these details are requested</h3><p>Display name introduces you. Contact details would support private account contact. Optional access needs would help arrange suitable support. Optional certifications describe self-reported qualifications. Future account storage, contact verification and identity checks need separate implementation.</p></div>
+          <label class="registration-checkbox"><input id="registration-private-ack" type="checkbox" aria-describedby="registration-private-ack-error"><span>I understand these purposes and that this local inspection keeps my details only in page memory until I discard or leave the draft.</span></label><p id="registration-private-ack-error" class="field-error" hidden></p>
+          <label class="registration-checkbox"><input id="registration-certifications-ack" type="checkbox" aria-describedby="registration-certifications-ack-error"><span>I understand any certifications I entered are self-reported and have not been verified.</span></label><p id="registration-certifications-ack-error" class="field-error" hidden></p>
+          <p id="registration-certification-ack-note" class="fineprint">The certification acknowledgment is needed only when you add a certification.</p>
+          <fieldset class="sharing-choices"><legend>Optional public profile preferences</legend>
+            <label class="registration-checkbox"><input id="registration-publish-name" type="checkbox" aria-describedby="registration-publish-name-error"><span>Include my display name in a future public profile candidate.</span></label><p id="registration-publish-name-error" class="field-error" hidden></p>
+            <label class="registration-checkbox"><input id="registration-publish-organization" type="checkbox" aria-describedby="registration-publish-organization-error"><span>Include my organization in a future public profile candidate.</span></label><p id="registration-publish-organization-error" class="field-error" hidden></p>
+            <p class="fineprint">Both start off. Contact email, legal name, access needs and certifications cannot become public profile content through these choices.</p>
+          </fieldset>
+        </section>
+        <section id="registration-face-step" class="registration-section" aria-labelledby="registration-face-heading" hidden>
+          <h2 id="registration-face-heading" tabindex="-1">Operator face reference</h2>
+          <p class="muted">Enrollment gives later Operator checks a face reference to compare against. It does not verify a legal identity. Requester registration skips face capture, enrollment and matching entirely.</p>
+          <label for="registration-face-account">Local development account binding</label><input id="registration-face-account" value="synthetic-account" readonly autocomplete="off" aria-describedby="registration-face-account-note"><p id="registration-face-account-note" class="fineprint">An isolated account label, bound to synthetic-person on this browser device. No server account is created. The authentication inspection uses this same label.</p>
+          <p class="fineprint">Selected encoder: Qualcomm / foamliu MobileFaceNet, 128-dimensional reference. Model, runtime and face alignment availability are checked separately. This encoder supplies neither liveness validation nor trusted camera integrity.</p>
+          <label for="registration-face-capture-kind">Capture adapter</label><select id="registration-face-capture-kind"><option value="synthetic">Synthetic inspection — no human face</option><option value="browser-photo">Optional browser camera photo</option></select>
+          <div class="purpose-card"><h3>Private enrollment purpose</h3><p>An explicitly started check opens only the camera for a bounded operation. No microphone or location is requested. Captured photos are transient. A retained face reference contains a biometric embedding and its account, device and selected-model binding; it stays in this browser's local reference store and is excluded from public profiles, certifications and task evidence.</p></div>
+          <label class="registration-checkbox"><input id="registration-face-consent" type="checkbox"><span>I consent to processing a camera photo for this local Operator reference. Retaining it requires my separate review and deliberate action below.</span></label>
+          <div class="button-row"><button id="registration-face-start" class="secondary" type="button">Start enrollment capture</button><button id="registration-face-capture" class="secondary" type="button" disabled>Complete face capture</button><button id="registration-face-cancel" class="secondary" type="button">Cancel / discard transient capture</button></div>
+          <div id="registration-face-camera-area" class="registration-face-camera-area" hidden><video id="registration-face-video" playsinline muted aria-label="Temporary Operator enrollment camera" hidden></video><img id="registration-face-preview" alt="Transient Operator enrollment capture" hidden></div>
+          <p id="registration-face-status" role="status" aria-live="polite">Operator face enrollment has not started. No sensor is open.</p>
+          <p id="registration-face-reference" class="fineprint">No reference selected for this local account binding.</p>
+          <label class="registration-checkbox"><input id="registration-face-review-consent" type="checkbox"><span>I reviewed the account binding and local retention purpose. Retain the resulting face reference until I deliberately delete or replace it on this browser device.</span></label>
+          <div class="button-row"><button id="registration-face-enroll" class="primary" type="button" disabled>Retain local Operator reference</button><button id="registration-face-replace" class="secondary" type="button" disabled>Replace this account's local reference</button><button id="registration-face-delete" class="secondary" type="button">Delete this account's local reference</button></div>
+          <p class="fineprint">Resetting form details or closing this page removes transient captures and prepared form data. It does not silently delete a reference you intentionally retained. Deletion and replacement are separate deliberate actions. Enrollment continuity, legal identity verification, liveness and capture integrity remain distinct.</p>
+        </section>
+        <section id="registration-review-step" class="registration-section" aria-labelledby="registration-review-heading" hidden>
+          <h2 id="registration-review-heading" tabindex="-1">Final review</h2>
+          <p class="muted">Review the exact details and privacy choices below. Editing anything invalidates this review and any prepared result.</p>
+          <div id="registration-review-content"></div>
+          <div class="button-row"><button id="registration-review" class="secondary" type="button">Confirm I reviewed this draft</button><button id="registration-prepare" class="primary" type="button" disabled>Prepare local registration</button></div>
+          <p class="fineprint">Preparation produces a local in-memory registration record. An Operator needs a bound local face enrollment; Requesters do not. Preparation does not create an account, publish this profile, authenticate you, verify legal identity or certifications, or change work availability.</p>
+          <div id="registration-result" class="notice" role="status" aria-live="polite" hidden></div>
+        </section>
+        <div class="registration-navigation"><button id="registration-back" type="button" class="secondary" disabled>Back</button><button id="registration-next" type="button" class="primary">Continue</button></div>
+      </form>
+    </div>
+  </main>
+  <footer><span>non-verba / local registration inspection</span><span>MEMORY ONLY · NO ACCOUNT CREATED</span></footer>
+</body>
+</html>

@@ -8,6 +8,7 @@ internal object NativeAudioCore {
     external fun createPilot(request: String, nowMs: Long): String
     external fun validateRound(request: String, round: String, priorRounds: String, nowMs: Long): String
     external fun probe(round: String): FloatArray
+    external fun inspectPilot(pcm: FloatArray, round: String): String
     external fun validatePilot(pcm: FloatArray, round: String): String
     external fun encodeChunk(pcm: FloatArray): String
     external fun validateReceipt(request: String, rounds: String, receipt: String, nowMs: Long): String

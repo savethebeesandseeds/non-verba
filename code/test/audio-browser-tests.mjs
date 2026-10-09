@@ -7,6 +7,7 @@
 // NONVERBA_PLAYWRIGHT_PATH may point to an installed Playwright package.
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -14,7 +15,7 @@ import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.NONVERBA_PLAYWRIGHT_PATH||'playwright');
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const out=resolve(root,'artifacts/qa');
+const out=resolve(process.env.NONVERBA_AUDIO_QA_DIR||resolve(root,'artifacts/qa'));
 const base=process.env.NONVERBA_TEST_URL||'http://127.0.0.1:4174';
 // Useful when diagnosing a browser/driver failure in the independent live path.
 // This skips baseline checks; it never relaxes the recorder or verifier.
@@ -37,7 +38,7 @@ async function device(){
   const context=await browser.newContext({acceptDownloads:true,permissions:['microphone'],viewport:{width:1440,height:1000}});
   contexts.push(context);
   await context.addInitScript(()=>{
-    const qa={contexts:[],tracks:[],loopback:true,denyMicrophone:false,settingsOverrides:{},played:0,calls:{},timings:[],workletEvents:[],destinations:new WeakMap(),closures:new WeakMap()};
+    const qa={contexts:[],tracks:[],loopback:true,denyMicrophone:false,holdPermission:false,permissionHeld:0,settingsOverrides:{},played:0,calls:{},timings:[],workletEvents:[],destinations:new WeakMap(),closures:new WeakMap()};
     window.__audioQa=qa;
     const OriginalContext=window.AudioContext;
     window.AudioContext=class extends OriginalContext{
@@ -56,6 +57,7 @@ async function device(){
     navigator.mediaDevices.getUserMedia=async constraints=>{
       if(!constraints.audio)return microphone(constraints);
       if(qa.denyMicrophone)throw new DOMException('Synthetic permission denial','NotAllowedError');
+      if(qa.holdPermission){qa.permissionHeld++;return new Promise(resolve=>{qa.releasePermission=resolve;});}
       const context=qa.contexts.at(-1);if(!context)throw new Error('Expected the production AudioContext before microphone acquisition');
       const destination=context.createMediaStreamDestination();destination.channelCount=1;destination.channelCountMode='explicit';
       qa.destinations.set(context,destination);
@@ -101,7 +103,7 @@ const requester=await device(),operator=await device();
 const errors=[];
 for(const [role,page]of [['requester',requester],['operator',operator]])page.on('pageerror',error=>errors.push(`${role}: ${error.message}`));
 const results=[];
-let pin,requesterPin,signed,receipt,request,sessionBundle;
+let pin,requesterPin,signed,receipt,request,sessionBundle,acceptedSessionId,acceptedRows;
 async function check(name,fn){if(checkFilter&&!checkFilter.test(name))return;const start=Date.now();await fn();results.push({name,status:'passed',milliseconds:Date.now()-start});console.log(`PASS ${name}`);}
 const el=(page,id)=>page.locator(`#${id}`);
 async function action(page,id){await el(page,id).click();await page.waitForFunction(id=>!document.getElementById(id).hasAttribute('aria-busy'),id);}
@@ -200,6 +202,7 @@ try{
     const result=JSON.parse(await el(requester,'audio-session-report').textContent());assert.equal(result.verified,true,JSON.stringify(result));assert.equal(result.fresh_action_eligible,true);assert.equal(result.request.spec.policy.version,2);assert.equal(result.request.spec.policy.audio_recording_monitoring_required,false);
     assert.equal(await el(requester,'audio-accept').isDisabled(),false);await action(requester,'audio-accept');assert.match(await el(requester,'audio-session-verdict').textContent(),/Accepted once/);assert.equal(await el(requester,'audio-accept').isDisabled(),true);
     const accepted=await requester.evaluate(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('nonverba-agent-evidence-v1');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});try{return await new Promise((resolve,reject)=>{const r=db.transaction('accepted').objectStore('accepted').getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}finally{db.close();}});
+    acceptedSessionId=result.request.session_id;acceptedRows=accepted;
     assert.equal(accepted.length,2,'The transaction reserves both session and sensor challenge');assert.deepEqual(accepted[0],accepted[1]);await requester.screenshot({path:resolve(out,'audio-final-receipt-desktop.png'),fullPage:true});
   });
   await check('exported final audio evidence requires independently supplied pins and exact retained artifact context',async()=>{
@@ -226,6 +229,84 @@ try{
   await check('wrong operator pin and substituted nonce fail verification',async()=>{
     const wrongPin=await verify(signed,receipt,'0'.repeat(64));assert.equal(wrongPin.verified,false);assert.equal(wrongPin.checks.device_match,false);
     const changed=structuredClone(receipt);changed.transcript.rounds[0].nonce='0'.repeat(64);const wrongNonce=await verify(signed,changed,pin);assert.equal(wrongNonce.verified,false);assert.equal(wrongNonce.checks.transcript_match,false);assert.equal(wrongNonce.checks.signal_detected,false);
+  });
+  await check('retained audio acceptance survives requester reload and refuses replay without new capture',async()=>{
+    assert.match(acceptedSessionId,/^[0-9a-f]{64}$/);assert.equal(acceptedRows.length,2);
+    const originalBytes=await readFile(signed),originalHash=createHash('sha256').update(originalBytes).digest('hex');
+    await requester.reload();await requester.waitForFunction(()=>document.getElementById('audio-runtime').textContent==='LOCAL ENGINE READY');
+    const reopened=await requester.evaluate(async id=>{
+      const {createCoreClient}=await import('./core-client.js'),{AgentRequester}=await import('./agent-requester.js');
+      const {readEvidenceSession}=await import('./agent-evidence-storage.js');
+      const engine=createCoreClient();await engine.ready;
+      const client=new AgentRequester(engine),hex=bytes=>[...new Uint8Array(bytes)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+      try{
+        const requesterPin=await client.identity(),inspection=await client.inspectRetained(id),stored=await readEvidenceSession(id);
+        const wavHash=hex(await crypto.subtle.digest('SHA-256',stored.outcome.primary));
+        let replayError=null,deliveryError=null,observedAcceptanceAdds=0;
+        const nativeAcceptanceErrors=[],originalAdd=IDBObjectStore.prototype.add;
+        const expectedAcceptanceKeys=new Set([`session:${id}`,`challenge:${stored.task.sensor_nonce}`]);
+        // Observe genuine duplicate-key errors before they bubble. The storage
+        // API may reject generically before transaction.error is populated.
+        // Keep request values/default error handling entirely unchanged.
+        try{
+          IDBObjectStore.prototype.add=function(...args){
+            const request=Reflect.apply(originalAdd,this,args);
+            if(this.transaction.db.name==='nonverba-agent-evidence-v1'&&this.name==='accepted'&&expectedAcceptanceKeys.has(args[1])){
+              const observed=observedAcceptanceAdds++;
+              if(observed<2)request.addEventListener('error',()=>{
+                if(nativeAcceptanceErrors.length<2)nativeAcceptanceErrors.push({key:typeof args[1]==='string'&&args[1].length<=80?args[1]:'[unsupported]',
+                  name:request.error?.name??null,message:request.error?.message?.slice(0,256)??null});
+              });
+            }
+            return request;
+          };
+          try{await client.accept(id);}catch(error){replayError={name:error.name,message:error.message};}
+        }finally{IDBObjectStore.prototype.add=originalAdd;}
+        // A new controller may inspect completed evidence but cannot revive the
+        // old live transport or accept another artifact delivery after reload.
+        try{await client.receive(id,{primary:stored.outcome.primary});}catch(error){deliveryError={name:error.name,message:error.message};}
+        const after=await readEvidenceSession(id);
+        const db=await new Promise((resolve,reject)=>{const request=indexedDB.open('nonverba-agent-evidence-v1');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+        let allAccepted;
+        try{allAccepted=await new Promise((resolve,reject)=>{const request=db.transaction('accepted').objectStore('accepted').getAll();request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});}finally{db.close();}
+        return {requesterPin,inspection,original_request:stored.task.original_request,context_json:stored.task.context_json,
+          sensor_nonce:stored.task.sensor_nonce,task_state:stored.task.state,receipt:stored.outcome.receipt,transcript_json:stored.outcome.audio_transcript_json,
+          wav_sha256:wavHash,wav_bytes:stored.outcome.primary.length,acceptance:stored.acceptance,challenge_acceptance:stored.challengeAcceptance,
+          after_acceptance:after.acceptance,after_challenge_acceptance:after.challengeAcceptance,after_task_state:after.task.state,
+          all_accepted_rows:allAccepted,
+          after_wav_sha256:hex(await crypto.subtle.digest('SHA-256',after.outcome.primary)),replay_error:replayError,delivery_error:deliveryError,
+          native_acceptance_errors:nativeAcceptanceErrors,observed_acceptance_adds:observedAcceptanceAdds,
+          audio_contexts:window.__audioQa.contexts.length,microphone_tracks:window.__audioQa.tracks.length,playbacks:window.__audioQa.played,
+          worker_calls:{...window.__audioQa.calls}};
+      }finally{client.close();}
+    },acceptedSessionId);
+    // Preserve the actual reload verdict even if age or replay checks refuse.
+    await writeFile(resolve(out,'audio-retained-reload-verification.json'),JSON.stringify(reopened,null,2));
+    assert.equal(reopened.requesterPin,requesterPin);
+    assert.equal(reopened.original_request,sessionBundle.original_request);assert.equal(reopened.receipt,sessionBundle.receipt);
+    assert.equal(reopened.transcript_json,JSON.stringify(sessionBundle.audio_receipt.transcript));assert.equal(reopened.context_json,sessionBundle.context_json);
+    assert.equal(reopened.sensor_nonce,receipt.request.session_id);assert.equal(reopened.task_state,'complete');assert.equal(reopened.after_task_state,'complete');
+    assert.equal(reopened.wav_sha256,originalHash);assert.equal(reopened.after_wav_sha256,originalHash);assert.equal(reopened.wav_bytes,originalBytes.length);
+    assert.equal(reopened.inspection.report.verified,true,JSON.stringify(reopened.inspection.report));
+    assert.equal(reopened.inspection.report.fresh_action_eligible,true,'A stale receipt cannot demonstrate fresh duplicate-key rejection');
+    assert.equal(reopened.inspection.report.request.session_id,acceptedSessionId);assert.equal(reopened.inspection.report.request.spec.evidence.type,'audio');
+    assert.equal(reopened.inspection.report.request.requester_pin.sha256,requesterPin);
+    assert.equal(reopened.inspection.report.request.spec.operator_pins.media_certificate_sha256,pin);
+    // Keep the signed verifier verdict separate from the local acceptance ledger.
+    assert.equal(reopened.inspection.report.acceptance_recorded,false);assert.equal(reopened.inspection.report.global_replay_checked,false);
+    assert.deepEqual(reopened.inspection.acceptance,acceptedRows[0]);assert.deepEqual(reopened.acceptance,acceptedRows[0]);
+    assert.deepEqual(reopened.challenge_acceptance,acceptedRows[1]);assert.deepEqual(reopened.after_acceptance,acceptedRows[0]);
+    assert.deepEqual(reopened.after_challenge_acceptance,acceptedRows[1]);
+    assert.deepEqual(reopened.all_accepted_rows,acceptedRows);
+    assert(reopened.replay_error,'Repeated acceptance must refuse rather than replace the original rows');
+    assert.equal(reopened.observed_acceptance_adds,2);
+    const duplicateKeys=[`session:${acceptedSessionId}`,`challenge:${receipt.request.session_id}`];
+    assert(reopened.native_acceptance_errors.some(error=>error.name==='ConstraintError'&&duplicateKeys.includes(error.key)),
+      'Still-fresh replay must reach the actual IndexedDB unique-key guard');
+    assert.match(reopened.delivery_error?.message||'',/Unexpected or repeated evidence delivery/);
+    assert.equal(reopened.audio_contexts,0);assert.equal(reopened.microphone_tracks,0);assert.equal(reopened.playbacks,0);
+    assert(reopened.worker_calls.verify_evidence_session_receipt>=2,'Inspection and attempted acceptance must re-run the actual Rust verifier');
+    for(const method of ['create_audio_request','create_evidence_session_request','create_audio_round','audio_probe','seal_audio','seal_evidence_session_receipt'])assert.equal(reopened.worker_calls[method]||0,0,method);
   });
   await check('cancellation during recording closes microphone and produces no new WAV or receipt',async()=>{
     await pair('Synthetic cancellation test');await action(operator,'audio-arm');await pageReady(requester,'audio-start');const before=await operator.evaluate(()=>window.__audioQa.calls.seal_audio||0);
@@ -341,6 +422,31 @@ try{
       assert.equal(await el(operator,'audio-result').isVisible(),false);assert.equal(await el(operator,'audio-save-demo-receipt').isDisabled(),true);assert.equal(await operator.evaluate(()=>window.__audioQa.calls.seal_audio||0),before);
     }
     assert.deepEqual(await liveReceiptIds(operator),liveBeforeDemo);
+  });
+  await check('cancelling pending permission enables a fresh demo without releasing the old prompt',async()=>{
+    await action(operator,'audio-demo');
+    const before=await operator.evaluate(()=>window.__audioQa.calls.seal_audio||0);
+    await operator.evaluate(()=>{window.__audioQa.holdPermission=true;});
+    await el(operator,'audio-arm').click();
+    await operator.waitForFunction(()=>window.__audioQa.permissionHeld===1);
+    await action(operator,'audio-cancel');
+    await operator.waitForFunction(()=>!document.getElementById('audio-arm').hasAttribute('aria-busy'));
+    await assertStopped(operator);
+    await operator.evaluate(()=>{window.__audioQa.holdPermission=false;});
+    await action(operator,'audio-demo');
+    assert.equal(await el(operator,'audio-arm').isDisabled(),false,'Old pending permission must not keep the new arm button busy');
+    const eventCount=await operator.evaluate(()=>window.__audioQa.workletEvents.length);
+    await el(operator,'audio-arm').click();
+    await operator.waitForFunction(count=>window.__audioQa.workletEvents.slice(count).some(event=>event.type==='started'),eventCount);
+    assert.equal(await operator.evaluate(()=>typeof window.__audioQa.releasePermission),'function','The old permission promise remains unresolved throughout fresh setup');
+    await action(operator,'audio-cancel');
+    await operator.waitForFunction(()=>!document.getElementById('audio-arm').hasAttribute('aria-busy'));
+    await assertStopped(operator);
+    assert.equal(await operator.evaluate(()=>window.__audioQa.calls.seal_audio||0),before);
+    assert.equal(await el(operator,'audio-result').isVisible(),false);
+    assert.equal(await el(operator,'audio-save-demo-receipt').isDisabled(),true);
+    assert.deepEqual(await liveReceiptIds(operator),liveBeforeDemo);
+    assert.deepEqual(errors,[]);
   });
   await check('demo microphone denial cannot create evidence',async()=>{
     await action(operator,'audio-demo');await operator.evaluate(()=>{window.__audioQa.denyMicrophone=true;});

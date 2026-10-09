@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Authentication &amp; work privacy inspection</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./authentication-privacy.css">
+  <script type="module" src="./authentication-privacy-ui.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="./index.html"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">DEVELOPER INSPECTION</span></a><span class="runtime" id="runtime">Starting local Rust policy</span></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">AUTHENTICATION / WORK PRIVACY</p><h1>A deliberate boundary<span>.</span></h1><p class="lede">Inspect independent components before assembling the actual app.</p></div></div>
+    <div class="notice warning"><strong>Isolated developer inspection.</strong> Account, devices, work collectors, discovery and notifications below are synthetic. Operator checks use the selected MobileFaceNet encoder against a deliberately enrolled local reference. A face match does not establish liveness, trusted camera capture or legal identity, and cannot issue genuine authentication. Requesters have no face checks.</div>
+    <p class="workflow-links"><a class="secondary" href="./index.html">Back to direct developer tools</a><a class="secondary" href="./registration.html">Registration inspection ↗</a></p>
+    <p id="inspection-notice" class="notice" role="status" aria-live="polite" hidden></p>
+    <div class="privacy-grid">
+      <section class="panel roomy" aria-labelledby="privacy-heading">
+        <p class="eyebrow">ACCOUNT-WIDE INTENT / SIMULATED DEVICES</p><h2 id="privacy-heading">Stop work. Keep your profile.</h2>
+        <p class="muted">Synthetic account: <strong>synthetic-account</strong>. The selected work state persists in this inspection page only. Reload never restores sensor operations or grants.</p>
+        <p id="privacy-state" class="privacy-state" role="status" aria-live="polite">On hold</p>
+        <div class="button-row"><button id="privacy-hold" class="secondary">On hold</button><button id="privacy-clock-out" class="secondary">Clock out</button><button id="privacy-sign-out" class="secondary">Sign out</button><button id="privacy-clock-in" class="primary">Explicitly resume simulation</button></div>
+        <p class="fineprint">Hold keeps notifications normal. Clock-out and sign-out make work notifications silent. Resuming does not revive cancelled operations; each new collector needs fresh scoped consent.</p>
+        <p id="privacy-status" role="status" aria-live="polite">No simulated collectors active.</p>
+        <ul id="privacy-devices" class="device-list"></ul>
+        <details><summary>Exercise enforcement and failure handling</summary>
+          <p class="muted">These are synthetic camera collectors with illustrative 30-second local leases. No physical sensor is opened. Disconnect the second device, stop work, then advance time: its shutdown remains unconfirmed until reconnection.</p>
+          <div class="button-row"><button id="privacy-start-local" class="secondary">Consent &amp; start local collector</button><button id="privacy-start-remote" class="secondary">Consent &amp; start second-device collector</button></div>
+          <div class="button-row"><button id="privacy-disconnect" class="secondary">Disconnect second device</button><button id="privacy-reconnect" class="secondary">Reconnect second device</button><button id="privacy-expire" class="secondary">Advance inspection time 31 seconds</button></div>
+          <label class="privacy-checkbox"><input id="privacy-cleanup-failure" type="checkbox">Simulate resource cleanup failure</label>
+          <div class="button-row"><button id="privacy-retry" class="secondary">Retry local cleanup</button><button id="privacy-stale-resume" class="secondary">Try stale resume command</button></div>
+        </details>
+        <div class="profile-card"><span class="pill">PROFILE REMAINS VISIBLE</span><h3>Synthetic Operator</h3><p>Published profile only. Search performs no sensing and exposes no authentication media.</p></div>
+        <div class="button-row"><button id="privacy-notify" class="secondary">Deliver synthetic notification</button></div>
+        <p id="privacy-notifications" role="status" aria-live="polite">No notifications delivered. Sound and vibration are never activated by this inspection.</p>
+      </section>
+      <section class="panel roomy" aria-labelledby="auth-heading">
+        <p class="eyebrow">REUSABLE PIPELINE / TWO DISTINCT MODES</p><h2 id="auth-heading">Check who is using the account.</h2>
+        <p class="muted">Registration legal identity verification remains separate. Operator face continuity is checked against its private local enrollment. Requesters use no face capture or comparison. Neither inspection mode issues genuine authentication.</p>
+        <label for="auth-mode">Required authentication mode</label><select id="auth-mode"><option value="operator">Operator</option><option value="requester">Requester</option></select>
+        <label for="auth-context">Caller</label><select id="auth-context"><option value="login">Account login</option><option value="clock-in">Clock-in check only</option><option value="task-a">Task A — may reuse a result</option><option value="task-b">Task B — may reuse a result</option><option value="task-fresh">Task C — requires a fresh check</option></select>
+        <label for="auth-capture-kind">Operator capture adapter</label><select id="auth-capture-kind"><option value="synthetic">Synthetic capture — default</option><option value="browser-photo">Optional browser camera photo</option></select>
+        <p id="auth-camera-disclosure" class="capture-disclosure" hidden><strong>Optional local camera check.</strong> Selecting Start authentication opens only this device's camera for a 30-second authorization. No microphone or location is accessed. A captured photo stays in page memory for local face inference: no upload, persistence, download or evidence sharing. It is discarded after processing or on a new check, cancellation, work stop, backgrounding or leaving this page. Liveness and trusted capture remain unresolved.</p>
+        <div class="button-row"><button id="auth-present" class="secondary">Present requirement</button><button id="auth-start" class="primary" disabled>Start authentication</button><button id="auth-capture" class="secondary" disabled>Complete capture</button><button id="auth-cancel" class="secondary" disabled>Cancel / clear media</button></div>
+        <p id="auth-status" role="status" aria-live="polite">Present a requirement. No sensor starts automatically.</p>
+        <div id="auth-camera-area" class="auth-camera-area" hidden><video id="auth-camera-video" playsinline muted aria-label="Temporary authentication camera preview" hidden></video><img id="auth-photo-preview" alt="Local authentication photo; identity validation not implemented" hidden><p id="auth-synthetic-preview" hidden>Synthetic capture only. No human photo collected.</p></div>
+        <p class="fineprint">Requester method is not selected. Its configurable pipeline enters a pending validation step without requiring Operator facial capture. Both modes keep work state unchanged.</p>
+        <section id="auth-face-panel" class="auth-face-panel" aria-labelledby="auth-face-heading">
+          <h3 id="auth-face-heading">Operator face comparison</h3>
+          <p class="muted">Qualcomm / foamliu MobileFaceNet, 128-dimensional reference. A fresh capture must match the same local account's selected-model enrollment. Missing references, unavailable alignment and unavailable model inference remain explicit states.</p>
+          <label for="auth-face-account">Local development account binding</label><input id="auth-face-account" value="synthetic-account" readonly autocomplete="off">
+          <p id="auth-face-reference" class="fineprint">Enrollment is performed separately in the registration inspection. No reference is fetched for Requester mode.</p>
+          <label for="auth-face-threshold">Evaluation cosine threshold <span class="fineprint">optional, uncalibrated</span></label><input id="auth-face-threshold" type="number" min="-1" max="1" step="0.01" placeholder="No production threshold selected" autocomplete="off">
+          <button id="auth-face-compare" class="secondary" type="button" disabled>Compare fresh Operator capture</button>
+          <p id="auth-face-status" role="status" aria-live="polite">No face comparison performed. Liveness and trusted capture unresolved.</p>
+          <p class="fineprint">Embedding match, non-match, account authentication, liveness and capture integrity are separate results. Changing the threshold is an evaluation action. No comparison enables work sensors or resumes work.</p>
+        </section>
+        <details><summary>Inspect reuse, freshness and simulated results</summary>
+          <p class="muted">Five-minute result validity and the policy here are illustrative fixtures, not production decisions. Switch callers or required mode and assess the current result without another capture.</p>
+          <button id="auth-simulate" class="secondary" disabled>Simulate validator success</button>
+          <label class="privacy-checkbox"><input id="auth-allow-simulation" type="checkbox" checked>Allow simulation for this inspection requirement</label>
+          <button id="auth-check" class="secondary">Assess caller requirement</button>
+          <p id="auth-assessment" role="status" aria-live="polite">No requirement assessed.</p>
+          <pre id="auth-result">No authentication operation.</pre>
+        </details>
+      </section>
+    </div>
+    <p class="fineprint">Rust/WASM supplies shared authentication, privacy, notification and discovery policy. This harness exercises orchestration and resource cleanup. Account transport, native sensor integration, registration verification, recognition, production validity and notification delivery remain future work.</p>
+  </main>
+  <footer><span>non-verba / isolated authentication &amp; privacy</span><span>SIMULATION · NO IDENTITY VALIDATION</span></footer>
+</body>
+</html>

@@ -2,6 +2,10 @@
 import init, * as core from './pkg/nonverba_core.js';
 const ready = init();
 const allowed = new Set(['create_identity','create_challenge','validate_challenge','validate_location','seal_image','verify_image','extract_watermark',
+  'authentication_create','authentication_transition','authentication_assess',
+  'work_privacy_transition','work_privacy_assess',
+  'registration_assess','registration_prepare',
+  'face_identity_enroll','face_identity_assess',
   'camera_quality_profile','analyze_camera_quality',
   'create_audio_request','create_audio_demo_request','validate_audio_request','create_audio_round','audio_probe','detect_audio_probe',
     'encode_audio_pcm','decode_audio_pcm','hash_audio_pcm','seal_audio','verify_audio',

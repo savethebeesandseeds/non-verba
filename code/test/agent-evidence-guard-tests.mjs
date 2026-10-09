@@ -3,7 +3,7 @@
 // commit guards, not browser IndexedDB implementation or physical camera hardware.
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {syntheticCameraJpeg} from './fixtures/synthetic-camera.mjs';
 import {loadShippedCore} from '../tools/image-requester-session.mjs';
 const {core}=await loadShippedCore(), clone=structuredClone;
 const db={stores:new Map(),beforeAcceptanceRead:null,createObjectStore(name){this.stores.set(name,new Map());},close(){},
@@ -22,7 +22,7 @@ globalThis.indexedDB={open(){const request={result:db};setImmediate(()=>{request
 const storage=await import('../../web/src/agent-evidence-storage.js');
 const operator=core.create_identity(),requester=core.create_identity(),mediaPin=JSON.parse(operator).fingerprint,
   requesterPin=JSON.parse(core.live_requester_identity(requester)).pin.sha256;
-const jpeg=new Uint8Array(await readFile(new URL('../artifacts/qa/native-camera-synthetic.jpg',import.meta.url)));
+const jpeg=await syntheticCameraJpeg();
 let wall=1800000000500;const realNow=Date.now;Date.now=()=>wall;
 process.once('exit',()=>{Date.now=realNow;});
 const now=()=>Math.floor(wall/1000),engine={json:async(name,...args)=>JSON.parse(await core[name](...args))};

@@ -344,7 +344,10 @@ export function bytesToBase64(bytes, limit = MAX_LOCATION_PROOF) {
 
 export function base64ToBytes(encoded, limit = MAX_LOCATION_PROOF) {
   if (typeof encoded !== 'string' || encoded.length === 0 || encoded.length > Math.ceil(limit / 3) * 4
-      || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)) throw new Error('Invalid location proof encoding.');
+      || encoded.length % 4 !== 0) throw new Error('Invalid location proof encoding.');
+  const padding = encoded.endsWith('==') ? 2 : encoded.endsWith('=') ? 1 : 0;
+  // A repeated-group regex can exhaust the stack on otherwise bounded large files.
+  if (/[^A-Za-z0-9+/]/.test(encoded.slice(0, encoded.length - padding))) throw new Error('Invalid location proof encoding.');
   const binary = atob(encoded);
   if (binary.length === 0 || binary.length > limit) throw new Error('The location proof is too large.');
   const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));

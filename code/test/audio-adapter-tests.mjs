@@ -20,21 +20,44 @@ function overrideGlobals(values) {
   };
 }
 
-function capturePlatform(t, {pendingResume = false, pendingPrime = false} = {}) {
-  const state = {permissionCalls: 0, nodes: [], controls: [], failures: []};
-  const track = new EventTarget();
-  track.readyState = 'live'; track.muted = false;
-  track.getSettings = () => ({sampleRate: 48000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false});
-  track.stop = () => { track.readyState = 'ended'; };
-  const stream = {getAudioTracks: () => [track], getTracks: () => [track]};
+function capturePlatform(t, {pendingResume = false, pendingPermission = false, pendingModule = false, pendingPrime = false,
+  resumeError, permissionError, moduleError, connectionError, disconnectError, closeError, settings = {}} = {}) {
+  const state = {permissionCalls: 0, moduleCalls: 0, nodes: [], playback: [], buffers: [], controls: [], failures: [], contexts: [], streams: [], pendingPermission};
+  function microphone() {
+    const track = new EventTarget();
+    track.readyState = 'live'; track.muted = false; track.stops = 0;
+    track.getSettings = () => ({sampleRate: 48000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false, ...settings});
+    track.stop = () => { track.stops++; track.readyState = 'ended'; };
+    const stream = {getAudioTracks: () => [track], getTracks: () => [track]};
+    state.streams.push({track, stream}); return {track, stream};
+  }
+  const {track, stream} = microphone();
   class Context extends EventTarget {
-    constructor() { super(); this.sampleRate = 48000; this.state = 'suspended'; this.destination = {}; this.audioWorklet = {addModule: async () => {}}; }
+    constructor() {
+      super(); this.sampleRate = 48000; this.currentTime = 0; this.state = 'suspended'; this.destination = {}; state.contexts.push(this);
+      this.audioWorklet = {addModule: async () => {
+        state.moduleCalls++;
+        if (moduleError) throw moduleError;
+        if (pendingModule) return new Promise((resolve, reject) => { state.module = resolve; state.rejectModule = reject; });
+      }};
+    }
     resume() {
-      if (pendingResume) return new Promise(resolve => { state.resume = resolve; });
+      if (resumeError) return Promise.reject(resumeError);
+      if (pendingResume) return new Promise((resolve, reject) => { state.resume = resolve; state.rejectResume = reject; });
       this.state = 'running'; return Promise.resolve();
     }
-    async close() { this.state = 'closed'; }
-    createMediaStreamSource() { return {connect() {}, disconnect() {}}; }
+    close() { this.state = 'closed'; if (closeError) throw closeError; return Promise.resolve(); }
+    createMediaStreamSource() { return {connect() { if (connectionError) throw connectionError; }, disconnect() { if (disconnectError) throw disconnectError; }}; }
+    createBuffer(channels, length, sampleRate) {
+      const buffer = {channels, length, sampleRate, copyToChannel(samples, channel) { this.samples = samples.slice(); this.channel = channel; }};
+      state.buffers.push(buffer); return buffer;
+    }
+    createBufferSource() {
+      const source = {stops: 0, disconnects: 0, connect(destination) { this.destination = destination; },
+        start(time) { this.startTime = time; }, stop() { this.stops++; }, disconnect() { this.disconnects++; },
+        finish() { this.ended = true; this.onended?.(); }};
+      state.playback.push(source); return source;
+    }
   }
   class Worklet {
     constructor() { this.port = {postMessage: message => {
@@ -42,11 +65,17 @@ function capturePlatform(t, {pendingResume = false, pendingPrime = false} = {}) 
       if (message.type === 'prime' && !pendingPrime) queueMicrotask(() => this.emit({type: 'ready'}));
     }}; state.nodes.push(this); }
     connect() {}
-    disconnect() {}
+    disconnect() { if (disconnectError) throw disconnectError; }
     emit(message) { this.port.onmessage({data: message}); }
   }
   const restore = overrideGlobals({AudioContext: Context, AudioWorkletNode: Worklet,
-    navigator: {mediaDevices: {getUserMedia: async () => { state.permissionCalls++; return stream; }}}});
+    navigator: {mediaDevices: {getUserMedia: async () => {
+      state.permissionCalls++;
+      if (permissionError) throw permissionError;
+      const result = state.permissionCalls === 1 ? stream : microphone().stream;
+      if (state.pendingPermission) return new Promise((resolve, reject) => { state.permission = () => resolve(result); state.rejectPermission = reject; });
+      return result;
+    }}}});
   const capture = new AudioCapture(error => state.failures.push(error));
   t.after(() => { capture.close(); restore(); });
   return {capture, state, track};
@@ -55,10 +84,152 @@ function capturePlatform(t, {pendingResume = false, pendingPrime = false} = {}) 
 test('cancellation during AudioContext.resume never requests microphone permission', {timeout: 1000}, async t => {
   const {capture, state} = capturePlatform(t, {pendingResume: true});
   const opening = capture.open();
+  const rejected = assert.rejects(opening, /cancelled/i);
   capture.close();
-  state.resume();
-  await assert.rejects(opening, /cancelled/i);
+  await rejected;
+  assert.equal(state.contexts[0].state, 'closed');
   assert.equal(state.permissionCalls, 0);
+  state.resume(); await nextTurn();
+  assert.equal(state.permissionCalls, 0);
+  assert.equal(capture.ready, false);
+});
+
+test('cancellation settles a pending permission request and stops every late granted track', {timeout: 1000}, async t => {
+  const {capture, state, track} = capturePlatform(t, {pendingPermission: true});
+  const extraTrack = {stops: 0, stop() { this.stops++; }};
+  state.streams[0].stream.getTracks = () => [track, extraTrack];
+  const opening = capture.open(); await nextTurn();
+  assert.equal(state.permissionCalls, 1);
+  const rejected = assert.rejects(opening, /cancelled/i);
+  capture.close(); await rejected;
+  assert.equal(state.contexts[0].state, 'closed');
+  assert.equal(state.moduleCalls, 0);
+  state.permission(); await nextTurn();
+  assert.equal(track.readyState, 'ended');
+  assert.equal(track.stops, 1);
+  assert.equal(extraTrack.stops, 1);
+  assert.equal(state.nodes.length, 0);
+  assert.equal(capture.ready, false);
+  assert.deepEqual(state.failures, []);
+});
+
+test('cancellation settles a pending worklet module and rejects its late readiness', {timeout: 1000}, async t => {
+  const {capture, state, track} = capturePlatform(t, {pendingModule: true});
+  const opening = capture.open(); await nextTurn();
+  assert.equal(state.moduleCalls, 1);
+  const rejected = assert.rejects(opening, /cancelled/i);
+  capture.close(); await rejected;
+  assert.equal(track.readyState, 'ended');
+  assert.equal(state.contexts[0].state, 'closed');
+  state.module(); await nextTurn();
+  assert.equal(state.nodes.length, 0);
+  assert.equal(capture.ready, false);
+  assert.deepEqual(state.controls, []);
+});
+
+test('late setup rejections are handled after immediate cancellation', {timeout: 1000}, async t => {
+  for (const [option, rejection] of [['pendingResume', 'rejectResume'], ['pendingPermission', 'rejectPermission'], ['pendingModule', 'rejectModule']]) {
+    await t.test(option, async sub => {
+      const {capture, state} = capturePlatform(sub, {[option]: true});
+      const opening = capture.open(); await nextTurn();
+      const rejected = assert.rejects(opening, /cancelled/i);
+      capture.close(); await rejected;
+      state[rejection](new Error('Late platform rejection')); await nextTurn();
+      assert.equal(capture.ready, false);
+      assert.equal(state.contexts[0].state, 'closed');
+      assert.deepEqual(state.failures, []);
+    });
+  }
+});
+
+test('repeated open cannot replace a pending or ready microphone owner', {timeout: 1000}, async t => {
+  await t.test('pending setup', async sub => {
+    const {capture, state} = capturePlatform(sub, {pendingResume: true});
+    const opening = capture.open();
+    await assert.rejects(capture.open(), /already started/);
+    assert.equal(state.contexts.length, 1);
+    const rejected = assert.rejects(opening, /cancelled/i);
+    capture.close(); await rejected;
+  });
+  await t.test('ready capture', async sub => {
+    const {capture, state, track} = capturePlatform(sub);
+    await capture.open();
+    await assert.rejects(capture.open(), /already started/);
+    assert.equal(capture.ready, true);
+    assert.equal(state.permissionCalls, 1);
+    assert.equal(state.contexts.length, 1);
+    assert.equal(state.nodes.length, 1);
+    assert.equal(track.readyState, 'live');
+  });
+});
+
+test('setup failures preserve their original rejection and close owned resources', {timeout: 1000}, async t => {
+  for (const [option, microphoneOwned] of [['resumeError', false], ['permissionError', false], ['moduleError', true]]) {
+    await t.test(option, async sub => {
+      const error = new Error(`Original ${option}`);
+      const {capture, state, track} = capturePlatform(sub, {[option]: error});
+      await assert.rejects(capture.open(), actual => actual === error);
+      assert.equal(capture.closed, true);
+      assert.equal(state.contexts[0].state, 'closed');
+      assert.equal(track.stops, microphoneOwned ? 1 : 0);
+      assert.equal(state.nodes.length, 0);
+      await assert.rejects(capture.open(), /cancelled/i);
+      assert.equal(state.contexts.length, 1);
+    });
+  }
+  await t.test('unconfirmed microphone profile', async sub => {
+    const {capture, state, track} = capturePlatform(sub, {settings: {echoCancellation: true}});
+    await assert.rejects(capture.open(), /cannot confirm/);
+    assert.equal(track.readyState, 'ended');
+    assert.equal(track.stops, 1);
+    assert.equal(state.contexts[0].state, 'closed');
+    assert.equal(state.moduleCalls, 0);
+  });
+});
+
+test('a fresh adapter can recover while an old permission response is still pending', {timeout: 1000}, async t => {
+  const {capture, state, track} = capturePlatform(t, {pendingPermission: true});
+  const opening = capture.open(); await nextTurn();
+  const rejected = assert.rejects(opening, /cancelled/i);
+  capture.close(); await rejected;
+  const latePermission = state.permission;
+  state.pendingPermission = false;
+  const retry = new AudioCapture(error => state.failures.push(error));
+  t.after(() => retry.close());
+  await retry.open();
+  const freshTrack = state.streams[1].track;
+  assert.equal(retry.ready, true);
+  assert.equal(freshTrack.readyState, 'live');
+  latePermission(); await nextTurn();
+  assert.equal(track.readyState, 'ended');
+  assert.equal(freshTrack.readyState, 'live');
+  assert.equal(retry.ready, true);
+  assert.equal(state.nodes.length, 1);
+  assert.deepEqual(state.failures, []);
+});
+
+test('throwing node teardown cannot replace a setup error or prevent track and context cleanup', {timeout: 1000}, async t => {
+  const original = new Error('Original source connection failure');
+  const {capture, state, track} = capturePlatform(t, {connectionError: original, disconnectError: new Error('Disconnect failure'), closeError: new Error('Synchronous context close failure')});
+  await assert.rejects(capture.open(), error => error === original);
+  assert.equal(state.nodes.length, 1);
+  assert.equal(track.readyState, 'ended');
+  assert.equal(track.stops, 1);
+  assert.equal(state.contexts[0].state, 'closed');
+  assert.equal(capture.closed, true);
+  assert.doesNotThrow(() => capture.close());
+});
+
+test('a late stream disposal error is handled after cancellation', {timeout: 1000}, async t => {
+  const {capture, state} = capturePlatform(t, {pendingPermission: true});
+  state.streams[0].stream.getTracks = () => { throw new Error('Late getTracks failure'); };
+  const opening = capture.open(); await nextTurn();
+  const rejected = assert.rejects(opening, /cancelled/i);
+  capture.close(); await rejected;
+  state.permission(); await nextTurn();
+  assert.equal(capture.ready, false);
+  assert.equal(state.contexts[0].state, 'closed');
+  assert.deepEqual(state.failures, []);
 });
 
 test('cancellation before the first audio quantum rejects start and completion', {timeout: 1000}, async t => {
@@ -118,6 +289,60 @@ test('cancellation after start settles the pilot and is safe for callback-only s
   state.nodes[0].emit({type: 'done'});
   assert.equal(delivered, 0);
   assert.equal(track.readyState, 'ended');
+});
+
+test('finished speaker probes stay attached until capture closes and then every source is released', {timeout: 1000}, async t => {
+  const {capture, state, track} = capturePlatform(t);
+  await capture.open();
+  const signal = new Float32Array(36864).fill(0.05);
+  const starting = capture.record(2, () => {});
+  state.nodes[0].emit({type: 'started', frame: 128}); await starting;
+  capture.play(signal); state.playback[0].finish();
+  capture.play(signal); state.playback[1].finish();
+  assert.equal(capture.recording, true);
+  assert.equal(capture.sources.size, 2);
+  for (const source of state.playback) {
+    assert.equal(source.destination, state.contexts[0].destination);
+    assert.equal(source.disconnects, 0, 'An ended probe must not mutate the recording graph');
+    assert.equal(source.stops, 0);
+    assert.equal(source.startTime, 0.025);
+    assert.equal(source.buffer.sampleRate, 48000);
+    assert.equal(source.buffer.length, 36864);
+  }
+  capture.close(); await assert.rejects(capture.finished, /cancelled/i);
+  assert.equal(track.readyState, 'ended'); assert.equal(state.contexts[0].state, 'closed');
+  assert.equal(capture.sources.size, 0);
+  for (const source of state.playback) {
+    assert.equal(source.stops, 1); assert.equal(source.disconnects, 1);
+    source.finish(); assert.equal(source.disconnects, 1, 'Late completion cannot reconnect or mutate closed capture');
+  }
+  capture.close();
+  assert(state.playback.every(source => source.stops === 1 && source.disconnects === 1));
+});
+
+test('retained playback is bounded to one pilot and fifteen supported probes before allocating more audio', {timeout: 1000}, async t => {
+  const {capture, state} = capturePlatform(t);
+  await capture.open();
+  for (const length of [0, 36863, 36865]) assert.throws(() => capture.play(new Float32Array(length)), /supported audio session profile/);
+  assert.equal(state.buffers.length, 0); assert.equal(state.playback.length, 0);
+  for (let index = 0; index < 16; index++) { capture.play(new Float32Array(36864)); state.playback[index].finish(); }
+  assert.equal(capture.sources.size, 16);
+  assert.throws(() => capture.play(new Float32Array(36864)), /supported audio session profile/);
+  assert.equal(state.buffers.length, 16); assert.equal(state.playback.length, 16);
+  capture.close();
+  assert.equal(capture.sources.size, 0);
+  assert(state.playback.every(source => source.stops === 1 && source.disconnects === 1));
+});
+
+test('a throwing playback teardown cannot strand another source or the microphone', {timeout: 1000}, async t => {
+  const {capture, state, track} = capturePlatform(t);
+  await capture.open(); capture.play(new Float32Array(36864)); capture.play(new Float32Array(36864));
+  state.playback[0].stop = () => { throw new Error('Playback stop failed'); };
+  state.playback[0].disconnect = () => { throw new Error('Playback disconnect failed'); };
+  assert.doesNotThrow(() => capture.close());
+  assert.equal(capture.sources.size, 0);
+  assert.equal(state.playback[1].stops, 1); assert.equal(state.playback[1].disconnects, 1);
+  assert.equal(track.readyState, 'ended'); assert.equal(state.contexts[0].state, 'closed');
 });
 
 function peerPlatform(t, authorizeChunk = () => false, {authorizeArtifact = () => false} = {}) {

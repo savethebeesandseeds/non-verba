@@ -13,10 +13,11 @@ import {installRetainedEvidenceUI} from './retained-evidence-ui.js';
 import {installCameraQualityUI} from './camera-quality.js';
 import {prepareCameraPermissions} from './camera-session-preflight.js';
 import {newRequestPreset, installRequestPresetSummary} from './request-presets.js';
+import {createCoreClient} from './core-client.js';
 const $=id=>document.getElementById(id);
 const now=()=>Math.floor(Date.now()/1000);
-const worker=new Worker(new URL('./core-worker.js',import.meta.url),{type:'module'});
-let sequence=0, workerReady=false, stream=null, activeChallenge=null, identity=null, evidence=null, previewUrl=null, verification=null, verifiedFile=null, issued=null;
+const locationEngine=createCoreClient();
+let stream=null, activeChallenge=null, identity=null, evidence=null, previewUrl=null, verification=null, verifiedFile=null, issued=null;
 let cameraGeneration=0, cameraPending=false, captureRevision=0, verificationRevision=0;
 let locationRequest=null;
 let activeLocationPolicy=null, activeLocationFingerprint=null, locationProofAbort=null, issuedEnvelope=null;
@@ -35,18 +36,8 @@ const liveCameraCapture=new CameraCaptureHandoff({
   stop:()=>{stopCamera();resetEvidence();activeChallenge=null;activeLocationPolicy=null;activeLocationFingerprint=null;$('loaded-challenge').hidden=true;$('start-camera').disabled=true;},
   lock:locked=>{for(const id of ['operator-challenge','import-challenge','load-challenge'])$(id).disabled=locked;}
 });
-const pending=new Map();
-const engineReady=new Promise((resolve,reject)=>{
-  worker.addEventListener('message',({data})=>{
-    if(data.ready){workerReady=true;resolve();$('runtime').lastChild.textContent='Local engine ready';return;}
-    if(data.fatal){reject(new Error(data.fatal));return;}
-    const item=pending.get(data.id);if(!item)return;pending.delete(data.id);data.error?item.reject(new Error(data.error)):item.resolve(data.value);
-  });
-  worker.addEventListener('error',error=>{reject(new Error('The Rust/WASM engine could not load. Rebuild the web app and use a current browser.'));for(const item of pending.values())item.reject(error);pending.clear();});
-});
-async function core(method,...args){await engineReady;return new Promise((resolve,reject)=>{const id=++sequence;pending.set(id,{resolve,reject});worker.postMessage({id,method,args});});}
-async function jsonCore(method,...args){return JSON.parse(await core(method,...args));}
-const locationEngine={call:core,json:jsonCore,ready:engineReady};
+const engineReady=locationEngine.ready.then(()=>{$('runtime').lastChild.textContent='Local engine ready';});
+const core=locationEngine.call, jsonCore=locationEngine.json;
 installCameraQualityUI({engine:locationEngine,saveArtifact});
 function notify(message,type=''){const n=$('notice');n.textContent=message;n.className=`notice ${type}`;n.hidden=false;}
 function errorMessage(error){return String(error?.message||error);}

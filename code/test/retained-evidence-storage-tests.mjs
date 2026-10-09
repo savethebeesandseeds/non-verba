@@ -2,8 +2,8 @@
 // Real shipped Rust/WASM over synthetic camera bytes/clocks, with a Node
 // IndexedDB transaction double. Browser persistence is covered separately.
 import {test} from 'node:test';
+import {syntheticCameraJpeg} from './fixtures/synthetic-camera.mjs';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
 import {webcrypto} from 'node:crypto';
 import {loadShippedCore} from '../tools/image-requester-session.mjs';
 
@@ -65,7 +65,7 @@ const engine = {
   call: async (name, ...args) => name === 'create_identity' ? requester : core[name](...args),
   json: async (name, ...args) => JSON.parse(await core[name](...args))
 };
-const jpeg = new Uint8Array(await readFile(new URL('../artifacts/qa/native-camera-synthetic.jpg', import.meta.url)));
+const jpeg = await syntheticCameraJpeg();
 let wall = 1800000000500;
 const originalNow = Date.now; Date.now = () => wall;
 process.once('exit', () => { Date.now = originalNow; });

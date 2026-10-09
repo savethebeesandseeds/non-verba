@@ -101,9 +101,9 @@ internal class RawGnssCollector(
     /** Invoked on the main thread on every session terminal path, including ready/frozen. */
     fun stop() {
         active = false
-        val listener = callback
-        callback = null
-        if (listener != null) LocationManagerCompat.unregisterGnssMeasurementsCallback(manager, listener)
+        NativeLifecycleCleanup.release("raw GNSS callback", { callback },
+            { LocationManagerCompat.unregisterGnssMeasurementsCallback(manager, it) },
+            { callback = null }).run()
     }
 
     @RequiresApi(29)

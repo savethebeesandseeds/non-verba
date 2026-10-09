@@ -16,6 +16,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.AtomicFile
 import android.util.Base64
+import android.util.Log
 import android.webkit.JavascriptInterface
 import org.json.JSONArray
 import org.json.JSONObject
@@ -105,6 +106,7 @@ internal class NativeLocation(
         var permissionGrantedMs: Long? = null
         var firstRawAdmittedMs: Long? = null
         var validationFault: NativeGpsAttemptValidation.Fault? = null
+        val cleanupErrors = mutableListOf<String>()
     }
 
     @JavascriptInterface
@@ -141,6 +143,11 @@ internal class NativeLocation(
         val created = synchronized(lock) {
             check(!closed && lifecycleGeneration == generation) { "Location setup was cancelled during key provisioning" }
             check(current?.state !in ACTIVE_STATES) { "A native location session is already active" }
+            current?.let { previous ->
+                check(previous.listener == null && previous.rawCollector == null && previous.gnssStatusCollector == null) {
+                    "Previous native location resources could not be released; cancel or leave the page to retry cleanup"
+                }
+            }
             val nonce = validated.getJSONObject("challenge").getString("id")
             check(!readLedger().has(nonce)) { "This challenge was already finalized on this device" }
             Session(UUID.randomUUID().toString(), validated, requestJson, key, spki, System.currentTimeMillis(), SystemClock.elapsedRealtimeNanos()).also {
@@ -275,9 +282,11 @@ internal class NativeLocation(
                 session.failureStage = session.state
                 session.state = "cancelled"
                 session.error = "Native location session was cancelled"
-                freezeTerminal(session)
-                main.post { detach(session) }
+                NativeLifecycleCleanup.run(listOf(NativeLifecycleCleanup.Action("location cancellation snapshot") {
+                    freezeTerminal(session)
+                })) { recordCleanupFailure(session, it) }
             }
+            main.post { detach(session) } // Retry retained registrations on a terminal session as well.
             snapshot(session).toString()
         }
         return result
@@ -337,26 +346,38 @@ internal class NativeLocation(
         return synchronized(lock) { snapshot(session).toString() }
     }
 
+    /** Revocation only; no OS call can delay revoking the other native signers. */
+    fun revokeAuthority() { foreground = false }
+
     /** Main-thread lifecycle hook. Completed public evidence remains available. */
     fun pause() {
         foreground = false
         val session = synchronized(lock) {
             lifecycleGeneration++
             attemptValidation.clear()
-            current?.takeIf { it.state in ACTIVE_STATES }?.also {
-                it.failureStage = it.state
-                it.state = "cancelled"
-                it.error = "The application left the foreground; start a new location session"
-                freezeTerminal(it)
+            current?.also {
+                if (it.state in ACTIVE_STATES) {
+                    it.failureStage = it.state
+                    it.state = "cancelled"
+                    it.error = "The application left the foreground; start a new location session"
+                }
             }
         }
-        if (session != null) detach(session)
+        if (session != null) NativeLifecycleCleanup.run(listOf(
+            NativeLifecycleCleanup.Action("location terminal snapshot") {
+                synchronized(lock) { if (session.state == "cancelled") freezeTerminal(session) }
+            },
+            NativeLifecycleCleanup.Action("location collector cleanup") { detach(session) }
+        )) { recordCleanupFailure(session, it) }
     }
 
     fun destroy() {
-        pause()
-        synchronized(lock) { closed = true; current = null }
-        worker.shutdown()
+        revokeAuthority()
+        synchronized(lock) { closed = true }
+        NativeLifecycleCleanup.run(listOf(
+            NativeLifecycleCleanup.Action("location destruction cleanup", ::pause),
+            NativeLifecycleCleanup.Action("location worker shutdown") { worker.shutdown() }
+        )) { Log.w("NonverbaLifecycle", it.label, it.error) }
     }
 
     private fun start(session: Session) {
@@ -599,6 +620,7 @@ internal class NativeLocation(
             .put("attempt_report_error", session.attemptError ?: JSONObject.NULL)
             .put("attempt_id", session.id)
             .put("debug_attempt_validation_fault", session.validationFault?.mode ?: JSONObject.NULL)
+            .also { if (session.cleanupErrors.isNotEmpty()) it.put("cleanup_errors", JSONArray(session.cleanupErrors)) }
     }
 
     private fun liveSnapshot(session: Session): JSONObject {
@@ -786,22 +808,28 @@ internal class NativeLocation(
     }
 
     private fun detach(session: Session, keepDeadline: Boolean = false) {
-        try {
-            session.listener?.let { manager.removeUpdates(it) }
-        } finally {
-            session.listener = null
-            try {
-                session.rawCollector?.stop()
-            } finally {
-                session.rawCollector = null
-                session.gnssStatusCollector?.stop()
-                session.gnssStatusCollector = null
-                if (!keepDeadline) {
-                    session.timeout?.let { main.removeCallbacks(it) }
-                    session.timeout = null
+        synchronized(lock) {
+            NativeLifecycleCleanup.run(listOf(
+                NativeLifecycleCleanup.release("location updates", { session.listener },
+                    { manager.removeUpdates(it) }, { session.listener = null }),
+                NativeLifecycleCleanup.release("raw GNSS registration", { session.rawCollector },
+                    { it.stop() }, { session.rawCollector = null }),
+                NativeLifecycleCleanup.release("GNSS status registration", { session.gnssStatusCollector },
+                    { it.stop() }, { session.gnssStatusCollector = null }),
+                NativeLifecycleCleanup.Action("location timeout") {
+                    if (!keepDeadline) NativeLifecycleCleanup.release("timeout", { session.timeout },
+                        { main.removeCallbacks(it) }, { session.timeout = null }).run()
                 }
-            }
+            )) { recordCleanupFailure(session, it) }
         }
+    }
+
+    private fun recordCleanupFailure(session: Session, failure: NativeLifecycleCleanup.Failure) {
+        synchronized(lock) {
+            val message = "${failure.label}: ${safeError(failure.error)}".take(400)
+            if (message !in session.cleanupErrors && session.cleanupErrors.size < 8) session.cleanupErrors.add(message)
+        }
+        Log.w("NonverbaLifecycle", failure.label, failure.error)
     }
 
     // Successful-proof reservation stores only nonce IDs. The separate bounded

@@ -203,7 +203,11 @@ struct Device {
         AAudioStreamBuilder_setSampleRate(builder, kRate);
         AAudioStreamBuilder_setChannelCount(builder, 1);
         AAudioStreamBuilder_setFormat(builder, AAUDIO_FORMAT_PCM_FLOAT);
-        AAudioStreamBuilder_setPerformanceMode(builder, AAUDIO_PERFORMANCE_MODE_LOW_LATENCY);
+        // Android 11's legacy LOW_LATENCY input can open a PCM16 AudioRecord and
+        // convert it to FLOAT callbacks. NONE keeps the requested input FLOAT at
+        // both observed client boundaries; all format/timing checks still apply.
+        AAudioStreamBuilder_setPerformanceMode(builder,
+            isInput ? AAUDIO_PERFORMANCE_MODE_NONE : AAUDIO_PERFORMANCE_MODE_LOW_LATENCY);
         // Shared mode is explicit and reported. Exclusive ownership is not claimed.
         AAudioStreamBuilder_setSharingMode(builder, AAUDIO_SHARING_MODE_SHARED);
         if (isInput) {
@@ -320,8 +324,11 @@ struct Device {
         }
     }
     static void streamJson(std::ostream& out, AAudioStream* stream, const char* type) {
+        require(AAudioStream_getFormat(stream) == AAUDIO_FORMAT_PCM_FLOAT,
+            "AAudio stream format changed before its metadata snapshot");
         out << "{\"device_id\":" << AAudioStream_getDeviceId(stream) << ",\"device_type\":\"" << type
-            << "\",\"sample_rate\":48000,\"channels\":1,\"format\":\"pcm-f32\",\"sharing_mode\":\"" << sharing(stream)
+            << "\",\"sample_rate\":" << AAudioStream_getSampleRate(stream) << ",\"channels\":" << AAudioStream_getChannelCount(stream)
+            << ",\"format\":\"pcm-f32\",\"sharing_mode\":\"" << sharing(stream)
             << "\",\"performance_mode\":\"" << performance(stream) << "\",\"frames_per_burst\":" << AAudioStream_getFramesPerBurst(stream)
             << ",\"buffer_capacity_frames\":" << AAudioStream_getBufferCapacityInFrames(stream) << "}";
     }

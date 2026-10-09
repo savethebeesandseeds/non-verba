@@ -119,6 +119,9 @@ internal class NativeKeyEnrollment(private val activity: Activity, private val i
         snapshot(session).toString()
     }
 
+    /** Revocation only; does not release resources or replace an identity. */
+    fun revokeAuthority() { foreground = false }
+
     fun pause() {
         foreground = false
         synchronized(lock) {

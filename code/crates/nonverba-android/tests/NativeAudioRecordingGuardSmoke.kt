@@ -36,6 +36,19 @@ fun main() {
         "Unsupported hardware encoding" to clean.copy(deviceFormat = hardware.copy(encoding = "unsupported"))
     )
     for ((label, value) in invalid) rejects(label) { guard().observe(listOf(value), 200) }
+    val rejectedFormat = guard()
+    val frameworkPcm16 = clean.copy(clientFormat = format.copy(encoding = "pcm-i16"))
+    val formatFailure = runCatching { rejectedFormat.observe(listOf(frameworkPcm16), 200) }.exceptionOrNull()
+    check(formatFailure?.message?.contains("48000 Hz / 1 channels / pcm-i16") == true); passed++
+    check(rejectedFormat.diagnosticConfiguration == frameworkPcm16 && rejectedFormat.baseline == null && rejectedFormat.count == 0); passed++
+    rejects("Fresh clean config cannot erase the refused format diagnostic") { rejectedFormat.observe(listOf(clean), 300) }
+    check(rejectedFormat.diagnosticConfiguration == frameworkPcm16); passed++
+    for (changed in listOf(format.copy(sampleRate = 44100), format.copy(channels = 2), format.copy(encoding = "unsupported"))) {
+        val failed = guard()
+        val message = runCatching { failed.observe(listOf(clean.copy(clientFormat = changed)), 100) }.exceptionOrNull()?.message
+        check(message?.contains("${changed.sampleRate} Hz / ${changed.channels} channels / ${changed.encoding}") == true); passed++
+        check(failed.diagnosticConfiguration?.clientFormat == changed && failed.count == 0); passed++
+    }
     val sticky = guard()
     sticky.observe(listOf(clean), 100)
     rejects("Bad callback between otherwise clean polls") { sticky.observe(listOf(clean.copy(silenced = true)), 200) }

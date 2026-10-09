@@ -4,6 +4,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {syntheticCameraJpeg} from './fixtures/synthetic-camera.mjs';
 import {loadShippedCore} from '../tools/image-requester-session.mjs';
 const databases=new Map();
 function database(){
@@ -35,7 +36,7 @@ const {locationPolicy}=await import('../../web/src/location-policy.js');
 const {AgentRequester}=await import('../../web/src/agent-requester.js');
 const storage=await import('../../web/src/agent-evidence-storage.js');
 const template=JSON.parse(await readFile(new URL('../crates/nonverba-core/src/location_proof/raw_gnss_fixture.json',import.meta.url),'utf8'));
-const jpeg=new Uint8Array(await readFile(new URL('../artifacts/qa/native-camera-synthetic.jpg',import.meta.url)));
+const jpeg=await syntheticCameraJpeg();
 const media=core.create_identity(),location=core.create_identity(),mediaPin=JSON.parse(media).fingerprint,
   locationPin=JSON.parse(core.live_requester_identity(location)).pin.sha256;
 const json=JSON.stringify,now=()=>Math.floor(clock/1000),calls=[];

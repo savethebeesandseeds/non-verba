@@ -110,7 +110,7 @@ function Invoke-SourceSnapshot {
     # whole checkout, Git history, local evidence, vaults or developer caches.
     $rootFiles = @('README.md','CONTRIBUTING.md','GOVERNANCE.md','SECURITY.md','AGENTS.md','LICENSE','.gitignore','.gitattributes','THIRD_PARTY_NOTICES.md')
     $sourceRoots = @('LICENSES','docs','web','code/crates','code/android','code/container','code/tools','code/test','code/protocol','code/simulator','code/examples','code/requests','code/disputes','.github/workflows')
-    $codeFiles = @('Cargo.toml','Cargo.lock','rust-toolchain.toml','package.json','package-lock.json','dev.ps1','dev.sh','setup.sh','.dockerignore')
+    $codeFiles = @('Cargo.toml','Cargo.lock','rust-toolchain.toml','package.json','package-lock.json','dev.ps1','dev.sh','setup.sh','.dockerignore','models/mobilefacenet/model-lock.json')
     $excludedDirectories = @('.git','.tools','.toolchain','.gradle','.kotlin','.cxx','node_modules','target','dist','artifacts','reviews','build','jniLibs')
     $extensions = @('.rs','.mjs','.js','.css','.html','.kt','.kts','.cpp','.h','.c','.toml','.lock','.json','.md','.sh','.ps1','.yml','.yaml','.txt','.svg','.png','.xml','.properties','.rnx')
     $files = [Collections.Generic.List[string]]::new()

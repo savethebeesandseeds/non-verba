@@ -3,11 +3,11 @@
 // requester seam. This does not claim physical capture, browser RTC or IndexedDB.
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
 import {CameraSession, CAMERA_CONTEXT, authenticateCameraSession, verifyCameraSessionBundle, readCameraOffer} from '../../web/src/camera-session.js';
 import {loadShippedCore} from '../tools/image-requester-session.mjs';
+import {syntheticCameraJpeg} from './fixtures/synthetic-camera.mjs';
 const {core} = await loadShippedCore(), operator = core.create_identity(), pin = JSON.parse(operator).fingerprint;
-const jpeg = new Uint8Array(await readFile(new URL('../artifacts/qa/native-camera-synthetic.jpg', import.meta.url)));
+const jpeg = await syntheticCameraJpeg();
 const now = () => Math.floor(Date.now()/1000), empty = new Uint8Array(), json = JSON.stringify;
 const engine = {call:async (name,...args) => core[name](...args), json:async (name,...args) => JSON.parse(await core[name](...args))};
 const hints = {requester:'Synthetic requester',task:'Synthetic camera task',assurance:'browser-or-android'};

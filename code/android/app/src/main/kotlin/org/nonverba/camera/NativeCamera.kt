@@ -27,6 +27,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.AtomicFile
 import android.util.Base64
+import android.util.Log
 import android.util.Size
 import android.view.Gravity
 import android.view.Surface
@@ -38,6 +39,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.json.JSONObject
+import org.json.JSONArray
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -90,6 +92,8 @@ internal class NativeCamera(
         var jpegSize: Size? = null
         var device: CameraDevice? = null
         var captureSession: CameraCaptureSession? = null
+        var deviceOpenPending = false
+        var configurationPending = false
         var previewSurface: Surface? = null
         var reader: ImageReader? = null
         var captureRequestedNs = 0L
@@ -103,6 +107,7 @@ internal class NativeCamera(
         var imageHeight = 0
         var resultMetadata: JSONObject? = null
         var result: JSONObject? = null
+        val cleanupErrors = mutableListOf<String>()
     }
 
     @JavascriptInterface
@@ -132,6 +137,13 @@ internal class NativeCamera(
         val session = synchronized(lock) {
             check(!closed && lifecycleGeneration == generation) { "Camera setup was cancelled during key provisioning" }
             check(current?.state !in ACTIVE_STATES) { "A native camera session is already active" }
+            current?.let { previous ->
+                check(previous.captureSession == null && previous.device == null && previous.reader == null &&
+                    previous.previewSurface == null && previous.dialog == null && previous.texture == null &&
+                    !previous.deviceOpenPending && !previous.configurationPending) {
+                    "Previous native camera resources could not be released; cancel or leave the page to retry cleanup"
+                }
+            }
             val nonce = request.getJSONObject("challenge").getString("id")
             check(!readLedger().has(nonce)) { "This camera challenge was already used on this device" }
             val anchor = NativeCameraTiming.anchor({ UUID.randomUUID().toString() },
@@ -173,30 +185,38 @@ internal class NativeCamera(
             session.state = "cancelled"
             session.error = "Native camera session was cancelled"
             session.image = null
-            main.post { detach(session) }
         }
+        main.post { detach(session) } // Terminal sessions may still own a failed release.
         snapshot(session).toString()
     }
+
+    /** Revocation only; safe before another subsystem's potentially slow OS cleanup. */
+    fun revokeAuthority() { foreground = false }
 
     /** Main-thread lifecycle hook. Completed evidence may still be exported. */
     fun pause() {
         foreground = false
         val session = synchronized(lock) {
             lifecycleGeneration++
-            current?.takeIf { it.state in ACTIVE_STATES }?.also {
-                it.state = "cancelled"
-                it.error = "The application left the foreground; request a new camera session"
-                it.image = null
+            current?.also {
+                if (it.state in ACTIVE_STATES) {
+                    it.state = "cancelled"
+                    it.error = "The application left the foreground; request a new camera session"
+                    it.image = null
+                }
             }
         }
         if (session != null) detach(session)
     }
 
     fun destroy() {
-        pause()
-        synchronized(lock) { closed = true; current = null }
-        worker.shutdown()
-        cameraThread.quitSafely()
+        revokeAuthority()
+        synchronized(lock) { closed = true }
+        NativeLifecycleCleanup.run(listOf(
+            NativeLifecycleCleanup.Action("camera destruction cleanup", ::pause),
+            NativeLifecycleCleanup.Action("camera worker shutdown") { worker.shutdown() },
+            NativeLifecycleCleanup.Action("camera callback thread shutdown") { cameraThread.quitSafely() }
+        )) { Log.w("NonverbaLifecycle", it.label, it.error) }
     }
 
     private fun start(session: Session) {
@@ -321,19 +341,33 @@ internal class NativeCamera(
                 session.reader = ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, 2).apply {
                     setOnImageAvailableListener({ receiveImage(session, it) }, cameraHandler)
                 }
+                session.deviceOpenPending = true
             }
             manager.openCamera(session.cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(device: CameraDevice) {
-                    synchronized(lock) {
-                        if (!isCurrent(session, "opening")) { device.close(); return }
+                    val configure = synchronized(lock) {
+                        session.deviceOpenPending = false
                         session.device = device
+                        isCurrent(session, "opening")
                     }
-                    configureSession(session, device)
+                    if (configure) configureSession(session, device)
+                    else main.post { detach(session) }
                 }
-                override fun onDisconnected(device: CameraDevice) { device.close(); fail(session, "Native camera disconnected") }
-                override fun onError(device: CameraDevice, error: Int) { device.close(); fail(session, "Native camera failed ($error)") }
+                override fun onDisconnected(device: CameraDevice) {
+                    synchronized(lock) { session.deviceOpenPending = false; session.device = device }
+                    fail(session, "Native camera disconnected")
+                    main.post { detach(session) }
+                }
+                override fun onError(device: CameraDevice, error: Int) {
+                    synchronized(lock) { session.deviceOpenPending = false; session.device = device }
+                    fail(session, "Native camera failed ($error)")
+                    main.post { detach(session) }
+                }
             }, cameraHandler)
-        } catch (error: Throwable) { fail(session, safeError(error)) }
+        } catch (error: Throwable) {
+            synchronized(lock) { session.deviceOpenPending = false }
+            fail(session, safeError(error))
+        }
     }
 
     @Suppress("DEPRECATION") // API 21 session overload also supports the APK's API 26 floor.
@@ -341,15 +375,17 @@ internal class NativeCamera(
         try {
             val outputs = synchronized(lock) {
                 if (!isCurrent(session, "opening")) return
+                session.configurationPending = true
                 listOf(requireNotNull(session.previewSurface), requireNotNull(session.reader).surface)
             }
             device.createCaptureSession(outputs, object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(captureSession: CameraCaptureSession) {
                     try {
                         synchronized(lock) {
-                            if (!isCurrent(session, "opening")) { captureSession.close(); return }
-                            check(foreground && hasPermission()) { "Camera permission was revoked" }
+                            session.configurationPending = false
                             session.captureSession = captureSession
+                            if (!isCurrent(session, "opening")) { main.post { detach(session) }; return }
+                            check(foreground && hasPermission()) { "Camera permission was revoked" }
                             val request = device.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
                                 addTarget(requireNotNull(session.previewSurface))
                                 set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
@@ -369,9 +405,16 @@ internal class NativeCamera(
                         }
                     } catch (error: Throwable) { fail(session, safeError(error)) }
                 }
-                override fun onConfigureFailed(captureSession: CameraCaptureSession) { captureSession.close(); fail(session, "Native camera stream configuration failed") }
+                override fun onConfigureFailed(captureSession: CameraCaptureSession) {
+                    synchronized(lock) { session.configurationPending = false; session.captureSession = captureSession }
+                    fail(session, "Native camera stream configuration failed")
+                    main.post { detach(session) }
+                }
             }, cameraHandler)
-        } catch (error: Throwable) { fail(session, safeError(error)) }
+        } catch (error: Throwable) {
+            synchronized(lock) { session.configurationPending = false }
+            fail(session, safeError(error))
+        }
     }
 
     private fun takePicture(session: Session) {
@@ -574,27 +617,33 @@ internal class NativeCamera(
     private fun detach(session: Session, keepDeadline: Boolean = false) {
         // Runs on the Activity thread; state is terminal or sealing before surfaces disappear.
         synchronized(lock) {
-            session.captureTimeout?.let { main.removeCallbacks(it) }
-            session.captureTimeout = null
-            if (!keepDeadline) {
-                session.timeout?.let { main.removeCallbacks(it) }
-                session.timeout = null
+            val releases = listOf(
+                NativeLifecycleCleanup.release("camera capture timeout", { session.captureTimeout },
+                    { main.removeCallbacks(it) }, { session.captureTimeout = null }),
+                NativeLifecycleCleanup.Action("camera session timeout") {
+                    if (!keepDeadline) NativeLifecycleCleanup.release("timeout", { session.timeout },
+                        { main.removeCallbacks(it) }, { session.timeout = null }).run()
+                },
+                NativeLifecycleCleanup.release("camera capture session", { session.captureSession },
+                    { it.close() }, { session.captureSession = null }),
+                NativeLifecycleCleanup.release("camera device", { session.device },
+                    { it.close() }, { session.device = null }),
+                NativeLifecycleCleanup.Action("camera image listener") { session.reader?.setOnImageAvailableListener(null, null) },
+                NativeLifecycleCleanup.release("camera image reader", { session.reader },
+                    { it.close() }, { session.reader = null }),
+                NativeLifecycleCleanup.release("camera preview surface", { session.previewSurface },
+                    { it.release() }, { session.previewSurface = null }),
+                NativeLifecycleCleanup.release("camera preview listener", { session.texture },
+                    { it.surfaceTextureListener = null }, { session.texture = null }),
+                NativeLifecycleCleanup.release("camera dialog", { session.dialog },
+                    { it.dismiss() }, { session.dialog = null }),
+                NativeLifecycleCleanup.Action("camera UI references") { session.statusText = null; session.captureButton = null }
+            )
+            NativeLifecycleCleanup.run(releases) { failure ->
+                val message = "${failure.label}: ${safeError(failure.error)}".take(400)
+                if (message !in session.cleanupErrors && session.cleanupErrors.size < 8) session.cleanupErrors.add(message)
+                Log.w("NonverbaLifecycle", failure.label, failure.error)
             }
-            session.captureSession?.close()
-            session.captureSession = null
-            session.device?.close()
-            session.device = null
-            session.reader?.setOnImageAvailableListener(null, null)
-            session.reader?.close()
-            session.reader = null
-            session.previewSurface?.release()
-            session.previewSurface = null
-            session.texture?.surfaceTextureListener = null
-            session.dialog?.dismiss()
-            session.dialog = null
-            session.texture = null
-            session.statusText = null
-            session.captureButton = null
         }
     }
 
@@ -625,6 +674,7 @@ internal class NativeCamera(
         .put("state", session.state).put("key_fingerprint", session.identity.fingerprint)
         .put("key_profile", session.key.profile)
         .put("timing_diagnostics", JSONObject(session.timing.snapshot()).put("unsigned", true))
+        .also { if (session.cleanupErrors.isNotEmpty()) it.put("cleanup_errors", JSONArray(session.cleanupErrors)) }
         .also { result -> session.error?.let { result.put("error", it) }; session.result?.let { result.put("result", it) } }
 
     private fun fail(session: Session, message: String) {

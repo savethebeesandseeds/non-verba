@@ -62,6 +62,20 @@ internal class NativeAudio(
         var volume = 0
         var pilot: String? = null
         var pilotVerified = false
+        var pilotAssessment: JSONObject? = null
+        var roundAssessment: JSONObject? = null
+        var roundAssessmentError: String? = null
+        var pilotProbeEnqueued = false
+        var lastDeviceDiagnostic: JSONObject? = null
+        var lastPilotTiming: JSONObject? = null
+        val lastRecordingDiagnostic = NativeAudioLastObservation<JSONObject> { value ->
+            val encoded = value.toString()
+            check(encoded.length <= 16 * 1024) { "Native microphone configuration diagnostics exceed their bound" }
+            JSONObject(encoded)
+        }
+        var recordingDiagnosticError: String? = null
+        var diagnostics: JSONObject? = null
+        var diagnosticsError: String? = null
         var focus: AudioFocusRequest? = null
         var capturedFrames = 0
         var exportedChunks = 0
@@ -72,7 +86,8 @@ internal class NativeAudio(
         var metadata: JSONObject? = null
         var error: String? = null
         var result: JSONObject? = null
-        var poll: Runnable? = null
+        lateinit var lifecycle: NativeAudioLifecycle
+        val cleanupErrors = mutableListOf<String>()
     }
 
     @JavascriptInterface
@@ -104,10 +119,20 @@ internal class NativeAudio(
             check(!closed && lifecycleGeneration == generation && current?.state !in ACTIVE) { "Native microphone setup was cancelled or another session started" }
             check(Build.VERSION.SDK_INT >= 29 && unprocessedSupported()) { "This phone cannot observe the required unprocessed microphone path (Android API29 required)" }
             check(!readLedger().has(request.getString("session_id"))) { "This audio request was already used on this device" }
+            current?.let { previous ->
+                release(previous)
+                check(previous.handle == 0L && previous.focus == null && previous.recordingMonitor == null) { "Previous native microphone resources could not be released; retry cleanup before starting another session" }
+            }
             Session(UUID.randomUUID().toString(), request, key, identity, System.nanoTime(), System.currentTimeMillis())
-                .also { current = it }
+                .also { created ->
+                    created.lifecycle = NativeAudioLifecycle(created.requestNs,
+                        active = { synchronized(lock) { current === created && created.state in ACTIVE && !closed } },
+                        failure = { message -> synchronized(lock) { fail(created, message) } })
+                    current = created
+                    try { scheduleDeadline(created) } catch (error: Throwable) { fail(created, safeError(error)) }
+                }
         }
-        main.post { start(session) }
+        enqueue(session, main, "permission setup") { start(session) }
         synchronized(lock) { snapshot(session).toString() }
     } catch (error: Throwable) { failure(error) }
 
@@ -171,7 +196,7 @@ internal class NativeAudio(
         val transcript = NativeAudioCore.validateReceipt(session.request.toString(), session.rounds.toString(), receiptJson, System.currentTimeMillis())
         session.state = "sealing"
         session.phaseNs = System.nanoTime()
-        worker.post { seal(session, transcript) }
+        enqueue(session, worker, "finalization") { seal(session, transcript) }
         snapshot(session)
     }
 
@@ -179,12 +204,18 @@ internal class NativeAudio(
     fun cancel(sessionId: String): String = synchronized(lock) {
         val session = current?.takeIf { it.id == sessionId } ?: return@synchronized failureMessage("Unknown native audio session")
         if (session.state in ACTIVE) {
+            val stoppedState = session.state
             session.state = "cancelled"
             session.error = "Native microphone session cancelled"
-            release(session)
+            try { freezeDiagnostics(session, stoppedState) }
+            catch (error: Throwable) { session.diagnosticsError = safeError(error).take(160) }
+            finally { release(session) }
         }
         snapshot(session).toString()
     }
+
+    /** Revocation only: Activity clears every signer before attempting OS cleanup. */
+    fun revokeAuthority() { foreground = false }
 
     fun pause() {
         foreground = false
@@ -228,7 +259,8 @@ internal class NativeAudio(
         session.inputId = requireNotNull(builtIn(true)) { "A built-in microphone is required" }.id
         session.outputId = requireNotNull(builtIn(false)) { "A built-in speaker is required" }.id
         session.volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
-        check(session.volume > 0 && !audio.isMicrophoneMute) { "Unmute the microphone and media speaker before the acoustic pilot" }
+        check(session.volume > 0) { "Android media volume is zero. Set a comfortable non-zero media volume before retrying." }
+        check(!audio.isMicrophoneMute) { "Android reports the microphone muted. Unmute it before retrying." }
         val focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
             .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
             .setOnAudioFocusChangeListener({ change ->
@@ -240,8 +272,7 @@ internal class NativeAudio(
         session.focus = focus
         session.state = "preparing"
         session.phaseNs = System.nanoTime()
-        session.poll = Runnable { poll(session) }
-        worker.post(requireNotNull(session.poll))
+        enqueue(session, worker, "acquisition polling") { poll(session) }
     }
 
     private fun poll(session: Session) {
@@ -258,23 +289,49 @@ internal class NativeAudio(
                 }
                 if (session.handle == 0L) openStreams(session)
                 val device = JSONObject(NativeAudioDevice.snapshot(session.handle))
+                val observedNs = System.nanoTime().toString()
+                session.lastDeviceDiagnostic = JSONObject().put("input", JSONObject(device.getJSONObject("input").toString()))
+                    .put("output", JSONObject(device.getJSONObject("output").toString()))
+                    .put("input_session_id", device.getInt("input_session_id"))
+                    .put("captured_frames", device.getInt("captured_frames"))
+                    .put("timestamps_ready", device.getBoolean("timestamps_ready"))
+                    .put("stream_phase", session.phase)
+                    .put("observed_monotonic_ns", observedNs)
+                if (session.phase == "pilot-opening" || session.phase == "pilot-recording") {
+                    session.lastPilotTiming = pilotTiming(device, observedNs)
+                }
                 val observed = requireNotNull(session.recordingMonitor).poll()
                 when (session.phase) {
                     "pilot-opening" -> if (observed && device.getBoolean("timestamps_ready")) {
                         session.pilot = NativeAudioCore.createPilot(session.request.toString(), System.currentTimeMillis())
-                        NativeAudioDevice.record(session.handle, CHUNK)
-                        NativeAudioDevice.play(session.handle, 0, NativeAudioCore.probe(requireNotNull(session.pilot)))
+                        val generatedProbe = NativeAudioCore.probe(requireNotNull(session.pilot))
+                        try {
+                            NativeAudioDevice.record(session.handle, CHUNK)
+                            NativeAudioDevice.play(session.handle, 0, generatedProbe)
+                            session.pilotProbeEnqueued = true
+                        } finally { generatedProbe.fill(0.0f) }
                         session.state = "pilot"
                         session.phase = "pilot-recording"
                         session.phaseNs = System.nanoTime()
                     }
                     "pilot-recording" -> if (device.getInt("captured_frames") == CHUNK) {
                         val pilotPcm = NativeAudioDevice.copyFrames(session.handle, 0, CHUNK)
-                        NativeAudioDevice.close(session.handle)
-                        session.handle = 0
-                        session.recordingMonitor?.close()
-                        session.recordingMonitor = null
-                        NativeAudioCore.validatePilot(pilotPcm, requireNotNull(session.pilot))
+                        try {
+                            rememberRecordingDiagnostic(session)
+                            NativeAudioDevice.close(session.handle)
+                            session.handle = 0
+                            session.recordingMonitor?.close()
+                            session.recordingMonitor = null
+                            val assessment = JSONObject(NativeAudioCore.inspectPilot(pilotPcm, requireNotNull(session.pilot)))
+                            session.pilotAssessment = assessment
+                            check(assessment.getBoolean("passed")) {
+                                when (assessment.getString("reason")) {
+                                    "not_detected" -> "Native microphone/speaker pilot did not detect the challenge"
+                                    "detected_late" -> "Native microphone/speaker pilot detected the challenge after the 800 ms start limit"
+                                    else -> "Native microphone/speaker pilot assessment refused the challenge"
+                                }
+                            }
+                        } finally { pilotPcm.fill(0.0f) }
                         session.pilotVerified = true
                         session.pilot = null
                         // New streams and new native buffers: no pilot sample can
@@ -297,7 +354,7 @@ internal class NativeAudio(
                         if (session.capturedFrames == session.request.getInt("duration_secs") * RATE) finishRecording(session, device)
                     }
                 }
-                if (session.state in ACQUIRING) worker.postDelayed(requireNotNull(session.poll), 25)
+                if (session.state in ACQUIRING) enqueue(session, worker, "acquisition polling", 25) { poll(session) }
             } catch (error: Throwable) { fail(session, safeError(error)) }
         }
     }
@@ -310,7 +367,7 @@ internal class NativeAudio(
         // monitor; a callback from an old generation cannot poison its successor.
         lateinit var monitor: NativeAudioRecordingMonitor
         monitor = NativeAudioRecordingMonitor(audio, observations, inputSessionId, session.inputId) { message ->
-            worker.post { synchronized(lock) {
+            enqueue(session, worker, "configuration failure") { synchronized(lock) {
                 if (current === session && session.recordingMonitor === monitor) fail(session, message)
             } }
         }
@@ -329,9 +386,9 @@ internal class NativeAudio(
         session.state = "awaiting-receipt"
         session.phaseNs = System.nanoTime()
         releaseFocus(session)
-        worker.postDelayed({ synchronized(lock) {
+        enqueue(session, worker, "receipt timeout", 15000) { synchronized(lock) {
             if (current === session && session.state == "awaiting-receipt") fail(session, "Requester receipt did not arrive before the native recording expired")
-        } }, 15000)
+        } }
     }
 
     private fun metadata(session: Session, device: JSONObject): JSONObject {
@@ -373,6 +430,10 @@ internal class NativeAudio(
                 session.identity.spki, session.identity.certificatePem, sealedAtMs, signer))
             val monitor = synchronized(lock) {
                 if (current !== session || session.state != "sealing" || closed) return
+                rememberRoundAssessment(session, result)
+                check(result.optBoolean("ok", true)) {
+                    result.optString("error", "Native microphone acoustic policy refused the recording")
+                }
                 requireSealingAllowed(session)
                 check(result.getString("fingerprint") == session.identity.fingerprint && result.getString("media_origin") == "native-aaudio-pcm") {
                     "Native audio sealing identity or origin changed"
@@ -411,7 +472,8 @@ internal class NativeAudio(
         // MainActivity pause, stop and document navigation revoke this cached flag.
         NativeSessionGuards.requireAuthority(foreground, closed, current === session, hasPermission())
         val elapsed = NativeSessionGuards.elapsedMillis(session.requestWallMs, session.requestNs, nowMs, System.nanoTime())
-        check(elapsed <= 150000L) { "Native microphone session lifetime expired" }
+        check(elapsed <= NativeAudioLifecycle.MAX_LIFETIME_MS) { "Native microphone session lifetime expired" }
+        NativeSessionGuards.requireRequestWindow(nowMs, session.request.getLong("issued_at"), session.request.getLong("expires_at"))
         return elapsed
     }
 
@@ -434,26 +496,143 @@ internal class NativeAudio(
     }
 
     private fun releaseFocus(session: Session) {
-        session.focus?.let { audio.abandonAudioFocusRequest(it) }
-        session.focus = null
+        session.focus?.let {
+            check(audio.abandonAudioFocusRequest(it) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { "Native speaker audio focus could not be released" }
+            session.focus = null
+        }
     }
 
     private fun release(session: Session) {
-        session.recordingMonitor?.let { runCatching { it.close() } }
-        session.recordingMonitor = null
-        session.poll?.let { worker.removeCallbacks(it) }
-        if (session.handle != 0L) { runCatching { NativeAudioDevice.close(session.handle) }; session.handle = 0 }
-        releaseFocus(session)
-        session.pcm = null
-        session.chunks.fill(null)
-        session.pilot = null
+        session.lifecycle.close()
+        val errors = NativeAudioLifecycle.cleanup(listOf(
+            { session.recordingMonitor?.close(); session.recordingMonitor = null },
+            { if (session.handle != 0L) { NativeAudioDevice.close(session.handle); session.handle = 0 } },
+            { releaseFocus(session) }
+        )) {
+            session.pcm = null
+            session.chunks.fill(null)
+            session.pilot = null
+        }
+        errors.forEach { if (it !in session.cleanupErrors && session.cleanupErrors.size < 8) session.cleanupErrors.add(it) }
+    }
+
+    private fun enqueue(session: Session, handler: Handler, label: String, delayMs: Long = 0, action: () -> Unit) =
+        session.lifecycle.enqueue(label,
+            post = { if (delayMs == 0L) handler.post(it) else handler.postDelayed(it, delayMs) },
+            remove = { handler.removeCallbacks(it) }, action = action)
+
+    /** Independent of the native worker, including while an OS permission reply is absent. */
+    private fun scheduleDeadline(session: Session) {
+        val delay = NativeAudioLifecycle.deadlineDelayMillis(session.requestWallMs, session.requestNs,
+            session.request.getLong("expires_at"), System.currentTimeMillis(), System.nanoTime())
+        enqueue(session, main, "session deadline", delay) { synchronized(lock) {
+            if (current === session && session.state in ACTIVE && !closed) {
+                val wallMs = System.currentTimeMillis()
+                val elapsed = NativeSessionGuards.elapsedMillis(session.requestWallMs, session.requestNs, wallMs, System.nanoTime())
+                when {
+                    elapsed > NativeAudioLifecycle.MAX_LIFETIME_MS -> fail(session, "Native microphone session lifetime expired")
+                    wallMs / 1000 >= session.request.getLong("expires_at") -> fail(session, "Native microphone request expired")
+                    else -> scheduleDeadline(session)
+                }
+            }
+        } }
     }
 
     private fun fail(session: Session, message: String) {
         if (current !== session || session.state !in ACTIVE) return
+        val stoppedState = session.state
         session.state = "error"
         session.error = message.take(400)
-        release(session)
+        try { freezeDiagnostics(session, stoppedState) }
+        catch (error: Throwable) { session.diagnosticsError = safeError(error).take(160) }
+        finally { release(session) }
+    }
+
+    /** Freeze observations before teardown; never query hardware or sign diagnostics here. */
+    private fun freezeDiagnostics(session: Session, stoppedState: String) {
+        if (session.diagnostics != null) return
+        session.lifecycle.close()
+        rememberRecordingDiagnostic(session)
+        val errors = JSONArray()
+        session.recordingDiagnosticError?.let { errors.put(it) }
+        session.roundAssessmentError?.let { errors.put(it) }
+        val configuration = session.lastRecordingDiagnostic.snapshot()
+        fun requested(performance: String) = JSONObject().put("sample_rate", RATE).put("channels", 1)
+            .put("format", "pcm-f32").put("performance_mode", performance)
+        val diagnostics = JSONObject().put("version", 1).put("type", "nonverba-native-audio-diagnostics")
+            .put("signed", false).put("successful_measurement", false)
+            .put("session_id", session.id).put("request_session_id", session.request.getString("session_id"))
+            .put("key_fingerprint", session.identity.fingerprint)
+            .put("stopped_state", stoppedState).put("stopping_phase", session.phase)
+            .put("error", session.error ?: "Native audio stopped")
+            .put("terminal_elapsed_ms", session.lifecycle.terminalElapsedMillis())
+            .put("retained_frames_last_observed", session.lastDeviceDiagnostic?.optInt("captured_frames") ?: JSONObject.NULL)
+            .put("pilot_probe_enqueued", session.pilotProbeEnqueued).put("pilot_verified", session.pilotVerified)
+            .put("pilot_assessment", session.pilotAssessment ?: JSONObject.NULL)
+            .put("round_assessment", session.roundAssessment?.let { JSONObject(it.toString()) } ?: JSONObject.NULL)
+            .put("pilot_native_timing_last_observed", session.lastPilotTiming?.let { JSONObject(it.toString()) } ?: JSONObject.NULL)
+            .put("challenge_count", session.rounds.length())
+            .put("android_recording_configuration_last_observed", configuration ?: JSONObject.NULL)
+            .put("aaudio_requested", JSONObject().put("input", requested("none")).put("output", requested("low-latency")))
+            .put("aaudio_actual_last_observed", session.lastDeviceDiagnostic ?: JSONObject.NULL).put("diagnostic_errors", errors)
+        check(diagnostics.toString().toByteArray(Charsets.UTF_8).size <= 16 * 1024) { "Native microphone diagnostics exceed their bound" }
+        session.diagnostics = diagnostics
+    }
+
+    /** Native sealer observations only; a diagnostic copy failure cannot replace its original refusal. */
+    private fun rememberRoundAssessment(session: Session, result: JSONObject) {
+        if (!result.has("round_assessment") || result.isNull("round_assessment")) return
+        try {
+            val assessment = result.getJSONObject("round_assessment")
+            check(assessment.getInt("version") == 1 && assessment.getString("type") == "nonverba-native-audio-round-assessment" &&
+                assessment.getString("signal_algorithm") == "org.nonverba.audio-fsk.v1" && assessment.getString("sample_format") == "pcm16" &&
+                assessment.getInt("maximum_start_offset_samples") == 38400 && assessment.get("passed") is Boolean &&
+                assessment.getJSONArray("rounds").length() <= 15) {
+                "Native microphone round assessment has an invalid diagnostic schema"
+            }
+            val encoded = assessment.toString()
+            check(encoded.toByteArray(Charsets.UTF_8).size <= 8192) { "Native microphone round assessment exceeds its bound" }
+            session.roundAssessment = JSONObject(encoded)
+        } catch (error: Throwable) {
+            session.roundAssessmentError = safeError(error).take(160)
+        }
+    }
+
+    /** Existing collector counters only; a completed callback probe does not establish physical playback. */
+    private fun pilotTiming(device: JSONObject, observedNs: String): JSONObject {
+        fun available(field: String, minimum: Long = 1): Any {
+            val value = device.getString(field)
+            return if (value.toLong() >= minimum) value else JSONObject.NULL
+        }
+        val rounds = device.getJSONArray("rounds")
+        val completed = if (rounds.length() == 0) null else {
+            val round = rounds.getJSONObject(0)
+            check(round.getInt("index") == 0) { "Native pilot output observation is not round zero" }
+            JSONObject().put("index", round.getInt("index"))
+                .put("output_start_stream_frame", round.getString("output_start_stream_frame"))
+                .put("output_end_stream_frame", round.getString("output_end_stream_frame"))
+                .put("output_first_callback_monotonic_ns", round.getString("output_first_callback_monotonic_ns"))
+                .put("input_frame_at_output_start", round.getInt("input_frame_at_output_start"))
+        }
+        val timing = JSONObject().put("input_session_id", device.getInt("input_session_id"))
+            .put("observed_monotonic_ns", observedNs).put("captured_frames", device.getInt("captured_frames"))
+            .put("record_requested_monotonic_ns", available("record_requested_monotonic_ns"))
+            .put("record_start_stream_frame", available("record_start_stream_frame", 0))
+            .put("first_input_callback_monotonic_ns", available("first_input_callback_monotonic_ns"))
+            .put("last_input_callback_monotonic_ns", available("last_input_callback_monotonic_ns"))
+            .put("completed_output_probe", completed ?: JSONObject.NULL)
+        check(timing.toString().toByteArray(Charsets.UTF_8).size <= 2048) { "Native pilot timing diagnostics exceed their bound" }
+        return timing
+    }
+
+    /** Copy the existing collector observation before detaching it; never poll hardware here. */
+    private fun rememberRecordingDiagnostic(session: Session) {
+        try {
+            val observed = session.recordingMonitor?.diagnostics()?.put("stream_phase", session.phase)
+            session.lastRecordingDiagnostic.remember(observed)
+        } catch (error: Throwable) {
+            session.recordingDiagnosticError = safeError(error).take(160)
+        }
     }
 
     private fun readLedger(): JSONObject {
@@ -483,7 +662,12 @@ internal class NativeAudio(
         .put("session_id", session.id).put("key_fingerprint", session.identity.fingerprint).put("state", session.state)
         .put("key_profile", session.key.profile)
         .put("pilot_verified", session.pilotVerified).put("captured_frames", session.capturedFrames)
+        .put("elapsed_ms", session.lifecycle.elapsedMillis()).put("timing_signed", false)
+        .also { session.lifecycle.terminalElapsedMillis()?.let { elapsed -> it.put("terminal_elapsed_ms", elapsed) }
+            if (session.cleanupErrors.isNotEmpty()) it.put("cleanup_errors", JSONArray(session.cleanupErrors)) }
         .also { session.error?.let { error -> it.put("error", error) }; session.result?.let { result -> it.put("result", result) } }
+        .also { session.diagnostics?.let { diagnostics -> it.put("diagnostics", JSONObject(diagnostics.toString())) } }
+        .also { session.diagnosticsError?.let { error -> it.put("diagnostics_error", error) } }
     private fun safeError(error: Throwable) = (error.message ?: "Native audio capture failed").take(400)
     private fun failure(error: Throwable) = failureMessage(safeError(error))
     private fun failureMessage(message: String) = JSONObject().put("ok", false).put("state", "error").put("error", message).toString()

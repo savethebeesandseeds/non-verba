@@ -10,6 +10,7 @@
   <title>Non-verba — Evidence camera</title>
   <link rel="stylesheet" href="./style.css">
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./developer-inspection-navigation.js"></script>
 <script type="module" src="./screen-awake.js"></script>
 <script type="module" src="gps-warmup.js"></script>
 </head>
@@ -18,7 +19,7 @@
   <main>
     <div id="screen-awake" class="screen-awake" hidden><button id="screen-awake-toggle" type="button" class="secondary" aria-pressed="false" aria-describedby="screen-awake-note">Keep screen awake</button><div><p id="screen-awake-status" role="status" aria-live="polite">Off — normal screen timeout.</p><p id="screen-awake-note">For this app session only. Tap again to turn off; restarting the app resets it. Android lock settings stay unchanged.</p></div></div>
     <div class="intro"><div><p class="eyebrow">LESS TRUST. MORE EVIDENCE.</p><h1>Evidence starts here<span>.</span></h1><p class="lede">A fresh challenge. A camera capture. A signed record that travels with your photo.</p></div><div class="edition-note">NON-VERBA FIELD TOOLS<br><span>Proof of integrity, by design.</span></div></div>
-    <p class="workflow-links"><a class="secondary" href="./audio.html">Live audio evidence ↗</a><a class="secondary" href="./location.html">Location proof ↗</a><a class="secondary" href="./live-location.html">Live location receipt ↗</a><a class="secondary" href="./key-enrollment.html">Signing keys ↗</a></p>
+    <p class="workflow-links"><a class="secondary" href="./audio.html">Live audio evidence ↗</a><a class="secondary" href="./location.html">Location proof ↗</a><a class="secondary" href="./live-location.html">Live location receipt ↗</a><a class="secondary" href="./key-enrollment.html">Signing keys ↗</a><a class="secondary" data-browser-inspection hidden href="./authentication-privacy.html">Authentication &amp; work privacy (browser inspection) ↗</a><a class="secondary" data-browser-inspection hidden href="./registration.html">Registration (browser inspection) ↗</a></p>
     <details class="panel roomy" id="camera-live-panel"><summary>Live camera session — pair before requesting</summary>
       <p class="muted">A direct connection carries a fresh signed requester challenge and the complete signed JPEG back, with its separate location proof when requested. Keep both screens open. No relay is configured; a reachable direct route is required.</p>
       <p class="fineprint">Exchange public key IDs through a trusted channel first. Same-device or self-operated tests do not establish an independent requester. Receipt timing comes from the requester’s browser; scene, GPS, hardware authenticity and trustworthy clocks remain unproven.</p>

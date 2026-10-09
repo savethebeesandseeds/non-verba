@@ -17,14 +17,17 @@ internal class NativeGnssStatusCollector(
     private val diagnostics: NativeGnssStatusDiagnostics,
     private val canObserve: () -> Boolean
 ) {
-    private var callback: GnssStatusCompat.Callback? = null
+    private val registration = NativeGnssStatusRegistration<GnssStatusCompat.Callback>(diagnostics) {
+        LocationManagerCompat.unregisterGnssStatusCallback(manager, it)
+    }
 
     @SuppressLint("MissingPermission") // Owning native session checks precise foreground permission.
     fun start() {
-        if (!canObserve() || !diagnostics.registrationAttempt()) return
+        if (!canObserve()) return
         val listener = object : GnssStatusCompat.Callback() {
             override fun onSatelliteStatusChanged(status: GnssStatusCompat) {
-                if (!canObserve() || !diagnostics.callback((SystemClock.elapsedRealtimeNanos() - anchorNs) / 1_000_000)) return
+                if (!registration.active || !canObserve() ||
+                    !diagnostics.callback((SystemClock.elapsedRealtimeNanos() - anchorNs) / 1_000_000)) return
                 try {
                     val count = status.satelliteCount
                     if (count !in 0..NativeGnssStatusDiagnostics.MAX_SATELLITES) {
@@ -37,27 +40,13 @@ internal class NativeGnssStatusCollector(
                 } catch (_: Throwable) { diagnostics.unreadableCallback() }
             }
         }
-        callback = listener
-        try {
-            val registered = LocationManagerCompat.registerGnssStatusCallback(manager, listener, handler)
-            diagnostics.registrationResult(registered)
-            if (!registered) stop()
-        } catch (_: Throwable) {
-            diagnostics.registrationException()
-            stop()
+        registration.start(listener) {
+            LocationManagerCompat.registerGnssStatusCallback(manager, it, handler)
         }
     }
 
-    /** Main-thread, idempotent cleanup on every terminal/frozen path; optional diagnostics cannot fail a proof. */
-    fun stop() {
-        diagnostics.stop()
-        val listener = callback
-        callback = null
-        if (listener != null) {
-            try { LocationManagerCompat.unregisterGnssStatusCallback(manager, listener) }
-            catch (_: Throwable) { diagnostics.cleanupFailure() }
-        }
-    }
+    /** Main-thread cleanup. The owning runner retains and reports failed OS release without refusing proof. */
+    fun stop() { registration.stop() }
 
     companion object {
         fun snapshot(diagnostics: NativeGnssStatusDiagnostics): JSONObject {

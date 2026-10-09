@@ -21,13 +21,14 @@ internal class NativeAudioRecordingMonitor(
 ) {
     private val lock = Any()
     private val guard = NativeAudioRecordingGuard(inputSessionId, deviceId)
-    private var closed = false
+    private val closed: Boolean get() = cleanup.revoked
     private var failure: String? = null
+    private var diagnosticConfiguration: JSONObject? = null
     private var fence: NativeAudioObservationFence? = null
     private val callback = object : AudioManager.AudioRecordingCallback() {
         override fun onRecordingConfigChanged(configs: MutableList<AudioRecordingConfiguration>) {
             val error = synchronized(lock) {
-                if (closed) return
+                if (closed || failure != null) return
                 try {
                     if (Build.VERSION.SDK_INT < 29) error("Microphone observation is unavailable")
                     observe(configs); null
@@ -38,6 +39,10 @@ internal class NativeAudioRecordingMonitor(
             if (error != null) onFailure(error)
         }
     }
+    private val cleanup = NativeAudioCallbackCleanup(
+        revoke = { fence?.cancel() },
+        unregister = { audio.unregisterAudioRecordingCallback(callback) }
+    )
 
     init {
         check(Build.VERSION.SDK_INT >= 29) { "Microphone configuration observation requires Android API29" }
@@ -96,19 +101,31 @@ internal class NativeAudioRecordingMonitor(
         pending.start()
     }
 
-    fun close() = synchronized(lock) {
-        if (!closed) {
-            closed = true
-            fence?.cancel()
-            audio.unregisterAudioRecordingCallback(callback)
-        }
+    fun close() = synchronized(lock) { cleanup.close() }
+
+    /** Bounded unsigned values; remains readable after a refused observation. */
+    fun diagnostics(): JSONObject? = synchronized(lock) {
+        diagnosticConfiguration?.let { JSONObject(it.toString()) }
     }
 
     @RequiresApi(29)
     private fun observe(configs: List<AudioRecordingConfiguration>): Boolean {
+        guard.requireHealthy() // A later clean callback cannot replace refused diagnostics.
         // Public Android callbacks redact application identity, but retain the
         // session ID. Never attribute another application's recording to ours.
-        val values = configs.filter { it.clientAudioSessionId == inputSessionId }.map { config ->
+        val matching = configs.filter { it.clientAudioSessionId == inputSessionId }
+        if (matching.size == 1) {
+            val config = matching.single()
+            val device = config.audioDevice
+            diagnosticConfiguration = JSONObject().put("input_session_id", inputSessionId)
+                .put("observed_monotonic_ns", System.nanoTime().toString())
+                .put("device_id", device?.id ?: 0).put("built_in", device?.type == AudioDeviceInfo.TYPE_BUILTIN_MIC)
+                .put("client_silenced", config.isClientSilenced)
+                .put("client_source", config.clientAudioSource).put("source", config.audioSource)
+                .put("client_format", diagnosticFormat(config.clientFormat)).put("device_format", diagnosticFormat(config.format))
+                .put("client_effect_count", config.clientEffects.size).put("effect_count", config.effects.size)
+        }
+        val values = matching.map { config ->
             val device = config.audioDevice
             NativeAudioRecordingGuard.Configuration(config.clientAudioSessionId, device?.id ?: 0,
                 device?.type == AudioDeviceInfo.TYPE_BUILTIN_MIC, config.isClientSilenced,
@@ -129,4 +146,7 @@ internal class NativeAudioRecordingMonitor(
         })
     private fun formatJson(value: NativeAudioRecordingGuard.Format) = JSONObject()
         .put("sample_rate", value.sampleRate).put("channels", value.channels).put("encoding", value.encoding)
+    private fun diagnosticFormat(value: AudioFormat) = formatJson(format(value))
+        .put("android_encoding", value.encoding).put("channel_mask", value.channelMask)
+        .put("channel_index_mask", value.channelIndexMask)
 }
