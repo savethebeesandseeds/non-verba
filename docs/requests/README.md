@@ -60,7 +60,7 @@ guide to use the terminal workflow, or readiness for implemented scope and limit
 | [Dispute lifecycle and consent](DISPUTE_LIFECYCLE.md) | Existing case records, proposed negotiation interface, exact mutual consent and unresolved closure/escalation decisions |
 | [Dispute priors and local analysis](DISPUTE_PRIORS.md) | Profiles, pre-cooperation review, annex, evidence/analysis boundaries and reports |
 | [Open settlement decisions](DISPUTE_PRIORS_DECISIONS.md) | Decisions needed before priors could determine a binding outcome |
-| [Research notes for disputes priors and incidents](../notes/research/README.md) | Operational dispute handling; derivation, inclusion, processing and evaluation of priors; incident handling and insurance |
+| [Research notes for disputes priors and incidents](../notes/README.md#research) | Operational dispute handling; derivation, inclusion, processing and evaluation of priors; incident handling and insurance |
 | [Threat model](THREAT_MODEL.md) | Coalition attacks, assumptions, client distribution and privacy |
 | [Migration](MIGRATION.md) | Preserving legacy evidence and avoiding invented acceptance |
 | [Readiness](READINESS.md) | Implemented scope, verification evidence and deployment gaps |

@@ -5,7 +5,8 @@ physical directories. The private reserve tracks only README, ignore rules and
 text attributes; its original Git history is preserved. Former source and
 working changes remain in a small local recovery archive outside both repositories.
 Obsolete archived caches and host toolchains were removed at the owner's request. See
-[repository state and cleanup boundaries](REPOSITORY_CLEANUP.md).
+[completed consolidation record](VALIDATION.md#private-reserve-and-recovery-record)
+and [working boundaries](../../AGENTS.md).
 The existing managed container is
 preserved: name `non-verba-dev`, immutable ID
 `fcb9461f2ccc1d76871ee40713fcc93752b72e51a454890188cf9b1f052d7d4e`, image

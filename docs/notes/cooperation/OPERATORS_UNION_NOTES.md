@@ -180,7 +180,7 @@ does not decide disputed facts or transfer money. The existing
 authorization requirements. How the union's remuneration promises fit those
 requirements is an integration question.
 
-The [dispute research](../research/README.md) provides a place to develop the
+The [dispute research](../README.md#research) provides a place to develop the
 interpretation and resolution mechanisms. Dispute priors express considerations
 for disagreement; they are separate from remuneration ballots and do not give a
 member extra union voting influence. The current dispute companion remains

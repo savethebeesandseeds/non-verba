@@ -563,4 +563,4 @@ performed for those additions. The 4 October reorganization adds no such result,
 changes no signed record and selects no mechanism.
 
 Use [Terminology](../../requests/TERMINOLOGY.md) for shared names and
-[all research notes](README.md) for the three connected subjects.
+[the research index](../README.md#research) for the three connected subjects.

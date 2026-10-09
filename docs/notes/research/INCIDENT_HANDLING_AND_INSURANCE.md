@@ -190,4 +190,4 @@ See [open decisions](../../requests/DISPUTE_PRIORS_DECISIONS.md) for the current
 implementation scope and [Terminology](../../requests/TERMINOLOGY.md) for the
 provisional names.
 
-Return to [all research notes](README.md) or [all notes](../README.md).
+Return to [research](../README.md#research) or [all notes](../README.md).

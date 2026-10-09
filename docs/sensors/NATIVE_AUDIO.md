@@ -35,7 +35,8 @@ submit microphone samples, a playback waveform, acquisition metadata, an image
 hash or arbitrary bytes for the native key to sign. It can retrieve immutable
 copies of successive microphone segments to deliver to the requester.
 
-Setup records a two-second acoustic pilot, checks it with the shared Rust
+Setup prepares the native nonce-bound waveform before starting its two-second
+acoustic pilot, then records and checks it with Rust
 detector, then destroys those streams and buffers. A fresh pair of streams is
 primed before `ready`; no evidence samples are retained before the first
 requester nonce arrives. That nonce reserves the one-use request in an atomic
@@ -85,8 +86,14 @@ identity automatically.
   that it took effect. API29 records support/request as false and actual state
   as null; no privacy-sensitive protection is claimed there.
 - Shared stream mode is requested and reported honestly. Exclusive ownership
-  of the physical microphone or speaker is not claimed. Low latency is requested;
-  the actual performance mode is recorded.
+  of the physical microphone or speaker is not claimed. Standard performance is
+  requested for input and low latency for output; actual modes are recorded.
+  Android 11's legacy low-latency input can open an underlying PCM16 client and
+  convert it to float AAudio callbacks. Standard input avoids this app-selected
+  conflict with the existing strict float client-format requirement. It does not
+  relax the source, route, format, timing or observation requirements.
+  See the pinned [Android 11 input implementation](https://android.googlesource.com/platform/frameworks/av/+/refs/tags/android-11.0.0_r1/media/libaaudio/src/legacy/AudioStreamRecord.cpp)
+  and [legacy-path selection for an explicit session](https://android.googlesource.com/platform/frameworks/av/+/refs/tags/android-11.0.0_r1/media/libaaudio/src/core/AudioStreamBuilder.cpp).
 - The input callback copies AAudio input into a preallocated buffer. It never
   pads a missing input block or mixes the challenge waveform into microphone
   samples. Speaker silence and speaker probe playback are separate output work.
@@ -188,6 +195,87 @@ first nonce stays consumed after failure. Setup, waiting for a first nonce,
 recording, and waiting for a receipt have explicit time limits. A phone that
 cannot meet the strict profile fails; the native path does not silently
 downgrade to a browser recording.
+
+The native controller now schedules a watchdog independently of its recording
+worker, including while the initial permission callback is absent. It uses the
+earlier original request expiry or the existing 150-second session lifetime;
+the exact 150,000 ms lifetime boundary remains permitted. Existing pilot,
+challenge, recording, receipt and sample-freshness limits are unchanged.
+Rejected handler submissions become errors instead of leaving a pending phase.
+Cancellation and terminal transitions revoke queued work, and elapsed status
+timing freezes before teardown. These status fields are explicitly unsigned;
+they are not a signed microphone attempt report or a measurement duration.
+
+Teardown attempts each resource release and wipes retained unsigned PCM, cached
+segments and pilot data even if another release throws. Bounded unsigned cleanup
+errors remain visible, and unresolved stream, audio-focus or recording-callback
+cleanup prevents a new session until it succeeds. Callback health stays revoked
+while failed Android unregistration is retried. The watchdog cannot forcibly interrupt a
+platform/JNI operation already holding the controller lock; it is application
+lifecycle enforcement, not a hardware or real-time deadline guarantee.
+
+Failed or cancelled native sessions also freeze a bounded
+`nonverba-native-audio-diagnostics` record. It identifies the native attempt,
+original request session and reporting-key fingerprint, stopping phase, unsigned
+terminal elapsed time, pilot enqueue/verification flags and challenge count.
+It retains the last observed own-session Android recording configuration and
+AAudio stream values, with their observation times and stream phase. A previous
+pilot snapshot can remain when evidence-stream opening fails; it is explicitly
+last observed, not an exact terminal hardware state. Unavailable values remain
+null. No samples, effect arrays or waveform are included.
+
+After the 6 October phone refusal, the controller retains the bounded last
+framework configuration before pilot teardown, with its original observation
+time, input session and stream phase. Rust assesses the collector's exact
+96,000-sample pilot against the retained native nonce and returns a separate
+`nonverba-native-audio-pilot-assessment`: `passed`, `not_detected` or
+`detected_late`, plus score, matched symbols, best candidate sample offset, RMS
+and in-band energy ratio. The unchanged policy requires detection and a start
+offset no later than 38,400 samples (800 ms). Invalid PCM or nonce remains an
+error, not a fabricated diagnosis. The internal JNI entry is never a WebView
+interface; no arbitrary PCM enters it from the page.
+
+The assessment is unsigned and retained in terminal diagnostics. Passing this
+pilot only permits the subsequent evidence collection; it is not a completed
+measurement. Best candidate offset is not calibrated sound travel time and
+score is not a probability of authenticity. Neither refusal class establishes
+physical cause. The earlier phone attempt cannot be retrospectively assessed
+because its pilot samples were released; its original evidence remains unchanged.
+See the [phone pilot record](VALIDATION.md#microphone-pilot-after-format-correction--6-october-2026).
+
+When ordinary detection reports no qualifying signal, pilot readiness also
+checks the highest-ranked qualifying peak across the complete bounded pilot.
+It uses the same score, matched-symbol, RMS and band-ratio thresholds, then
+applies the inclusive 38,400-sample start limit. A sub-threshold repeat cannot
+hide a valid timely pilot. Original detected-late refusals stay unchanged; the
+search is not clipped at the deadline, which could misclassify a late marker's
+rising flank. Ordinary passing results and original failure metrics when no
+timely peak qualifies remain unchanged. This is a readiness correction; the
+generic detector and successful WAV sealing/verification retain their existing
+rules. Multiple-peak selection in those successful-evidence paths, and suppression
+by a stronger qualifying late repeat, remain separate open concerns.
+
+Unsigned diagnostics also preserve the pilot's own input session, record/input
+callback timing and the last observed completed output-round callback, when
+available. A later evidence stream cannot replace these pilot observations.
+Enqueueing and supplying samples to an output callback are distinct; even a
+completed callback does not prove hardware presentation or a physical sound.
+Unavailable completion stays null. Native stream close return-code reporting
+remains an open cleanup concern; no close failure was observed on this phone.
+
+The web adapter checks ownership and the 16 KiB diagnostic bound before retaining
+the latest record across retries in the open page. A separate control saves it
+as JSON; save or diagnostic construction errors remain errors. It is explicitly
+unsigned, is not a successful measurement or signed failure report, and cannot
+enter WAV signing or successful verification. No earlier unsigned failure is
+retroactively signed. Media-volume zero and Android microphone mute now have
+separate readiness errors.
+
+The Rust audio verifier selects exactly one assertion in each required Non-verba
+artifact domain. A similarly prefixed assertion cannot substitute for the exact
+audio or native-acquisition assertion, and duplicate instances are rejected.
+Unrelated assertions remain allowed. Historical audio without native acquisition
+metadata remains readable and receives no native-monitoring credit.
 
 ## What this evidence establishes
 

@@ -39,7 +39,7 @@ acquisition and key enrollment from earlier releases. Sensor modules remain
 independent; the shared requester API handles policy, receipt and acceptance.
 See [the agent interface](AGENT_EVIDENCE.md),
 [native camera](NATIVE_CAMERA.md), [native audio](NATIVE_AUDIO.md), and
-[live requester sessions](LIVE_SESSIONS.md). Physical-device acceptance remains
+[requester evidence sessions](EVIDENCE_SESSIONS.md). Physical-device acceptance remains
 partial; these features do not establish sensor truth.
 
 Binary releases, device captures and earlier review journals are not included in this source import. Generated outputs remain ignored. See [sensor validation boundaries](VALIDATION.md) and [the current unification checks](../development/VALIDATION.md) for their distinct scope.

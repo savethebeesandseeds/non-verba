@@ -62,7 +62,7 @@ Materiality criteria, coverage checks, privacy, legal authority and the
 institutional form remain open; no insurance dependency or launch jurisdiction
 has been selected.
 
-The [research context](../notes/research/README.md) connects these subjects to
+The [research context](../notes/README.md#research) connects these subjects to
 this baseline. Priors are not sensor reliability weights. Reorganizing the notes
 selects no outcome amounts, deterrents, model or evaluation method, reopens no
 DP-2 acceptance condition and confers no financial authority.

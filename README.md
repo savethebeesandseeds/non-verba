@@ -94,7 +94,7 @@ uncommitted work and private journals remain in a small local recovery archive;
 obsolete caches and host toolchains were removed at the owner's request. The
 private repository now tracks only its README, ignore rules and text attributes.
 Its original Git history and ignored local records remain private.
-See [repository cleanup](docs/development/REPOSITORY_CLEANUP.md).
+See [the completed consolidation record](docs/development/VALIDATION.md#private-reserve-and-recovery-record).
 
 Read the [governance principles](GOVERNANCE.md) for the project's intended rights
 and cooperation model. They are a draft design, not a legal charter or a

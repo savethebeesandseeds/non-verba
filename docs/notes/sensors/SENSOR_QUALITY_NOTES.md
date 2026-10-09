@@ -15,6 +15,23 @@ of delivered JPEGs in Rust and WASM. Its separate unsigned report retains the
 image hash and analysis profile. Calibration, enforced signed quality contracts,
 movement evidence and simultaneous multi-camera capture remain proposals.
 
+On 5 October the owner requested one unified user-facing quality value, with
+one underlying algorithm. The proposed optional request argument is minimum
+sharpness on a 0–100 scale, with higher values demanding a sharper image. The
+algorithm remains deliberately undecided and implementation is deferred. Metric
+versions and processing settings should be managed internally, rather than
+presented as extra requester choices. The current guidance module and acceptance
+rules are unchanged.
+
+Published candidates include the [Crété-based blur-effect scale](https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.blur_effect)
+and [CPBD](https://ivulab.asu.edu/software/cpbd/). This is research for later work,
+not selection of an algorithm or a calibrated threshold. Before enforcing the
+single value, validate it against actual reading of representative text/digits,
+including subject size, glare, noise, compression and sharp backgrounds. A blur
+score is not a percentage of readable characters. Keep unassessable results
+explicit and bind any future requirement to the original signed request before
+collection. Quality failure alone does not establish responsibility.
+
 ## Purpose and fairness
 
 Add simple, stable, deterministic measurements that help operators collect useful
@@ -89,6 +106,187 @@ simultaneous capture. This is a proposal for later consideration, not an
 implemented feature.
 
 ## Audio: recording defects and environmental conditions
+
+On 6 October, microphone hardening addresses cancelled browser setup, native
+permission/queue deadlines and teardown recovery, and exact unique C2PA assertion
+selection. Native terminal status timing is frozen but unsigned. This is not a
+signed microphone failure-report format or a calibrated audio-quality score.
+The [native audio guide](../../sensors/NATIVE_AUDIO.md) describes the implemented
+boundary; [validation](../../sensors/VALIDATION.md) keeps software results and
+remaining physical tests separate. Device work is prepared only after silent
+container checks, with the owner connecting the phone for a bounded test. The
+first authorized phone demo start was refused before opening audio streams:
+media volume was non-positive or Android reported microphone mute. Its combined
+message does not identify which condition failed. The installed update and
+refusal are retained; physical capture and speaker support remain unverified.
+
+Headphones also need an explicit evidence boundary. The current native audio
+profile requests the built-in microphone and speaker by their exact Android
+device IDs and checks the actual AAudio IDs before starting streams and during
+capture. Wired, USB and Bluetooth microphones/headphones are not a supported
+fallback. An attached accessory alone does not establish the route used, and
+the USB debugging cable is not itself an audio accessory. The current test
+instructions ask the operator to disconnect audio accessories.
+
+Keep wired/USB/Bluetooth connection, disconnection and actual route substitution
+on the pending device checklist. A future headset profile would need to state
+which microphone and output produced the evidence and validate its acoustic
+challenge path separately. The 6 October format fix adds distinct media-volume
+zero and microphone-mute reasons. The older installed combined readiness error
+does not identify which condition failed. Neither that error nor a connected
+headset establishes hardware fault or operator responsibility.
+
+The owner's headphone-free retry passed the earlier mute/volume gate but failed
+the Android recording-configuration client-format check. The error did not
+retain actual rate, channels, encoding or stopping phase. Preserve those bounded
+values alongside the AAudio-reported format before another diagnostic attempt;
+do not relax the guard or infer hardware incompatibility from this message.
+The failed outcome is retained and phone cleanup was verified complete.
+
+The next correction requests standard input performance while retaining
+low-latency output and every strict format/collection requirement. Android 11's
+legacy low-latency input implementation can use an underlying PCM16 client while
+delivering float AAudio callbacks; this is a plausible app-selected cause, not
+proof of this phone's unrecorded values. Bounded, explicitly unsigned diagnostics
+now preserve actual client/device formats, last observed AAudio values and phase,
+frozen timing and unavailable values. They are retained across retries in the
+open page and can be saved separately; they give no successful-measurement credit.
+Software and subsequent device results belong in the validation record.
+
+The reconnected-phone check reached the two-second pilot with 48 kHz mono float
+AAudio input/output on the selected built-in devices, but failed the acoustic
+pilot policy after an unsigned 2,484 ms. The complete recording flow still does
+not pass. One attempt only was used, and awake/GPS controls and the USB helper
+were closed afterward. That pilot error combined missing detection with
+detection after 800 ms; the physical/acoustic cause remains unknown.
+
+The software follow-up now implements these diagnostic boundaries:
+
+- Preserve the monitor's bounded Android configuration before pilot teardown,
+  retaining its original observation time, input session and stream phase.
+- Distinguish not-detected and late-marker refusal and retain bounded detector
+  score, matched symbols, RMS, band ratio and offset, without retaining raw PCM
+  or changing thresholds.
+- Synthetic timing, silence, wrong nonce, filtering and low-signal tests, plus
+  configuration retention after detachment, frozen timing and retry isolation.
+
+These remain unsigned diagnostics. A passed pilot gives no successful-measurement
+credit; signing and requester acceptance still require the complete evidence.
+Physical detection on the phone and exact saved JSON retrieval/durability remain
+open. The unchanged marker's actual playback/capture response is uncalibrated;
+synthetic filtering failures cannot identify the phone's physical cause.
+
+Further inspection found pilot recording started before native waveform
+generation. Preparation now precedes record/enqueue, preserving the original
+800 ms policy and two-second collection. Existing native callback timing and
+completed pilot output-round details are retained separately as unsigned last
+observations; completion means samples supplied to callbacks, not proven sound.
+
+Five silent synthetic JNI cases reproduced a selection defect: a valid noisy
+timely marker passed alone, but an extra clean repeat could hide it behind a
+sub-RMS or late peak. A pilot-only bounded fallback fixes the sub-RMS case by
+selecting the highest-ranked qualifying peak across the full pilot, then applying
+the original 800 ms limit. Original detected-late refusals stay unchanged. A
+deadline-clipped search could accept a late marker's rising flank and was rejected
+during review before tests or packaging. This does not establish why the saved phone
+attempt failed. Generic detection and successful signed WAV verification remain
+unchanged; their multiple-peak selection and the stronger late-repeat ambiguity
+remain open for separate policy/compatibility work. Native C++ also discards
+stream stop/close return codes; honest reporting of those errors remains open,
+with no observed close failure.
+
+The conservative fallback, retained callback diagnostics, real-JNI regression,
+adapter/page tests and Android package checks passed in the existing container.
+No phone or audio test ran in that inspection; the package remains uninstalled.
+See the [dated validation](../../sensors/VALIDATION.md#microphone-pilot-selection-and-callback-inspection--6-october-2026).
+
+The later owner-authorized single local demo passed pilot readiness and reached
+four seconds of retained native samples, but the WebView refused its response
+before a receipt or signed WAV completed. Silent regression tests reproduced
+an Android JSON/Base64 size bug and then a shared decoder stack overflow. Both
+are corrected in source with unchanged decoded limits and acceptance rules;
+149 focused transport checks passed. This correction has not been packaged or
+installed, so a complete native recording remains pending. Saved phone JSON
+bytes/durability, independent requester acceptance and the earlier full
+synthetic browser-demo failure remain unverified. All phone controls and the
+USB helper were closed. See [the phone result](../../sensors/VALIDATION.md#microphone-phone-pilot-and-transport-rejection--6-october-2026)
+and [the silent transport correction](../../sensors/VALIDATION.md#microphone-json-and-base64-transport-correction--6-october-2026).
+
+The already released pilot samples cannot be recovered from this attempt's
+diagnostic record. The app's JSON-save control was invoked, but exact saved-file
+retrieval/durability remains unverified; the current USB helper has no audio
+diagnostic retrieval action. Do not treat screenshots or operator transcription
+as an exact native export or a signed attempt report.
+
+On 6 October the installed transport correction let one authorized phone demo
+pass pilot readiness, retain all four seconds and reach sealing. Rust refused
+the recording's per-round acoustic check before signing. The pilot's successful
+metrics cannot establish that both later recording rounds passed. Their exact
+metrics and released PCM were unavailable; the physical cause remains unknown.
+A silent canonical-PCM16 characterization reproduced a selection limitation in
+which a faint late repeat hides a valid early noisy marker, while pilot readiness
+still passes. Do not assume that synthetic fixture describes this phone.
+See [the phone and characterization record](../../sensors/VALIDATION.md#microphone-corrected-transport-phone-result--6-october-2026).
+
+The software follow-up retains bounded unsigned per-round detector metrics from
+the actual canonical PCM16 sealing pass before PCM release. This identifies
+which round refused and whether its selected marker failed detection or the
+800 ms start limit without adding recording retention, a signature, or an extra
+detector pass. Rust, adapter, real audio-only JNI and actual page-handler checks
+passed; Android controller compilation passed. The change is not packaged,
+installed or physically exercised. It cannot recover the prior phone's missing
+metrics or establish its cause. See [the diagnostic validation](../../sensors/VALIDATION.md#microphone-sealing-round-diagnostics--software-follow-up-6-october-2026).
+
+Later on 6 October, the verified diagnostic package was installed and one
+authorized phone demo completed four seconds with two challenges and a locally
+verified signed WAV. Both save controls displayed success notifications. This
+demonstrates one working local demo under the unchanged acceptance rules; it
+does not explain the earlier failures or establish consistent reliability.
+The successful attempt did not expose a failure report, so Android round-report
+retention/display remains unverified. Exact saved WAV/receipt bytes, external
+verification, restart durability and independent requester acceptance remain
+pending. No second recording or recorded-audio playback ran, and the awake lease
+and dedicated USB helper were closed. See [the successful local check](../../sensors/VALIDATION.md#microphone-diagnostic-package-and-successful-local-phone-demo--6-october-2026).
+
+**Pending validation: very noisy environments.** The successful local demo does
+not establish performance around loud traffic, music, machinery, wind or
+interference near the probe frequencies. No calibrated environmental noise limit
+or success rate has been measured. Prefer offline fixtures before a small,
+focused device check; decide whether changes are needed after reviewing those
+results. This validation is deferred.
+
+The 7 October follow-up prepares exact saved-demo WAV/receipt retrieval and
+independent Rust checking, with separate unsigned-receipt provenance and a
+previously retained media-key pin. Importer, Rust altered-input and Linux transfer
+guard checks passed. The subsequent saved-phone transfer and external Rust
+verification passed: all nine checks true, both 64-symbol challenges recovered,
+and five altered-input controls refused. Original WAV/receipt and public
+Downloads copies match exact hashes. No new physical audio ran; cleanup is
+verified. The unsigned demo receipt still provides no independently retained
+requester history or acceptance. Silent Chromium
+testing also reproduced an interrupted render-frame sequence; bounded retention
+of ended playback sources corrected three normal runs while deliberate
+interruptions still refused. The subsequent full synthetic browser demo passed
+real Rust/WASM/C2PA verification with both acoustic challenges. This does not
+measure physical acoustic quality or establish noisy-environment performance.
+See [the dated results](../../sensors/VALIDATION.md#audio-saved-demo-export-and-silent-browser-correction--7-october-2026).
+
+The next 7 October software check passed the separate synthetic requester/operator
+flow, exact retained evidence after reload and real local duplicate-key refusal:
+11 browser checks plus five lifecycle checks. It started no new physical audio.
+The initial failed test assertion and corrected run remain separate records;
+production signing/storage and freshness rules were unchanged. This covers
+controller/storage inspection, not resumed live collection or restored export
+controls. Physical independent-requester acceptance, simultaneous first audio
+acceptance and very noisy environments remain open. See [the reload and replay
+results](../../sensors/VALIDATION.md#audio-requester-lifecycle-and-initial-reload-check--7-october-2026).
+
+Resolving
+generic multiple-peak selection requires separate policy/compatibility work;
+do not silently apply the pilot-only fallback to successful signed verification.
+The 20.25/20.75 kHz probes have no ordinary beep; hearing no sound is not a
+pass/fail verdict. The challenge's physical playback/capture response remains
+uncalibrated.
 
 Useful deterministic checks include:
 

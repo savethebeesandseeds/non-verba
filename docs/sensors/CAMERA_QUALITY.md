@@ -94,9 +94,10 @@ coefficients, decoder scratch and processing buffers also require memory.
 The [dated validation record](VALIDATION.md#camera-quality-guidance--5-october-2026)
 separates mathematical tests, exact native/WASM fixture agreement, browser
 behavior and physical validation. Synthetic fixtures are explicitly synthetic,
-including the software-signed C2PA sample. This version's phone deployment,
-real-device quality calibration, motion/gyro evidence, audio quality and
-simultaneous multi-camera acquisition remain separate work.
+including the software-signed C2PA sample. Phone deployment and one saved-JPEG
+analysis/export were subsequently checked as recorded below. Real-device quality
+calibration, motion/gyro evidence, audio quality and simultaneous multi-camera
+acquisition remain separate work.
 
 A subsequent [single-photo compatibility check](VALIDATION.md#one-photo-camera-quality-compatibility--5-october-2026)
 used the already verified installed camera app. Its 12-million-pixel signed JPEG
@@ -118,3 +119,12 @@ does not authenticate the report or verify its measurements. Recompute against
 independently retained image/profile bytes. See the
 [deployment preparation record](VALIDATION.md#camera-quality-phone-deployment-preparation--5-october-2026)
 for package verification and remaining phone/parser coverage.
+
+The subsequent [phone panel and saved-JPEG check](VALIDATION.md#phone-quality-panel-and-saved-jpeg-export--5-october-2026)
+installed the verified update and reused the retained 3000 × 4000 photograph.
+The phone's complete default-profile report and exported bytes matched the
+independently retained native Rust and WASM expectations. This checks Android
+WebView computation and the positive USB retrieval path for one actual file;
+it does not calibrate readability, repeat physical capture or change acceptance.
+Negative PowerShell parser tests remain unrun. The proposed single-value blur
+requirement and its undecided algorithm remain in the [hardening notes](../notes/sensors/SENSOR_QUALITY_NOTES.md).

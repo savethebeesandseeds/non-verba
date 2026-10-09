@@ -64,6 +64,7 @@ For the existing authorized setup, from `C:\Work\Non-verba\private-source` on Wi
 ./code/tools/usb-device.ps1 ExportEnrollments
 ./code/tools/usb-device.ps1 ExportLocations
 ./code/tools/usb-device.ps1 ExportCamera
+./code/tools/usb-device.ps1 ExportCameraQuality
 # Compare API29+ direct Downloads copies against an original public retrieval:
 ./code/tools/usb-device.ps1 VerifySavedDownloads -RetrievalManifest C:\Work\Non-verba\private-source\code\artifacts\device-acceptance\RETRIEVAL-DIRECTORY\retrieval.json
 ./code/tools/usb-device.ps1 Preview
@@ -353,6 +354,17 @@ retrieval directory for separate Rust/C2PA verification; transfer does not prove
 capture freshness, GPS or the depicted scene. It never takes a photo or starts
 the microphone. Composed location proofs use `ExportLocations` separately.
 
+`ExportCameraQuality` retrieves explicitly saved unsigned quality guidance in
+its separate category. It accepts only `nonverba-camera-quality-<12 lowercase
+hex characters>.json` beneath the owned export cache, with 128 KiB/report and a
+128-file inventory bound. Filename/image-hash correspondence, UTF-8, bounded
+report shape and guidance-only claims are checked; metric correctness and
+authenticity are not established by transport. Recompute from independently
+retained JPEG/profile bytes with the Rust verifier. The 5 October saved-JPEG
+phone check passed its positive path and exact native/WASM/export comparison;
+PowerShell-specific negative parser tests remain unrun. See the
+[camera quality validation](../sensors/VALIDATION.md#phone-quality-panel-and-saved-jpeg-export--5-october-2026).
+
 `VerifySavedDownloads` accepts only a complete public `retrieval.json` in its
 original camera/location/enrollment directory beneath device-acceptance. It
 validates allowed filenames, bounded sizes, local original byte hashes, user 0,
@@ -469,3 +481,36 @@ Recompute in Rust/WASM against independently retained JPEG and profile bytes.
 The existing `ExportCamera` and `VerifySavedDownloads` allowlists are unchanged.
 See [camera quality validation](../sensors/VALIDATION.md#camera-quality-phone-deployment-preparation--5-october-2026)
 for the separate package, parser and device coverage.
+
+## Saved local audio demo retrieval
+
+The original approved helper's `ExportAudio` action reads only explicitly saved
+`nonverba-demo-audio-<12 lowercase session characters>.wav` and
+`nonverba-demo-receipt-<same session prefix>.json` files beneath owned
+`cache/exports/<UUID>/` folders. It allows at most 16 unique paths, 8 MiB per WAV,
+64 KiB per receipt and 32 MiB in total. Listing, byte and hash reads are bounded;
+linked paths, changing bytes and unexpected framing are refused. Fresh user-0
+Non-verba focus is required throughout. No sensor or playback starts.
+
+Original bytes and their hashes enter a unique `audio-demo-exports-*` directory
+with a separate `nonverba-public-audio-demo-retrieval` manifest. A partial or
+failed copy remains incomplete and retains its report. `VerifySavedDownloads`
+also supports this category, checking only the exact unsuffixed public filenames
+against the retrieved originals. Neither action verifies audio evidence or
+records successful measurement acceptance.
+
+In Debian, prepare one explicit pair with
+`node tools/audio-demo-export.mjs --wav ORIGINAL.wav --receipt ORIGINAL.json
+--operator-pin EXTERNALLY_RETAINED_FINGERPRINT --output-dir NEW_QA_DIRECTORY`,
+then run the existing `verify_audio` Rust example against that original WAV and
+the generated `request.json` and `transcript.json`. The importer preserves the
+receipt verbatim, records both original hashes, and never infers a trusted key
+from the supplied artifacts. Compare those hashes again around verification.
+
+The receipt is an unsigned local demo export. Even a valid signed WAV and matching
+request/transcript do not provide independently retained requester history or
+independent requester acceptance. Keep the demo label and the verifier's physical
+authenticity limitations. Do not start another recording if yesterday's saved
+files are unavailable. PowerShell transport fixtures require a separately
+provisioned managed runtime; the current Debian image has none, so those fixtures
+are not claimed as executed there.

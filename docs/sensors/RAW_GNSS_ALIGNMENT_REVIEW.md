@@ -1,5 +1,10 @@
 # Raw-GPS device compatibility decision
 
+Historical decision and validation record from 29 September 2026. Use
+[complete sensor packages](COMPLETE_SENSOR_PACKAGES.md) for current requester
+defaults and [sensor status](STATUS.md) for later results and remaining work.
+The earlier 10 ms proposal below is retained as history, not a current preset.
+
 ## Revised engineering choice — 29 September 2026
 
 The owner delegated numerical choices and explicitly asked for device diversity,
@@ -83,7 +88,7 @@ attestation remain unproven.
 The existing foreground awake lease survived the APK update without a new
 toggle and retained its 17:51 local expiry, as shown by the
 14:50 screen (local review record, not included in this source release).
-Microphone recording and playback remain on hold.
+Microphone recording and playback remained on hold at that checkpoint.
 
 ## Earlier 10 ms proposal and validation history
 
@@ -94,7 +99,7 @@ alignment as well,
 so that candidate failed. The original failed record remains unchanged:
 `code/artifacts/device-acceptance/raw-clock-magnitude-20260929T1355.json`.
 
-## Proposed new-request preset
+## Earlier proposed 10 ms preset
 
 Add this one field to new raw-required requests:
 

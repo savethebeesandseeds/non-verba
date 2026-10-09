@@ -313,4 +313,4 @@ proposed review interface, and [settlement handling](../../requests/SETTLEMENT_H
 describes the existing independently authorized release path. This reorganization
 changes no code, signed terms, retained review artifact or financial authority.
 
-Return to [all research notes](README.md) or [all notes](../README.md).
+Return to [research](../README.md#research) or [all notes](../README.md).
