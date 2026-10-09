@@ -315,15 +315,32 @@ pub fn verify_location_proof(
     expected_asset_json: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    json(&verify_location_proof_report(
+        proof_bytes,
+        expected_request_json,
+        expected_pin,
+        expected_asset_json,
+        now_secs,
+    )?)
+}
+
+/// Typed result shared by native composition and the existing JSON transport.
+pub fn verify_location_proof_report(
+    proof_bytes: &[u8],
+    expected_request_json: &str,
+    expected_pin: &str,
+    expected_asset_json: &str,
+    now_secs: f64,
+) -> Result<Verification, String> {
     let request = parse_request(expected_request_json)?;
     let asset: Option<AssetBinding> = parse_json(expected_asset_json)?;
-    json(&verify(
+    verify(
         proof_bytes,
         &request,
         expected_pin,
         asset.as_ref(),
         millis(now_secs)?,
-    )?)
+    )
 }
 
 #[cfg(test)]

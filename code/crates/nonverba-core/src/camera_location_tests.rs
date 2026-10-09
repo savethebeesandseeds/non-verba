@@ -306,10 +306,7 @@ fn concurrent_fixture() -> Fixture {
     // Movement after the early photo stays in the trace, never in its photo GPS.
     f.trace.samples[1].latitude += 0.0001;
     f.trace.samples[2].latitude += 0.0002;
-    f.location = serde_json::to_string(
-        &sample_location(&serde_json::to_value(&f.trace.samples[0]).unwrap()).unwrap(),
-    )
-    .unwrap();
+    f.location = serde_json::to_string(&sample_location(&f.trace.samples[0])).unwrap();
     f.image = f.sign_image_at(&jpeg(0), &f.location, NOW + 3.0);
     f.proof = f.bind_image(&f.image);
     f
@@ -496,10 +493,7 @@ fn concurrent_camera_uses_precise_native_acquisition_time() {
         }
         trace.ended_at_ms += fix_delay;
         trace.elapsed_ms += fix_delay;
-        let location = serde_json::to_string(
-            &sample_location(&serde_json::to_value(&trace.samples[0]).unwrap()).unwrap(),
-        )
-        .unwrap();
+        let location = serde_json::to_string(&sample_location(&trace.samples[0])).unwrap();
         let mut metadata = crate::camera_capture::tests::fixture();
         let received: u64 = metadata.request_received_elapsed_ns.parse().unwrap();
         let sensor = received + acquired_after_ms * 1_000_000;

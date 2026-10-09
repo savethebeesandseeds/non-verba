@@ -24,7 +24,7 @@ const AUDIO_ASSERTION: &str = "org.nonverba.audio";
 const MAX_SAMPLES: usize = 30 * SAMPLE_RATE as usize;
 const MAX_WAV: usize = 8 * 1024 * 1024;
 const DEADLINE_MS: u32 = 3000;
-const LATEST_PROBE_OFFSET: u32 = 38_400;
+pub(crate) const LATEST_PROBE_OFFSET: u32 = 38_400;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -465,6 +465,20 @@ fn recording_binding(pcm: &[u8], transcript: &AudioTranscript) -> Result<(), Str
 }
 
 fn detections(pcm: &[f32], transcript: &AudioTranscript) -> Result<(bool, Vec<Value>), String> {
+    let (passed, reports) = round_detections(pcm, transcript)?;
+    Ok((
+        passed,
+        reports
+            .into_iter()
+            .map(|report| serde_json::to_value(report).map_err(err))
+            .collect::<Result<_, _>>()?,
+    ))
+}
+
+fn round_detections(
+    pcm: &[f32],
+    transcript: &AudioTranscript,
+) -> Result<(bool, Vec<audio_signal::Detection>), String> {
     let mut passed = true;
     let mut reports = Vec::with_capacity(transcript.rounds.len());
     for round in &transcript.rounds {
@@ -483,9 +497,25 @@ fn detections(pcm: &[f32], transcript: &AudioTranscript) -> Result<(bool, Vec<Va
             &round.nonce,
         )?;
         passed &= report.detected && report.offset_samples <= LATEST_PROBE_OFFSET;
-        reports.push(serde_json::to_value(report).map_err(err)?);
+        reports.push(report);
     }
     Ok((passed, reports))
+}
+
+fn read_capture_assertion(manifest: &c2pa::Manifest) -> Result<AudioCapture, String> {
+    // C2PA 0.91 find_assertion uses prefix matching. Select the exact domain
+    // ourselves; read-side labels omit instance suffixes, so duplicates count.
+    let mut assertions = manifest
+        .assertions()
+        .iter()
+        .filter(|assertion| assertion.label() == AUDIO_ASSERTION);
+    let assertion = assertions
+        .next()
+        .ok_or("Missing Non-verba audio assertion")?;
+    if assertions.next().is_some() {
+        return Err("Non-verba audio assertion must be unique".into());
+    }
+    assertion.to_assertion().map_err(err)
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -520,6 +550,46 @@ pub(crate) fn prepare_audio(
     now_secs: f64,
     fingerprint: &str,
 ) -> Result<(Builder, Cursor<Vec<u8>>), String> {
+    prepare_audio_inner(
+        pcm,
+        request_json,
+        transcript_json,
+        now_secs,
+        fingerprint,
+        None,
+    )
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) fn prepare_audio_observed(
+    pcm: &[f32],
+    request_json: &str,
+    transcript_json: &str,
+    now_secs: f64,
+    fingerprint: &str,
+    round_assessment: &mut Option<String>,
+) -> Result<(Builder, Cursor<Vec<u8>>), String> {
+    *round_assessment = None;
+    prepare_audio_inner(
+        pcm,
+        request_json,
+        transcript_json,
+        now_secs,
+        fingerprint,
+        Some(round_assessment),
+    )
+}
+
+fn prepare_audio_inner(
+    pcm: &[f32],
+    request_json: &str,
+    transcript_json: &str,
+    now_secs: f64,
+    fingerprint: &str,
+    round_assessment: Option<&mut Option<String>>,
+) -> Result<(Builder, Cursor<Vec<u8>>), String> {
+    #[cfg(target_arch = "wasm32")]
+    let _ = round_assessment;
     let now = seconds(now_secs)?;
     let request: AudioRequest = parse(request_json)?;
     let transcript: AudioTranscript = parse(transcript_json)?;
@@ -531,10 +601,26 @@ pub(crate) fn prepare_audio(
     let pcm_bytes = encode_audio_pcm(pcm)?;
     recording_binding(&pcm_bytes, &transcript)?;
     // Verify exactly the quantized PCM that will travel in the signed WAV.
-    if !detections(&decode_audio_pcm(&pcm_bytes)?, &transcript)?.0 {
+    let (passed, reports) = round_detections(&decode_audio_pcm(&pcm_bytes)?, &transcript)?;
+    #[cfg(not(target_arch = "wasm32"))]
+    let mut assessment_error = None;
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(slot) = round_assessment {
+        match crate::native_audio_signing::serialize_round_assessment(&transcript, &reports) {
+            Ok(assessment) => *slot = Some(assessment),
+            Err(error) => assessment_error = Some(error),
+        }
+    }
+    #[cfg(target_arch = "wasm32")]
+    let _ = reports;
+    if !passed {
         return Err(
             "Fresh audio challenge was not detected within every round's allowed window".into(),
         );
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(error) = assessment_error {
+        return Err(error);
     }
     let capture = AudioCapture {
         version: 1,
@@ -569,6 +655,27 @@ pub async fn verify_audio(
     expected_device_fingerprint: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    serde_json::to_string(
+        &verify_audio_report(
+            wav_bytes,
+            expected_request_json,
+            expected_transcript_json,
+            expected_device_fingerprint,
+            now_secs,
+        )
+        .await?,
+    )
+    .map_err(err)
+}
+
+/// Typed native result; JSON encoding is confined to the transport wrapper.
+pub async fn verify_audio_report(
+    wav_bytes: &[u8],
+    expected_request_json: &str,
+    expected_transcript_json: &str,
+    expected_device_fingerprint: &str,
+    now_secs: f64,
+) -> Result<AudioVerification, String> {
     if wav_bytes.len() > MAX_WAV {
         return Err("WAV exceeds the 8 MiB input limit".into());
     }
@@ -604,7 +711,7 @@ pub async fn verify_audio(
             result
                 .errors
                 .push(format!("C2PA audio manifest cannot be validated: {error}"));
-            return serde_json::to_string(&result).map_err(err);
+            return Ok(result);
         }
     };
     result.validation = serde_json::to_value(reader.validation_results()).map_err(err)?;
@@ -621,7 +728,7 @@ pub async fn verify_audio(
         result.signer_spki_sha256 =
             crate::certificate_spki_fingerprint(signature.cert_chain()).unwrap_or_default();
     }
-    match manifest.find_assertion::<AudioCapture>(AUDIO_ASSERTION) {
+    match read_capture_assertion(manifest) {
         Ok(capture) => {
             result.demo = capture.request.demo;
             result.checks.request_match = capture.request == expected_request;
@@ -712,8 +819,12 @@ pub async fn verify_audio(
         }
     }
     result.verified = result.errors.is_empty();
-    serde_json::to_string(&result).map_err(err)
+    Ok(result)
 }
+
+#[cfg(test)]
+#[path = "audio/assertion_tests.rs"]
+pub(crate) mod assertion_tests;
 
 #[cfg(test)]
 mod tests {
@@ -722,7 +833,7 @@ mod tests {
 
     const NOW: f64 = 1_790_424_000.0;
 
-    fn fixture() -> (AudioRequest, AudioTranscript, Vec<f32>) {
+    pub(super) fn fixture() -> (AudioRequest, AudioTranscript, Vec<f32>) {
         let request: AudioRequest = parse(
             &create_audio_request("Independent requester", "Audio protocol test", NOW, 120, 4)
                 .unwrap(),

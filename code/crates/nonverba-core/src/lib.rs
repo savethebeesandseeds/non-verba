@@ -9,10 +9,12 @@ pub mod android_attestation;
 pub mod audio;
 pub mod audio_capture;
 pub mod audio_signal;
+pub mod authentication;
 pub mod camera_capture;
 pub mod camera_location;
 pub mod camera_quality;
 pub mod evidence_session;
+pub mod face_identity;
 pub mod key_enrollment;
 pub mod live_session;
 pub mod location;
@@ -22,7 +24,14 @@ pub mod location_proof;
 pub mod native_audio_signing;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native_signer;
+pub mod registration;
 pub mod watermark;
+pub mod work_privacy;
+
+pub use authentication::{authentication_assess, authentication_create, authentication_transition};
+pub use face_identity::{face_identity_assess, face_identity_enroll};
+pub use registration::{registration_assess, registration_prepare};
+pub use work_privacy::{work_privacy_assess, work_privacy_transition};
 
 pub use camera_location::{seal_image_with_location_request, verify_image_with_location_proof};
 
@@ -543,6 +552,25 @@ pub async fn verify_image(
     expected_device_fingerprint: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    serde_json::to_string(
+        &verify_image_report(
+            image_bytes,
+            expected_challenge_json,
+            expected_device_fingerprint,
+            now_secs,
+        )
+        .await?,
+    )
+    .map_err(err)
+}
+
+/// Typed native result; the JSON/WASM entry point only encodes this report.
+pub async fn verify_image_report(
+    image_bytes: &[u8],
+    expected_challenge_json: &str,
+    expected_device_fingerprint: &str,
+    now_secs: f64,
+) -> Result<Verification, String> {
     if image_bytes.len() > MAX_IMAGE {
         return Err("JPEG exceeds the 32 MiB limit".into());
     }
@@ -577,7 +605,7 @@ pub async fn verify_image(
             result
                 .errors
                 .push(format!("C2PA manifest cannot be validated: {error}"));
-            return serde_json::to_string(&result).map_err(err);
+            return Ok(result);
         }
     };
     result.validation = serde_json::to_value(reader.validation_results()).map_err(err)?;
@@ -679,7 +707,7 @@ pub async fn verify_image(
             result.errors.push(message.into());
         }
     }
-    serde_json::to_string(&result).map_err(err)
+    Ok(result)
 }
 
 #[cfg(test)]

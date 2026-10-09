@@ -516,18 +516,19 @@ pub(crate) fn read_assertion(
     capture: Option<&AudioCapture>,
     now_secs: u64,
 ) -> Result<Option<AudioCaptureMetadata>, String> {
-    let count = manifest
+    // Read-side C2PA labels omit instance suffixes. Count all exact-domain
+    // instances and decode that selected assertion, never a prefix lookalike.
+    let mut assertions = manifest
         .assertions()
         .iter()
-        .filter(|assertion| assertion.label() == ASSERTION_LABEL)
-        .count();
-    if count == 0 {
+        .filter(|assertion| assertion.label() == ASSERTION_LABEL);
+    let Some(assertion) = assertions.next() else {
         return Ok(None);
-    }
-    if count != 1 {
+    };
+    if assertions.next().is_some() {
         return Err("Native audio acquisition assertion must be unique".into());
     }
-    let metadata: AudioCaptureMetadata = manifest.find_assertion(ASSERTION_LABEL).map_err(err)?;
+    let metadata: AudioCaptureMetadata = assertion.to_assertion().map_err(err)?;
     let capture = capture.ok_or("Native audio metadata requires the signed recording assertion")?;
     let sealed = metadata
         .sealed_at_unix_ms

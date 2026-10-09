@@ -6,12 +6,19 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 mod context;
+mod report;
+use report::{appraisal_json, appraise_report};
+pub(crate) use report::{AppraisalReport, SensorVerification};
 #[cfg(test)]
 #[path = "agent_appraisal/context_tests.rs"]
 mod context_tests;
 pub use context::{
     appraise_audio_with_context, appraise_camera_location_with_context,
     appraise_image_with_context, appraise_location_with_context,
+};
+pub(crate) use context::{
+    appraise_audio_with_context_report, appraise_camera_location_with_context_report,
+    appraise_image_with_context_report, appraise_location_with_context_report,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -63,123 +70,6 @@ fn policy(text: &str) -> Result<EvidencePolicy, String> {
     Ok(result)
 }
 
-fn appraise(
-    sensor: &str,
-    report: Value,
-    request: &Value,
-    policy: &EvidencePolicy,
-    now: u64,
-) -> Result<String, String> {
-    appraise_with_additional(
-        sensor,
-        report,
-        request,
-        policy,
-        now,
-        &context::AdditionalEvidence::default(),
-    )
-}
-
-fn appraise_with_additional(
-    sensor: &str,
-    report: Value,
-    request: &Value,
-    policy: &EvidencePolicy,
-    now: u64,
-    additional: &context::AdditionalEvidence,
-) -> Result<String, String> {
-    let valid = report["verified"] == true;
-    let location = if sensor == "location" {
-        &report
-    } else {
-        &report["location_proof"]
-    };
-    let native = match sensor {
-        "location" => location["evidence"]["trace"]["profile"] == "native-android",
-        "image" => report["checks"]["native_camera_metadata_valid"] == true,
-        "audio" => report["checks"]["native_audio_metadata_valid"] == true,
-        _ => false,
-    };
-    let requirements = [
-        (
-            "native_acquisition_metadata",
-            policy.native_acquisition_required,
-            native,
-        ),
-        (
-            "audio_recording_monitoring",
-            policy.audio_recording_monitoring_required.unwrap_or(false),
-            sensor == "audio"
-                && native
-                && report["native_audio"]["recording_configuration"].is_object(),
-        ),
-        (
-            "raw_gnss_consistency",
-            policy.raw_gnss_required,
-            location["verified"] == true && location["raw_gnss"]["ready"] == true,
-        ),
-        (
-            "correlated_camera_clock",
-            policy.correlated_camera_clock_required,
-            sensor == "image"
-                && native
-                && report["native_camera"]["timestamp_source"] == "realtime",
-        ),
-        // Only independently revalidated, actual-credential-bound extra evidence
-        // can satisfy these requirements. Local KeyInfo and operator reports cannot.
-        (
-            "remote_hardware_attestation",
-            policy.hardware_attestation_required,
-            additional.key_attested,
-        ),
-        (
-            "independent_position_recomputation",
-            policy.independent_position_required,
-            additional.position_verified,
-        ),
-    ];
-    let checks: Vec<Value> = requirements
-        .iter()
-        .map(|(name, required, observed)| {
-            json!({
-                "name":name,"required":required,"established":valid && *observed,
-                "policy_passed":!*required || (valid && *observed)
-            })
-        })
-        .collect();
-    let missing: Vec<&str> = requirements
-        .iter()
-        .filter(|(_, required, observed)| *required && (!valid || !observed))
-        .map(|(name, _, _)| *name)
-        .collect();
-    let satisfied = valid && missing.is_empty();
-    let challenge =
-        if sensor == "audio" || (sensor == "image" && request.get("challenge").is_none()) {
-            request
-        } else {
-            &request["challenge"]
-        };
-    let window_open = challenge["issued_at"]
-        .as_u64()
-        .is_some_and(|issued| now >= issued)
-        && challenge["expires_at"]
-            .as_u64()
-            .is_some_and(|expiry| now < expiry);
-    let demo = request["demo"] == true || report["demo"] == true;
-    serde_json::to_string(&json!({
-        "version":1,"type":"nonverba-agent-appraisal","sensor":sensor,"policy":policy,
-        "evidence_verified":valid,"policy_satisfied":satisfied,
-        "request_window_open":window_open,"demo":demo,
-        "fresh_action_eligible":satisfied && window_open && !demo,
-        "checks":checks,"missing_requirements":missing,
-        "acceptance_recorded":false,"local_replay_checked":false,"global_replay_checked":false,
-        "physical_measurement_authenticity_proven":false,"device_clock_trusted":false,
-        "additional_evidence":additional,
-        "verification":report
-    }))
-    .map_err(crate::err)
-}
-
 fn request_value(text: &str) -> Result<Value, String> {
     if text.len() > 64 * 1024 {
         return Err("Agent original request exceeds its limit".into());
@@ -199,20 +89,20 @@ pub fn appraise_location(
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let now = crate::seconds(now_secs)?;
-    let report = crate::location_proof::verify_location_proof(
+    let report = crate::location_proof::verify_location_proof_report(
         proof,
         request_json,
         expected_pin,
         expected_asset_json,
         now_secs,
     )?;
-    appraise(
-        "location",
-        serde_json::from_str(&report).map_err(crate::err)?,
+    appraisal_json(&appraise_report(
+        SensorVerification::Location(Box::new(report)),
         &request,
-        &policy,
+        policy,
         now,
-    )
+        context::AdditionalEvidence::default(),
+    ))
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -226,14 +116,14 @@ pub async fn appraise_image(
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let now = crate::seconds(now_secs)?;
-    let report = crate::verify_image(jpeg, request_json, expected_pin, now_secs).await?;
-    appraise(
-        "image",
-        serde_json::from_str(&report).map_err(crate::err)?,
+    let report = crate::verify_image_report(jpeg, request_json, expected_pin, now_secs).await?;
+    appraisal_json(&appraise_report(
+        SensorVerification::Image(Box::new(report)),
         &request,
-        &policy,
+        policy,
         now,
-    )
+        context::AdditionalEvidence::default(),
+    ))
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -249,7 +139,7 @@ pub async fn appraise_camera_location(
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let now = crate::seconds(now_secs)?;
-    let report = crate::camera_location::verify_image_with_location_proof(
+    let report = crate::camera_location::verify_image_with_location_proof_report(
         jpeg,
         proof,
         request_json,
@@ -258,13 +148,13 @@ pub async fn appraise_camera_location(
         now_secs,
     )
     .await?;
-    appraise(
-        "image",
-        serde_json::from_str(&report).map_err(crate::err)?,
+    appraisal_json(&appraise_report(
+        SensorVerification::CameraLocation(Box::new(report)),
         &request,
-        &policy,
+        policy,
         now,
-    )
+        context::AdditionalEvidence::default(),
+    ))
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -279,7 +169,7 @@ pub async fn appraise_audio(
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let now = crate::seconds(now_secs)?;
-    let report = crate::audio::verify_audio(
+    let report = crate::audio::verify_audio_report(
         wav,
         request_json,
         original_transcript_json,
@@ -287,13 +177,13 @@ pub async fn appraise_audio(
         now_secs,
     )
     .await?;
-    appraise(
-        "audio",
-        serde_json::from_str(&report).map_err(crate::err)?,
+    appraisal_json(&appraise_report(
+        SensorVerification::Audio(Box::new(report)),
         &request,
-        &policy,
+        policy,
         now,
-    )
+        context::AdditionalEvidence::default(),
+    ))
 }
 
 #[cfg(test)]

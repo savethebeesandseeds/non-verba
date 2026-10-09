@@ -17,6 +17,16 @@ use wasm_bindgen::prelude::*;
 pub(crate) const PROOF_REQUIRED: &str =
     "This photo requires its matching location proof and independently pinned location key";
 
+/// Native composition retains both typed reports. Its serialized form remains
+/// the existing image report, including the presentation-only location field.
+#[derive(serde::Serialize)]
+#[serde(transparent)]
+pub struct CameraLocationVerification {
+    pub image: Verification,
+    #[serde(skip)]
+    pub location: crate::location_proof::Verification,
+}
+
 fn camera_request(text: &str, at: f64) -> Result<Value, String> {
     let normalized = crate::location_proof::validate_location_request(text, at)?;
     let request: Value = parse(&normalized)?;
@@ -61,6 +71,29 @@ pub async fn verify_image_with_location_proof(
     expected_location_fingerprint: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    serde_json::to_string(
+        &verify_image_with_location_proof_report(
+            image_bytes,
+            proof_bytes,
+            expected_location_request_json,
+            expected_photo_fingerprint,
+            expected_location_fingerprint,
+            now_secs,
+        )
+        .await?,
+    )
+    .map_err(err)
+}
+
+/// Typed camera/location composition used before transport serialization.
+pub async fn verify_image_with_location_proof_report(
+    image_bytes: &[u8],
+    proof_bytes: &[u8],
+    expected_location_request_json: &str,
+    expected_photo_fingerprint: &str,
+    expected_location_fingerprint: &str,
+    now_secs: f64,
+) -> Result<CameraLocationVerification, String> {
     let supplied: Value = parse(expected_location_request_json)?;
     let issued_at = supplied["challenge"]["issued_at"]
         .as_u64()
@@ -69,26 +102,22 @@ pub async fn verify_image_with_location_proof(
     // replay prevention remain separate requester-side operations.
     let expected = camera_request(expected_location_request_json, issued_at as f64)?;
     let challenge = serde_json::to_string(&expected["challenge"]).map_err(err)?;
-    let mut image: Verification = serde_json::from_str(
-        &crate::verify_image(
-            image_bytes,
-            &challenge,
-            expected_photo_fingerprint,
-            now_secs,
-        )
-        .await?,
+    let mut image = crate::verify_image_report(
+        image_bytes,
+        &challenge,
+        expected_photo_fingerprint,
+        now_secs,
     )
-    .map_err(err)?;
+    .await?;
     image.errors.retain(|message| message != PROOF_REQUIRED);
     let asset = crate::location_proof::location_asset(image_bytes)?;
-    let mut location: Value = serde_json::from_str(&crate::location_proof::verify_location_proof(
+    let location = crate::location_proof::verify_location_proof_report(
         proof_bytes,
         expected_location_request_json,
         expected_location_fingerprint,
         &asset,
         now_secs,
-    )?)
-    .map_err(err)?;
+    )?;
     let capture_matches = image.capture.as_ref().is_some_and(|capture| {
         capture.version == 3
             && capture.location_request.as_ref().is_some_and(|request| {
@@ -102,15 +131,16 @@ pub async fn verify_image_with_location_proof(
         .ok()
         .cloned();
     let selected_matches = camera_observation.as_ref().is_some_and(|sample| {
-        sample_location(sample)
-            .is_ok_and(|selected| crate::location::matches(image_bytes, &selected).is_ok())
+        crate::location::matches(image_bytes, &sample_location(sample)).is_ok()
     });
-    let attached = capture_matches && selected_matches && location["verified"] == true;
+    let attached = capture_matches && selected_matches && location.verified;
     image.checks.location_proof_valid = Some(attached);
+    let mut location_value = serde_json::to_value(&location).map_err(err)?;
     if attached && expected["context"]["camera_timing"] == "concurrent" {
         // The standalone report's selected_location remains the final trace fix.
         // Identify the distinct, authenticated observation actually bound to the photo.
-        location["camera_observation"] = camera_observation.unwrap();
+        location_value["camera_observation"] =
+            serde_json::to_value(camera_observation.unwrap()).map_err(err)?;
     }
     if !capture_matches {
         image
@@ -122,12 +152,12 @@ pub async fn verify_image_with_location_proof(
             .errors
             .push("Photo GPS differs from the location session's selected observation".into());
     }
-    if location["verified"] != true {
+    if !location.verified {
         image
             .errors
             .push("The attached location proof did not pass verification".into());
     }
-    image.location_proof = Some(location);
+    image.location_proof = Some(location_value);
     let checks = &image.checks;
     image.verified = checks.c2pa_integrity
         && checks.challenge_match
@@ -137,17 +167,20 @@ pub async fn verify_image_with_location_proof(
         && checks.location_metadata_valid == Some(true)
         && checks.native_camera_metadata_valid != Some(false)
         && attached;
-    serde_json::to_string(&image).map_err(err)
+    Ok(CameraLocationVerification { image, location })
 }
 
 fn selected_observation<'a>(
-    report: &'a Value,
+    report: &'a crate::location_proof::Verification,
     image: &Verification,
     expected: &Value,
-) -> Result<&'a Value, String> {
-    let samples = report["evidence"]["trace"]["samples"]
-        .as_array()
-        .ok_or("Location proof has no observations")?;
+) -> Result<&'a crate::location_proof::Sample, String> {
+    let samples = &report
+        .evidence
+        .as_ref()
+        .ok_or("Location proof has no observations")?
+        .trace
+        .samples;
     let capture = image
         .capture
         .as_ref()
@@ -157,7 +190,7 @@ fn selected_observation<'a>(
         let sample = samples
             .last()
             .ok_or("Location proof has no selected observation")?;
-        if sample_location(sample)? != *embedded {
+        if sample_location(sample) != *embedded {
             return Err("Photo GPS differs from the final location observation".into());
         }
         return Ok(sample);
@@ -167,16 +200,14 @@ fn selected_observation<'a>(
     // is silently substituted for the fix retained at the photo's acquisition.
     let mut matches = samples
         .iter()
-        .filter(|sample| sample_location(sample).is_ok_and(|location| location == *embedded));
+        .filter(|sample| sample_location(sample) == *embedded);
     let sample = matches
         .next()
         .ok_or("Photo GPS is absent from the location trace")?;
     if matches.next().is_some() {
         return Err("Photo GPS matches multiple location observations".into());
     }
-    let fix_ms = sample["fix_timestamp_ms"]
-        .as_u64()
-        .ok_or("Invalid camera observation timestamp")?;
+    let fix_ms = sample.fix_timestamp_ms;
     let maximum_age = expected["policy"]["max_fix_age_ms"]
         .as_u64()
         .ok_or("Missing camera fix freshness policy")?;
@@ -198,15 +229,14 @@ fn selected_observation<'a>(
     Ok(sample)
 }
 
-fn sample_location(sample: &Value) -> Result<Location, String> {
-    serde_json::from_value(serde_json::json!({
-        "latitude": sample["latitude"],
-        "longitude": sample["longitude"],
-        "accuracy_m": sample["accuracy_m"],
-        "altitude_m": sample["altitude_m"],
-        "altitude_accuracy_m": sample["altitude_accuracy_m"],
-        "timestamp_ms": sample["fix_timestamp_ms"],
-        "source": "device-geolocation"
-    }))
-    .map_err(err)
+fn sample_location(sample: &crate::location_proof::Sample) -> Location {
+    Location {
+        latitude: sample.latitude,
+        longitude: sample.longitude,
+        accuracy_m: sample.accuracy_m,
+        altitude_m: sample.altitude_m,
+        altitude_accuracy_m: sample.altitude_accuracy_m,
+        timestamp_ms: sample.fix_timestamp_ms as f64,
+        source: "device-geolocation".into(),
+    }
 }

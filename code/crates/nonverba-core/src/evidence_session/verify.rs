@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 use super::*;
-use serde_json::Value;
+use crate::agent_appraisal::{AppraisalReport, SensorVerification};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -41,7 +41,7 @@ async fn appraise(
     transcript: &str,
     context: &str,
     now: f64,
-) -> Result<Value, String> {
+) -> Result<AppraisalReport, String> {
     use crate::agent_appraisal::*;
     let sensor_request = request.spec.evidence.request_json()?;
     let policy = json(&request.spec.policy)?;
@@ -50,10 +50,17 @@ async fn appraise(
     let location = pins.location_spki_sha256.as_deref().unwrap_or("");
     let result = match &request.spec.evidence {
         Evidence::Image(_) => {
-            appraise_image_with_context(primary, &sensor_request, media, &policy, context, now)
-                .await?
+            appraise_image_with_context_report(
+                primary,
+                &sensor_request,
+                media,
+                &policy,
+                context,
+                now,
+            )
+            .await?
         }
-        Evidence::Location(_) => appraise_location_with_context(
+        Evidence::Location(_) => appraise_location_with_context_report(
             primary,
             &sensor_request,
             location,
@@ -63,7 +70,7 @@ async fn appraise(
             now,
         )?,
         Evidence::CameraLocation(_) => {
-            appraise_camera_location_with_context(
+            appraise_camera_location_with_context_report(
                 primary,
                 secondary,
                 &sensor_request,
@@ -76,7 +83,7 @@ async fn appraise(
             .await?
         }
         Evidence::Audio(_) => {
-            appraise_audio_with_context(
+            appraise_audio_with_context_report(
                 primary,
                 &sensor_request,
                 transcript,
@@ -88,7 +95,7 @@ async fn appraise(
             .await?
         }
     };
-    serde_json::from_str(&result).map_err(crate::err)
+    Ok(result)
 }
 
 fn timing(
@@ -147,27 +154,20 @@ fn timing(
 fn observation(
     request: &SessionRequest,
     receipt: &SessionReceipt,
-    appraisal: &Value,
+    appraisal: &AppraisalReport,
     checks: &mut SessionChecks,
 ) {
-    checks.evidence_verified = appraisal["evidence_verified"] == true;
-    checks.evidence_policy_satisfied = appraisal["policy_satisfied"] == true;
-    let v = &appraisal["verification"];
+    checks.evidence_verified = appraisal.evidence_verified;
+    checks.evidence_policy_satisfied = appraisal.policy_satisfied;
+    let v = &appraisal.verification;
     let requester = request.requester_pin.sha256.as_str();
-    let separated = |pin: &Value| {
-        pin.as_str()
-            .is_some_and(|pin| hash(pin) && pin != requester)
-    };
+    let separated = |pin: &str| hash(pin) && pin != requester;
     checks.key_roles_separated = checks.evidence_verified
-        && match &request.spec.evidence {
-            Evidence::Location(_) => separated(&v["device_fingerprint"]),
-            Evidence::CameraLocation(_) => {
-                separated(&v["signer_spki_sha256"])
-                    && separated(&v["location_proof"]["device_fingerprint"])
-            }
-            _ => separated(&v["signer_spki_sha256"]),
-        };
-    let secs = |n: &Value| n.as_u64().and_then(|n| n.checked_mul(1000));
+        && separated(v.signer_spki())
+        && (!v.composed()
+            || v.location()
+                .is_some_and(|location| separated(&location.device_fingerprint)));
+    let secs = |n: u64| n.checked_mul(1000);
     let between = |start: Option<u64>, end: Option<u64>| match (start, end) {
         (Some(start), Some(end)) => {
             start <= end
@@ -180,42 +180,44 @@ fn observation(
         }
         _ => false,
     };
-    let location_time = |v: &Value| {
-        between(
-            v["evidence"]["trace"]["started_at_ms"].as_u64(),
-            v["evidence"]["sealed_at_ms"].as_u64(),
-        )
-    };
-    let camera_time = |v: &Value| {
-        if v["native_camera"].is_null() {
-            // Browser and legacy camera records retain their whole-second
-            // capture claim. They do not supply native finalization timing.
+    let location_time = |v: &crate::location_proof::Verification| {
+        v.evidence.as_ref().is_some_and(|evidence| {
             between(
-                secs(&v["capture"]["captured_at"]),
-                secs(&v["capture"]["captured_at"]),
+                Some(evidence.trace.started_at_ms),
+                Some(evidence.sealed_at_ms),
             )
-        } else {
+        })
+    };
+    let camera_time = |v: &crate::Verification| {
+        if let Some(metadata) = &v.native_camera {
             // A complete native JPEG cannot arrive before its signed
             // finalization entry. These are device clock claims, checked with
             // the existing requester/device tolerance, not trusted clocks.
             between(
-                v["native_camera"]["acquired_at_unix_ms"].as_u64(),
-                v["native_camera"]["sealed_at_unix_ms"].as_u64(),
+                Some(metadata.acquired_at_unix_ms),
+                metadata.sealed_at_unix_ms,
             )
+        } else {
+            // Browser and legacy camera records retain their whole-second
+            // capture claim. They do not supply native finalization timing.
+            v.capture.as_ref().is_some_and(|capture| {
+                between(secs(capture.captured_at), secs(capture.captured_at))
+            })
         }
     };
     checks.sample_precedes_reception = checks.evidence_verified
-        && match &request.spec.evidence {
-            Evidence::Image(_) => camera_time(v),
-            Evidence::Location(_) => location_time(v),
-            Evidence::CameraLocation(_) => location_time(&v["location_proof"]) && camera_time(v),
-            Evidence::Audio(_) => between(
-                secs(&v["capture"]["transcript"]["started_at"]),
-                secs(&v["capture"]["signed_at"]),
-            ),
+        && match v {
+            SensorVerification::Image(image) => camera_time(image),
+            SensorVerification::Location(location) => location_time(location),
+            SensorVerification::CameraLocation(composed) => {
+                location_time(&composed.location) && camera_time(&composed.image)
+            }
+            SensorVerification::Audio(audio) => audio.capture.as_ref().is_some_and(|capture| {
+                between(secs(capture.transcript.started_at), secs(capture.signed_at))
+            }),
         };
     checks.demo_marker_valid =
-        receipt.demo == request.spec.evidence.demo() && (appraisal["demo"] == true) == receipt.demo;
+        receipt.demo == request.spec.evidence.demo() && appraisal.demo == receipt.demo;
 }
 
 fn failures(checks: &SessionChecks) -> Vec<String> {
@@ -427,7 +429,7 @@ pub async fn verify_evidence_session_receipt(
     {
         Ok(appraisal) => {
             observation(&request, &receipt, &appraisal, c);
-            report.appraisal = Some(appraisal);
+            report.appraisal = Some(serde_json::to_value(appraisal).map_err(crate::err)?);
         }
         Err(error) => report.errors.push(error),
     }

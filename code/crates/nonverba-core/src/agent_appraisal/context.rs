@@ -3,7 +3,7 @@
 use super::*;
 
 #[derive(Default, Serialize)]
-pub(super) struct AdditionalEvidence {
+pub(crate) struct AdditionalEvidence {
     pub key_attested: bool,
     pub position_verified: bool,
     pub signing_key: Option<Value>,
@@ -88,11 +88,11 @@ fn attested(report: &Option<Value>) -> bool {
 
 fn additional(
     context: &VerificationContext,
-    sensor: &str,
-    report: &Value,
-    composed: bool,
+    report: &SensorVerification,
     now: f64,
 ) -> Result<AdditionalEvidence, String> {
+    let sensor = report.sensor();
+    let composed = report.composed();
     if !composed && context.location_key_attestation.is_some() {
         return Err(
             "A separate location key applies only to composed camera/location evidence".into(),
@@ -101,22 +101,18 @@ fn additional(
     if sensor != "location" && !composed && context.position.is_some() {
         return Err("Position recomputation requires a signed location proof".into());
     }
-    let spki = if sensor == "location" {
-        &report["device_fingerprint"]
-    } else {
-        &report["signer_spki_sha256"]
-    };
     let signing_key = attestation(
         context.key_attestation.as_ref(),
-        report["verified"] == true,
-        spki.as_str(),
+        report.verified(),
+        Some(report.signer_spki()),
         now,
     )?;
     let location_key = if composed {
+        let location = report.location();
         attestation(
             context.location_key_attestation.as_ref(),
-            report["verified"] == true && report["location_proof"]["verified"] == true,
-            report["location_proof"]["device_fingerprint"].as_str(),
+            report.verified() && location.is_some_and(|location| location.verified),
+            location.map(|location| location.device_fingerprint.as_str()),
             now,
         )?
     } else {
@@ -172,19 +168,40 @@ pub fn appraise_location_with_context(
     context_json: &str,
     now_secs: f64,
 ) -> Result<String, String> {
-    let policy = policy(policy_json)?;
-    let request = request_value(request_json)?;
-    let context = parse_context(context_json)?;
-    let now = crate::seconds(now_secs)?;
-    let report: Value = serde_json::from_str(&crate::location_proof::verify_location_proof(
+    appraisal_json(&appraise_location_with_context_report(
         proof,
         request_json,
         expected_pin,
         expected_asset_json,
+        policy_json,
+        context_json,
         now_secs,
     )?)
-    .map_err(crate::err)?;
-    let mut extra = additional(&context, "location", &report, false, now_secs)?;
+}
+
+pub(crate) fn appraise_location_with_context_report(
+    proof: &[u8],
+    request_json: &str,
+    expected_pin: &str,
+    expected_asset_json: &str,
+    policy_json: &str,
+    context_json: &str,
+    now_secs: f64,
+) -> Result<AppraisalReport, String> {
+    let policy = policy(policy_json)?;
+    let request = request_value(request_json)?;
+    let context = parse_context(context_json)?;
+    let now = crate::seconds(now_secs)?;
+    let report = SensorVerification::Location(Box::new(
+        crate::location_proof::verify_location_proof_report(
+            proof,
+            request_json,
+            expected_pin,
+            expected_asset_json,
+            now_secs,
+        )?,
+    ));
+    let mut extra = additional(&context, &report, now_secs)?;
     recompute_position(
         &mut extra,
         &context,
@@ -194,7 +211,7 @@ pub fn appraise_location_with_context(
         expected_asset_json,
         now_secs,
     )?;
-    appraise_with_additional("location", report, &request, &policy, now, &extra)
+    Ok(appraise_report(report, &request, policy, now, extra))
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -206,16 +223,36 @@ pub async fn appraise_image_with_context(
     context_json: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    appraisal_json(
+        &appraise_image_with_context_report(
+            jpeg,
+            request_json,
+            expected_pin,
+            policy_json,
+            context_json,
+            now_secs,
+        )
+        .await?,
+    )
+}
+
+pub(crate) async fn appraise_image_with_context_report(
+    jpeg: &[u8],
+    request_json: &str,
+    expected_pin: &str,
+    policy_json: &str,
+    context_json: &str,
+    now_secs: f64,
+) -> Result<AppraisalReport, String> {
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let context = parse_context(context_json)?;
     let now = crate::seconds(now_secs)?;
-    let report: Value = serde_json::from_str(
-        &crate::verify_image(jpeg, request_json, expected_pin, now_secs).await?,
-    )
-    .map_err(crate::err)?;
-    let extra = additional(&context, "image", &report, false, now_secs)?;
-    appraise_with_additional("image", report, &request, &policy, now, &extra)
+    let report = SensorVerification::Image(Box::new(
+        crate::verify_image_report(jpeg, request_json, expected_pin, now_secs).await?,
+    ));
+    let extra = additional(&context, &report, now_secs)?;
+    Ok(appraise_report(report, &request, policy, now, extra))
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -230,12 +267,38 @@ pub async fn appraise_camera_location_with_context(
     context_json: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    appraisal_json(
+        &appraise_camera_location_with_context_report(
+            jpeg,
+            proof,
+            request_json,
+            camera_pin,
+            location_pin,
+            policy_json,
+            context_json,
+            now_secs,
+        )
+        .await?,
+    )
+}
+
+#[allow(clippy::too_many_arguments)] // Independent composed pins plus policy/context.
+pub(crate) async fn appraise_camera_location_with_context_report(
+    jpeg: &[u8],
+    proof: &[u8],
+    request_json: &str,
+    camera_pin: &str,
+    location_pin: &str,
+    policy_json: &str,
+    context_json: &str,
+    now_secs: f64,
+) -> Result<AppraisalReport, String> {
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let context = parse_context(context_json)?;
     let now = crate::seconds(now_secs)?;
-    let report: Value = serde_json::from_str(
-        &crate::camera_location::verify_image_with_location_proof(
+    let report = SensorVerification::CameraLocation(Box::new(
+        crate::camera_location::verify_image_with_location_proof_report(
             jpeg,
             proof,
             request_json,
@@ -244,9 +307,8 @@ pub async fn appraise_camera_location_with_context(
             now_secs,
         )
         .await?,
-    )
-    .map_err(crate::err)?;
-    let mut extra = additional(&context, "image", &report, true, now_secs)?;
+    ));
+    let mut extra = additional(&context, &report, now_secs)?;
     recompute_position(
         &mut extra,
         &context,
@@ -256,7 +318,7 @@ pub async fn appraise_camera_location_with_context(
         &crate::location_proof::location_asset(jpeg)?,
         now_secs,
     )?;
-    appraise_with_additional("image", report, &request, &policy, now, &extra)
+    Ok(appraise_report(report, &request, policy, now, extra))
 }
 
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -269,12 +331,35 @@ pub async fn appraise_audio_with_context(
     context_json: &str,
     now_secs: f64,
 ) -> Result<String, String> {
+    appraisal_json(
+        &appraise_audio_with_context_report(
+            wav,
+            request_json,
+            original_transcript_json,
+            expected_pin,
+            policy_json,
+            context_json,
+            now_secs,
+        )
+        .await?,
+    )
+}
+
+pub(crate) async fn appraise_audio_with_context_report(
+    wav: &[u8],
+    request_json: &str,
+    original_transcript_json: &str,
+    expected_pin: &str,
+    policy_json: &str,
+    context_json: &str,
+    now_secs: f64,
+) -> Result<AppraisalReport, String> {
     let policy = policy(policy_json)?;
     let request = request_value(request_json)?;
     let context = parse_context(context_json)?;
     let now = crate::seconds(now_secs)?;
-    let report: Value = serde_json::from_str(
-        &crate::audio::verify_audio(
+    let report = SensorVerification::Audio(Box::new(
+        crate::audio::verify_audio_report(
             wav,
             request_json,
             original_transcript_json,
@@ -282,8 +367,7 @@ pub async fn appraise_audio_with_context(
             now_secs,
         )
         .await?,
-    )
-    .map_err(crate::err)?;
-    let extra = additional(&context, "audio", &report, false, now_secs)?;
-    appraise_with_additional("audio", report, &request, &policy, now, &extra)
+    ));
+    let extra = additional(&context, &report, now_secs)?;
+    Ok(appraise_report(report, &request, policy, now, extra))
 }

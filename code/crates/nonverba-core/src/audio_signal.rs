@@ -86,27 +86,9 @@ pub fn detect(
     index: u32,
     nonce_hex: &str,
 ) -> Result<Detection, String> {
-    let bits = symbols(session_id, index, nonce_hex)?;
-    if sample_rate != SAMPLE_RATE {
-        return Err("Audio FSK v1 requires exactly 48000 Hz mono PCM".into());
-    }
-    if !(PROBE_SAMPLES..=MAX_SAMPLES).contains(&samples.len()) {
-        return Err("Audio detector needs a 768 ms to 2 s recording segment".into());
-    }
-    if samples
-        .iter()
-        .any(|sample| !sample.is_finite() || sample.abs() > 1.0)
-    {
-        return Err("Audio PCM samples must be finite values in [-1,1]".into());
-    }
+    let bits = checked_symbols(samples, sample_rate, session_id, index, nonce_hex)?;
     let bands = CARRIER_HZ.map(|frequency| Quadrature::new(samples, frequency));
-    let mut energy = Vec::with_capacity(samples.len() + 1);
-    energy.push(0.0);
-    let mut sum = 0.0;
-    for sample in samples {
-        sum += f64::from(*sample).powi(2);
-        energy.push(sum);
-    }
+    let energy = sample_energy(samples);
     let mut best = Candidate::default();
     let mut best_offset = 0;
     let last_offset = samples.len() - PROBE_SAMPLES;
@@ -134,20 +116,72 @@ pub fn detect(
             best_offset = offset;
         }
     }
-    let detected = best.score >= MIN_SCORE
-        && best.matched >= MIN_MATCHED_SYMBOLS
-        && best.rms >= MIN_RMS
-        && best.band_ratio >= MIN_BAND_RATIO;
-    Ok(Detection {
-        detected,
-        score: best.score as f32,
-        matched_symbols: best.matched,
-        symbol_count: SYMBOL_COUNT as u32,
-        offset_samples: best_offset as u32,
-        sample_rate,
-        rms: best.rms as f32,
-        in_band_ratio: best.band_ratio as f32,
-    })
+    Ok(best.detection(best_offset, sample_rate))
+}
+
+/// Native pilot readiness fallback, never used by the public detector or signed
+/// audio verification. Search every complete integer start for the globally
+/// highest ranked candidate satisfying all existing detection gates. The caller
+/// applies the unchanged timing limit after this global selection; clipping the
+/// search at the deadline could incorrectly promote a late marker's flank.
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) fn detect_qualifying_peak(
+    samples: &[f32],
+    sample_rate: u32,
+    session_id: &str,
+    index: u32,
+    nonce_hex: &str,
+) -> Result<Option<Detection>, String> {
+    let bits = checked_symbols(samples, sample_rate, session_id, index, nonce_hex)?;
+    let bands = CARRIER_HZ.map(|frequency| Quadrature::new(samples, frequency));
+    let energy = sample_energy(samples);
+    let last_offset = samples.len() - PROBE_SAMPLES;
+    let mut best: Option<(Candidate, usize)> = None;
+    for offset in 0..=last_offset {
+        let candidate = measure(&bands, &energy, &bits, offset);
+        if candidate.qualifies()
+            && best
+                .as_ref()
+                .is_none_or(|(previous, _)| candidate.rank() > previous.rank())
+        {
+            best = Some((candidate, offset));
+        }
+    }
+    Ok(best.map(|(candidate, offset)| candidate.detection(offset, sample_rate)))
+}
+
+fn checked_symbols(
+    samples: &[f32],
+    sample_rate: u32,
+    session_id: &str,
+    index: u32,
+    nonce_hex: &str,
+) -> Result<[u8; SYMBOL_COUNT], String> {
+    let bits = symbols(session_id, index, nonce_hex)?;
+    if sample_rate != SAMPLE_RATE {
+        return Err("Audio FSK v1 requires exactly 48000 Hz mono PCM".into());
+    }
+    if !(PROBE_SAMPLES..=MAX_SAMPLES).contains(&samples.len()) {
+        return Err("Audio detector needs a 768 ms to 2 s recording segment".into());
+    }
+    if samples
+        .iter()
+        .any(|sample| !sample.is_finite() || sample.abs() > 1.0)
+    {
+        return Err("Audio PCM samples must be finite values in [-1,1]".into());
+    }
+    Ok(bits)
+}
+
+fn sample_energy(samples: &[f32]) -> Vec<f64> {
+    let mut energy = Vec::with_capacity(samples.len() + 1);
+    energy.push(0.0);
+    let mut sum = 0.0;
+    for sample in samples {
+        sum += f64::from(*sample).powi(2);
+        energy.push(sum);
+    }
+    energy
 }
 
 fn hex32(value: &str) -> Result<[u8; 32], String> {
@@ -235,6 +269,26 @@ struct Candidate {
 }
 
 impl Candidate {
+    fn qualifies(&self) -> bool {
+        self.score >= MIN_SCORE
+            && self.matched >= MIN_MATCHED_SYMBOLS
+            && self.rms >= MIN_RMS
+            && self.band_ratio >= MIN_BAND_RATIO
+    }
+
+    fn detection(&self, offset: usize, sample_rate: u32) -> Detection {
+        Detection {
+            detected: self.qualifies(),
+            score: self.score as f32,
+            matched_symbols: self.matched,
+            symbol_count: SYMBOL_COUNT as u32,
+            offset_samples: offset as u32,
+            sample_rate,
+            rms: self.rms as f32,
+            in_band_ratio: self.band_ratio as f32,
+        }
+    }
+
     fn rank(&self) -> f64 {
         // Contrast finds the right code; a small coherence contribution resolves
         // near-equal alignment peaks without preferring a louder wrong code.

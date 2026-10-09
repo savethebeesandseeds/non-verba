@@ -121,6 +121,21 @@ pub extern "system" fn Java_org_nonverba_camera_NativeAudioCore_probe(
 }
 
 #[no_mangle]
+pub extern "system" fn Java_org_nonverba_camera_NativeAudioCore_inspectPilot(
+    mut env: JNIEnv<'_>,
+    _this: JObject<'_>,
+    samples: JFloatArray<'_>,
+    round: JString<'_>,
+) -> jstring {
+    response(&mut env, |env| {
+        nonverba_core::native_audio_signing::inspect_pilot(
+            &pcm(env, samples, CHUNK_SAMPLES as i32)?,
+            &text(env, round, 4096)?,
+        )
+    })
+}
+
+#[no_mangle]
 pub extern "system" fn Java_org_nonverba_camera_NativeAudioCore_validatePilot(
     mut env: JNIEnv<'_>,
     _this: JObject<'_>,
@@ -193,26 +208,61 @@ pub extern "system" fn Java_org_nonverba_camera_NativeAudioCore_seal(
                 .map_err(|error| error.to_string())?;
         let spki = bytes(env, public_spki, 4096)?;
         let certificates = text(env, certificate_pem, 64 * 1024)?;
-        let mut callback = |message: &[u8]| {
-            let message = env
-                .byte_array_from_slice(message)
-                .map_err(|error| error.to_string())?;
-            let signature = env
-                .call_method(
-                    &key,
-                    "signEvidence",
-                    "([B)[B",
-                    &[JValue::Object(message.as_ref())],
-                )
-                .map_err(|_| "Native audio signing capability failed".to_owned())?
-                .l()
-                .map_err(|error| error.to_string())?;
-            bytes(env, JByteArray::from(signature), 128)
+        let mut round_assessment = None;
+        let (sealed, fingerprint) = {
+            let mut callback = |message: &[u8]| {
+                let message = env
+                    .byte_array_from_slice(message)
+                    .map_err(|error| error.to_string())?;
+                let signature = env
+                    .call_method(
+                        &key,
+                        "signEvidence",
+                        "([B)[B",
+                        &[JValue::Object(message.as_ref())],
+                    )
+                    .map_err(|_| "Native audio signing capability failed".to_owned())?
+                    .l()
+                    .map_err(|error| error.to_string())?;
+                bytes(env, JByteArray::from(signature), 128)
+            };
+            let signer = ExternalSigner::new(&certificates, &spki, &mut callback)?;
+            let sealed = signer.seal_native_audio_observed(
+                &samples,
+                &request,
+                &transcript,
+                &metadata,
+                now(now_ms)?,
+                &mut round_assessment,
+            );
+            (sealed, signer.fingerprint().to_owned())
         };
-        let signer = ExternalSigner::new(&certificates, &spki, &mut callback)?;
-        let wav =
-            signer.seal_native_audio(&samples, &request, &transcript, &metadata, now(now_ms)?)?;
-        Ok(json!({"wav_base64": STANDARD.encode(wav), "fingerprint": signer.fingerprint(), "media_origin":"native-aaudio-pcm",
-            "hardware_attested":false,"collection_attested":false,"sensor_origin_proven":false,"acoustic_path_proven":false}).to_string())
+        let assessment: Option<serde_json::Value> = round_assessment
+            .as_deref()
+            .map(serde_json::from_str)
+            .transpose()
+            .map_err(|error| error.to_string())?;
+        match sealed {
+            Ok(wav) => {
+                let mut result = json!({"wav_base64": STANDARD.encode(wav), "fingerprint": fingerprint, "media_origin":"native-aaudio-pcm",
+                    "hardware_attested":false,"collection_attested":false,"sensor_origin_proven":false,"acoustic_path_proven":false});
+                if let Some(assessment) = assessment {
+                    result["round_assessment"] = assessment;
+                }
+                Ok(result.to_string())
+            }
+            Err(error) => {
+                if let Some(assessment) = assessment {
+                    // The old exception path cleared a failed Keystore callback.
+                    // Do the same before response creates this refusal string.
+                    if env.exception_check().unwrap_or(false) {
+                        let _ = env.exception_clear();
+                    }
+                    Ok(json!({"ok":false,"error":error,"round_assessment":assessment}).to_string())
+                } else {
+                    Err(error)
+                }
+            }
+        }
     })
 }

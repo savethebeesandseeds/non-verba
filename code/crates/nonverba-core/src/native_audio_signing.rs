@@ -3,7 +3,7 @@
 
 use std::{collections::HashSet, io::Cursor};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     audio::{AudioRequest, AudioRound, AudioTranscript, CHUNK_SAMPLES},
@@ -101,7 +101,123 @@ pub fn validate_receipt(
     serde_json::to_string(&receipt.transcript).map_err(err)
 }
 
-pub fn validate_pilot(pcm: &[f32], round_json: &str) -> Result<String, String> {
+const PILOT_MAXIMUM_START_OFFSET_SAMPLES: u32 = crate::audio::LATEST_PROBE_OFFSET;
+pub const MAX_ROUND_ASSESSMENT_JSON_BYTES: usize = 8192;
+
+#[derive(Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum PilotReason {
+    Passed,
+    NotDetected,
+    DetectedLate,
+}
+
+#[derive(Serialize)]
+struct PilotAssessment {
+    version: u32,
+    #[serde(rename = "type")]
+    assessment_type: &'static str,
+    signal_algorithm: &'static str,
+    sample_count: u32,
+    maximum_start_offset_samples: u32,
+    passed: bool,
+    reason: PilotReason,
+    detection: crate::audio_signal::Detection,
+}
+
+#[derive(Serialize)]
+struct NativeRoundAssessment {
+    version: u32,
+    #[serde(rename = "type")]
+    assessment_type: &'static str,
+    signal_algorithm: &'static str,
+    sample_format: &'static str,
+    maximum_start_offset_samples: u32,
+    passed: bool,
+    rounds: Vec<NativeRoundAssessmentEntry>,
+}
+
+#[derive(Serialize)]
+struct NativeRoundAssessmentEntry {
+    index: u32,
+    start_sample: u32,
+    sample_count: u32,
+    passed: bool,
+    reason: PilotReason,
+    detection: crate::audio_signal::Detection,
+}
+
+/// Unsigned native diagnostics from the exact canonical detections already used
+/// by sealing. No request, nonce, PCM, signature or readiness fallback is added.
+pub(crate) fn serialize_round_assessment(
+    transcript: &AudioTranscript,
+    detections: &[crate::audio_signal::Detection],
+) -> Result<String, String> {
+    if detections.len() != transcript.rounds.len() || detections.is_empty() || detections.len() > 15
+    {
+        return Err("Native audio round assessment has an invalid round count".into());
+    }
+    let rounds: Vec<_> = transcript
+        .rounds
+        .iter()
+        .zip(detections)
+        .map(|(round, detection)| {
+            let reason = if !detection.detected {
+                PilotReason::NotDetected
+            } else if detection.offset_samples > crate::audio::LATEST_PROBE_OFFSET {
+                PilotReason::DetectedLate
+            } else {
+                PilotReason::Passed
+            };
+            NativeRoundAssessmentEntry {
+                index: round.index,
+                start_sample: round.start_sample,
+                sample_count: round.sample_count,
+                passed: reason == PilotReason::Passed,
+                reason,
+                detection: detection.clone(),
+            }
+        })
+        .collect();
+    let assessment = NativeRoundAssessment {
+        version: 1,
+        assessment_type: "nonverba-native-audio-round-assessment",
+        signal_algorithm: crate::audio_signal::PROFILE,
+        sample_format: "pcm16",
+        maximum_start_offset_samples: crate::audio::LATEST_PROBE_OFFSET,
+        passed: rounds.iter().all(|round| round.passed),
+        rounds,
+    };
+    let json = serde_json::to_string(&assessment).map_err(err)?;
+    if json.len() > MAX_ROUND_ASSESSMENT_JSON_BYTES {
+        return Err("Native audio round assessment exceeds its byte bound".into());
+    }
+    Ok(json)
+}
+
+impl PilotAssessment {
+    fn from_detection(detection: crate::audio_signal::Detection) -> Self {
+        let reason = if !detection.detected {
+            PilotReason::NotDetected
+        } else if detection.offset_samples > PILOT_MAXIMUM_START_OFFSET_SAMPLES {
+            PilotReason::DetectedLate
+        } else {
+            PilotReason::Passed
+        };
+        Self {
+            version: 1,
+            assessment_type: "nonverba-native-audio-pilot-assessment",
+            signal_algorithm: crate::audio_signal::PROFILE,
+            sample_count: CHUNK_SAMPLES,
+            maximum_start_offset_samples: PILOT_MAXIMUM_START_OFFSET_SAMPLES,
+            passed: reason == PilotReason::Passed,
+            reason,
+            detection,
+        }
+    }
+}
+
+fn assess_pilot(pcm: &[f32], round_json: &str) -> Result<PilotAssessment, String> {
     if pcm.len() != CHUNK_SAMPLES as usize {
         return Err("Native audio pilot requires exactly two seconds of microphone samples".into());
     }
@@ -113,10 +229,46 @@ pub fn validate_pilot(pcm: &[f32], round_json: &str) -> Result<String, String> {
         round.index,
         &round.nonce,
     )?;
-    if !detection.detected || detection.offset_samples > 38_400 {
+    let assessment = PilotAssessment::from_detection(detection);
+    if assessment.detection.detected {
+        // Preserve both ordinary success and every detected-late refusal.
+        return Ok(assessment);
+    }
+    // A sub-floor peak can hide a qualifying marker. Readiness alone retries
+    // global selection among candidates meeting all unchanged detection gates.
+    // Never clip the search to the deadline: a late marker's rising flank could
+    // otherwise be promoted. Public detection and signed audio keep their
+    // original selection policy, including the unresolved late-repeat ambiguity.
+    if let Some(qualifying) = crate::audio_signal::detect_qualifying_peak(
+        pcm,
+        crate::audio::SAMPLE_RATE,
+        &round.session_id,
+        round.index,
+        &round.nonce,
+    )? {
+        let fallback = PilotAssessment::from_detection(qualifying);
+        if fallback.passed {
+            return Ok(fallback);
+        }
+    }
+    // Preserve the complete original refusal and its full-window metrics.
+    Ok(assessment)
+}
+
+/// An unsigned setup diagnostic derived from the retained native pilot only.
+/// It reports the unchanged detector and timing policy, never successful audio
+/// evidence, a calibrated acoustic diagnosis or the cause of a refusal.
+pub fn inspect_pilot(pcm: &[f32], round_json: &str) -> Result<String, String> {
+    serde_json::to_string(&assess_pilot(pcm, round_json)?).map_err(err)
+}
+
+pub fn validate_pilot(pcm: &[f32], round_json: &str) -> Result<String, String> {
+    let assessment = assess_pilot(pcm, round_json)?;
+    if !assessment.passed {
         return Err("Native microphone/speaker pilot did not recover the timely challenge".into());
     }
-    serde_json::to_string(&detection).map_err(err)
+    // Keep the successful legacy return shape compatible with existing callers.
+    serde_json::to_string(&assessment.detection).map_err(err)
 }
 
 impl ExternalSigner<'_> {
@@ -129,6 +281,42 @@ impl ExternalSigner<'_> {
         transcript_json: &str,
         metadata: &AudioCaptureMetadata,
         now_ms: u64,
+    ) -> Result<Vec<u8>, String> {
+        self.seal_native_audio_inner(pcm, request_json, transcript_json, metadata, now_ms, None)
+    }
+
+    /// Preserve bounded unsigned round checks even if policy or signing later
+    /// refuses. The caller owns the slot; it never enters the signed assertions.
+    #[allow(clippy::too_many_arguments)]
+    pub fn seal_native_audio_observed(
+        &self,
+        pcm: &[f32],
+        request_json: &str,
+        transcript_json: &str,
+        metadata: &AudioCaptureMetadata,
+        now_ms: u64,
+        round_assessment: &mut Option<String>,
+    ) -> Result<Vec<u8>, String> {
+        *round_assessment = None;
+        self.seal_native_audio_inner(
+            pcm,
+            request_json,
+            transcript_json,
+            metadata,
+            now_ms,
+            Some(round_assessment),
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn seal_native_audio_inner(
+        &self,
+        pcm: &[f32],
+        request_json: &str,
+        transcript_json: &str,
+        metadata: &AudioCaptureMetadata,
+        now_ms: u64,
+        round_assessment: Option<&mut Option<String>>,
     ) -> Result<Vec<u8>, String> {
         let request: AudioRequest = parse(request_json)?;
         let transcript: AudioTranscript = parse(transcript_json)?;
@@ -147,13 +335,23 @@ impl ExternalSigner<'_> {
         metadata.sealed_at_unix_ms = Some(now_ms);
         metadata.seal_time_origin = Some("native-finalization-start".into());
         metadata.validate(&request, &transcript, now_ms)?;
-        let (mut builder, mut source) = crate::audio::prepare_audio(
-            pcm,
-            request_json,
-            transcript_json,
-            (now_ms / 1000) as f64,
-            self.fingerprint(),
-        )?;
+        let (mut builder, mut source) = match round_assessment {
+            Some(slot) => crate::audio::prepare_audio_observed(
+                pcm,
+                request_json,
+                transcript_json,
+                (now_ms / 1000) as f64,
+                self.fingerprint(),
+                slot,
+            ),
+            None => crate::audio::prepare_audio(
+                pcm,
+                request_json,
+                transcript_json,
+                (now_ms / 1000) as f64,
+                self.fingerprint(),
+            ),
+        }?;
         builder
             .add_assertion(ASSERTION_LABEL, &metadata)
             .map_err(err)?;
@@ -166,8 +364,16 @@ impl ExternalSigner<'_> {
 }
 
 #[cfg(test)]
+#[path = "native_audio_signing/pilot_tests.rs"]
+mod pilot_tests;
+
+#[cfg(test)]
 #[path = "native_audio_signing/playback_tests.rs"]
 mod playback_tests;
+
+#[cfg(test)]
+#[path = "native_audio_signing/round_assessment_tests.rs"]
+mod round_assessment_tests;
 
 #[cfg(test)]
 mod tests {
