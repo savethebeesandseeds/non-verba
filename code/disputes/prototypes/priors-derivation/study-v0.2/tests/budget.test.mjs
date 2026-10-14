@@ -1,0 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+import test from 'node:test';import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';import {mkdir,rm} from 'node:fs/promises';import {join} from 'node:path';
+import {STUDY_BASE,writeJSON} from '../lib/store.mjs';import {freezeMainUnitBudget} from '../lib/budget.mjs';
+test('predeclared main allocation preserves the frozen ceiling and remains immutable',async t=>{const root=join(STUDY_BASE,`test-budget-${randomUUID()}`);await mkdir(root,{recursive:true});t.after(()=>rm(root,{recursive:true,force:true}));await writeJSON(root,'recipe.json',{extraction:{maxUnits:300000}});const first=await freezeMainUnitBudget(root);assert.equal(first.discovery_limit,200000);assert.equal(first.confirmation_limit+first.temporal_limit,100000);assert.deepEqual(await freezeMainUnitBudget(root),first);});
+test('allocation refuses a different frozen total instead of silently expanding it',async t=>{const root=join(STUDY_BASE,`test-budget-${randomUUID()}`);await mkdir(root,{recursive:true});t.after(()=>rm(root,{recursive:true,force:true}));await writeJSON(root,'recipe.json',{extraction:{maxUnits:1000}});await assert.rejects(freezeMainUnitBudget(root),/frozen resource ceiling/);});

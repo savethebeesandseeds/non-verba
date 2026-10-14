@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "id": "repair-v8",
+  "previous_protocol": "audit-protocols/repair-v7/protocol.json",
+  "new_exposure_artifacts": [
+    {
+      "path": "audits/5a983c1be1ab87156e93/development-author-v7/stopped-partial.json",
+      "sha256": "8b654b04b2ed628fe521f5da7b1ac024481684e8cc646ce5cd1cb66ff76f2ae0",
+      "exposure_field": "opened_source_contract_ids"
+    },
+    {
+      "path": "audits/5a983c1be1ab87156e93/integrity-root-v7/stopped-partial.json",
+      "sha256": "6471fbaa91365e33c69d30559d8f1db781c448d03856e1a0b31a90dab3e719d0",
+      "exposure_field": "source_exposed_contract_ids"
+    }
+  ],
+  "additional_evidence_records": [
+    {
+      "path": "coding/open-coding-a/v7/review.stopped-partial.json",
+      "sha256": "e0a90f44af68e691d57bd39d8b118380f7f6954b1b03abb8f9638505c8633dbd"
+    },
+    {
+      "path": "coding/clean-b-v7/coverage-held-after-0024.json",
+      "sha256": "3cc7272a6029bd72ba2bc66d6afa6f98ee387226c2e2fb209e2b8c32b0730bfc"
+    },
+    {
+      "path": "audits/5a983c1be1ab87156e93/development-author-v7/boundary-failure-0013-neighbor.json",
+      "sha256": "d746a2f562eb710bee58581732df2476ba14e87ee11322fee74cabfbb307b083"
+    },
+    {
+      "path": "source-issues/adjudications/v7-coding-0014-adjacent-source-section.json",
+      "sha256": "5ed553fad525ebcf51cc417ea49d82a5e1677585830b1250c88e2a6303468aab"
+    }
+  ],
+  "additional_source_diagnostic_contracts": [
+    "contract-c4c20b310e4a6bd38b2a", "contract-edc2eb570b3275a77d4c",
+    "contract-c82807004cbb6b5cb745", "contract-dba335bb12ee7dccb387",
+    "contract-e49c5ea6f9649945279f", "contract-0b36684ced9eeef3caf3",
+    "contract-43e87d569f2a4112796b", "contract-01d80bfe2e71046d8b3e",
+    "contract-c398069b82ec5a51fae2", "contract-c07dc12c0ca8cbffea62",
+    "contract-1385c838225fafe6945c", "contract-4a54fc15726ed030aed0",
+    "contract-e8704b600490efddfb85", "contract-eb390c3ebd9d6aee00ba",
+    "contract-84428e1bb29857dde12d", "contract-423fc53cbd0a52d7e83d",
+    "contract-292c70647aa0b21f324a", "contract-fc780cbc23a8d1aa3de4",
+    "contract-9cb7b9e0cc77ff97b757", "contract-a7782e41c53e4094d590",
+    "contract-468781f7b473b005c966", "contract-34c756a143036c47b162",
+    "contract-d2216d42b094ff39428b", "contract-1a52a7dffe6ece30560d"
+  ],
+  "reason": "Preserve V7 partial reviews and repair a material false attachment boundary within a continuing license sentence. Require generic caption evidence and source continuity before treating an Exhibit/Schedule reference as a new attachment. Keep the original purpose seed, all earlier exposure exclusions and every newly opened discovery/control contract. No V7 fresh-audit content was opened; its untouched contract pool is retained. Neighbor findings remain explicitly partial and do not masquerade as completed sampled-parent reviews.",
+  "authority": "NONE"
+}

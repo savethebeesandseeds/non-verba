@@ -7,6 +7,8 @@
   "description": "Cooperation and assignment protocols, evidence capture and independent verification",
   "exports": "./protocol/cooperation.mjs",
   "scripts": {
+    "test:map": "node --test test/map-component-tests.mjs",
+    "test:browser:map": "node test/map-browser-tests.mjs",
     "test:model:operator-face": "node tools/run-tests.mjs face_model",
     "test:operator-face": "cargo test --locked -p nonverba-core face_identity && cargo test --locked -p nonverba-core authentication && cargo test --locked -p nonverba-core registration && cargo test --locked -p nonverba-core work_privacy && node --test test/face-workflow-tests.mjs test/authentication-workflow-tests.mjs test/registration-workflow-tests.mjs test/work-privacy-controller-tests.mjs test/test-suites-tests.mjs",
     "test:browser:operator-face": "node tools/build-web.mjs && node test/operator-face-browser-tests.mjs",

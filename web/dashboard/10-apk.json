@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "apk",
+  "number": 10,
+  "title": "APK buildout",
+  "summary": "Extend the existing native development package into the complete Android participant experience and a reviewed distribution lifecycle.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "apk-android-foundation-goal",
+      "title": "Android package foundation",
+      "description": "The existing development package, shared assets, native adapters and documented managed-container build contract.",
+      "milestones": [
+        {
+          "id": "apk-native-foundation",
+          "title": "Shared UI and native Android package foundation",
+          "description": "The existing APK packages shared web UI/WASM, the Rust sensor/provenance core and Kotlin platform adapters under a documented managed Debian build/signature contract. This milestone is the development package foundation; the achievement date is unspecified.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "The APK bundles shared policy/verification and native permission, lifecycle, sensor and key adapters.",
+            "Documented Debian builds assemble/lint the package and inspect signatures without Windows Java.",
+            "Unsupported required sensor capabilities fail rather than silently using a reduced profile."
+          ],
+          "evidence": [
+            {
+              "label": "Android implementation and build contract",
+              "path": "code/android/README.md"
+            },
+            {
+              "label": "Recorded installed package milestones",
+              "path": "docs/sensors/STATUS.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

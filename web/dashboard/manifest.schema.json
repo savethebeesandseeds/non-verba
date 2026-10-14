@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Non Verba Hero manifest version 2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "title", "description", "heroes"],
+  "properties": {
+    "schemaVersion": {"const": 2},
+    "title": {"type": "string", "pattern": "\\S"},
+    "description": {"type": "string", "pattern": "\\S"},
+    "heroes": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "object", "additionalProperties": false, "required": ["id", "file"], "properties": {"id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}, "file": {"type": "string", "pattern": "^[0-9]{2,3}-[a-z0-9-]+\\.json$"}}}}
+  }
+}

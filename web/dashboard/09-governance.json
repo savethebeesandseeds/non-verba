@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 2,
+  "id": "governance",
+  "number": 9,
+  "title": "Governance and launch readiness",
+  "summary": "Turn working principles into accountable institutions, a bounded pilot and independently reviewed operating commitments.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "governance-project-organization-goal",
+      "title": "Standalone project dashboard",
+      "description": "The maintained local hierarchy, evidence record and navigation implemented in this session.",
+      "milestones": [
+        {
+          "id": "governance-project-dashboard",
+          "title": "Establish the maintained workstream dashboard",
+          "description": "The maintained dashboard has one independent JSON per Hero, a documented schema, validation, safe evidence links and a generated standalone HTML page. AGENTS.md requires evidence-backed milestone upkeep. The record is deliberately partial; unconfirmed Goals and Milestones are left empty.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "All eleven Heroes retain independent source files; confirmed entries expose their actual scoped state and evidence while unconfirmed breakdowns stay empty.",
+            "The schema, validator and focused checks cover data integrity, filtering and responsive presentation.",
+            "AGENTS.md requires evidence-backed updates and root documentation makes the dashboard easy to find."
+          ],
+          "evidence": [
+            {
+              "label": "Dashboard schema and maintenance",
+              "path": "web/dashboard/README.md"
+            },
+            {
+              "label": "Repository maintenance rule",
+              "path": "AGENTS.md#project-progress-dashboard"
+            },
+            {
+              "label": "Focused model checks",
+              "path": "web/dashboard/test/model.test.mjs"
+            },
+            {
+              "label": "Browser behavior checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-hero-hierarchy",
+          "title": "Adopt the Heroes, Goals and Milestones hierarchy",
+          "description": "Schema version 2 supports eleven independent Hero files with the fixed Hero, Goal and Milestone hierarchy, optional metadata and empty planning records. Milestone states are color-coded and Hero/Goal summaries count only listed records. Reviewed Priors checkpoints remain under that session's ownership.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Each Hero has one independent JSON file containing Goals and their flat Milestones.",
+            "The schema supports concise Milestones, optional metadata and empty planning records while retaining stable IDs for confirmed entries.",
+            "The webpage, validation and maintenance instructions implement the fixed hierarchy together."
+          ],
+          "evidence": [
+            {
+              "label": "Hierarchy schema and maintenance contract",
+              "path": "web/dashboard/SCHEMA.md"
+            },
+            {
+              "label": "Formal Hero schema version 2",
+              "path": "web/dashboard/hero.schema.json"
+            },
+            {
+              "label": "Hierarchy and color browser checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-file-open-dashboard",
+          "title": "Open the dashboard as a standalone HTML file",
+          "description": "The dashboard opens directly as a self-contained HTML file. Its initial file-selection workflow was superseded by the validated embedded record and refresh helpers. Opening the page requires no webserver, adjacent runtime assets or network requests.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Opening index.html directly with file:// renders the self-contained interface without HTTP requests or neighboring runtime assets.",
+            "The interface and maintained Hero JSONs remain separate authored inputs.",
+            "The standalone opening workflow requires no dashboard server."
+          ],
+          "evidence": [
+            {
+              "label": "Standalone dashboard HTML",
+              "path": "web/dashboard/index.html"
+            },
+            {
+              "label": "Direct-open and maintenance instructions",
+              "path": "web/dashboard/README.md"
+            },
+            {
+              "label": "File-open and fresh-reload browser checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-auto-open-dashboard",
+          "title": "Show project progress immediately when the HTML opens",
+          "description": "The Hero JSONs and schema sit beside index.html. The generated HTML embeds the validated record and opens populated without a chooser or server. PowerShell and Bash helpers refresh it in the preserved managed container; the Windows workflow copies back the result and checks for concurrent edits.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "An isolated HTML file immediately renders the project overview from its validated embedded record without file selection or external requests.",
+            "Each Hero remains one independent JSON beside the page and formal schema; the authoring guide distinguishes the included snapshot from live source files.",
+            "The documented refresh command validates records, updates the workspace HTML and preserves concurrent edits; AGENTS.md requires it after milestone updates.",
+            "The fixed hierarchy, filters, dependency links, distinct milestone colors and phone layout pass focused browser checks."
+          ],
+          "evidence": [
+            {
+              "label": "Standalone dashboard",
+              "path": "web/dashboard/index.html"
+            },
+            {
+              "label": "Schema and update workflow",
+              "path": "web/dashboard/SCHEMA.md"
+            },
+            {
+              "label": "Container-backed refresh orchestration",
+              "path": "web/dashboard/refresh.ps1"
+            },
+            {
+              "label": "Bash refresh helper",
+              "path": "web/dashboard/refresh.sh"
+            },
+            {
+              "label": "Automatic file-open behavior checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-branded-progress-dashboard",
+          "title": "Make project progress easier to explore with the existing branding",
+          "description": "The standalone page embeds the existing sprout mark and eleven character illustrations. Its overview, completion counts and active/blocked working set are derived from the recorded Milestones. Artwork remains available when only index.html is copied, and the original branding assets remain unchanged.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "The existing project artwork is used without changing the originals, and copying only index.html preserves the interface and all branding.",
+            "The overview shows every Hero, completion counts and navigable active or blocked milestones derived from the maintained records.",
+            "Hero, Goal and Milestone detail, color-coded states, filters, criteria, evidence and dependencies remain usable on desktop and phone layouts.",
+            "Focused checks confirm file-open behavior without a picker or external requests, correct progress counts and literal rendering of authored text."
+          ],
+          "evidence": [
+            {
+              "label": "Standalone project dashboard",
+              "path": "web/dashboard/index.html"
+            },
+            {
+              "label": "Existing project artwork",
+              "path": "web/site/branding/README.md"
+            },
+            {
+              "label": "Embedded artwork and thumbnail mapping",
+              "path": "web/dashboard/branding.mjs"
+            },
+            {
+              "label": "Overview and hierarchy interactions",
+              "path": "web/dashboard/dashboard.js"
+            },
+            {
+              "label": "File-open interaction and layout checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-goal-milestone-detail",
+          "title": "Make Goals and Milestones clearer to read and navigate",
+          "description": "Goals display original numbering and recorded milestone counts. Expanded Milestones show literal descriptions, numbered acceptance criteria, evidence paths and optional dependencies. Unknown achievement dates remain absent; record IDs are secondary disclosures. Requirements have no invented checkbox completion states.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Goal outcomes, progress and state counts remain visible when their Milestones are hidden, and filtered views preserve original numbering and total counts.",
+            "Search, expansion controls and explicit dependency navigation retain the selected hierarchy and reveal the requested Goal.",
+            "Milestone previews retain the complete text in expanded details; criteria remain requirements without invented checkbox states, and evidence retains its authored label and full-path context.",
+            "Desktop and phone file-open checks cover the refined hierarchy, literal text rendering, collapse persistence and navigation without external requests or schema changes."
+          ],
+          "evidence": [
+            {
+              "label": "Refined standalone dashboard",
+              "path": "web/dashboard/index.html"
+            },
+            {
+              "label": "Goal and Milestone rendering",
+              "path": "web/dashboard/dashboard.js"
+            },
+            {
+              "label": "Responsive detail presentation",
+              "path": "web/dashboard/dashboard.css"
+            },
+            {
+              "label": "Exploration and maintenance guide",
+              "path": "web/dashboard/README.md"
+            },
+            {
+              "label": "Collapse, hierarchy and detail browser checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-focused-dashboard-navigation",
+          "title": "Explore one Hero and one Goal at a time",
+          "description": "The dashboard opens at an overview with no selected details. Selecting a Hero shows compact Goal choices; selecting a Goal shows only its details and Milestones. Filters retain that context and separate full recorded counts from matching counts. Explicit focus/dependency links reveal their actual target.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "The default overview renders no Hero or Goal detail, and explicit selection renders at most one Hero and one Goal.",
+            "Every Goal remains available as a compact card with original numbering, recorded state and full-scope progress; filtered matches are labelled separately without losing the selected context.",
+            "Overview and Goal return controls, scoped resets, milestone details and cross-Goal dependencies navigate to the correct context on desktop and phone layouts.",
+            "The standalone file opens with embedded data and branding without a server, file picker, adjacent runtime files or network requests; the guide and AGENTS.md describe the selection workflow."
+          ],
+          "evidence": [
+            {
+              "label": "Focused standalone dashboard",
+              "path": "web/dashboard/index.html"
+            },
+            {
+              "label": "Hero and Goal selection behavior",
+              "path": "web/dashboard/dashboard.js"
+            },
+            {
+              "label": "Responsive Goal cards and detail presentation",
+              "path": "web/dashboard/dashboard.css"
+            },
+            {
+              "label": "Exploration and upkeep guide",
+              "path": "web/dashboard/README.md"
+            },
+            {
+              "label": "File-open selection and navigation checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        },
+        {
+          "id": "governance-interactive-goal-selection",
+          "title": "Browse Goal progress without losing the current position",
+          "description": "Goal choices show completion rings, actual milestone state dots and a clear selected indicator in a taller bounded sage navigator with compact ivory buttons. Phones use a short swipeable strip above the detail panel. Selecting or clearing a Goal preserves buttons, panel, keyboard focus and document position; same-Hero filters and resets retain the list's scroll offsets. Translucent sand milestone headers fade gently across the underlying state tint and contain each description once, previewing two lines when closed and the full text when open. The actual milestone state colors its strong left rail, header rule, marker and badge outline, with a subtle body tint. Acceptance criteria use soft sage surfaces and evidence uses warm parchment, following the established earthy theme. Explicit dependency and current-work jumps still reveal their requested milestone. The validator, 24 model tests and eight isolated file-open browser scenarios passed in the managed container, including scrolling, literal text, state accents and contrast checks; desktop and phone detail views were visually inspected.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Goal completion rings and state dots describe the original source Milestones, with separate filtered match counts and honest empty planning records.",
+            "Pointer, Enter and Space selection update one detail panel while preserving the Goal buttons, focus and document scroll position on desktop and phone layouts.",
+            "Clearing a Goal restores the prompt and previous button focus without a forced scroll; reduced motion disables the detail fade.",
+            "The compact phone selector keeps the selected panel near the choices, and existing filters, evidence, milestone expansion and direct dependency navigation continue to work in the standalone HTML.",
+            "The taller Goal list contains compact buttons and scrolls within a bounded area, preserving its offsets through same-Hero filtering and reset.",
+            "Milestone descriptions appear once in a distinct header, with full text available when open; criteria and evidence have separate readable background colors.",
+            "Interface surfaces follow the established cream, sage and earthy sand theme, while the actual Milestone status controls its rail, header rule, marker and badge outline."
+          ],
+          "evidence": [
+            {
+              "label": "Interactive standalone dashboard",
+              "path": "web/dashboard/index.html"
+            },
+            {
+              "label": "Persistent Goal selection and detail rendering",
+              "path": "web/dashboard/dashboard.js"
+            },
+            {
+              "label": "Completion rings and responsive Goal navigator",
+              "path": "web/dashboard/dashboard.css"
+            },
+            {
+              "label": "Interaction and maintenance guide",
+              "path": "web/dashboard/README.md"
+            },
+            {
+              "label": "Pointer, keyboard, viewport and motion checks",
+              "path": "web/dashboard/test/browser.mjs"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

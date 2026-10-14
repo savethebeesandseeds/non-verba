@@ -7,6 +7,7 @@ licensed under their own notices and license files.
 
 | Material | Location and provenance |
 | --- | --- |
+| Kartverket Norway display geometry | `web/src/map-country-data.js`; reviewed snapshot of simplified mainland municipality illustration polygons, including coastal waters, with [CC BY 4.0 attribution and provenance](LICENSES/Kartverket-map-data-notice.txt). This display mask is not a legal border or deployment authority. |
 | Primer Octicons GitHub icon | Homepage inline SVG; MIT notice in [LICENSES/Primer-Octicons-MIT.txt](LICENSES/Primer-Octicons-MIT.txt) and beside the SVG |
 | IGS/BKG broadcast navigation excerpt | `code/crates/nonverba-core/src/location_proof/position/importer/igs-2026270-excerpt.rnx`; [data notice](LICENSES/IGS-BKG-navigation-notice.txt) |
 | Google public Android attestation root certificates | `code/crates/nonverba-core/src/android_attestation/google-roots-2026.json`; [trust-anchor notice](LICENSES/Google-attestation-roots-notice.txt) |

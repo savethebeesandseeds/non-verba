@@ -1,0 +1,819 @@
+{
+  "schemaVersion": 2,
+  "id": "priors",
+  "number": 4,
+  "title": "Priors and the reasoning system",
+  "summary": "Priors Derivation Lab v0.2 is an isolated research prototype: calibration engineering is complete; source review and independent coding are active; full discovery remains gated. Candidate validation, case inclusion, reasoning evaluation and the decision on the first priors remain open.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "priors-corpus-discovery-goal",
+      "title": "Establish a trustworthy contract corpus prototype",
+      "description": "Keep the completed 100-contract pilot separate from the active 1,000-record calibration and the planned 15,000-record study. Source quality, rather than vector or test completion, controls expansion.",
+      "milestones": [
+        {
+          "id": "priors-derivation-lab-baseline",
+          "title": "Priors Derivation Lab v0.1 research baseline",
+          "description": "The completed isolated v0.1 prototype freezes sampling, extraction, bounded embeddings, discovery settings and inspectable candidate/desk-review structure. Human evaluation remains NOT_RUN, authority NONE and no candidate is adopted. The achievement date is unspecified.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "The prototype retains provenance, excluded material and explicit representation bounds.",
+            "Candidate cards and desk-review records remain inspectable hypotheses.",
+            "Signed catalog and financial core remain unchanged."
+          ],
+          "evidence": [
+            {
+              "label": "Completed v0.1 prototype",
+              "path": "code/disputes/prototypes/priors-derivation/README.md"
+            }
+          ],
+          "dependsOn": []
+        },
+        {
+          "id": "priors-study-metadata-selection",
+          "title": "Freeze the complete metadata census and 15,000-record selection",
+          "description": "The study checkpoint records a census of 1,168,530 metadata records and all 15,000 frozen selections: 6,000 broad discovery, 4,000 services-label enrichment, 3,000 confirmation and 2,000 temporal. Filer assignments are disjoint, capped at two records per assigned filer. The achievement date is unspecified; machine labels remain unverified.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Retain the pinned complete metadata census and reproducible selection ordering for all four cohorts.",
+            "Keep filer assignments disjoint, sampling reasons explicit and failed selections visible without replacement.",
+            "Seal the confirmation/temporal split before candidate interpretation."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded frozen census and selection",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Metadata selection and acquisition procedure",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/acquisition.mjs"
+            }
+          ],
+          "dependsOn": []
+        },
+        {
+          "id": "priors-study-v5-calibration",
+          "title": "Retain the completed V5 engineering baseline",
+          "description": "The historical V5 calibration accounts for 1,000 selections: 994 raw acquisitions, six retained size-limit failures, 937 accepted texts and 57 exclusions. Its vectors and 20 geometry attempts are preserved for comparison. V9 is the current representation; V5 engineering completion never passed the source-quality gate.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Account for every selected calibration ID, including terminal acquisition failures and excluded source records.",
+            "Retain actual pinned-model vector shards and all 20 predeclared geometry attempts with verified bytes and identities.",
+            "Report calibration limits without treating engineering completion as source adequacy, full-study completion or adoption."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded V5 engineering checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Bounded inference and retained geometry verification",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/analysis.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-metadata-selection"
+          ]
+        },
+        {
+          "id": "priors-study-v9-calibration",
+          "title": "Complete current V9 calibration engineering",
+          "description": "The authored checkpoint records 14,408 parents, 20,642 admitted units, 20,399 verified pinned-model vectors and all 20 geometry attempts on the same calibration selections. All 188 integrated tests passed. Verified cache reuse is distinguished from new inference; the 72 focused provenance tests overlap this test surface and are not an additional study sample. This establishes engineering execution, not adequate source reconstruction or valid prior meanings.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Account for all 1,000 calibration selections, including six acquisition failures and 57 explicit text exclusions.",
+            "Retain source-bound extraction, actual verified vectors and all 20 predeclared geometry attempts for the current V9 representation.",
+            "Keep cache reuse, test results and geometry diagnostics distinct from source audit results and semantic findings."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Calibration analysis and retained inference checks",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/analysis.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-metadata-selection"
+          ]
+        },
+        {
+          "id": "priors-study-source-integrity-controls",
+          "title": "Read all 57 rejection controls and verify V9 equivalence",
+          "description": "All 57 exclusions have actual retained-anchor and complete original-markup readings: 12 from V7 and 45 from V8. Strict V9 input-equivalence receipts preserve those exact reading scopes; they are zero new V9 readings. Image bodies remain unavailable and no pixels or OCR were read. These controls do not establish context or heading adequacy for accepted texts.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Cover every rejected source with actual original-markup and retained-anchor reading records, preserving the origin and scope of reused readings.",
+            "Verify exact current-input equivalence before admitting prior control judgments under V9.",
+            "Retain unavailable image-body limitations and exclusion reasons without treating excluded content as reconstructed."
+          ],
+          "evidence": [
+            {
+              "label": "Actual 57-source control scope and immutable review identity",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Supporting-review admission and current-source checks",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/quality.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-metadata-selection"
+          ]
+        },
+        {
+          "id": "priors-study-development-review",
+          "title": "Complete 200 actual development source judgments",
+          "description": "The last authored checkpoint, 14 October at 10:44 UTC, records 184/200 completed judgments: 99 in one assigned half and 85 in the other. They comprise 117 new full V9 readings, 66 exact prior-reading equivalents and one transparently combined prior-parent/new-source-context completion. Sixteen judgments remain incomplete at that checkpoint. A completed reading can still fail adequacy; original judgments, failures and rubric adjudications remain visible.",
+          "status": "in_progress",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Complete all 200 source-bound development judgments against the current extraction, including original source, complete parent context and headings.",
+            "Distinguish new readings, strictly equivalent prior readings and partial records; retain failed and adjudicated judgments.",
+            "Resolve observed material reconstruction issues with actual current-source replays before the fresh audit."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Actual reading and adequacy rubric",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/AUDIT_RUBRIC.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-v9-calibration"
+          ]
+        },
+        {
+          "id": "priors-study-source-quality-audit",
+          "title": "Pass the fresh source-quality gate before expansion",
+          "description": "The gate remains unpassed. All three known material boundary issues have actual V9 repair replays, but development review is incomplete and the 100-parent fresh packet, drawn from 29 contracts, remains unopened at the recorded checkpoint. Freeze the repaired representation before fresh review. Correlated sections and unavailable material must remain explicit.",
+          "status": "in_progress",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Complete current-source development review and retain the 57 rejection controls with their exact reading provenance.",
+            "Actually read all 100 fresh cases after development fixes; report contract overlap, context adequacy and heading adequacy separately.",
+            "Reach at least 95% fresh context adequacy and at least 95% fresh heading adequacy, with zero unresolved observed material loss, before expansion.",
+            "Recheck the current source identity and later observed issues whenever authorizing expansion, candidate freeze or reserve access."
+          ],
+          "evidence": [
+            {
+              "label": "Unpassed gate and repair state",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Source-reading and adequacy rubric",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/AUDIT_RUBRIC.md"
+            },
+            {
+              "label": "Actual calibration gate verification",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/quality.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-development-review",
+            "priors-study-source-integrity-controls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "priors-full-discovery-goal",
+      "title": "Complete discovery and representation comparisons",
+      "description": "Use the frozen 6,000 broad and 4,000 enriched discovery records. The remaining 3,000 confirmation and 2,000 temporal records are sealed evaluation cohorts, not extra discovery data.",
+      "milestones": [
+        {
+          "id": "priors-study-full-discovery-sensitivity",
+          "title": "Complete the frozen 10,000-record discovery selection",
+          "description": "Expansion beyond the 1,000-record calibration is blocked by the unpassed source-quality gate. The 15,000-record metadata freeze does not mean 15,000 contracts have been acquired or read. Resume the same frozen discovery selection only after the matching gate passes; retain terminal failures and resource stops.",
+          "status": "blocked",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Account for all 10,000 selected discovery records without silently replacing failures or shortages.",
+            "Retain source/extraction/exclusion lineage, bounded vectors, predeclared geometry diagnostics and cumulative 1,000/3,000/6,000/10,000 checkpoints.",
+            "Respect the 200,000-unit discovery allocation and declared byte/storage limits; distinguish selected records, accepted texts, units and independent agreements."
+          ],
+          "evidence": [
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Frozen cohort acquisition",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/acquisition.mjs"
+            },
+            {
+              "label": "Shared main-unit allocation",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/main-unit-budget.json"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-source-quality-audit"
+          ]
+        },
+        {
+          "id": "priors-study-representation-comparison",
+          "title": "Compare four representations on the same 30,000 units",
+          "description": "The fixed comparison remains unrun and is blocked by the unpassed source gate and completion of the planned discovery material. Compare the pinned baseline, verified parent context, pinned second model and lexical baseline on the exact same diagnostic units. Geometry agreement cannot choose the first priors.",
+          "status": "blocked",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Run all four predeclared arms on the frozen 30,000-unit comparison selection, retaining actual model/source/configuration identities.",
+            "Report seed, context and model sensitivity, outliers, structural noise and contract/era mix with bounded comparators.",
+            "Preserve shortages, resource stops and disagreement instead of treating stable clusters as confirmed meanings."
+          ],
+          "evidence": [
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Frozen same-unit comparison recipe",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/comparison-recipe.json"
+            },
+            {
+              "label": "Bounded comparison implementation",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/sensitivity.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-full-discovery-sensitivity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "priors-meaning-context-goal",
+      "title": "Derive and challenge candidate prior meanings",
+      "description": "Use independent readings and fixed-facts contrasts to propose ordinary-language declarations. Neither the original five nor the pilot six is a required category set; agent desk work remains preparatory evidence.",
+      "milestones": [
+        {
+          "id": "priors-study-reading-provenance-gates",
+          "title": "Verify coding provenance and revoke reserve access on a later source hold",
+          "description": "The isolated prototype now checks exact coding packets, source methods, parent identities/coordinates, raw hashes, full reading ranges, author-declared independence and separate complete reconciliation. Reused readings cannot expand their original scope. Every reserve authorization and final freeze commit rechecks the current source gate and observed issues. Independent source review and all 72 focused declared-synthetic regression tests passed with no skips. Actual 500-case codings and candidate freeze remain incomplete; no study reserve was opened.",
+          "status": "done",
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-14",
+          "acceptance": [
+            "Reject partial/provisional coding, mismatched parent or raw bindings, expanded prior-reading claims and incomplete reconciliation.",
+            "Preserve truthful fully inspected unavailable-body unclear outcomes without claiming image or OCR reading.",
+            "Reject reserve authorization after a later observed material source issue, before any request or extraction, while preserving the immutable freeze."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded focused validation and its synthetic scope",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Coding and mutable source-gate admission",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/evaluation.mjs"
+            },
+            {
+              "label": "Synthetic provenance and late-hold regressions",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/tests/coding-freeze.test.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-derivation-lab-baseline"
+          ]
+        },
+        {
+          "id": "priors-study-independent-coding",
+          "title": "Complete two independent 500-section open codings",
+          "description": "Both reviewers have begun the same frozen 500-section packet, but both codings remain incomplete in the authored checkpoint. Packet construction and provenance checks are complete engineering components, not completed readings. Code without supplying the original five or pilot six as categories.",
+          "status": "in_progress",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Retain two separately conducted, complete 500-section open codings with author-declared independence.",
+            "Bind every judgment to the exact packet, extraction version, parent coordinates, raw source identity and actual reading ranges.",
+            "Preserve missing/unavailable content, unclear findings and partial records without promoting them to completed readings."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Coding admission and source bindings",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/evaluation.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-reading-provenance-gates",
+            "priors-study-v9-calibration"
+          ]
+        },
+        {
+          "id": "priors-study-coding-reconciliation",
+          "title": "Reconcile the two complete 500-section codings",
+          "description": "Final reconciliation is blocked by the two incomplete independent codings. Agreement summaries and packet hashes cannot substitute for separate source-bound judgments and an explicit reconciliation of every case.",
+          "status": "blocked",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Reconcile all 500 cases after preserving both independent original codings.",
+            "Retain agreement, disagreement, source limitations and reasons for merged, retired or unresolved concepts.",
+            "Keep reconciliation separate from either reviewer's original reading record."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Complete reconciliation admission",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/evaluation.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-independent-coding"
+          ]
+        },
+        {
+          "id": "priors-study-negative-cases",
+          "title": "Read and challenge candidates against 200 difficult cases",
+          "description": "The 200 difficult/negative readings are outstanding. Their final source-bound assessment depends on an adequate representation and candidate distinctions from the independent coding. Include rare types, redactions, reversed duties, structural noise and deceptively close concepts.",
+          "status": "blocked",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Complete actual readings and retained judgments for all 200 predeclared difficult/negative cases.",
+            "Record counterexamples, boundary failures, nearest confusions and resulting candidate revisions or retirements.",
+            "Report this purposive sample as challenge evidence rather than a prevalence estimate."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-source-quality-audit",
+            "priors-study-coding-reconciliation"
+          ]
+        },
+        {
+          "id": "priors-study-novelty-checks",
+          "title": "Complete three fresh 100-section novelty checks",
+          "description": "The three pools are frozen from metadata, but actual readings and reconciliation remain outstanding. Checks are tied to the 3,000/6,000/10,000 discovery checkpoints and are blocked by gated discovery expansion. A frozen pool is not a completed novelty finding.",
+          "status": "blocked",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Read and reconcile each predeclared fresh 100-section batch with source-contract uniqueness and actual reading provenance verified.",
+            "Compare distinctions on shared evaluation material so a change of cluster IDs is not counted as conceptual novelty.",
+            "Report unresolved/new distinctions and propose an extension with a fresh reserve if novelty persists; do not claim an exhaustive vocabulary."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Frozen novelty pools and reading checks",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/novelty.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-full-discovery-sensitivity",
+            "priors-study-coding-reconciliation"
+          ]
+        },
+        {
+          "id": "priors-study-fixed-facts-pairs",
+          "title": "Prepare at least 50 independently authored disagreement pairs",
+          "description": "The protocol defines this preparatory task and it can proceed alongside source review. Actual completion is not recorded. Pairs must include counterparty-benefiting invocations, irrelevant candidates and close concepts, with facts held fixed. Agent judgments do not establish participant understanding.",
+          "status": "ready",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Retain at least 50 independently authored disagreement pairs and their source-independent authorship records.",
+            "Vary declared emphasis while preserving facts, missing information, scope, consent, protected rights and evidence rules.",
+            "Record which candidate distinctions survive challenge without targeting a financial outcome or historical payout."
+          ],
+          "evidence": [
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            }
+          ],
+          "dependsOn": []
+        },
+        {
+          "id": "priors-study-meaning-freeze",
+          "title": "Freeze candidate cards and evaluation rules",
+          "description": "A final freeze is blocked by incomplete discovery, representation comparison, independent coding/reconciliation, difficult cases, novelty checks and fixed-facts challenges. Freeze candidate wording and selection rules before opening reserves. Candidate count remains open; merge, retire or retain unresolved concepts with reasons.",
+          "status": "blocked",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Freeze each surviving candidate's ordinary-language definition, higher/lower fixed-facts contrast, scope, evidence, counterexamples, nearest confusion and transfer limits.",
+            "Retain coding, comparison and challenge findings plus revision, retirement and unresolved history; prescribe no final count.",
+            "Freeze evidence-selection and evaluation rules before reserve access, with the current source gate passing.",
+            "Keep prototype candidates at authority NONE; freezing a research candidate set does not adopt the first priors or change signed terms."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Candidate freeze and reserve gates",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/evaluation.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-full-discovery-sensitivity",
+            "priors-study-representation-comparison",
+            "priors-study-coding-reconciliation",
+            "priors-study-negative-cases",
+            "priors-study-novelty-checks",
+            "priors-study-fixed-facts-pairs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "priors-reserved-evaluation-goal",
+      "title": "Evaluate frozen candidates and publish v0.2 findings",
+      "description": "Separate a complete contract-corpus prototype report from later external transfer, participant studies and the owner's choice of the first priors.",
+      "milestones": [
+        {
+          "id": "priors-study-sealed-evaluation",
+          "title": "Evaluate 3,000 confirmation and 2,000 temporal records",
+          "description": "Actual reserve findings are outstanding; source access is blocked until candidate meanings and evaluation rules are frozen and the current source gate passes. These records cannot enter discovery fitting. Candidate revisions after opening reserves need a new untouched evaluation set.",
+          "status": "blocked",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Account for every reserved selection, explicit failures and source reconstruction under the separate 60,000/40,000-unit allocations.",
+            "Search all retained reserve sources using the frozen procedure; inspect the fixed 300-section random sample and provisional 50 matches/20 confusions per candidate, disclosing overlap and source families.",
+            "Retain independent supportive/contradictory/unrelated/unclear source judgments and later-period findings, including new or missing concepts.",
+            "Keep retrieval ranks, template familiarity and cluster membership distinct from semantic confirmation."
+          ],
+          "evidence": [
+            {
+              "label": "Sealed access and outstanding reserve targets",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md"
+            },
+            {
+              "label": "Frozen reserve evaluation and review sealing",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/evaluation.mjs"
+            },
+            {
+              "label": "Reserved validation protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-meaning-freeze",
+            "priors-study-source-quality-audit"
+          ]
+        },
+        {
+          "id": "priors-expanded-corpus-study",
+          "title": "Publish the complete v0.2 prototype findings",
+          "description": "The v0.2 study is active, but its final report is blocked by incomplete full discovery, candidate freeze and sealed evaluation. Publish actual findings and limits from this isolated prototype; metadata selection, calibration and source-gate implementation alone do not complete the study.",
+          "status": "blocked",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Retain the versioned census/protocol, split and leakage manifests, actual acquisition/processing/resource receipts, source audits, comparison results and coding/challenge history.",
+            "Report the frozen candidate set and actual confirmation/temporal findings with source-to-hypothesis lineage, failures and uncertainty.",
+            "Distinguish SEC corporate-contract coverage from assignment relevance; identify external transfer and real-participant phases as outstanding unless their actual evidence exists.",
+            "Preserve v0.1, the isolated v0.2 boundary, authority NONE and an explicit owner decision before any first-prior adoption."
+          ],
+          "evidence": [
+            {
+              "label": "Recorded 14 October study checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-sealed-evaluation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "priors-case-inclusion-goal",
+      "title": "Specify how priors enter the agreed case context",
+      "description": "Derivation proposes meanings; inclusion specifies the versioned declarations both participants actually agree to use. This design can be explored while corpus research continues.",
+      "milestones": [
+        {
+          "id": "priors-meaning-context",
+          "title": "Specify both participants' declarations and case inclusion",
+          "description": "The inclusion approach remains a research decision. Define understandable declarations, role-specific profiles, versioning and consent, and show how they accompany the contract, claims and evidence. This work does not assume that the present five dimensions or any prototype candidate set is final.",
+          "status": "proposed",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Specify the exact meaning/version and each participant's separate declaration retained in the case context.",
+            "Make ordinary-language distinctions and consequences understandable; keep declared interpretive emphasis separate from evidence credibility and factual findings.",
+            "Specify consent and change rules before any signed catalog or runtime change, and evaluate inclusion together with meaning and processing."
+          ],
+          "evidence": [
+            {
+              "label": "Derivation, inclusion, processing and evaluation research",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md"
+            }
+          ],
+          "dependsOn": []
+        }
+      ]
+    },
+    {
+      "id": "priors-reasoning-workflow-goal",
+      "title": "Make prior-informed reasoning inspectable",
+      "description": "Preserve the completed analysis-only workflow while defining the public harness and how declarations may affect interpretation. Runtime implementation does not establish model competence.",
+      "milestones": [
+        {
+          "id": "priors-analysis-integration",
+          "title": "DP-2 analysis-only workflow integration",
+          "description": "The documented DP-2 closeout supports synthetic case assembly, runtime consent, bounded analysis, retained reports and portable replay. It remains ANALYSIS_ONLY, financial authority NONE and settlement policy UNSPECIFIED; model competence was not accepted. The source record is dated 29 September, but its achievement date is unspecified.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "The synthetic workflow retains exact case/runtime context and portable analysis records.",
+            "Budget, replay and consent boundaries remain explicit.",
+            "Outputs grant no financial authority and preserve negative model findings."
+          ],
+          "evidence": [
+            {
+              "label": "DP-1 / DP-2 implementation",
+              "path": "docs/requests/DISPUTE_PRIORS.md"
+            },
+            {
+              "label": "Integration closeout boundary",
+              "path": "docs/requests/READINESS.md"
+            }
+          ],
+          "dependsOn": [
+            "assignments-protocol-two"
+          ]
+        },
+        {
+          "id": "priors-reasoning-harness",
+          "title": "Develop the public reasoning harness",
+          "description": "The public multimodal harness remains a proposal. Specify supported inputs, provider/model configuration, provenance, uncertainty and replay. The existing local companion establishes workflow plumbing and retains negative competence findings; provider choice and supported modalities still need definition.",
+          "status": "proposed",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Declare supported evidence modalities and handle unsupported or incomplete inputs explicitly.",
+            "Retain exact evidence/context, model/runtime configuration, outputs, uncertainty, failures and reproducible inspection records.",
+            "Separate factual findings, interpretation and any proposed bounded consequence while preserving the current analysis-only boundary."
+          ],
+          "evidence": [
+            {
+              "label": "Public multimodal harness proposal",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md#a-public-multimodal-reasoning-harness"
+            },
+            {
+              "label": "Current runtime limits",
+              "path": "code/disputes/RUNTIME.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-analysis-integration",
+            "priors-meaning-context"
+          ]
+        },
+        {
+          "id": "priors-processing-mechanism",
+          "title": "Specify and test how declarations affect reasoning",
+          "description": "The processing mechanism remains open. Investigate the current two-pass idea and alternatives using paired cases, with a fact-based reading followed by explicit consideration of both declarations. No settlement formula, competent final resolver or financial authority is selected by this research.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Specify how candidate meanings, both declarations, facts and missing evidence enter each reasoning stage.",
+            "Use fixed-facts with/without-priors comparisons to explain relevance, conflicts, uncertainty and sensitivity to declaration changes.",
+            "Define acceptable effects and failure cases before runtime adoption; preserve mandatory scope, consent, rights and evidence rules."
+          ],
+          "evidence": [
+            {
+              "label": "Processing research and two-pass proposal",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md"
+            },
+            {
+              "label": "Current runtime boundary",
+              "path": "code/disputes/RUNTIME.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-meaning-context",
+            "priors-reasoning-harness"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "priors-reasoning-evaluation-goal",
+      "title": "Evaluate transfer, comprehension and reasoning quality",
+      "description": "Evaluate the candidate meanings, inclusion method and processing together. Agent desk review, external-source relevance and real participant understanding answer different questions.",
+      "milestones": [
+        {
+          "id": "priors-reasoning-evaluation",
+          "title": "Independently evaluate consistency, bias and gaming",
+          "description": "Define and run an independent evaluation of the proposed reasoning harness. The test design remains open. Preserve failures and investigate paired-role symmetry, irrelevant identity changes, paraphrase/order effects, missing evidence, fabricated evidence, injection, repeated attempts and model drift.",
+          "status": "proposed",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Freeze criteria and retain controlled with/without-priors comparisons, factual consistency, uncertainty and role-symmetry findings.",
+            "Challenge misleading inputs and strategic declarations without optimizing toward a target payout or historical outcome.",
+            "Report failures, configuration sensitivity and limits independently from model self-assessment and corpus cluster stability."
+          ],
+          "evidence": [
+            {
+              "label": "Evaluation research",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md#evaluation-of-the-priors-and-reasoning-process"
+            },
+            {
+              "label": "Evaluation study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-meaning-context",
+            "priors-reasoning-harness",
+            "priors-processing-mechanism"
+          ]
+        },
+        {
+          "id": "priors-external-transfer",
+          "title": "Design and conduct external assignment-source transfer review",
+          "description": "Named sources, permissions and sampling still need review. The plan proposes approximately 500–1,000 assignment-like agreements and 200–500 published disagreement/resolution records as later study targets, not acquired material or guaranteed sample sizes.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Identify sources, access terms, jurisdictions, task types and selection limits before collecting external study material.",
+            "Challenge candidate meanings against assignment-like contexts and retain contradictions, missing concepts and transfer limits.",
+            "Treat published resolutions as comparison material rather than fairness ground truth."
+          ],
+          "evidence": [
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Evaluation and transfer research",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md#evaluation-of-the-priors-and-reasoning-process"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-meaning-freeze"
+          ]
+        },
+        {
+          "id": "priors-participant-formative",
+          "title": "Test comprehension with real participants in both roles",
+          "description": "Recruitment and a participant protocol are not yet established. The plan proposes roughly 8–12 formative interviews per role to examine paraphrases, distinctions, counterparty-benefit consistency and confusion between preferences and mandatory rules. Agent reviews cannot complete this phase.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Agree the formative protocol and recruit actual participants in both roles with appropriate consent.",
+            "Retain comprehension and confusion findings for candidate wording, declarations and case inclusion.",
+            "Record revisions and unresolved problems without presenting agent agreement as participant validation."
+          ],
+          "evidence": [
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Participant comprehension research",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-meaning-context",
+            "priors-study-meaning-freeze"
+          ]
+        },
+        {
+          "id": "priors-participant-preregistered",
+          "title": "Define and conduct the preregistered participant study",
+          "description": "The design, recruitment and sample size still need definition after formative findings. The 60–100-person range in the plan is provisional planning context, not a power calculation, recruitment commitment or completed result.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Preregister questions, measures, comparisons, uncertainty goals and an appropriate sample-size rationale informed by formative work.",
+            "Conduct the study with real participants and report comprehension, distinctions, role effects, rule/preference confusion and limitations.",
+            "Retain null, adverse and unresolved findings alongside any supporting results."
+          ],
+          "evidence": [
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-participant-formative"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "priors-first-catalog-decision-goal",
+      "title": "Make an explicit decision on the first priors",
+      "description": "Research should support a reviewable choice of meanings, inclusion and processing. A corpus-derived candidate set is a proposal; adoption remains a separate owner decision.",
+      "milestones": [
+        {
+          "id": "priors-first-catalog-decision",
+          "title": "Review the evidence and decide the first-prior proposal",
+          "description": "The first priors remain undecided. Assemble derivation findings, counterexamples, external relevance, participant comprehension and reasoning limitations into an owner-review proposal. Explain which evidence is complete and which uncertainties remain; do not automatically adopt the current five, pilot six or a new cluster-derived set.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Present proposed meanings, fixed-facts contrasts, boundaries, revisions and retirement reasons without prescribing a count.",
+            "Explain the evidence and remaining uncertainty across derivation, inclusion, processing and evaluation, with actual participant and external-study scope stated.",
+            "Record the owner's explicit decision and any further research requested; treat signed catalog/runtime changes and financial consequence as separately authorized work."
+          ],
+          "evidence": [
+            {
+              "label": "Priors research decision framework",
+              "path": "docs/notes/research/DISPUTE_PRIORS_NOTES.md"
+            },
+            {
+              "label": "Predeclared v0.2 study protocol",
+              "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Current implemented proposal and authority boundary",
+              "path": "docs/requests/DISPUTE_PRIORS.md"
+            }
+          ],
+          "dependsOn": [
+            "priors-expanded-corpus-study",
+            "priors-external-transfer",
+            "priors-participant-preregistered",
+            "priors-reasoning-evaluation"
+          ]
+        }
+      ]
+    }
+  ]
+}

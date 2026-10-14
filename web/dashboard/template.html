@@ -1,0 +1,105 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- Local review only: element styles let the Codex review selector render. -->
+  <meta http-equiv="Content-Security-Policy" content="__DASHBOARD_CSP__">
+  <meta name="description" content="The local Non Verba project dashboard: Heroes, Goals, Milestones, acceptance criteria and evidence.">
+  <title>Project dashboard · Non Verba</title>
+  <!-- DASHBOARD_STYLE -->
+</head>
+<body>
+  <a class="skip-link" href="#hero-map-title">Skip to Heroes</a>
+  <div class="page-shell">
+    <header class="masthead">
+      <a class="brand" href="../../README.md" aria-label="Non Verba project README">
+        <img src="__BRAND_MARK__" alt="" class="brand-mark">
+        <span>Non Verba<span class="brand-subtitle">Project field guide</span></span>
+      </a>
+      <div class="masthead-actions">
+        <span class="local-label"><span aria-hidden="true"></span>Project record</span>
+        <button id="refresh" class="button button-quiet" type="button" disabled><svg class="interface-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5M20 12a8 8 0 1 0-2 5M20 7v5"/></svg> Reload dashboard</button>
+      </div>
+    </header>
+
+    <section id="project-intro" class="intro" aria-labelledby="page-title">
+      <div class="intro-copy-block">
+        <p class="eyebrow">The Non Verba project</p>
+        <h1 id="page-title">A living map of the work.</h1>
+        <p class="intro-copy">Heroes give the project its shape. Goals and Milestones are added as their scope and evidence are confirmed.</p>
+        <div class="project-summary"><div id="project-progress">Reading milestone progress…</div><p id="scope-summary">Reading the project scope…</p></div>
+      </div>
+      <img src="__BRAND_PORTRAIT__" alt="" class="intro-portrait">
+      <div class="intro-meta">
+        <a href="../../docs/notes/WORKSTREAMS.md">Read the workstream outline <svg class="interface-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        <p id="updated-at">Reading the project record…</p>
+        <p id="file-source">Included project record</p>
+      </div>
+    </section>
+
+    <p id="hierarchy-key" class="hierarchy-key" aria-label="Project hierarchy: Hero, then Goal, then Milestone"><span><strong>Hero</strong> Workstream</span><span class="hierarchy-arrow" aria-hidden="true">→</span><span><strong>Goal</strong> Outcome</span><span class="hierarchy-arrow" aria-hidden="true">→</span><span><strong>Milestone</strong> Checkpoint</span></p>
+
+    <noscript><div class="notice notice-error">JavaScript is needed to display the project record. Enable JavaScript and reload this page.</div></noscript>
+    <div id="load-state" class="load-state" role="status" hidden>
+      <span class="loading-dot" aria-hidden="true"></span>
+      <div><strong>Reading Heroes</strong><p>Preparing Goals and their milestones.</p></div>
+    </div>
+    <section id="load-error" class="notice notice-error" aria-labelledby="error-title" role="alert" hidden>
+      <div><p class="eyebrow">Data unavailable</p><h2 id="error-title">The included project record needs attention.</h2><p id="error-message"></p><p>Reload the dashboard. If this message remains, review the <a href="README.md">maintenance guide</a>.</p></div>
+      <button id="retry" class="button button-primary" type="button">Reload dashboard</button>
+    </section>
+
+    <div id="dashboard" hidden>
+      <section id="filter-panel" class="filter-panel" aria-label="Filter project record">
+        <div class="search-field"><label id="search-label" for="search">Search Heroes, Goals and milestones</label><div class="input-wrap"><span aria-hidden="true"><svg class="interface-icon" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></span><input id="search" type="search" placeholder="Goal, milestone, evidence, owner…" autocomplete="off"></div></div>
+        <div class="status-field"><label for="status-filter">State</label><select id="status-filter"><option value="all">All states</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="ready">Ready</option><option value="proposed">Proposed</option><option value="done">Done</option></select></div>
+        <button id="reset" class="button button-quiet filter-reset" type="button">Reset filters</button>
+      </section>
+      <p id="project-results" class="project-results" aria-live="polite"></p>
+      <main id="project-overview" aria-label="Project overview">
+      <section class="overview" aria-labelledby="overview-title">
+        <div class="section-heading"><h2 id="overview-title">The state of the work</h2><p>Choose a state to explore its milestones.</p></div>
+        <div id="overview-counts" class="overview-counts"></div>
+        <p class="overview-note">Partial record: empty Heroes await confirmed Goals. Completion bars cover only the listed Milestones; broader work may still be undefined.</p>
+      </section>
+
+      <div class="navigation-overview">
+        <section class="hero-map-panel" aria-labelledby="hero-map-title">
+          <div class="section-heading map-heading"><div><p class="eyebrow">Meet the workstreams</p><h2 id="hero-map-title">Explore the Heroes</h2></div><p>Choose a Hero to open its Goals.</p></div>
+          <div id="hero-map" class="hero-map"></div>
+          <div id="project-empty" class="project-empty" hidden><h3>No Heroes match these filters.</h3><p>Try a broader search or another state.</p><button id="project-reset" class="button button-quiet" type="button">Reset filters</button></div>
+        </section>
+        <aside class="focus-panel" aria-labelledby="focus-heading">
+          <div class="focus-panel-heading"><p class="eyebrow">Working set</p><h2 id="focus-heading">In motion</h2><p>Milestones in progress or blocked.</p></div>
+          <div id="focus-list" class="focus-list"></div>
+        </aside>
+      </div>
+
+      </main>
+      <div id="workspace" class="workspace" hidden>
+        <aside class="sidebar" aria-label="Hero navigation">
+          <div class="sidebar-heading"><h2>Heroes</h2><span id="hero-count" class="small-count"></span></div>
+          <nav id="hero-nav" aria-label="Choose a Hero"></nav>
+          <div class="sidebar-note"><svg class="interface-icon note-symbol" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4v9a3 3 0 0 0 3 3h11m-5-5 5 5-5 5"/></svg><p>Hero numbers identify workstreams. They do not set priority or implementation order.</p></div>
+          <a class="schema-link" href="README.md">How to maintain this record <svg class="interface-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+        </aside>
+
+        <main id="heroes" tabindex="-1" aria-labelledby="heroes-title">
+          <h2 id="heroes-title" class="sr-only">Hero details</h2>
+          <div class="detail-breadcrumb"><a class="overview-return" href="#hero-map-title"><svg class="interface-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></svg> Project overview</a><span id="visible-count" class="visible-count" aria-live="polite"></span></div>
+          <div id="detail-toolbar" class="list-toolbar" hidden><p>Open a milestone to see its criteria and evidence.</p><div><button id="expand-all" class="text-button" type="button">Expand details</button><span aria-hidden="true">/</span><button id="collapse-all" class="text-button" type="button">Collapse details</button></div></div>
+          <div id="hero-list" class="hero-list"></div>
+          <div id="empty-state" class="empty-state" hidden><svg class="interface-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><h3>No Goals match these filters.</h3><p>Try a broader search or another state.</p><button id="empty-reset" class="button button-primary" type="button">Reset filters</button></div>
+        </main>
+      </div>
+      <section class="state-key" aria-labelledby="state-key-title"><h2 id="state-key-title">Reading milestone states</h2><dl><div><dt><span class="status-badge status-proposed">Proposed</span></dt><dd>Scope still needs agreement.</dd></div><div><dt><span class="status-badge status-ready">Ready</span></dt><dd>Defined and available to start.</dd></div><div><dt><span class="status-badge status-in_progress">In progress</span></dt><dd>Active work is underway.</dd></div><div><dt><span class="status-badge status-blocked">Blocked</span></dt><dd>A stated dependency prevents progress.</dd></div><div><dt><span class="status-badge status-done">Done</span></dt><dd>The recorded milestone is complete.</dd></div></dl><p class="rollup-note">Recorded complete means all listed Milestones are done. Broader Hero or Goal work may still be unrecorded. Partially complete means some listed Milestones are done and none is currently in progress.</p></section>
+    </div>
+
+    <footer class="page-footer"><p>Non Verba <span aria-hidden="true">/</span> A working record, refined with the work.</p><a href="README.md">Schema &amp; maintenance</a></footer>
+  </div>
+  <!-- DASHBOARD_SCRIPTS -->
+</body>
+</html>

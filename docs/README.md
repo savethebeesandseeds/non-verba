@@ -17,6 +17,13 @@ prototype into a deployed marketplace or make sensor claims physically true.
 
 ## Planned work and open decisions
 
+Start with [Non Verba workstreams](notes/WORKSTREAMS.md) for the broad work
+categories and task boundaries, including APK buildout and server side services.
+
+Use the [project dashboard](../web/dashboard/README.md) to inspect Heroes, Goals
+and Milestones, with color-coded progress and evidence. Its
+[schema](../web/dashboard/SCHEMA.md) defines updates to one JSON per Hero.
+
 The [notes index](notes/README.md) is the shared home for research and drafting.
 These directions remain active even where a related implementation milestone is
 complete. They are proposed work, not deployed features or adopted policy.
@@ -25,6 +32,7 @@ complete. They are proposed work, not deployed features or adopted policy.
 | --- | --- |
 | Authentication and work privacy | [Isolated development requirements](development/AUTHENTICATION_AND_WORK_PRIVACY.md) for Requester/Operator authentication, account-wide hold and clock-out, and registration identity verification |
 | Registration | [Operator and Requester pipelines and remaining account services](development/REGISTRATION_PIPELINES.md) — local drafts, private accessibility needs, self-reported certifications and explicit sharing choices |
+| Maps | [Shared map component and country pipeline](development/MAP_COMPONENT.md) — Norway overview, country visibility, supplied positions and routes; production tile and tracking services remain separate |
 | Operator face continuity | [Selected model, private enrollment and comparison](development/OPERATOR_FACE_PIPELINE.md) — isolated browser components; liveness, trusted capture and production threshold evaluation remain unresolved |
 | Agent access and durable workflows | [MCP implementation gates](development/AGENT_WORKFLOWS_MCP.md#implementation-gates-for-later-work) |
 | Operators union | [Membership, collective decisions and next research steps](notes/cooperation/OPERATORS_UNION_NOTES.md#possible-next-research-steps) |

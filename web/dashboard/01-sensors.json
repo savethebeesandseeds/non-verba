@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 2,
+  "id": "sensors",
+  "number": 1,
+  "title": "Sensor hardening and evidence quality",
+  "summary": "Build on signed evidence prototypes while establishing practical quality, lifecycle reliability and bounded physical-device assurance.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "sensors-evidence-integrity-goal",
+      "title": "Signed evidence formats",
+      "description": "Implemented challenge-bound camera, microphone and location formats, with shared verification and explicit authenticity limits.",
+      "milestones": [
+        {
+          "id": "sensors-signed-formats",
+          "title": "Signed camera, microphone and location formats",
+          "description": "Implemented development boundaries include challenge-bound C2PA JPEGs, signed WAVs and request-bound COSE location traces. This milestone concerns formats and shared verification; it does not establish independent physical authenticity. The achievement date is unspecified.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": null,
+          "acceptance": [
+            "Camera, microphone and location records bind to their original request and independently pinned signer.",
+            "Verification keeps artifact integrity separate from physical truth and successful acceptance."
+          ],
+          "evidence": [
+            {
+              "label": "Implemented sensor boundaries",
+              "path": "docs/sensors/STATUS.md"
+            },
+            {
+              "label": "Shared evidence appraisal",
+              "path": "docs/sensors/AGENT_EVIDENCE.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-acquisition-recovery-goal",
+      "title": "Recorded GPS and audio trials",
+      "description": "The dated, bounded GPS retention recheck and local audio demonstration; wider physical reliability remains unverified.",
+      "milestones": [
+        {
+          "id": "sensors-gps-failure-retention",
+          "title": "GPS failed-attempt reports and exact retention checkpoint",
+          "description": "The 5 October phone recheck retained a separately verified signed failure report and an unsigned pending journal snapshot with exact floating-point agreement after a controlled process restart. Crash and power-loss durability remain outside this milestone.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-05",
+          "acceptance": [
+            "Failed-attempt reports remain separate from successful location proofs.",
+            "Controlled restart preserves the observed signed and pending snapshots exactly without successful-measurement acceptance."
+          ],
+          "evidence": [
+            {
+              "label": "5 October exact retention result",
+              "path": "docs/sensors/STATUS.md#gps-reporting-and-retention-checkpoint--4-and-5-october-2026"
+            },
+            {
+              "label": "Failed-attempt format",
+              "path": "docs/sensors/GPS_ATTEMPT_REPORTS.md"
+            }
+          ]
+        },
+        {
+          "id": "sensors-audio-local-demo",
+          "title": "Local phone audio demo and independent saved-file verification",
+          "description": "One authorized local phone demo completed on 6 October. The exact saved WAV was independently verified on 7 October against the retained media key. Requester provenance remains a local demo; independent physical requester acceptance and consistent acoustic reliability are unfinished.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-07",
+          "acceptance": [
+            "The local phone demo completes its pilot and challenged recording.",
+            "The exact retained WAV passes external verification and altered-input controls."
+          ],
+          "evidence": [
+            {
+              "label": "Saved audio export checkpoint",
+              "path": "docs/sensors/STATUS.md#saved-audio-demo-export-and-browser-follow-up--7-october-2026"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-evidence-quality-goal",
+      "title": "Camera quality guidance",
+      "description": "Implemented unsigned JPEG guidance and the recorded deferred request for a single sharpness value.",
+      "milestones": [
+        {
+          "id": "sensors-camera-quality-guidance",
+          "title": "Unsigned camera-quality guidance and saved-photo inspection",
+          "description": "Resolution, exposure and regional sharpness indicators are implemented. On 5 October the phone analyzed an already saved JPEG; its exported unsigned report matched native Rust and WASM. This is guidance, with calibration and a unified requester value still open.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-05",
+          "acceptance": [
+            "Quality reports remain unsigned and cannot substitute for signed photo evidence.",
+            "The saved-photo phone export agrees with retained native and WASM results."
+          ],
+          "evidence": [
+            {
+              "label": "Camera quality guidance and phone result",
+              "path": "docs/sensors/STATUS.md#camera-quality-guidance--5-october-2026"
+            },
+            {
+              "label": "Quality metrics and limits",
+              "path": "docs/sensors/CAMERA_QUALITY.md"
+            }
+          ]
+        },
+        {
+          "id": "sensors-quality-calibration",
+          "title": "Define the requested single 0–100 sharpness value",
+          "description": "On 5 October the owner requested one user-facing sharpness value and one underlying algorithm. The source notes explicitly leave the algorithm undecided and implementation deferred. The existing unsigned guidance and acceptance rules are unchanged.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "evidence": [
+            {
+              "label": "Recorded owner request and deferred implementation",
+              "path": "docs/notes/sensors/SENSOR_QUALITY_NOTES.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

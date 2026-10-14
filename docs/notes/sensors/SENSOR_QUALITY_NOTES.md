@@ -1,13 +1,21 @@
 # Sensor quality control — notes for later consideration
 
 Recorded: 28 September 2026.
+Current-state review: 14 October 2026; no new sensor validation.
 
 Status: discussion proposal, with failure/attempt reporting prioritized by the
 owner on 30 September 2026. The bounded [native GPS attempt-report version 1](../../sensors/GPS_ATTEMPT_REPORTS.md)
-was implemented on 1 October; it covers raw-GNSS policy rejection and the existing
-collection timer expiring with zero raw callbacks. The
+was implemented on 1 October and extended on 4 October; it covers raw-GNSS policy
+rejection, the existing collection timer expiring with zero raw callbacks and
+Android raw-GNSS startup refusal (status 0). Exact retained pending/signed snapshot
+comparison passed on the phone on 5 October; natural status-0 report production
+and crash/power-loss durability remain unverified. The
 remaining quality proposals do not establish implemented features or calibrated
 thresholds. Historical unsigned logs remain unsigned.
+
+Use [the current sensor checkpoint](../../sensors/STATUS.md#current-workstream-checkpoint--14-october-2026)
+for completed work and remaining dependencies. Dated narratives below preserve
+earlier failures and handoffs; their pending actions are not all still pending.
 
 On 5 October the first [camera quality guidance module](../../sensors/CAMERA_QUALITY.md)
 implements resolution, exposure distribution and regional sharpness inspection
@@ -106,6 +114,17 @@ simultaneous capture. This is a proposal for later consideration, not an
 implemented feature.
 
 ## Audio: recording defects and environmental conditions
+
+Current checkpoint: the corrected native path completed one four-second local
+phone demo on 6 October, and its exact saved WAV passed external Rust verification
+on 7 October. The receipt remains unsigned same-device requester provenance.
+Synthetic browser retention/replay and concurrent first-acceptance checks passed
+through 8 October. These results supersede the earlier incomplete-flow checkpoints
+below, without establishing physical independent-requester acceptance, performance
+in noisy environments or the earlier phone failures' causes. Signed microphone
+failure reports, phone failure-diagnostic export/retention and calibrated audio
+quality remain open. See [current status](../../sensors/STATUS.md) and
+[the dated audio results](../../sensors/VALIDATION.md#audio-concurrent-acceptance-and-lifecycle--8-october-2026).
 
 On 6 October, microphone hardening addresses cancelled browser setup, native
 permission/queue deadlines and teardown recovery, and exact unique C2PA assertion
@@ -316,6 +335,12 @@ reported uncertainty as independently established ground truth.
 
 ## Sensing failures as recorded outcomes — future consideration
 
+The bounded GPS version is already implemented for the three triggers listed
+above; the requirements here describe broader coverage across sensors. Native
+audio freezes unsigned failure diagnostics, but there is no signed camera/audio
+attempt format. A composed GPS report describes GPS only and does not certify
+the camera component's outcome.
+
 Consider a sensing failure a valid, reportable outcome of a measurement attempt
 across all sensor types. For example, GPS may fail to obtain a fix within the
 agreed time limit. The failure record can be valid evidence of the attempt without
@@ -339,15 +364,16 @@ Preserve failures diligently, including when no usable measurement is produced:
 The aim is verifiable evidence of what failed and why, to the extent supported by
 the observations. Distinguish an observed failure, a device-reported reason and an
 established cause: a signed timeout record alone does not prove a hardware defect
-or operator fault. This remains a proposal for later implementation.
+or operator fault. Coverage beyond the bounded GPS version remains a proposal.
 
 ### Priority recorded on 30 September: failed attempts must be inspectable
 
-**Deferred to 1 October 2026 at the owner's request.** Resume from the
-[sensor hardening handoff](../../sensors/STATUS.md): freeze terminal timing first, then
-develop the separate signed GPS attempt report and its negative tests. No further
-implementation or physical testing is planned for 30 September. This is a saved
-handoff, not an automatic scheduled run.
+**Historical 30 September handoff, deferred then to 1 October at the owner's
+request.** Terminal timing now freezes, and the separate GPS attempt report and
+its negative tests are implemented for the bounded scope above. The
+[current checkpoint](../../sensors/STATUS.md#current-workstream-checkpoint--14-october-2026)
+records the remaining work. The original handoff was not an automatic scheduled
+run and authorized no microphone testing.
 
 The owner explicitly reiterated that adverse conditions are useful tests and
 that operators need a way to report that they attempted collection. Prioritize
@@ -356,7 +382,7 @@ format reusable across independently selected sensors. Camera/GPS composition
 must expose each component's outcome; one successful sensor must not hide the
 other's failure. No microphone testing is authorized by this priority.
 
-The current phone run illustrates the gap: receiver preparation was active,
+The 30 September phone run illustrated the gap: receiver preparation was active,
 but collection ended after a last raw callback at 26.2 seconds with insufficient
 qualifying satellite observations. The original request and diagnostics are
 preserved in the [validation record](../../sensors/VALIDATION.md).
@@ -365,13 +391,15 @@ nor the sensor snapshot establishes a physical cause or operator responsibility.
 Do not retrospectively sign these host observations as if the phone had recorded
 and signed them during the attempt.
 
-The code audit also found that `NativeLocation.snapshot` falls back to the current
-elapsed session time when a failed session has no completed trace. The value can
-therefore grow after failure. Freeze terminal timing before exporting or signing
-a future failure report; do not substitute a later inspection timestamp. Today's
-26.2-second diagnostic is a last-callback offset, not an exact terminal duration.
+The 30 September code audit found that `NativeLocation.snapshot` fell back to
+the current elapsed session time when a failed session had no completed trace,
+so the value could grow after failure. That timing defect has since been fixed:
+terminal timing freezes before publication. The historical 26.2-second diagnostic
+is still a last-callback offset, not an exact terminal duration; later inspection
+cannot establish a missing original timestamp.
 
-The next implementation must resolve these concrete requirements:
+The original requirements remain the basis for extending failure coverage;
+the bounded GPS implementation satisfies only its documented subset:
 
 - Use a distinct, versioned failure/attempt artifact and signing domain. A valid
   failure report must never be accepted by the successful measurement verifier
@@ -433,6 +461,12 @@ implementation plan.
 
 ## Proposed quality contract
 
+The owner's 5 October direction is one requester-facing minimum sharpness value
+on a 0–100 scale, with algorithm and metric versions managed internally. The
+algorithm remains undecided. The broader contract below preserves supporting
+measurements and explicit outcomes; it does not add more requester-facing
+algorithm/profile choices or implement signed quality enforcement.
+
 Quality requirements should be fixed in the signed request before collection:
 
 1. Agree on metric versions, thresholds, the relevant subject region, required
@@ -447,19 +481,27 @@ Quality requirements should be fixed in the signed request before collection:
 5. Bound retries and retain an appropriate record of attempts, preventing both
    endless requester demands and selective submission of convenient measurements.
 
-Avoid hiding all measurements behind one overall quality score. Agents should be
-able to inspect which requirement passed, failed or could not be assessed.
+Retain inspectable measurements and reasons alongside the proposed single
+sharpness value. Agents should be able to inspect which requirement passed,
+failed or could not be assessed; sharpness alone does not establish exposure,
+resolution or task usability.
 
-## Suggested first implementation, when prioritized
+## Implemented camera guidance and remaining quality work
 
-Create an independent Rust quality module for resolution, exposure and regional
-sharpness. Initially use it for guidance while thresholds are calibrated.
+The independent Rust module for resolution, exposure and regional sharpness
+was implemented on 5 October. Delivered-image measurements, versioned pixel
+processing and native/WASM agreement checks are already covered by
+[camera quality guidance](../../sensors/CAMERA_QUALITY.md). Its unsigned analysis
+profile is not bound into the signed request or camera evidence.
+
+Further quality work should preserve these properties:
 
 - Evaluate the actual delivered image so the requester can recompute its metrics.
 - Version the decoding, orientation, color conversion, resizing, filtering and
   rounding rules. Prefer integer or fixed-point arithmetic where practical.
 - Check agreement between native Rust and WASM using shared fixtures.
-- Bind the quality profile and its version to the request and evidence.
+- Bind any future enforced quality requirement and internal metric version to
+  the original signed request and evidence; this is not implemented today.
 - Treat capture-time device metadata as supporting observations with their own
   provenance limits.
 - Preserve standalone sensor use and explicit composition.

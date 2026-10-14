@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "name": "Priors Derivation Lab v0.2",
+  "status": "PROTOTYPE_RESEARCH_ONLY",
+  "authority": "NONE",
+  "adopted_catalog": false,
+  "seed": "nonverba-priors-study-20261013-v2",
+  "sourceRun": "/opt/nonverba-build/priors-derivation/20261013-mcc-pilot-100",
+  "temporalMinYear": 2022,
+  "maxPerFiler": 2,
+  "cohorts": [
+    {"id":"discovery-relevant","target":4000,"labels":["services"],"minYear":2000,"maxYear":2021,"selection_reason":"Explicit services/supply machine-label enrichment; not verified assignment relevance"},
+    {"id":"discovery-broad","target":6000,"labels":["employment","lease","services","purchase","security","shareholder","other","na"],"minYear":2000,"maxYear":2021,"selection_reason":"Broad type/era coverage including unknown/noncontract controls"},
+    {"id":"confirmation","target":3000,"labels":["employment","lease","services","purchase","security","shareholder","other","na"],"minYear":2000,"maxYear":2021,"sealed":true},
+    {"id":"temporal","target":2000,"labels":["employment","lease","services","purchase","security","shareholder","other","na"],"minYear":2022,"maxYear":2026,"sealed":true}
+  ],
+  "limits": {"contractBytes":4194304,"rawBytes":8589934592,"totalBytes":25769803776,"requestIntervalMs":1000,"memoryBytes":6442450944},
+  "extraction": {"minWords":20,"maxUnitWords":300,"contextWords":60,"maxContentChars":4194304,"maxPerContract":40,"maxUnits":300000},
+  "embedding": {"repository":"Xenova/all-MiniLM-L6-v2","revision":"751bff37182d3f1213fa05d7196b954e230abad9","directory":"/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9","dtype":"fp32","dimensions":384,"max_tokens":256,"pooling":"mean","normalize":true,"device":"cpu","maxUnitsPerBatch":500,"tokenBudget":8192},
+  "geometry": {"kValues":[32,64,128,256],"repeats":5,"seed":20261013,"reservoirSize":20000,"batchSize":512,"iterations":30,"primaryK":64,"primaryRepeat":1,"evaluationSize":1024},
+  "calibration": {"contracts":1000,"representationAudit":300,"independentCoding":500,"negativeCases":200,"adequacyTarget":0.95},
+  "license": {"corpus":"CC-BY-NC-SA-4.0","source":"AGPL-3.0-only","model":"Apache-2.0","citation":"Adelson, Peter, and Nyarko, Julian. The Material Contract Corpus. arXiv:2504.02864 (2025)."}
+}

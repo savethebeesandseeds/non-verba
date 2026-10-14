@@ -6,6 +6,14 @@ are grouped by purpose.
 Each document retains its own dates, status and distinction between ideas,
 implemented behavior and open questions.
 
+Start with [Non Verba workstreams](WORKSTREAMS.md) for the broad categories of
+work ahead, including APK buildout and server side services. Refine that outline
+and use its workstream numbers when dividing work into tasks.
+
+The [project dashboard](../../web/dashboard/README.md) organizes Heroes, Goals
+and Milestones in one JSON file per Hero, with milestone states and evidence.
+Read its [schema](../../web/dashboard/SCHEMA.md) before updating progress.
+
 | Folder | Purpose |
 | --- | --- |
 | `research/` | Developing dispute resolution, priors, incident handling and insurance |

@@ -28,6 +28,37 @@ authorized physical device and retain results outside the source tree.
    limitations. A GPS attempt report is a failure observation; key attestation
    and signatures do not establish sensor truth.
 
+## Evidence quality for each result
+
+Retain enough context to reproduce the exact claim without treating later
+success as proof that an earlier failure never occurred:
+
+- Record the source revision and relevant uncommitted changes, tested package
+  identity/signer, device/Android version, request profile, attempt/session IDs
+  and whether input was physical, synthetic or a same-device demo.
+- Keep the independently retained original request and trusted pins, exact
+  exported artifact bytes/hashes, requester transcript/receipt where applicable,
+  verifier inputs/results and any transfer comparison. A transfer hash checks
+  byte preservation; the verifier establishes signature and binding separately.
+- Separate acquisition outcome, artifact integrity, requested policy result,
+  local acceptance and quality guidance. A missing signed artifact is an explicit
+  outcome. Keep unsigned diagnostics and unobserved causes labelled accordingly;
+  retain camera and GPS component outcomes separately for composed attempts.
+- Distinguish terminal elapsed duration, observation span, last callback offset,
+  device wall-clock claims and independently observed arrival. Record unavailable
+  timing as unknown rather than substituting a later inspection time.
+- Preserve failed and corrected checks with their exact scope. Record whether
+  retention was checked after page reload, controlled app restart, interruption
+  during collection/write/signing or power loss; those are different results.
+  Include final observed resource cleanup and anything left unverified.
+
+The [current checkpoint](STATUS.md#current-workstream-checkpoint--14-october-2026)
+lists completed milestones and open physical cases. One saved camera-quality
+report, one externally verified local audio demo and controlled GPS retention
+checks do not complete this matrix. Physical independent-requester trials remain
+deferred until a second device is available; new sensor work needs its own
+bounded authorization.
+
 User evidence may contain faces, voices, precise locations and device identifiers.
 Do not commit raw phone captures, signing vaults, retrieval manifests or machine
 logs. Publish only deliberately reviewed results with enough context to support

@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "status": "PREDECLARED_RESEARCH_COMPARISON",
+  "authority": "NONE",
+  "seed": "nonverba-priors-comparison-20261013",
+  "unitTarget": 30000,
+  "perContract": 20,
+  "secondModel": {
+    "repository": "sentence-transformers/all-MiniLM-L12-v2",
+    "revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+    "dimensions": 384,
+    "dtype": "fp32",
+    "device": "cpu",
+    "pooling": "mean",
+    "normalize": true,
+    "max_tokens": 256,
+    "license": "apache-2.0",
+    "modelCard": "https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2",
+    "limitations": "Same model family and substantially overlapping training data as MiniLM-L6; this tests architecture/depth sensitivity, not independence of training assumptions."
+  },
+  "representations": ["heading-plus-unit", "heading-plus-verified-parent-context"],
+  "contextWords": 60,
+  "lexical": {"dimensions": 2048,"method": "signed-hashed-word-bigram-tfidf","lowercase":true,"minTokenChars":2},
+  "geometry": {"k":64,"seed":20261013,"iterations":30,"batchSize":512,"reservoirSize":20000,"evaluationSize":1024},
+  "selection": "Deterministic contract-balanced round robin on admitted discovery representatives; exact ordered IDs frozen before any comparison inference or result inspection."
+}

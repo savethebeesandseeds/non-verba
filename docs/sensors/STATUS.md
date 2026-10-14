@@ -24,6 +24,62 @@ bounded frozen diagnostics in their separate signed report. Neither authorizes
 capture. No privacy, freshness or timing rule is relaxed by
 the repository unification.
 
+## Current workstream checkpoint — 14 October 2026
+
+This checkpoint reconciles the current source with the existing dated results;
+it records no new build, sensor run or device acceptance. The sections below are
+historical checkpoints: a pending action there may have been completed by a later
+entry. Start here for current scope, then follow the linked validation evidence.
+
+| Area | Latest established result | Work still open |
+| --- | --- | --- |
+| GPS failed attempts | Version 1 covers raw-policy rejection, the existing no-callback collection timeout and Android startup status 0. Phone-signed timeout/policy-rejection verification and exact retained snapshot recovery passed; see [the 5 October recheck](VALIDATION.md#gps-exact-retention-recheck--5-october-2026). | Natural status-0 report production, the receiver failure's cause/recurrence, crash-during-write and power-loss durability. Permission denial, cancellation, provider loss and other uncovered failures have no signed attempt report. |
+| Camera quality | Delivered-JPEG resolution, exposure and regional sharpness guidance is implemented in Rust/WASM. One saved phone JPEG's Android panel/export matched native Rust and WASM exactly; see [the phone result](VALIDATION.md#phone-quality-panel-and-saved-jpeg-export--5-october-2026). | Reading-fidelity calibration, the requested unified 0–100 sharpness value and algorithm selection, signed quality requirements, motion evidence and simultaneous multi-camera capture. |
+| Native audio | One four-second local phone demo completed with two challenges on 6 October; its exact saved WAV passed external Rust verification on 7 October against a separately retained media pin. See [the saved-file result](VALIDATION.md#saved-phone-wav-externally-verified--7-october-2026). | This is a local demo with unsigned requester provenance. Physical independent-requester acceptance, repeatability, noisy environments, phone failure-diagnostic export/retention and the wider physical lifecycle matrix remain open. |
+| Requester acceptance | Exact audio retention/re-verification, cancellation, concurrent first acceptance in two tabs and replay refusal passed with actual Rust/WASM and browser IndexedDB; see [the 8 October checks](VALIDATION.md#audio-concurrent-acceptance-and-lifecycle--8-october-2026). | Tests use synthetic PCM. Physical requester/operator trials are deferred until a second device is available. Local ledgers do not establish replay exclusion across devices or cleared storage; audio reload inspection does not restore final-session export controls. |
+| Shared lifecycle and verification | Typed Rust reports, the separate audio controller and native resource ownership/retry cleanup have software coverage; see [the 8 October architecture checks](../development/VALIDATION.md#architecture-cleanup--8-october-2026). | Software/JVM checks do not establish Android callback behavior under actual interruption, crash or load. Native AAudio stop/close return codes are still discarded. |
+
+### Remaining tasks and dependencies
+
+- Characterize audio detection and honest refusal with offline fixtures containing
+  noise and repeated markers before any separately authorized physical check. The pilot-only
+  qualifying-peak fallback does not change signed WAV detection; generic
+  multiple-peak selection and stronger late-repeat ambiguity remain unresolved.
+- Evaluate the requested single sharpness value against representative readable
+  text/digits and adverse image conditions before selecting an algorithm or
+  enforcing a threshold. Keep the current unsigned guidance separate from
+  successful-measurement verification and responsibility.
+- Extend inspectable failures beyond the three covered GPS triggers, retaining
+  explicit signing/storage absence and separate camera/GPS outcomes. Signed
+  camera and microphone failure formats remain future work; unsigned audio
+  diagnostics are not a durable signed-attempt journal.
+- Complete the [physical acceptance matrix](DEVICE_ACCEPTANCE.md), including
+  route/privacy changes, long-duration audio, cancellation/retry and process
+  interruption. Independent requester/operator trials depend on another device
+  and a verified direct transport route; the live composed camera/location
+  browser-to-phone WebRTC route remains unvalidated.
+- Resolve the documented PowerShell fixture runtime gap for USB audio export
+  and camera-quality retrieval. Their positive phone transfer paths passed;
+  the deferred parser/transport fixtures are not counted as passing checks.
+
+These are remaining work items, not a new ordering decision or authorization to
+operate the phone. Earlier bounded physical permissions do not authorize a new
+capture, probe or playback. Durable enrollment/acceptance services and MCP
+workflow control belong to their separate infrastructure workstream.
+
+### Source boundaries for follow-up
+
+Rust sensor policy, DSP, quality and artifact verification live in
+`code/crates/nonverba-core/src/`, especially `camera_quality.rs`,
+`location_attempt.rs`, `native_audio_signing.rs`, `agent_appraisal/` and
+`evidence_session/`. `code/crates/nonverba-android/src/` provides internal JNI;
+the Android Kotlin collectors own permissions, terminal snapshots, key access,
+retention and lifecycle, while `native_audio_device.cpp` owns AAudio buffers.
+`web/src/audio-controller.js`, `agent-requester.js` and
+`agent-evidence-storage.js` separate transport coordination from verification
+and local acceptance. Focused regressions live in `code/test/` and
+`code/android/tests/`; use the managed container and the smallest relevant check.
+
 ## GPS failure-report checkpoint — 1 and 4 October 2026
 
 A real-device GPS failed-attempt report was exported on 1 October before the

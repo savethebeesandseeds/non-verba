@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "union",
+  "number": 6,
+  "title": "Cooperation and the Operators union",
+  "summary": "Extend reference remuneration calculations into genuine participation, collective authority and signed Assignment integration.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "union-remuneration-integration-goal",
+      "title": "Reference remuneration tools",
+      "description": "The shared reference calculator and fictional simulator; genuine membership and collective authority remain outside this checkpoint.",
+      "milestones": [
+        {
+          "id": "union-calculator",
+          "title": "Reference remuneration calculator and fictional simulator",
+          "description": "The reference Rust/WASM calculator and fictional simulator have a dated 26 September synthetic validation checkpoint covering remuneration, ballot decay, support fallback, demand effects and preserved acceptances. Membership, ballot authentication and policy-amendment authority remain outside this component; simulated edits and completions establish no real collective authority.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-09-26",
+          "acceptance": [
+            "The shared Rust/WASM reference calculator and verification-callback boundaries are documented.",
+            "The historical checks cover fictional rate, participation, decay, support-fallback and retained-term scenarios."
+          ],
+          "evidence": [
+            {
+              "label": "Implemented calculator boundaries",
+              "path": "docs/notes/cooperation/OPERATORS_UNION_NOTES.md#what-the-current-reference-implementation-establishes"
+            },
+            {
+              "label": "Historical calculator/simulator validation",
+              "path": "docs/cooperation/VALIDATION.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

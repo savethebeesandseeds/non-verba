@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 export const TEST_SUITES = Object.freeze({
   unit: [
+    'map-component-tests.mjs',
     'authentication-workflow-tests.mjs', 'work-privacy-controller-tests.mjs',
     'registration-workflow-tests.mjs',
     'face-workflow-tests.mjs',

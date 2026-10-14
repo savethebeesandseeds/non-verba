@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 2,
+  "id": "services",
+  "number": 11,
+  "title": "Server side services",
+  "summary": "Implement hosted account, task and record services plus reviewed operations; no account server or durable hosted acceptance ledger is currently established.",
+  "updatedAt": "2026-10-14",
+  "goals": []
+}

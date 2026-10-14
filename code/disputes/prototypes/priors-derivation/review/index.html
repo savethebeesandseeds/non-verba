@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="An isolated research prototype for inspecting contractual families and candidate priors.">
+  <title>Priors Derivation Lab · Prototype</title>
+  <link rel="stylesheet" href="./review.css">
+  <script type="module" src="./review.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to research workspace</a>
+  <div class="shell">
+    <header class="masthead">
+      <div class="identity"><span class="mark" aria-hidden="true">P<span>·</span></span><div><p class="eyebrow">NON-VERBA / RESEARCH DESK</p><h1>Priors Derivation Lab</h1><p class="subtitle">From contractual evidence to questions worth testing.</p></div></div>
+      <div class="masthead-actions"><span class="prototype">PROTOTYPE / RESEARCH ONLY</span><label class="import-button" for="report-file">Import report <span aria-hidden="true">↗</span></label><input id="report-file" type="file" accept=".json,application/json"><button id="export-review" class="quiet-button" type="button" disabled>Export review</button></div>
+    </header>
+    <section class="scope-note" aria-label="Research scope"><span class="scope-dot" aria-hidden="true"></span><p>Candidate priors are <strong>agent drafts for investigation</strong>. This lab does not choose, adopt, or weight Non-verba’s first priors. Evidence comes from the selected pilot and requires human interpretation.</p></section>
+    <div id="load-status" class="load-status" role="status" aria-live="polite">Looking for a completed run…</div>
+    <section id="run-overview" class="run-overview" aria-label="Run overview"></section>
+    <nav class="tabs" aria-label="Research views"><button type="button" data-tab="candidates" class="tab active" aria-current="page">Candidate priors <span id="candidate-count">0</span></button><button type="button" data-tab="families" class="tab">Clause families <span id="family-count">0</span></button><button type="button" data-tab="method" class="tab">Method &amp; provenance</button><button type="button" data-tab="findings" class="tab">Findings &amp; limits</button></nav>
+    <main id="workspace" tabindex="-1"></main>
+    <footer><p>Priors Derivation Lab · MCC Pilot · Prototype 0.1</p><p>Review choices remain in this browser session until you export them.</p></footer>
+  </div>
+</body>
+</html>

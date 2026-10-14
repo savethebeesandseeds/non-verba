@@ -1,0 +1,13 @@
+{
+  "schema_version": 2,
+  "status": "PREDECLARED_MAIN_UNIT_ALLOCATION",
+  "authority": "NONE",
+  "main_limit": 300000,
+  "discovery_limit": 200000,
+  "confirmation_limit": 60000,
+  "temporal_limit": 40000,
+  "allocation": "Contract-balanced round robin retaining seeded per-contract functional/parent priority; complete sections and all exclusions remain searchable and inspectable.",
+  "reason": "Reserve capacity for all three phases within the existing 300,000-main-unit resource envelope; the calibration yielded about21.6 selected units per acquired record before source repairs.",
+  "alternative_representations": "The separately pinned30,000-unit sensitivity study is accounted as additional diagnostic vectors within the unchanged24GiB total storage ceiling.",
+  "changes_require_new_allocation": true
+}

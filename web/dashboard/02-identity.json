@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 2,
+  "id": "identity",
+  "number": 2,
+  "title": "Identity, authentication and work privacy",
+  "summary": "Keep local inspection prototypes distinct from verified accounts, genuine authentication and account-wide privacy enforcement.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "identity-account-trust-goal",
+      "title": "Local registration inspection",
+      "description": "Reviewed local Operator and Requester drafts; this component creates no verified account or published profile.",
+      "milestones": [
+        {
+          "id": "identity-registration-prototype",
+          "title": "Local Operator and Requester registration inspection",
+          "description": "The reusable guided browser flow prepares reviewed local records with optional accessibility/certification information and limited public-field choices. The 9 October milestone creates no server account, verified identity or published profile.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-09",
+          "acceptance": [
+            "Both roles prepare only the deliberately reviewed draft.",
+            "Optional private fields stay out of the public candidate unless explicitly eligible and selected.",
+            "Edits, reset and late replies cannot restore stale review or private form data."
+          ],
+          "evidence": [
+            {
+              "label": "Registration scope",
+              "path": "docs/development/REGISTRATION_PIPELINES.md"
+            },
+            {
+              "label": "9 October validation",
+              "path": "docs/development/VALIDATION.md#isolated-registration-pipelines--9-october-2026"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "identity-presence-assurance-goal",
+      "title": "Local face-reference prototype",
+      "description": "Consented local reference handling and experimental comparison; real-person accuracy and liveness remain unverified.",
+      "milestones": [
+        {
+          "id": "identity-face-prototype",
+          "title": "Local Operator face reference and comparison",
+          "description": "The selected local face pipeline implements account-bound encrypted reference retention, explicit replacement/deletion and experimental feature comparison. The 9 October component validation used synthetic inputs; it measured no real-person accuracy or phone performance and establishes no liveness, legal identity or genuine authentication.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-09",
+          "acceptance": [
+            "Operator reference processing and retention require deliberate consent and review.",
+            "Requester paths instantiate no face model or biometric reference store.",
+            "Transient captures are discarded and experimental comparison preserves unresolved assurance."
+          ],
+          "evidence": [
+            {
+              "label": "Face implementation",
+              "path": "docs/development/OPERATOR_FACE_PIPELINE.md"
+            },
+            {
+              "label": "9 October face checks",
+              "path": "docs/development/VALIDATION.md#selected-operator-face-components--9-october-2026"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "identity-work-privacy-goal",
+      "title": "Authentication and work-state inspection",
+      "description": "Isolated policy and browser lifecycle behavior with simulated linked devices; account-wide enforcement remains unimplemented.",
+      "milestones": [
+        {
+          "id": "identity-privacy-prototype",
+          "title": "Isolated authentication and work-state policies",
+          "description": "The 8 October developer inspection implements shared Rust policy plus browser cancellation, leases, callback fencing, local work state and simulated linked-device behavior. Genuine authentication and global sensor shutdown remain false.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-08",
+          "acceptance": [
+            "Inspect authentication reuse, hold/clock-out and sensor-access policy independently.",
+            "Cancellation and lifecycle loss discard transient authority and fence late results.",
+            "Reload never restores active operations or sensor grants."
+          ],
+          "evidence": [
+            {
+              "label": "Inspection implementation",
+              "path": "docs/development/AUTHENTICATION_AND_WORK_PRIVACY.md#developer-inspection-implementation"
+            },
+            {
+              "label": "8 October validation",
+              "path": "docs/development/VALIDATION.md#isolated-authentication-and-work-privacy--8-october-2026"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

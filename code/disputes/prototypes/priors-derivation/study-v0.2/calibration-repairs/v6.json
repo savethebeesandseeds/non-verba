@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "id": "repair-v6",
+  "previous_protocol": "audit-protocols/repair-v5/protocol.json",
+  "new_exposure_artifacts": [
+    {
+      "path": "audits/5f76ffe889cedb36603e/fresh-a-v5/batch-001.failed.json",
+      "sha256": "8537d4e6077e13935db1b5e2afc8350c9b43bda6cab3b60dfea9c55684a9e080",
+      "exposure_field": "newly_source_exposed_contract_ids"
+    }
+  ],
+  "additional_source_diagnostic_contracts": [
+    "contract-c4c20b310e4a6bd38b2a", "contract-edc2eb570b3275a77d4c",
+    "contract-c82807004cbb6b5cb745", "contract-dba335bb12ee7dccb387",
+    "contract-e49c5ea6f9649945279f", "contract-0b36684ced9eeef3caf3",
+    "contract-43e87d569f2a4112796b", "contract-01d80bfe2e71046d8b3e"
+  ],
+  "reason": "Retain failed V5 evidence; repair quotation/paragraph and source-layout boundaries before a fresh accepted-source audit. Preserve the original purpose seed and exclude every declared prior source exposure.",
+  "authority": "NONE"
+}

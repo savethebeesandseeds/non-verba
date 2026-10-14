@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 2,
+  "id": "workflows",
+  "number": 8,
+  "title": "Durable infrastructure and agent access",
+  "summary": "Define transport-independent workflow, recovery and authorization semantics, then expose them through full agent interfaces.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "workflows-durable-outcomes-goal",
+      "title": "Local requester verification",
+      "description": "Independent artifact verification, retained inspection and bounded atomic acceptance in the local browser ledger.",
+      "milestones": [
+        {
+          "id": "workflows-local-requester",
+          "title": "Local requester verification, retention and atomic acceptance",
+          "description": "The 8 October software checkpoint used synthetic PCM and actual Rust/WASM verification with the same-origin local IndexedDB ledger. Exact completed audio bytes and original context were retained and reverified; concurrent first acceptance committed once, cancellation preserved unconsumed keys, and replay/reload checks preserved the winning rows. Physical requester/operator acceptance, global replay exclusion and a durable server remain unverified.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-08",
+          "acceptance": [
+            "Independent re-verification uses retained authority, original policy and exact completed bytes in the covered local workflow.",
+            "Concurrent first acceptance in two same-origin tabs commits exactly once in the identified local ledger.",
+            "Cancellation after verification and inside the transaction leaves acceptance keys absent; reload/replay checks reverify unchanged retained bytes and preserve winning rows without a new request, round, probe or signing."
+          ],
+          "evidence": [
+            {
+              "label": "8 October audio concurrency result",
+              "path": "docs/sensors/STATUS.md#audio-concurrent-acceptance-and-lifecycle-checkpoint--8-october-2026"
+            },
+            {
+              "label": "Existing workflow foundations",
+              "path": "docs/development/AGENT_WORKFLOWS_MCP.md#architecture-and-existing-foundations"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "workflows-mcp-access-goal",
+      "title": "Owner-requested agent access",
+      "description": "The recorded product direction for full authorized workflow access through MCP; implementation and final tool schemas remain undefined.",
+      "milestones": [
+        {
+          "id": "workflows-mcp-interface",
+          "title": "Define owner-requested MCP workflow access",
+          "description": "The owner recorded full MCP access to authorized evidence workflows as the product direction on 30 September. The requirements document leaves final operation names and schemas undefined and implementation for later work. No MCP server, remote agent authorization service or durable server ledger is established by this record.",
+          "status": "proposed",
+          "updatedAt": "2026-10-14",
+          "evidence": [
+            {
+              "label": "Recorded owner direction and implementation limits",
+              "path": "docs/development/AGENT_WORKFLOWS_MCP.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

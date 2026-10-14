@@ -13,8 +13,13 @@ MainActivity and the web audio coordinator now integrate this native path.
 Shared Rust tests, production Kotlin JNI declarations exercised on the Linux JVM,
 and browser verification of signed native synthetic WAV fixtures cover the
 protocol and signing boundary. Final APK packaging verification is tracked in
-[VALIDATION.md](VALIDATION.md); physical microphone/speaker acceptance is still
-required before claiming support for a particular phone.
+[VALIDATION.md](VALIDATION.md). One four-second local phone demo completed on
+6 October, and its exact saved WAV passed [external Rust verification on
+7 October](VALIDATION.md#saved-phone-wav-externally-verified--7-october-2026).
+That result has unsigned same-device requester provenance. Physical acceptance
+by an independent requester, repeatability, noisy-environment performance and the
+lifecycle matrix below remain unverified; it does not establish general support
+for that phone.
 
 ## Ownership and protocol
 
@@ -243,6 +248,20 @@ physical cause. The earlier phone attempt cannot be retrospectively assessed
 because its pilot samples were released; its original evidence remains unchanged.
 See the [phone pilot record](VALIDATION.md#microphone-pilot-after-format-correction--6-october-2026).
 
+Sealing also retains `nonverba-native-audio-round-assessment` version 1 when
+the canonical PCM16 round detections are available. It records each round's
+index, sample range, detector metrics and `passed`, `not_detected` or
+`detected_late` result, using the same detector and 38,400-sample start limit as
+successful signing/verification. Rust bounds this assessment to 8 KiB and at
+most fifteen rounds; Android freezes it within the original attempt's bounded
+16 KiB unsigned diagnostic. It adds no nonce, PCM or signature to that record
+and does not apply the pilot fallback to successful-evidence detection.
+Unavailable assessments stay absent/null; even all-passed round metrics cannot
+substitute for a completed signed WAV. See [the sealing diagnostic
+checks](VALIDATION.md#microphone-sealing-round-diagnostics--software-follow-up-6-october-2026).
+The later successful phone demo did not exercise the failure display/export
+branch, whose exact saved Android JSON and restart durability remain unverified.
+
 When ordinary detection reports no qualifying signal, pilot readiness also
 checks the highest-ranked qualifying peak across the complete bounded pilot.
 It uses the same score, matched-symbol, RMS and band-ratio thresholds, then
@@ -311,6 +330,15 @@ device/Android build:
    consistency, xruns and callback continuity at both four and thirty seconds.
 6. Crash/restart after nonce reservation, receipt timeout, cancelled signing and
    certificate-record mismatch; consumed requests and identity pins must persist.
+7. Challenge recovery and honest refusal in very noisy environments, using
+   offline fixtures first. Challenge detectability does not establish usable
+   capture of an unrelated external sound or a calibrated environmental noise
+   limit. Generic multiple-peak selection needs separate compatibility work.
+
+Physical independent-requester trials are deferred until a second device is
+available. The [8 October concurrent-acceptance checks](VALIDATION.md#audio-concurrent-acceptance-and-lifecycle--8-october-2026)
+establish software cancellation, local first-acceptance races and retained replay
+behavior with synthetic PCM; they do not complete these physical cases.
 
 Platform references: [AAudio guide](https://developer.android.com/ndk/guides/audio/aaudio/aaudio),
 [AAudio API reference](https://developer.android.com/ndk/reference/group/audio),

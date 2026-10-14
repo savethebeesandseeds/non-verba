@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 2,
+  "id": "assignments",
+  "number": 3,
+  "title": "Assignments and participant experience",
+  "summary": "Connect proven local protocol and map components into an understandable, authorized participant journey.",
+  "updatedAt": "2026-10-14",
+  "goals": [
+    {
+      "id": "assignments-contract-consent-goal",
+      "title": "Signed Assignment prototype",
+      "description": "The bounded Protocol-2 implementation and tested local signing/verification behavior.",
+      "milestones": [
+        {
+          "id": "assignments-protocol-two",
+          "title": "Protocol-2 signed Assignment prototype",
+          "description": "Package 0.2.1 supplies strict versioned records, pinned-role verification, exact financial grants, immutable terms and local signing/import/export workflows. The 28 September milestone and later checks cover synthetic protocol behavior, not real-money launch readiness.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-09-28",
+          "acceptance": [
+            "The tested Protocol-2 cases enforce exact signed terms, role authority and admitted grants/revisions.",
+            "Covered correction cases preserve established obligations and expose unresolved alternatives.",
+            "Local signing/export and native/WASM parity checks cover the bounded prototype."
+          ],
+          "evidence": [
+            {
+              "label": "Protocol readiness and 28 September checks",
+              "path": "docs/requests/READINESS.md"
+            },
+            {
+              "label": "Contract specification",
+              "path": "docs/requests/CONTRACT.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "assignments-participant-journey-goal",
+      "title": "Shared map inspection",
+      "description": "The reusable map component and its recorded geographic-policy and browser checks.",
+      "milestones": [
+        {
+          "id": "assignments-map-component",
+          "title": "Isolated shared map inspection component",
+          "description": "The 10 October shared map checkpoint covers geographic/deployment inspection and browser behavior. Its snapshot route collections are isolated from caller mutation across construction, clear, access and catalog resets. The component remains a local inspection surface; it establishes no deployed participant discovery or task marketplace.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-14",
+          "completedAt": "2026-10-10",
+          "acceptance": [
+            "Shared map behavior and geographic policy are explicit and inspectable.",
+            "Controller snapshots isolate route collections from caller mutation, including empty/reset states.",
+            "Browser checks cover the documented component and narrow layouts.",
+            "Deployment/discovery fixtures do not imply a live service."
+          ],
+          "evidence": [
+            {
+              "label": "Map component",
+              "path": "docs/development/MAP_COMPONENT.md"
+            },
+            {
+              "label": "10 October map validation",
+              "path": "docs/development/VALIDATION.md#shared-map-component--10-october-2026"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

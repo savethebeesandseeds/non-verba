@@ -1,0 +1,5 @@
+# Acquired corpus material and research outputs have their own terms.
+# Dependencies and models remain in the managed container's existing volumes.
+/artifacts/
+/node_modules/
+*.log

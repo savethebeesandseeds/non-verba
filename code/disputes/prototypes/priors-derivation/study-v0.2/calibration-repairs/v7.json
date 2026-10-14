@@ -1,0 +1,46 @@
+{
+  "schema_version": 2,
+  "id": "repair-v7",
+  "previous_protocol": "audit-protocols/repair-v6/protocol.json",
+  "new_exposure_artifacts": [
+    {
+      "path": "audits/655e6fe794d9ef62da56/fresh-a-v6/review.stopped-partial.metadata-corrected.json",
+      "sha256": "8696b56774cc002e118ec2a0d525fb851e463520fc0f9fd3336780b3d2148069",
+      "exposure_field": "source_exposed_contract_ids"
+    }
+  ],
+  "additional_evidence_records": [
+    {
+      "path": "audits/655e6fe794d9ef62da56/development-author-v6/stopped-partial.json",
+      "sha256": "3429deeac9d05a754fb150a939405d52546882ddbaa540703ebf9e49134a8c41"
+    },
+    {
+      "path": "audits/655e6fe794d9ef62da56/integrity-author-v6/stopped-partial-0001-0004.json",
+      "sha256": "354b27cb471afdce150d4e43b77864480035b28521c1bff35401c6af422fb459"
+    },
+    {
+      "path": "coding/clean-b-v6/coverage-hold-after-0012.json",
+      "sha256": "aeed730bdfa8684b24c01d4c0af8cddcc069cc37b80e6ce504ac048aff540c9d"
+    },
+    {
+      "path": "coding/clean-b-v6/boundary-failure-0010.json",
+      "sha256": "083e6b647cbe7c55e2351fe424349c84b70afd8edabd9d220ab126530e6a49f6"
+    }
+  ],
+  "additional_source_diagnostic_contracts": [
+    "contract-51047273b006c0c612c9", "contract-b6810c70adde295cdc19",
+    "contract-e54259df1218999b3271", "contract-327cc1e738fcb8a98106",
+    "contract-9b70971a6f1d1ebd2d9f", "contract-9c799394da023e8be54f",
+    "contract-f9f84fffff565d752f26", "contract-6e4703213453b9361973",
+    "contract-007eb9c1d24333c81f8c", "contract-0817c8cc36bd928af033",
+    "contract-0aaa952b05b63e75c80b", "contract-0fe6ab3e63a4ae3b70ed",
+    "contract-c4c20b310e4a6bd38b2a", "contract-edc2eb570b3275a77d4c",
+    "contract-c82807004cbb6b5cb745", "contract-dba335bb12ee7dccb387",
+    "contract-e49c5ea6f9649945279f", "contract-0b36684ced9eeef3caf3",
+    "contract-43e87d569f2a4112796b", "contract-01d80bfe2e71046d8b3e",
+    "contract-c398069b82ec5a51fae2", "contract-c07dc12c0ca8cbffea62",
+    "contract-1385c838225fafe6945c", "contract-4a54fc15726ed030aed0"
+  ],
+  "reason": "Retain V6's actual partial reviews and material introduced-list/governor failure. Repair generic list, associated qualification and source-boundary handling before another fresh accepted-source audit. Keep the original purpose seed and exclude every opened fresh contract, including partial readings. Diagnostic exposure IDs include the eight complete development readings, four complete/partial rejection controls and twelve open-coding source inspections; their immutable evidence is bound separately.",
+  "authority": "NONE"
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "name": "Priors Derivation Lab",
+  "version": "0.1.0",
+  "status": "PROTOTYPE",
+  "purpose": "RESEARCH_ONLY",
+  "authority": "NONE",
+  "adopted_catalog": false,
+  "corpus": {
+    "id": "stanford-material-contracts-corpus",
+    "origin": "https://mcc.law.stanford.edu",
+    "manifest_path": "/index/manifest.json",
+    "codebook_path": "/codebook.md",
+    "license": "CC-BY-NC-SA-4.0",
+    "citation": "Adelson, Peter, and Nyarko, Julian. The Material Contract Corpus. arXiv:2504.02864 (2025).",
+    "data_use": "Local noncommercial research; retain attribution and share-alike notices with corpus-derived artifacts. No commercial permission or public source redistribution is inferred."
+  },
+  "sampling": {
+    "seed": "nonverba-priors-20261013-v1",
+    "strata": [
+      { "label": "services", "count": 70 },
+      { "label": "employment", "count": 15 },
+      { "label": "lease", "count": 15 }
+    ],
+    "max_per_filer": 2,
+    "exclude_flags": ["amend", "joinder", "termination"],
+    "formats": ["text/html", "text/plain"],
+    "holdout_fraction": 0.2,
+    "limits": { "metadata_bytes": 67108864, "contract_bytes": 4194304, "total_contract_bytes": 50331648, "max_contracts": 300 }
+  },
+  "extraction": { "minWords": 20, "maxWords": 160, "contextWords": 45, "maxContentChars": 4194304, "max_clauses_per_contract": 20, "max_clauses": 2000 },
+  "embedding": {
+    "repository": "Xenova/all-MiniLM-L6-v2",
+    "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+    "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "license": "Apache-2.0",
+    "dtype": "fp32",
+    "dimensions": 384,
+    "max_tokens": 256,
+    "pooling": "mean",
+    "normalize": true,
+    "overflow": "measure tokenizer inputs including special tokens; overlapping bounded windows, new-word-weighted normalized mean; all source words covered",
+    "device": "cpu"
+  },
+  "discovery": { "kValues": [8, 12, 16], "primary_k": 12, "seed": 20261013, "repeats": 3, "maxIterations": 100, "silhouetteSampleSize": 96 },
+  "candidate_review": {
+    "status": "AGENT_DRAFT_REQUIRES_OWNER_REVIEW",
+    "required_fields": ["declaration", "contrast", "boundaries", "nearest_confusions", "support", "counterexamples", "domain_limits"],
+    "interpretation": "Clusters propose hypotheses. Frequency and geometric separation do not establish fairness, obligations, or adopted priors."
+  }
+}

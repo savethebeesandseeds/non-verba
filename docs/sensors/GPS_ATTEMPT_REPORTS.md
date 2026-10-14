@@ -172,5 +172,7 @@ retained their exact bytes; the initial-write-failed memory-only outcome remaine
 absent. The 4 October failure and original artifacts were preserved.
 These controlled restarts do not establish crash-during-write or power-loss
 durability. Naturally occurring status-0 report production and the receiver's
-original cause or permanent recovery remain unverified. Microphone recording,
-tones, playback and calibration remain held.
+original cause or permanent recovery remain unverified. These GPS checks invoked
+no microphone recording, tones, playback or calibration. Later separately
+authorized audio results are recorded in [current sensor status](STATUS.md);
+this GPS guide does not authorize new physical audio work.

@@ -9,7 +9,7 @@ are the foundation, while an MCP server and durable agent service remain planned
 See [agent workflow and MCP requirements](../development/AGENT_WORKFLOWS_MCP.md) for lifecycle,
 delegation, sensor independence, retry, transport and evidence-trust boundaries.
 
-The [implementation status](STATUS.md) summarizes native location, camera and microphone acquisition and the remaining assurance limits. The [physical acceptance checklist](DEVICE_ACCEPTANCE.md) describes an ordered phone test plan; it records no new physical result by itself.
+The [current workstream checkpoint](STATUS.md#current-workstream-checkpoint--14-october-2026) summarizes native location, camera and microphone acquisition, completed evidence checks and remaining dependencies. Earlier dated status entries preserve historical checkpoints. The [physical acceptance checklist](DEVICE_ACCEPTANCE.md) describes an ordered phone test plan; it records no new physical result by itself.
 
 The [notes index](../notes/README.md) groups the research and explanatory documents.
 The [sensor quality notes](../notes/sensors/SENSOR_QUALITY_NOTES.md) collect proposals
@@ -73,8 +73,9 @@ A speaker/microphone test gates capture. The fixed 20.25/20.75 kHz profile is ex
 
 ## Workflow
 
-Native GPS raw-GNSS policy rejections and collection timeouts with zero raw
-callbacks now have separate signed attempt reports.
+Native GPS raw-GNSS policy rejections, collection timeouts with zero raw
+callbacks and Android raw-GNSS startup refusal (status 0) have separate signed
+attempt reports. Other failure classes remain outside this signed-report scope.
 Use Location → **GPS failed attempts** to retain/export reports and verify them
 against an independently kept original request and trusted location key ID.
 Retries retain up to 32 attempts; full storage and signing failures are explicit.

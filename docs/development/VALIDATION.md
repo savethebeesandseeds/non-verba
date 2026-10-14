@@ -13,6 +13,43 @@ an explicit snapshot rather than the original private checkout. No Windows
 compiler, Java runtime, phone install, or physical sensor capture is part of
 these checks.
 
+## Shared map component — 10 October 2026
+
+Added an isolated shared map controller, geometry/access policy, tile-source
+port and Canvas viewport, with a browser inspection entry. Initial coverage is
+Norway mainland/coastal municipalities, including administrative coastal waters;
+Svalbard and Jan Mayen are excluded. Kartverket's simplified illustration
+snapshot is attributed and recorded with its source digest. It is display
+geometry, not an exact border, account authorization or evidence verification.
+
+Focused checks ran in the preserved managed Debian container using the public
+source snapshot bridge:
+
+- 14 map component tests passed: projection, holes/islands, cached containment,
+  Norway coastal locations and remote exclusions, active-deployment/requester
+  policy, explicit operator grants, atomic input rejection, access revocation,
+  permanent position expiry after backward clock changes, bounded inputs and
+  explicit same-origin/provider URL rules.
+- 2 test-catalog checks and 11 existing Android package-parser checks passed.
+  Android staging and verification source exclude the browser-only map entry;
+  no APK build or package verification was performed for this component task.
+- 8 real Chromium checks passed against the source entry: no default provider
+  or sensor requests, synthetic overlays and access changes, pan/zoom/keyboard,
+  opt-in OSM request scope/attribution/Referer, mobile layout and strict CSP,
+  actual browser HTTP cache reuse, mixed-winding polygon union/true holes,
+  pending-source cancellation and idempotent teardown.
+- Desktop and mobile screenshots were visually inspected. Geographic data,
+  controls, positions and attribution render without overflow; overview labels
+  are omitted and detailed labels remain readable outside the country clip.
+- Whitespace checks passed; the private reserve was unchanged.
+
+Browser tile responses were synthetic local fixtures; the checks contacted no
+external tile provider and acquired no physical sensors. The inspection page
+opens offline coverage by default, with deliberate browser-only OSM streets.
+There is no deployed curated tile service, continuous operator tracking feed,
+routing engine, Android map route or exact operational coverage mask. See
+[the composition and country pipeline](MAP_COMPONENT.md) for these boundaries.
+
 ## Private reserve and recovery record
 
 The completed consolidation made this public repository the active home of the

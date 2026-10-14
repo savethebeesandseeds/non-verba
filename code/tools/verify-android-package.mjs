@@ -209,7 +209,9 @@ async function main() {
     await run(join(buildTools,'zipalign'), ['-c','-P','16','-v','4',apkPath], report.tool_results);
     report.zip_16k_alignment = true;
 
-    const web = await files(webRoot, relative => basename(relative).toLowerCase() === 'review.html');
+    // The map entry is a browser-only provider preview, not an Android document.
+    const browserOnly = new Set(['review.html', 'map.html']);
+    const web = await files(webRoot, relative => browserOnly.has(basename(relative).toLowerCase()));
     const stageRoots = [join(androidRoot,'app/src/main/assets/web'), join(buildRoot,'app/src/main/assets/web')];
     const stages = await Promise.all(stageRoots.map(root=>files(root)));
     insist(web.size > 0 && [...web.keys()].some(name=>name.endsWith('.wasm')), 'Shared WASM assets missing.');
@@ -222,7 +224,7 @@ async function main() {
       for (const staged of stages) insist(digest===await fileHash(staged.get(name)), 'Staged web asset differs: '+name);
       report.assets.push({path:name, bytes:item.bytes, sha256:digest, matches_web_dist:true, matches_both_staging_trees:true});
     }
-    report.asset_count=report.assets.length; report.review_entry_excluded=true;
+    report.asset_count=report.assets.length; report.review_entry_excluded=true; report.map_preview_entry_excluded=true;
     const notices=await collectReleaseNotices();
     for(const [name,data] of notices) {
       const record=records.get('assets/nonverba-license/'+name);
@@ -234,6 +236,7 @@ async function main() {
     report.license_source_notices_verified=true; report.notice_count=notices.size;
     const webSource=await files(resolve(codeRoot,'../web/src'));
     for(const [name,path] of webSource) if(!name.includes('/')&&/\.(html|css|js)$/.test(name)) {
+      if(browserOnly.has(name.toLowerCase())) continue;
       if(!web.has(name)||await fileHash(path)!==await fileHash(web.get(name))) report.current_build_gaps.push('web/dist differs from current web/src: '+name);
     }
     const ignored=new Set(['.toolchain','.gradle','.kotlin','.cxx','build']);

@@ -10,6 +10,13 @@ does not prove that a camera scene, sound, or location is truthful. Read the
 [evidence boundaries](docs/sensors/SECURITY.md) and the
 [assignment threat model](docs/requests/THREAT_MODEL.md) before relying on a report.
 
+See [Non Verba workstreams](docs/notes/WORKSTREAMS.md) for the broad categories of
+work ahead and the outline to refine when dividing tasks.
+
+The [project dashboard](web/dashboard/README.md) organizes the work as Heroes,
+Goals and Milestones, with color-coded states and evidence. Read the
+[schema](web/dashboard/SCHEMA.md) to update one JSON per Hero.
+
 ## Project structure
 
 | Path | Responsibility |

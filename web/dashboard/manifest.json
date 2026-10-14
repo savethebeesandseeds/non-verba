@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "title": "Non Verba project dashboard",
+  "description": "A maintained hierarchy of Heroes, Goals and Milestones across eleven project workstreams. Documented progress is recorded per Hero; milestone counts describe scope rather than effort or production readiness.",
+  "heroes": [
+    {
+      "id": "sensors",
+      "file": "01-sensors.json"
+    },
+    {
+      "id": "identity",
+      "file": "02-identity.json"
+    },
+    {
+      "id": "assignments",
+      "file": "03-assignments.json"
+    },
+    {
+      "id": "priors",
+      "file": "04-priors.json"
+    },
+    {
+      "id": "disputes",
+      "file": "05-disputes.json"
+    },
+    {
+      "id": "union",
+      "file": "06-union.json"
+    },
+    {
+      "id": "incidents",
+      "file": "07-incidents.json"
+    },
+    {
+      "id": "workflows",
+      "file": "08-workflows.json"
+    },
+    {
+      "id": "governance",
+      "file": "09-governance.json"
+    },
+    {
+      "id": "apk",
+      "file": "10-apk.json"
+    },
+    {
+      "id": "services",
+      "file": "11-services.json"
+    }
+  ]
+}

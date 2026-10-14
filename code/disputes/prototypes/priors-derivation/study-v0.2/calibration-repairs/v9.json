@@ -1,0 +1,109 @@
+{
+  "schema_version": 2,
+  "id": "repair-v9",
+  "previous_protocol": "audit-protocols/repair-v8/protocol.json",
+  "new_exposure_artifacts": [
+    {
+      "path": "audits/70e88bd1446833a28e46/development-author-v8/checkpoint-059-complete-0019-partial.json",
+      "sha256": "249e10fbce4f0554fc3805f0a393f099842a32397cdfacbc22122798c9fd1207",
+      "exposure_field": "opened_contract_ids"
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/development-root-v8/stopped-after-0129.json",
+      "sha256": "c04ac99c81fe7111826c5e130a88afb6013d85ea640e22e4e231237055ce044d",
+      "exposure_field": "source_exposed_contract_ids"
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/review.json",
+      "sha256": "6a8378ddb308f68f63f29aae205c70bf84f7721b256e5658d2af3e9f14cdb55c",
+      "exposure_field": "source_exposed_contract_ids"
+    },
+    {
+      "path": "coding/open-coding-a/v8/hold-after-0023.exposure.json",
+      "sha256": "6cc44ac505bf443fea36376128fb6b26aa40b60d695829e24c529db48237a5c5",
+      "exposure_field": "source_exposed_contract_ids"
+    },
+    {
+      "path": "audit-protocols/repair-v9/opened-coding-b.json",
+      "sha256": "0333529349e83839d958c30dc5c81971642fbba89eeb9b7b974ed3fbdc34cf11",
+      "exposure_field": "source_exposed_contract_ids"
+    }
+  ],
+  "additional_evidence_records": [
+    {
+      "path": "coding/open-coding-a/v8/checkpoint-0001-0023.aggregate.json",
+      "sha256": "a5720795873a004d64ae466499d3cac77d16ac4b774a172da876686d0ce335d0"
+    },
+    {
+      "path": "coding/clean-b-v8/coverage-0058-stopped-v8.json",
+      "sha256": "257136516e913227989257d44ce1b2e2a7dd96a31ae60056d1566e4c7068fbd2"
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/development-root-v8/batch-001-0101-0103-0104-0106-0108-0110-0111.json",
+      "sha256": "f197514a76c6525604acde857517a34ba603eb4067b8005011a0e5f77778597d"
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/development-root-v8/boundary-failure-0129.json",
+      "sha256": "b3cbee54616a29cf5816857555e122ddea1479f5cb498b3f2b258f96ee21eca1"
+    },
+    {
+      "path": "source-issues/observed/issue-e07ac0b1bd20983f262ec846734b848aa202c501489abacc9bd5b93b830da7bc.json",
+      "sha256": "894cf357950d7c16ae2f4e3740ed436b8f94e50f03f2959cfc51d907ddbd102e"
+    },
+    {
+      "path": "source-issues/observed/issue-a40585b2897a9f6e5eb93e0fef26b92623d87319ea793b77b0ec8b3a4eb396e9.json",
+      "sha256": "d9c0bc7c54695cd66a2bbfab21a1680b52579ce7004ffb71805e4b4694627526"
+    },
+    {
+      "path": "source-issues/observed/issue-e88a40a6b9f6372054cd4aadae6176ab102736dfd973b656d4efe4834b8d7006.json",
+      "sha256": "5cf17676957e3f5fc852443cfea7e0e7321592fb64c7397f185e5a7d042aae39"
+    },
+    {
+      "path": "audit-protocols/repair-v8/protocol.json",
+      "sha256": "e367972f936445aacc022d752c21d9361d9af1660f6da062e8f2285601bcc177"
+    },
+    {
+      "path": "recipe.json",
+      "sha256": "a94ece46450597990695761fdfc46bcd25bf1b8b8b045b6aad372982fb70ba24"
+    },
+    {
+      "path": "selection.parquet",
+      "sha256": "81254f62c1a14799fdf89310a93e89af25b3547bdf72bcaeed7a4388d19cdbd3"
+    },
+    {
+      "path": "main-unit-budget.json",
+      "sha256": "354b2ad3372f2ebc8ba1d995597657dcb5b9d1e405f1482f6509cddaf4ebe845"
+    },
+    {
+      "path": "novelty/protocol.json",
+      "sha256": "86324f3bbfd9f2d1b638967356c2d4feb4467db11b7ec0b6bbe9887808017a79"
+    }
+  ],
+  "additional_source_diagnostic_contracts": [],
+  "preserved_study_constraints": {
+    "interpretation": "Carry-forward metadata from the exact frozen input files bound above; this repair does not change the targets, sampling, purpose seed or resource allocation.",
+    "selected_contracts": 15000,
+    "discovery_contracts": 10000,
+    "confirmation_contracts": 3000,
+    "temporal_contracts": 2000,
+    "calibration_selected_contracts": 1000,
+    "development_cases": 200,
+    "fresh_representation_cases": 100,
+    "independent_coding_cases_per_reviewer": 500,
+    "negative_cases": 200,
+    "fresh_adequacy_target": 0.95,
+    "zero_unresolved_material_losses_required": true,
+    "main_unit_limit": 300000,
+    "discovery_unit_limit": 200000,
+    "confirmation_unit_limit": 60000,
+    "temporal_unit_limit": 40000,
+    "sensitivity_unit_limit_separate": 30000,
+    "total_storage_limit_bytes": 25769803776,
+    "sampled_process_memory_limit_bytes": 6442450944,
+    "novelty_batches": 3,
+    "novelty_cases_per_batch": 100,
+    "reserved_cohort_content_opened": false
+  },
+  "reason": "Preserve all actual V8 source exposures and its stopped partial denominators before repairing a material native-heading boundary across an unfinished provision and page marker. V8's 57 completed source-integrity controls remain historical component evidence; its 100 fresh cases across 29 contracts remain entirely unopened. Keep the original purpose assignment seed, every previous exclusion, the same 1000 selected calibration records and explicit terminal failures without replacement. Bind the full C07/C13/C129 observed-issue history; each issue requires an actual source-bound repair replay for the exact new extraction version. The coding-B projection contains only the 58 already-opened audit/contract pairs from its immutable stopped coverage, not the whole coding packet, and adds no source reading. No new audit draw, extraction, adequacy pass, candidate adoption or reserve access is claimed by this configuration.",
+  "authority": "NONE"
+}

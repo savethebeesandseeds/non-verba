@@ -1,0 +1,78 @@
+Kartverket map display data
+SPDX-License-Identifier: CC-BY-4.0
+© Kartverket
+
+The illustrative Norway administrative coverage in web/src/map-country-data.js
+is derived from Kartverket's municipality illustration API. The source is a
+coarse display dataset, rather than detailed shoreline or survey geometry.
+
+Source snapshot
+
+  Publisher: Kartverket
+  Retrieved: 2026-10-10
+  Source API version: 1.2
+  Source URL:
+  https://api.kartverket.no/kommuneinfo/v1/kommuner/illustrasjonskart?utkoordsys=4326
+  Source size: 139,523 bytes
+  Source SHA-256:
+  66fc2c0e880d5c90d2c7fbd70ec9627d69856776333585d55bb291435e508e98
+  API documentation: https://api.kartverket.no/kommuneinfo/v1/
+  Catalogue:
+  https://kartkatalog.geonorge.no/metadata/uuid/041f1e6e-bdbc-4091-b48f-8a5990f3cc5b
+
+The source URL serves current data. The retrieval date and digest identify this
+bundled snapshot; they do not turn the URL into an immutable upstream release.
+The API does not provide a separate geometry revision identifier. A refresh
+must review the new response and update the snapshot metadata deliberately.
+
+License and attribution
+
+Kartverket licenses its free data under Creative Commons Attribution 4.0
+International (CC BY 4.0), including commercial use, modification and
+redistribution subject to its attribution requirements. Show the source name
+as © Kartverket wherever this display geometry is used, and link to Kartverket
+where possible. Retain the license link and indicate that the geometry was
+adapted as described below.
+
+  Attribution link: https://www.kartverket.no/
+  License: https://creativecommons.org/licenses/by/4.0/
+  Terms: https://www.kartverket.no/api-og-data/vilkar-for-bruk
+
+Derivation
+
+Retain all 357 municipality features in the source response. Their official
+municipality codes were compared with the current Kartverket municipality
+list at retrieval; all 357 unique codes matched, without missing or extra
+municipalities. Convert each Polygon to MultiPolygon coordinates and concatenate
+the constituent polygons in source feature/polygon order. This produces 365
+polygons, 371 rings (including six holes) and 4,759 coordinates, including
+ring-closing coordinates.
+
+Normalize ring winding to the GeoJSON convention: exterior rings are
+counterclockwise and interior rings clockwise. Only existing vertex order is
+reversed. No polygons, holes or vertices are removed, invented, dissolved,
+merged, simplified or buffered. Round values to at most five decimal places,
+with midpoints rounded away from zero; the source already uses three decimal
+places, so this does not change coordinate values. Coordinates are WGS84
+longitude, latitude in decimal degrees (EPSG:4326).
+
+All source coordinates fall within longitude >= 0 and latitude 0 to 72 degrees;
+Svalbard, Jan Mayen and Bouvet Island are absent. The aggregate bounds are
+[4.091, 57.759, 31.762, 71.385]. The administrative polygons include coastal
+waters, covering mainland and coastal island locations without requiring
+individual island shoreline polygons. They are a polygon union for display;
+internal municipality borders should not be presented as a national coastline.
+
+Limitations
+
+The API explicitly describes these polygons as coarsely simplified and only
+intended for an illustration map. Boundaries and coastal waters are generalized
+and can differ from detailed geography. This is an administrative display mask,
+not a land-only coastline, legal/survey map, exact geofence, entitlement
+decision, navigation dataset or claim that Non-verba is deployed at a location.
+Define actual deployment support and user permissions separately. Kartverket
+does not guarantee accuracy or suitability for a particular use.
+
+This notice covers only the bundled administrative illustration geometry.
+It does not grant rights to map tiles, tile services, other basemap assets
+or Kartverket's detailed Geovekst-derived cached maps.
