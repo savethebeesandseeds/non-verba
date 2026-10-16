@@ -2,6 +2,7 @@
 import init, * as core from './pkg/nonverba_core.js';
 const ready = init();
 const allowed = new Set(['create_identity','create_challenge','validate_challenge','validate_location','seal_image','verify_image','extract_watermark',
+  'create_camera_set_request','validate_camera_set_request','verify_camera_set','seal_browser_camera_set_member',
   'authentication_create','authentication_transition','authentication_assess',
   'work_privacy_transition','work_privacy_assess',
   'registration_assess','registration_prepare',

@@ -66,5 +66,46 @@ internal fun cameraSmoke(output: File): Int {
     File(output, "native-camera-synthetic.jpg").writeBytes(signed)
     File(output, "native-camera-synthetic-request.json").writeText(challenge)
     File(output, "native-camera-synthetic-key.txt").writeText(pin)
+    val attempt = "12345678-1234-1234-1234-123456789abc"
+    val profile = """{"version":1,"kind":"front-back","cameras":[{"camera_id":"0","lens_facing":"back"},{"camera_id":"1","lens_facing":"front"}],"timing":{"mode":"concurrent","max_start_skew_ns":"1000"}}"""
+    val setRequest = """{"version":1,"type":"nonverba-camera-set-request","challenge":$challenge,"profile":$profile,"acquisition":"native-camera2"}"""
+    NativeCameraSetCore.validateRequest(setRequest, now)
+    NativeCameraSetCore.validateLocation(setRequest, location, now)
+    val members = (0..1).map { index ->
+        val member = """{"version":1,"request":$setRequest,"attempt_id":"$attempt","camera_id":"$index"}"""
+        val capture = metadata.replace("synthetic-jni-camera",attempt)
+            .replace("\"camera_id\":\"0\"","\"camera_id\":\"$index\"")
+            .let { if(index==1)it.replace("\"lens_facing\":\"back\"","\"lens_facing\":\"front\"") else it }
+        val result = NativeCameraSetCore.seal(jpeg,member,location,capture,pair.public.encoded,cert,now,signer)
+        val encoded = Regex("\"image_base64\":\"([^\"]+)\"").find(result)!!.groupValues[1]
+        passed("camera-set member $index seals through production JNI")
+        """{"camera_id":"$index","jpeg_b64":"$encoded"}"""
+    }
+    val member = """{"version":1,"request":$setRequest,"attempt_id":"$attempt","camera_id":"0"}"""
+    rejected("camera-set JNI refuses metadata from another attempt") {
+        NativeCameraSetCore.seal(jpeg,member,location,metadata,pair.public.encoded,cert,now,signer)
+    }
+    rejected("camera-set JNI refuses expired original request") {NativeCameraSetCore.validateRequest(setRequest,now+900_000)}
+    rejected("camera-set JNI cannot sign after native capability revocation") {
+        NativeCameraSetCore.seal(jpeg,member,location,metadata.replace("synthetic-jni-camera",attempt),pair.public.encoded,cert,now,
+            NativeMediaEvidenceSigner {error("camera-set authority revoked")})
+    }
+    File(output,"camera-set-synthetic-request.json").writeText(setRequest)
+    File(output,"camera-set-synthetic-bundle.json").writeText("""{"version":1,"type":"nonverba-camera-set-bundle","request":$setRequest,"attempt_id":"$attempt","images":[${members.joinToString(",")}] }""")
+    File(output,"camera-set-synthetic-key.txt").writeText(pin)
+    val sequentialRequest=setRequest.replace("\"mode\":\"concurrent\",\"max_start_skew_ns\":\"1000\"", "\"mode\":\"sequential\"")
+    NativeCameraSetCore.validateRequest(sequentialRequest,now)
+    val sequentialMembers=(0..1).map {index ->
+        val member="""{"version":1,"request":$sequentialRequest,"attempt_id":"$attempt","camera_id":"$index"}"""
+        val capture=metadata.replace("synthetic-jni-camera",attempt)
+            .replace("\"camera_id\":\"0\"","\"camera_id\":\"$index\"")
+            .let {if(index==1)it.replace("\"lens_facing\":\"back\"","\"lens_facing\":\"front\"").replace("9007199254741013","9007199254741014") else it}
+        val sealed=NativeCameraSetCore.seal(jpeg,member,location,capture,pair.public.encoded,cert,now,signer)
+        val encoded=Regex("\"image_base64\":\"([^\"]+)\"").find(sealed)!!.groupValues[1]
+        passed("sequential camera-set member $index seals through production JNI")
+        """{"camera_id":"$index","jpeg_b64":"$encoded"}"""
+    }
+    File(output,"camera-set-sequential-request.json").writeText(sequentialRequest)
+    File(output,"camera-set-sequential-bundle.json").writeText("""{"version":1,"type":"nonverba-camera-set-bundle","request":$sequentialRequest,"attempt_id":"$attempt","images":[${sequentialMembers.joinToString(",")}] }""")
     return checks
 }

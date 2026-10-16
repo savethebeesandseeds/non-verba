@@ -3,6 +3,7 @@
 //! The WebView bridge cannot supply observations, timestamps, or data to a generic signer.
 mod audio;
 mod camera;
+mod camera_set;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use jni::{
     objects::{JByteArray, JObject, JString, JValue},

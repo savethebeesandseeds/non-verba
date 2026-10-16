@@ -120,6 +120,44 @@ Results are unsigned local diagnostics, retained privately. Empty/missing logs
 or flags are inconclusive; vendor formats and logging differ. The action cannot
 operate Android settings, restart the phone or establish physical cause.
 
+## Text-first APK control
+
+Owner instruction, 16 October 2026: optimize APK control using text content and
+semantic selectors. Avoid routine image-only interaction; screenshot/coordinate
+round trips are too slow for normal navigation and data inspection.
+
+1. Start with the original helper's `AppUiState`. Use the observed resource ID,
+   exact nontruncated text, content description or unambiguous semantic ID.
+2. Group related authorized actions into `AppUiBatch` (at most eight steps). Each
+   step obtains fresh own-app state and checks focus, rotation, visibility and
+   safe bounds. Use its returned final state and compact status/control summary
+   to decide the next step, without an intervening screenshot by default.
+3. Keep action acknowledgement separate from verified outcome. A failing batch's
+   last observation belongs to its labelled step before input; it is not current
+   state. Artifact retrieval/hash checks still establish what was actually saved.
+4. Use a screenshot only when visual inspection is needed or a particular control
+   is genuinely missing from semantic state. Follow the existing freshness and
+   coordinate guards for that fallback. Recheck semantic access after navigation
+   or an app update rather than continuing an image-only loop.
+
+A root-only accessibility hierarchy does not establish a blank or stuck page.
+For example, the 16 October pre-update observation exposed only three nodes while
+one fallback screenshot showed the complete working page. Record this as an
+accessibility limitation. Do not repeatedly dump the same inaccessible state or
+claim that text automation worked. Address the app's semantic exposure when the
+task calls for it; do not enable global accessibility settings, remote WebView
+debugging or an unrestricted ADB/JavaScript path as a shortcut. The approved helper
+path, native-dialog restrictions, own-app scope and permission boundaries remain
+in force. Detailed batch syntax and native-camera limits are documented below.
+
+The same phone session exposed 19 useful nodes after navigating from the home
+page to `camera-set.html`, including `discover`, `inventory` and `profile` IDs.
+Semantic discovery and a two-scroll batch then exposed the exact native error
+through the `status` node without further screenshots. When a compact console
+summary says long text was omitted, read the specific node from its saved state
+file; that avoids another device or image round trip. Check its truncation flag
+before treating the excerpt as complete. Accessibility limits can be page-specific.
+
 `AppScreenshot` reads a bounded PNG only while the focused window is Non-verba's
 user-0 activity, and rechecks focus before saving it uniquely under device
 acceptance artifacts. It rejects notification/lock screens or another app. It
@@ -444,6 +482,22 @@ the preview can replace the app window token; a hierarchy spanning that
 transition is discarded as before. Observe the stable native dialog in a fresh
 batch instead of retrying an input whose outcome is unknown. No screenshot
 round trip is required to locate these two observed native buttons.
+
+The camera-set trial has the same narrow native branch for the exact
+`TAKE ALL REQUESTED PHOTOS` and `CANCEL` labels. It requires the exact native
+`Non-verba camera set` content description on one heading, one content container,
+exactly those two enabled buttons, no WebView and the existing focus/rotation/
+safe-inset checks. This does not permit tapping permission dialogs or other
+native windows. Inspect a fresh stable dialog before submitting its shutter.
+
+`ExportCameraSet` retrieves only explicitly saved `camera-set-request.json` and
+`camera-set-<UUID>.json` bundle files from existing public export folders. It
+reuses exact length/hash readback and app/user guards, requires own-app focus,
+bounds inventory to eight files, each bundle to 32 MiB, requests to 32 KiB and
+aggregate bytes to 64 MiB. Its envelope check is not cryptographic verification;
+run the shared Rust verifier against the retained original and expected media
+pin separately. It has no arbitrary path or signing/capture action. The existing
+`VerifySavedDownloads` allowlist does not include camera sets.
 
 Example:
 {"version":1,"steps":[{"action":"scroll","direction":"down"},

@@ -8,8 +8,8 @@ Version 2. The hierarchy has exactly three levels:
 - **Goal:** a concrete outcome within that Hero.
 - **Milestone:** a checkable step toward the Goal, with its own state.
 
-Edit the relevant Hero JSON beside `index.html` and this schema, such as
-`01-sensors.json`. Only Milestones store states. The dashboard calculates Hero
+Edit the relevant Hero JSON in `heroes/`, such as
+`heroes/01-sensors.json`. Only Milestones store states. The dashboard calculates Hero
 and Goal summaries automatically from its last validated snapshot.
 
 ## Record only confirmed scope
@@ -118,15 +118,15 @@ production readiness. Empty Goals are allowed while planning.
 4. From the repository root, refresh the standalone dashboard:
 
 ```powershell
-./web/dashboard/refresh.ps1
+./web/dashboard/scripts/refresh.ps1
 ```
 
-Windows Bash can use `bash web/dashboard/refresh.sh` instead. It delegates to
+Windows Bash can use `bash web/dashboard/scripts/refresh.sh` instead. It delegates to
 the same snapshot/copy-back workflow. Inside the managed Debian container, the
 shell helper updates only that source snapshot's HTML. Shell options are
 `--check` and `--browser-check`.
 
-The refresh command validates the source JSONs and regenerates `index.html` in
+The refresh command validates the source JSONs and regenerates `public/index.html` in
 the existing managed container through the snapshot bridge, then copies the HTML
 back. Hero JSONs remain the source of truth. Preserve concurrent changes and do
 not hand-edit the generated HTML.
@@ -135,11 +135,11 @@ The adjacent `manifest.json` needs an edit only when adding/removing a Hero or
 changing its file/ID/order, and has no shared update date. Ordinary progress work
 edits one Hero JSON and refreshes the generated HTML.
 
-Open [index.html](index.html) directly in a browser after a successful refresh.
+Open [public/index.html](public/index.html) directly in a browser after a successful refresh.
 It opens populated without a picker or server. Browser file-open security prevents
 automatic fetching of adjacent JSONs, so the HTML includes the last validated
 snapshot. JSON edits become visible only after refresh and reopening/reloading
-the HTML. `./web/dashboard/refresh.ps1 -Check` validates data and HTML freshness
+the HTML. `./web/dashboard/scripts/refresh.ps1 -Check` validates data and HTML freshness
 without host writes; add `-BrowserCheck` for focused model and file-open checks.
 
 The formal definitions are [hero.schema.json](schemas/hero.schema.json) and

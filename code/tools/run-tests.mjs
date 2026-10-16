@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {TEST_SUITES, assertRegisteredTests} from './test-suites.mjs';
 if (process.platform !== 'linux' || process.env.NONVERBA_CONTAINER !== '1') throw new Error('Run test groups inside non-verba-dev through code/dev.ps1.');
 const root = fileURLToPath(new URL('../', import.meta.url));
-const groups = {javascript: ['unit', 'evidence', 'transport'], all: Object.keys(TEST_SUITES)};
+const groups = {javascript: ['unit', 'evidence', 'transport', 'build_process'], all: Object.keys(TEST_SUITES)};
 const name = process.argv[2], selected = groups[name] ?? (Object.hasOwn(TEST_SUITES, name) ? [name] : null);
 if (process.argv.length !== 3 || !selected) throw new Error(`Supply one test group: ${[...Object.keys(TEST_SUITES), ...Object.keys(groups)].join(', ')}.`);
 await assertRegisteredTests();

@@ -13,6 +13,8 @@ pub mod authentication;
 pub mod camera_capture;
 pub mod camera_location;
 pub mod camera_quality;
+pub mod camera_set;
+pub mod camera_set_evidence;
 pub mod evidence_session;
 pub mod face_identity;
 pub mod key_enrollment;

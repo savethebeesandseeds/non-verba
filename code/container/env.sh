@@ -6,14 +6,16 @@ if [[ $(uname -s) != Linux || ${NONVERBA_CONTAINER:-} != 1 || ( ! -f /.dockerenv
   return 1 2>/dev/null || exit 1
 fi
 export NONVERBA_TOOLS=/opt/nonverba-tools
+export NONVERBA_BUILD_ROOT=/opt/nonverba-build
+export NONVERBA_ANDROID_DEBUG_KEYSTORE=/root/.android/debug.keystore
 export JAVA_HOME=$NONVERBA_TOOLS/jdk
 export ANDROID_HOME=$NONVERBA_TOOLS/android-sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
 export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370
 export RUSTUP_HOME=$NONVERBA_TOOLS/rustup
 export CARGO_HOME=$NONVERBA_TOOLS/cargo
-export CARGO_TARGET_DIR=/opt/nonverba-build/target
-export GRADLE_USER_HOME=/opt/nonverba-build/gradle-home
+export CARGO_TARGET_DIR=$NONVERBA_BUILD_ROOT/target
+export GRADLE_USER_HOME=$NONVERBA_BUILD_ROOT/gradle-home
 export CMAKE_HOME=$NONVERBA_TOOLS/cmake
 export CUDA_HOME=/usr/local/cuda-13.1
 export CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}

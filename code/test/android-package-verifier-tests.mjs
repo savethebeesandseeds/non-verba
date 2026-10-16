@@ -3,9 +3,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {deflateRawSync} from 'node:zlib';
 import {parseZip, entryBytes, parseElf, exportedJni, crc32} from '../tools/verify-android-package.mjs';
+import {isAndroidBrowserOnly} from '../tools/android-web-assets.mjs';
 
 assert.equal(process.platform, 'linux', 'Run tests only inside non-verba-dev.');
 assert.equal(process.env.NONVERBA_CONTAINER, '1', 'Run tests only inside non-verba-dev.');
+
+test('developer staging and inspection exclude browser-only entries and model trees', () => {
+  for (const path of ['review.html', 'map.html', 'face-model', 'face-model/runtime.wasm', 'face-model/notices/LICENSE.txt']) {
+    assert.equal(isAndroidBrowserOnly(path), true, path);
+  }
+  for (const path of ['index.html', 'audio.html', 'pkg/nonverba_core_bg.wasm', 'face-model-spec.js']) {
+    assert.equal(isAndroidBrowserOnly(path), false, path);
+  }
+});
 
 function zip(entries, comment = '') {
   const locals=[], centrals=[];

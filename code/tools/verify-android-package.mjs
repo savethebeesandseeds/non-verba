@@ -15,6 +15,7 @@ import {inflateRawSync} from 'node:zlib';
 import {basename, dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {collectReleaseNotices} from './release-notices.mjs';
+import {isAndroidBrowserOnly} from './android-web-assets.mjs';
 
 const execute = promisify(execFile);
 const codeRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -210,8 +211,7 @@ async function main() {
     report.zip_16k_alignment = true;
 
     // The map entry is a browser-only provider preview, not an Android document.
-    const browserOnly = new Set(['review.html', 'map.html']);
-    const web = await files(webRoot, relative => browserOnly.has(basename(relative).toLowerCase()));
+    const web = await files(webRoot, relative => isAndroidBrowserOnly(relative));
     const stageRoots = [join(androidRoot,'app/src/main/assets/web'), join(buildRoot,'app/src/main/assets/web')];
     const stages = await Promise.all(stageRoots.map(root=>files(root)));
     insist(web.size > 0 && [...web.keys()].some(name=>name.endsWith('.wasm')), 'Shared WASM assets missing.');
@@ -236,7 +236,7 @@ async function main() {
     report.license_source_notices_verified=true; report.notice_count=notices.size;
     const webSource=await files(resolve(codeRoot,'../web/src'));
     for(const [name,path] of webSource) if(!name.includes('/')&&/\.(html|css|js)$/.test(name)) {
-      if(browserOnly.has(name.toLowerCase())) continue;
+      if(isAndroidBrowserOnly(name)) continue;
       if(!web.has(name)||await fileHash(path)!==await fileHash(web.get(name))) report.current_build_gaps.push('web/dist differs from current web/src: '+name);
     }
     const ignored=new Set(['.toolchain','.gradle','.kotlin','.cxx','build']);

@@ -6,7 +6,7 @@ No wireless pairing, TCP device connections, unrestricted shell or driver instal
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Status','DeviceInfo','AppStatus','GpsDiagnostics','InstallVerified','Launch','RestartApp','AppUiState','AppUiBatch','AppCameraChallenge','StageCameraOffer','AppScreenshot','AppTap','AppSwipe','AppBack','AppText','AppDismissShare','ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing','ExportAudio','VerifySavedDownloads','Preview','Stop')]
+    [ValidateSet('Status','DeviceInfo','AppStatus','GpsDiagnostics','InstallVerified','Launch','RestartApp','AppUiState','AppUiBatch','AppCameraChallenge','StageCameraOffer','AppScreenshot','AppTap','AppSwipe','AppBack','AppText','AppDismissShare','ExportEnrollments','ExportLocations','ExportCamera','ExportCameraSet','ExportCameraQuality','ExportCameraPairing','ExportAudio','VerifySavedDownloads','Preview','Stop')]
     [string]$Action = 'Status',
     [string]$VerificationReport,
     [string]$RetrievalManifest,
@@ -55,6 +55,10 @@ if ($Action -cin @('StageCameraOffer','ExportCameraPairing')) {
 if ($Action -ceq 'ExportCameraQuality') {
     if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Unsigned camera quality retrieval requires PowerShell 7.' }
     . (Join-Path $PSScriptRoot 'usb-camera-quality.ps1')
+}
+if ($Action -ceq 'ExportCameraSet') {
+    if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Camera-set retrieval requires PowerShell 7.' }
+    . (Join-Path $PSScriptRoot 'usb-camera-set.ps1')
 }
 if ($Action -ceq 'ExportAudio') {
     if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Local audio demo retrieval requires PowerShell 7.' }
@@ -228,10 +232,12 @@ function Get-OwnUiFocus {
 function Get-NativeCameraUiContainer($State) {
     if (@($State.nodes | Where-Object { $_.class -ceq 'android.webkit.WebView' }).Count) { throw 'Native camera taps require no WebView.' }
     $titles = @($State.nodes | Where-Object { $_.class -ceq 'android.widget.TextView' -and $_.text -ceq 'Non-verba camera' -and -not $_.'text-truncated' })
+    $setTitles = @($State.nodes | Where-Object { $_.class -ceq 'android.widget.TextView' -and $_.'content-desc' -ceq 'Non-verba camera set' -and -not $_.'content-desc-truncated' })
     $containers = @($State.nodes | Where-Object { $_.'resource-id' -ceq 'android:id/content' -and $_.class -ceq 'android.widget.FrameLayout' -and $_.enabled })
     $buttons = @($State.nodes | Where-Object { $_.class -ceq 'android.widget.Button' })
-    if ($titles.Count -ne 1 -or $containers.Count -ne 1 -or $buttons.Count -ne 2) { throw 'Expected the exact native camera dialog and its two buttons.' }
-    foreach ($label in @('TAKE PHOTO','CANCEL')) {
+    if (($titles.Count + $setTitles.Count) -ne 1 -or $containers.Count -ne 1 -or $buttons.Count -ne 2) { throw 'Expected the exact native camera dialog and its two buttons.' }
+    $shutterLabel = if ($setTitles.Count -eq 1) { 'TAKE ALL REQUESTED PHOTOS' } else { 'TAKE PHOTO' }
+    foreach ($label in @($shutterLabel,'CANCEL')) {
         $matches = @($buttons | Where-Object { $_.text -ceq $label -and -not $_.'text-truncated' -and
             $_.enabled -and $_.clickable -and -not $_.password -and -not $_.editable })
         if ($matches.Count -ne 1) { throw 'Native camera requires one enabled Take photo button and one enabled Cancel button.' }
@@ -666,7 +672,7 @@ try {
                     $nativeCameraTap = $false
                     if ($step.action -ceq 'tap') {
                         $nativeSelector = @($step.selector.PSObject.Properties)[0]
-                        $nativeCameraTap = $nativeSelector.Name -ceq 'text' -and $nativeSelector.Value -cin @('TAKE PHOTO','CANCEL')
+                        $nativeCameraTap = $nativeSelector.Name -ceq 'text' -and $nativeSelector.Value -cin @('TAKE PHOTO','TAKE ALL REQUESTED PHOTOS','CANCEL')
                     }
                     $viewport = Get-AppUiViewport $state -NativeCameraOnly:$nativeCameraTap
                     $bounds = $viewport.bounds
@@ -853,22 +859,25 @@ try {
                 user_action_required=(-not $stillInApp);focus_before=$focus;focus_after=$focusAfter;screen=$screen;
                 instruction='Observe a fresh AppScreenshot before any next input. If focus left Non-verba, stop and ask the user; do not follow into another app or permission screen.'} | ConvertTo-Json -Depth 5
         }
-        { $_ -cin @('ExportEnrollments','ExportLocations','ExportCamera','ExportCameraQuality','ExportCameraPairing','ExportAudio') } {
+        { $_ -cin @('ExportEnrollments','ExportLocations','ExportCamera','ExportCameraSet','ExportCameraQuality','ExportCameraPairing','ExportAudio') } {
             # These fixed actions share the bounded transfer path. Only their
             # explicit UI-export filename/shape/size allowlists differ.
             # No caller-supplied command/path, private app files or keys.
             $enrollments = $Action -ceq 'ExportEnrollments'
             $camera = $Action -ceq 'ExportCamera'
+            $cameraSet = $Action -ceq 'ExportCameraSet'
             $cameraQuality = $Action -ceq 'ExportCameraQuality'
             $pairing = $Action -ceq 'ExportCameraPairing'
             $audio = $Action -ceq 'ExportAudio'
-            $category = if ($enrollments) { 'enrollment' } elseif ($camera) { 'camera' } elseif ($cameraQuality) { 'camera-quality' } elseif ($pairing) { 'camera-pairing' } elseif ($audio) { 'audio-demo' } else { 'location' }
+            $category = if ($enrollments) { 'enrollment' } elseif ($camera) { 'camera' } elseif ($cameraSet) { 'camera-set' } elseif ($cameraQuality) { 'camera-quality' } elseif ($pairing) { 'camera-pairing' } elseif ($audio) { 'audio-demo' } else { 'location' }
             $names = if ($enrollments) {
                 @('nonverba-key-enrollment-request.json','nonverba-key-enrollment-response.json')
             } elseif ($camera) {
                 @('nonverba-????????????.jpg','nonverba-challenge-????????????.json','nonverba-public-device-id.txt')
             } elseif ($cameraQuality) {
                 @('nonverba-camera-quality-????????????.json')
+            } elseif ($cameraSet) {
+                @('camera-set-request.json','camera-set-????????-????-????-????-????????????.json')
             } elseif ($pairing) {
                 @('nonverba-camera-offer.json','nonverba-camera-answer.json')
             } elseif ($audio) {
@@ -885,6 +894,8 @@ try {
                 '^cache/exports/(' + $uuidPattern + ')/((?:nonverba-[a-f0-9]{12}\.jpg|nonverba-challenge-[a-f0-9]{12}\.json|nonverba-public-device-id\.txt))$'
             } elseif ($cameraQuality) {
                 '\Acache/exports/(' + $uuidPattern + ')/(nonverba-camera-quality-[a-f0-9]{12}\.json)\z'
+            } elseif ($cameraSet) {
+                '\Acache/exports/(' + $uuidPattern + ')/(camera-set-(?:request|' + $uuidPattern + ')\.json)\z'
             } elseif ($pairing) {
                 '^cache/exports/(' + $uuidPattern + ')/(nonverba-camera-(offer|answer)\.json)$'
             } elseif ($audio) {
@@ -896,8 +907,8 @@ try {
             if (-not $before.installed -or $before.android_user_id -ne 0) {
                 throw 'Public export retrieval currently requires the installed debug app and foreground Android user 0.'
             }
-            $audioFocus = if ($audio) { Get-OwnUiFocus } else { $null }
-            $inventoryLimit = if ($audio) { 17 } else { 129 }
+            $audioFocus = if ($audio -or $cameraSet) { Get-OwnUiFocus } else { $null }
+            $inventoryLimit = if ($audio) { 17 } elseif ($cameraSet) { 9 } else { 129 }
             $rootGuard = 'test -d cache/exports && test ! -L cache && test ! -L cache/exports'
             $paths = @()
             foreach ($name in $names) {
@@ -915,13 +926,14 @@ try {
                 throw 'Unexpected or excessive public export inventory; no files were read.'
             }
             if ($cameraQuality) { Assert-CameraQualityExportInventory $paths }
+            if ($cameraSet -and $paths.Count -gt 8) { throw 'Camera-set retrieval is bounded to eight public exports.' }
             if ($audio) { Assert-AudioExportInventory $paths }
             foreach ($remotePath in $paths) {
                 if ($remotePath -cnotmatch $exportPattern) { throw 'Unexpected public export path; no files were read.' }
             }
             $runName = $category + '-exports-' + [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffffffZ') + '-' + [Guid]::NewGuid().ToString('N')
             $output = Join-Path (Join-Path $codeRoot 'artifacts/device-acceptance') $runName
-            if ($audio) {
+            if ($audio -or $cameraSet) {
                 # Refuse linked local ancestors before storing phone bytes.
                 $ancestor = [IO.DirectoryInfo][IO.Path]::GetDirectoryName($output)
                 while ($null -ne $ancestor) {
@@ -932,7 +944,7 @@ try {
                 if (Test-Path -LiteralPath $output) { throw 'Audio retrieval output already exists.' }
             }
             [IO.Directory]::CreateDirectory($output) | Out-Null
-            if ($audio -and (((Get-Item -LiteralPath $output).Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) { throw 'Linked audio retrieval output is not accepted.' }
+            if (($audio -or $cameraSet) -and (((Get-Item -LiteralPath $output).Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) { throw 'Linked media retrieval output is not accepted.' }
             $record = [ordered]@{type=('nonverba-public-' + $category + '-retrieval');version=1;status='incomplete';
                 started_at_utc=[DateTime]::UtcNow.ToString('o');usb_transport=$true;android_user_id=0;
                 package='org.nonverba.camera';installed_apk_sha256=$before.installed_apk_sha256;
@@ -940,6 +952,9 @@ try {
                 sensor_tests_run=$false;timing_note='Retrieval times describe this USB copy only. They do not establish independently witnessed challenge issuance or earlier response arrival.'}
             if ($camera) {
                 $record.context_note = 'Operator-exported camera artifacts. Retrieval does not verify C2PA, the scene, GPS, request freshness or signing-key trust; independent Linux verification is required.'
+                $record.camera_evidence_verified = $false
+            } elseif ($cameraSet) {
+                $record.context_note = 'Explicitly saved camera-set originals and unsigned bundle indexes. Retrieval checks exact bytes and bounded structure only; shared Rust verification and independently expected request/key remain required.'
                 $record.camera_evidence_verified = $false
             } elseif ($cameraQuality) {
                 $record.context_note = 'Explicitly exported unsigned image quality guidance only. Retrieval checks bytes and bounded shape, not authenticity, metric correctness, task usability, operator effort or responsibility. Recompute independently retained JPEG/profile bytes with Rust/WASM.'
@@ -978,6 +993,9 @@ try {
                     } elseif ($cameraQuality) {
                         $qualitySpec = Get-CameraQualityExportSpec $name
                         $kind = $qualitySpec.kind; $maximum = $qualitySpec.maximum
+                    } elseif ($cameraSet) {
+                        $kind = if ($name -ceq 'camera-set-request.json') { 'set-request' } else { 'set-bundle' }
+                        $maximum = if ($kind -ceq 'set-request') { 32 * 1024 } else { 32 * 1024 * 1024 }
                     } elseif ($audio) {
                         $audioSpec = Get-AudioExportSpec $name
                         $kind = $audioSpec.kind; $maximum = $audioSpec.maximum
@@ -999,13 +1017,17 @@ try {
                     $guard = "$rootGuard && test -d $folder && test ! -L $folder && test -f $remotePath && test ! -L $remotePath"
                     $userId = ((Invoke-Bridge @('-d','shell','am','get-current-user')) -join '').Trim()
                     if ($userId -cne '0') { throw 'Foreground user changed; retrieval stopped.' }
-                    if ($audio -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; audio retrieval stopped.' }
+                    if (($audio -or $cameraSet) -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; media retrieval stopped.' }
                     $command = "$guard && stat -c %s $remotePath"
                     $sizeText = ((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) -join '').Trim()
                     if ($sizeText -cnotmatch '^[1-9][0-9]{0,8}$' -or [long]$sizeText -gt $maximum) { throw 'Public export exceeds its size bound.' }
                     if ($audio) {
                         $audioTotalBytes += [long]$sizeText
                         if ($audioTotalBytes -gt 32 * 1024 * 1024) { throw 'Audio demo inventory exceeds the 32 MiB aggregate bound.' }
+                    }
+                    if ($cameraSet) {
+                        $audioTotalBytes += [long]$sizeText
+                        if ($audioTotalBytes -gt 64 * 1024 * 1024) { throw 'Camera-set retrieval exceeds its 64 MiB aggregate bound.' }
                     }
                     $command = if ($audio) { "$guard && head -c $($maximum + 1) $remotePath | sha256sum" } else { "$guard && sha256sum $remotePath" }
                     $hashBefore = ((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) -join '').Trim()
@@ -1030,13 +1052,15 @@ try {
                     $command = if ($audio) { "$guard && head -c $($maximum + 1) $remotePath | sha256sum" } else { "$guard && sha256sum $remotePath" }
                     $hashAfter = ((Invoke-Bridge @('-d','shell','run-as','org.nonverba.camera','sh','-c',("'" + $command + "'"))) -join '').Trim()
                     if ($actualHash -cne $expectedHash -or $hashAfter -cne $hashBefore) { throw 'Public export bytes changed during retrieval.' }
-                    if ($audio -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; audio bytes were not stored.' }
+                    if (($audio -or $cameraSet) -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed; media bytes were not stored.' }
                     # Transport shape checks only. Preserve original bytes for
                     # independent Rust protocol/signature/chain verification.
                     if ($camera) {
                         Assert-CameraPublicExport -Bytes $bytes -Kind $kind -ChallengePrefix $challengePrefix
                     } elseif ($cameraQuality) {
                         $publicRecord = Assert-CameraQualityPublicExport -Bytes $bytes -Name $name
+                    } elseif ($cameraSet) {
+                        $publicRecord = Assert-CameraSetPublicExport -Bytes $bytes -Name $name
                     } elseif ($pairing) {
                         $publicRecord = Assert-CameraPairingRecord -Bytes $bytes -Kind $kind
                     } elseif ($audio) {
@@ -1122,6 +1146,7 @@ try {
                         sha256=$actualHash;retrieved_at_utc=$retrievedAt;purpose='location'}
                     if ($enrollments) { $entry.purpose = $publicRecord.purpose }
                     elseif ($camera) { $entry.purpose = 'camera'; $entry.challenge_id_prefix = $challengePrefix }
+                    elseif ($cameraSet) { $entry.purpose = 'camera-set'; $entry.artifact_type = $publicRecord.type }
                     elseif ($cameraQuality) {
                         $entry.purpose = 'camera-quality'; $entry.artifact_type = 'nonverba-camera-quality-report'
                         $entry.image_sha256 = $publicRecord.image_sha256; $entry.analysis_profile_sha256 = $publicRecord.analysis_profile_sha256
@@ -1136,7 +1161,7 @@ try {
                 $after = (& $PSCommandPath -Action AppStatus) | ConvertFrom-Json
                 if ($after.android_user_id -ne 0 -or -not $after.installed -or
                     $after.installed_apk_sha256 -cne $before.installed_apk_sha256) { throw 'Foreground user or installed app changed during retrieval.' }
-                if ($audio -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed during audio retrieval.' }
+                if (($audio -or $cameraSet) -and (Get-OwnUiFocus) -cne $audioFocus) { throw 'Non-verba focus changed during media retrieval.' }
                 $record.status = 'complete'
             } catch {
                 $record.error = $_.Exception.Message

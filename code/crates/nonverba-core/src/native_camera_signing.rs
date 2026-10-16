@@ -23,6 +23,38 @@ impl ExternalSigner<'_> {
         metadata: &CameraCaptureMetadata,
         now_ms: u64,
     ) -> Result<Vec<u8>, String> {
+        self.seal_camera_bound(jpeg, request, location_json, metadata, now_ms, None)
+    }
+
+    pub fn seal_camera_set_member(
+        &self,
+        jpeg: &[u8],
+        member: &crate::camera_set_evidence::CameraSetMember,
+        location_json: &str,
+        metadata: &CameraCaptureMetadata,
+        now_ms: u64,
+    ) -> Result<Vec<u8>, String> {
+        member.request.validate(now_ms)?;
+        member.validate_native(metadata)?;
+        self.seal_camera_bound(
+            jpeg,
+            &member.request.camera_request(),
+            location_json,
+            metadata,
+            now_ms,
+            Some(member),
+        )
+    }
+
+    fn seal_camera_bound(
+        &self,
+        jpeg: &[u8],
+        request: &CameraRequest,
+        location_json: &str,
+        metadata: &CameraCaptureMetadata,
+        now_ms: u64,
+        member: Option<&crate::camera_set_evidence::CameraSetMember>,
+    ) -> Result<Vec<u8>, String> {
         request.validate(now_ms)?;
         metadata.validate(&request.challenge, now_ms)?;
         metadata.validate_location(&crate::parse(location_json)?)?;
@@ -53,6 +85,11 @@ impl ExternalSigner<'_> {
         builder
             .add_assertion(ASSERTION_LABEL, &metadata)
             .map_err(err)?;
+        if let Some(member) = member {
+            builder
+                .add_assertion(crate::camera_set_evidence::ASSERTION_LABEL, member)
+                .map_err(err)?;
+        }
         let mut destination = Cursor::new(Vec::new());
         builder
             .sign(self, "image/jpeg", &mut source, &mut destination)

@@ -45,13 +45,16 @@ root:
 ./code/dev.ps1 Up
 ./code/dev.ps1 Setup
 ./code/dev.ps1 Test
-./code/dev.ps1 Build
+./code/dev.ps1 -Action Build -Command @('developer')
 ./code/dev.ps1 Serve
 ```
 
 `Up` inspects and reuses an existing matching container, including a stopped one.
 `Setup` installs/configures dependencies without managing container lifecycle.
-`Build` and `Test` dispatch the project operations inside Debian. `Prepare` is
+`Build` requires an explicit `developer`, `participant` or `all` target and
+assembles/lints without routine export copies; see the Android build contract
+for verified exports and retained workload checks. `Test` dispatches project
+checks inside Debian. `Prepare` is
 dependency-image preparation; it does not create or replace a container.
 
 The evidence application preview uses the documented loopback port 4173. Camera

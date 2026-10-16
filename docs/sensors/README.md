@@ -20,6 +20,11 @@ resolution, exposure and regional sharpness inspection. The verifier workspace
 can analyze a selected delivered JPEG and export an unsigned quality record;
 calibrated quality requirements and signed request binding remain future work.
 
+[Camera-set profiles](CAMERA_SET_PROFILE.md) define the new shared Rust
+single-camera/front-back policy and unsigned preparation/timing-claim checks.
+The tested foundation is separate from multi-image signing, native acquisition
+and physical support, which remain future work.
+
 The shared Rust core runs as WebAssembly in the browser and Android WebView, and through JNI for native Android sensor evidence. Kotlin adapts permissions, GNSS and Camera2 callbacks, lifecycle, Keystore signing, protected storage and file import/export. C++ owns the realtime AAudio buffers; Rust owns protocol, DSP and verification. There are **no Java source files**, server signing keys, remote signing services, CDN assets, or photo uploads.
 
 The 0.7.0 implementation connects live audio to the shared requester API: the
@@ -169,3 +174,5 @@ The capture preview uses localhost or HTTPS. Its generated local review entry ha
 - [C2PA Rust SDK 0.91.0](https://docs.rs/c2pa/0.91.0/c2pa/)
 - [C2PA soft-binding algorithm registry](https://github.com/c2pa-org/softbinding-algorithm-list)
 - [Android key attestation](https://developer.android.com/privacy-and-security/security-key-attestation)
+
+Camera-set developer implementation and the next phone checkpoint are recorded in [CAMERA_SET_IMPLEMENTATION.md](CAMERA_SET_IMPLEMENTATION.md).

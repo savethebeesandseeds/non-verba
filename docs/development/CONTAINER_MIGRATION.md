@@ -45,8 +45,13 @@ Then, from the unified public checkout:
 ```powershell
 ./code/dev.ps1 -Snapshot -Action Status
 ./code/dev.ps1 -Snapshot -Action Test
-./code/dev.ps1 -Snapshot -Action Build
+./code/dev.ps1 -Snapshot -Action Build -Command @('developer')
 ```
+
+Android builds require an explicit `developer`, `participant` or `all` target.
+Routine builds assemble/lint without exporting copies. The
+[Android build contract](../../code/android/README.md#build-contract) defines the
+canonical target pipeline, concurrency limit, run records and verified export flags.
 
 Snapshot execution accepts `Setup`, `Shell`, `Exec`, `Build`, `Test`, `Serve`
 and `Native`. `Status` only inspects the environment. `Up`, `Prepare` and `Adb`
@@ -78,20 +83,26 @@ and caches continue to use `/opt/nonverba-tools` and `/opt/nonverba-build`.
 
 ## Related operations share one snapshot
 
-Every invocation creates a fresh source copy. Generated WASM, Android staging,
-exports and reports stay inside that copy; they are not copied back or reused by
-another invocation. Keep a build and its follow-up checks together:
+Every invocation creates a fresh source copy. Generated web outputs, exports and
+reports stay inside that copy and are not copied back automatically. Android
+staging/outputs and Cargo/Gradle caches use the shared `/opt/nonverba-build` tree;
+a later selected build can replace its cached APK. An explicit verified export
+retains an exclusive copy for handoff. Keep preparation and follow-up checks
+together; a browser-only export needs no Android build:
 
 ```powershell
 ./code/dev.ps1 -Snapshot -Action Exec -Command @(
   'bash', '-c',
-  'bash dev.sh build && node tools/package-web.mjs'
+  'node tools/build-web.mjs && node tools/package-web.mjs'
 )
 ```
 
-For APK inspection, run `node tools/verify-android-package.mjs` after building
-in the same snapshot. Supply `--apk` with the build's exact exported APK path
-and `--baseline-report` with an independently retained signer report. The
+For APK handoff, add `--export --baseline-report PATH` to the selected Build
+command. The pipeline runs the selected independent package inspectors against
+its exact exported APKs in the same snapshot before finalizing a manifest.
+The developer inspector is `node tools/verify-android-package.mjs`; the separate
+participant inspector is `node tools/verify-participant-package.mjs`. Each also
+accepts an exact existing `--apk` and independent `--baseline-report`. The
 original report may remain under `/workspace/code/artifacts/`; reading its
 public signer fingerprint does not require publishing the private report.
 The inspector also verifies version, assets, libraries and license/source

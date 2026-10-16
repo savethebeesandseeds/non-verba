@@ -113,6 +113,14 @@ Sequential captures or a subset of cameras must not silently count as a complete
 simultaneous capture. This is a proposal for later consideration, not an
 implemented feature.
 
+16 October owner decision: the connected phone exposes front/rear cameras but
+advertises no concurrent combination. The owner approved a separate sequential
+rear-then-front mode under one photo action, with both images, signed mode/order
+binding and measured timestamps/gap where comparable. This does not satisfy a
+simultaneous request or reduce its required members. See the current
+[camera-set profile](../../sensors/CAMERA_SET_PROFILE.md) and
+[implementation/device record](../../sensors/CAMERA_SET_IMPLEMENTATION.md).
+
 ## Audio: recording defects and environmental conditions
 
 Current checkpoint: the corrected native path completed one four-second local

@@ -3,9 +3,12 @@
 set -euo pipefail
 code_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/." && pwd)
 cd "$code_root"
-source container/env.sh
 action=${1:-health}
 shift || true
+if [[ $action == build ]]; then
+  exec bash tools/build-android.sh "$@"
+fi
+source container/env.sh
 case "$action" in
   health)
     uname -s; java -version; node --version; rustc --version; wasm-bindgen --version
@@ -13,13 +16,6 @@ case "$action" in
     ;;
   exec) exec "$@" ;;
   native) exec bash tools/build-android-native.sh "$@" ;;
-  build)
-    node tools/build-wasm.mjs
-    node tools/build-web.mjs
-    node tools/stage-android.mjs
-    bash tools/build-android-native.sh
-    bash tools/build-android.sh
-    ;;
   test)
     node --run test
     ;;

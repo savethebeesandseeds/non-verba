@@ -18,16 +18,18 @@
 
 ## Project progress dashboard
 
-- Maintain one JSON per Hero beside `web/dashboard/index.html`, for example
-  `web/dashboard/01-sensors.json`. The fixed hierarchy
+- Maintain one JSON per Hero in `web/dashboard/heroes/`, for example
+  `web/dashboard/heroes/01-sensors.json`. The fixed hierarchy
   is Hero -> Goal -> Milestone; the previous eleven categories are Heroes. Read
   `web/dashboard/SCHEMA.md` and the relevant Hero JSON before updates; the schema
   is sufficient for ordinary progress edits. `docs/notes/WORKSTREAMS.md` defines
   Hero boundaries.
-- Keep author-facing Hero JSONs, manifest, schema guide, refresh entry points and
-  generated HTML at the dashboard root. Interface sources live in `src/`, build
-  and validation helpers in `tools/`, formal schemas in `schemas/`, prepared
-  artwork in `assets/branding/`, and focused checks in `test/`.
+- Keep the dashboard root limited to `README.md`, `SCHEMA.md`, `manifest.json`
+  and `package.json`. Hero records live in `heroes/`, interface sources in `src/`,
+  build/validation/refresh helpers in `scripts/`, formal schemas in `schemas/`,
+  prepared artwork in `assets/branding/`, focused checks in `tests/`, and generated
+  output in `public/`. Use the current manifest paths; do not recreate the old
+  root-level Hero files when continuing a session started before this migration.
 - Keep this a partial record of confirmed work. Add Goals and Milestones only
   from explicit owner requests, agreed task records or evidenced implementation;
   do not seed guessed tasks, acceptance criteria, dependencies or active states
@@ -51,20 +53,28 @@
   only when Heroes change.
   Keep private captures, device records, credentials and operational logs out of
   dashboard JSON. Preserve other sessions' Hero edits.
-- After Hero data changes, run `./web/dashboard/refresh.ps1` from the repository
-  root, or `bash web/dashboard/refresh.sh` from Windows Bash. The shell helper
+- Whenever any Hero JSON changes, including Goals, descriptions, evidence or
+  Milestone states, refresh the dashboard in the same task. The chat editing the
+  JSON is responsible for this step unless the owner explicitly coordinates
+  refresh elsewhere; do not wait for the user to ask. Run
+  `./web/dashboard/scripts/refresh.ps1` from the repository root, or
+  `bash web/dashboard/scripts/refresh.sh` from Windows Bash. The shell helper
   delegates to PowerShell on Windows; inside managed Debian it updates only the
   current snapshot's HTML. The Windows workflow validates and regenerates the
   standalone HTML in the existing managed container through a source snapshot,
-  then copies `index.html` back. Hero JSONs
+  then copies `public/index.html` back. Hero JSONs
   remain the source of truth; preserve concurrent edits and never hand-edit the
-  generated HTML. Dashboard upkeep needs no APK or aggregate project build.
-- Use `./web/dashboard/refresh.ps1 -Check` to validate data and HTML freshness
+  generated HTML. Confirm that the helper completed successfully before reporting
+  the dashboard updated; JSON/schema inspection or `-Check` alone does not refresh
+  it. If a guard or environment blocker prevents refresh, preserve the guards and
+  concurrent work and explicitly report that the dashboard refresh is pending.
+  Dashboard upkeep needs no APK or aggregate project build.
+- Use `./web/dashboard/scripts/refresh.ps1 -Check` to validate data and HTML freshness
   without host writes. When UI/model/template/schema code or behavior changes,
   use `-BrowserCheck` for focused model and file-open browser checks as well as
   freshness; refresh the generated HTML before delivery. Keep scripts protected
   by generated CSP hashes.
-- The dashboard opens directly as `web/dashboard/index.html`, already populated
+- The dashboard opens directly as `web/dashboard/public/index.html`, already populated
   from its last validated snapshot; do not create a webserver or require a picker
   to use it. Browser file-open security prevents automatically fetching adjacent
   JSONs. JSON edits become visible only after refresh and reopening/reloading the
@@ -97,7 +107,7 @@
   empty planning Goals; invent no priority or progress.
 - Reuse the project artwork in `web/site/branding/` for the dashboard. Keep
   originals unchanged and embed its small dashboard derivatives through
-  `web/dashboard/tools/branding.mjs`; the standalone page must retain its artwork
+  `web/dashboard/scripts/branding.mjs`; the standalone page must retain its artwork
   without neighboring assets or network requests. Completion indicators count
   tracked milestones, and the current-work panel reflects actual active/blocked
   records; do not invent priorities or imply production readiness.
@@ -156,3 +166,16 @@
   and two USB DLLs: loopback port 5038, mDNS/network autoconnection disabled,
   physical-device selection with `-d`. It does not authorize Windows Java,
   wireless debugging, driver installation, or phone actions unrelated to a task.
+- Control the APK through text and semantic state by default. Read the original
+  USB helper's `AppUiState`, select observed resource IDs, exact labels or content
+  descriptions, and use its bounded `AppUiBatch` for related authorized steps.
+  Inspect the returned final state; input acknowledgement does not prove success.
+  Do not use screenshot/coordinate loops as the routine control method: they are
+  slower and more fragile. Screenshots are for visual checks or specific controls
+  genuinely absent from semantic state. A root-only hierarchy is an accessibility
+  limitation, not proof of a blank or stuck page; record that limitation and use
+  a targeted fallback. Recheck semantic access after a page or app change.
+  Follow `docs/development/USB_DEBUGGING.md`; preserve own-app focus, fresh-state,
+  ambiguity, permission and native-dialog guards. This preference does not
+  authorize arbitrary ADB/JavaScript, global accessibility changes, WebView remote
+  debugging, credentials, other-app control or automatic permission approval.

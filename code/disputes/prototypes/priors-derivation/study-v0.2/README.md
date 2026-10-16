@@ -58,29 +58,44 @@ anchors. These engineering results do not pass the source-quality gate.
 
 The separate literal-emphasis/full-parent experiment remains a **PROTOTYPE**.
 Its closed runner and stored-reader components passed scoped source review;
-the latest fictional Phase A attempt is held as recorded below. The actual
-69-case pilot, full discovery, candidate-meaning
+the actual metadata-only Phase A trial is held as recorded below. The full
+69-case source pilot, full discovery, candidate-meaning
 freeze and untouched reserve evaluation remain outstanding. Detailed evidence
 and retained earlier attempts follow below.
 
 ### Current continuation hold — 16 October 2026
 
-The 25 fake utility controls and 11 pure observer controls passed and received
-independent acceptance for **source-only preparation**. The new fictional V3
-Phase A attempt then ran and was **HELD** by a bootstrap CLI/top-level-await
-import cycle and parent IPC shutdown. All original 200 records remain
-unattempted; neither B_PREPARE nor Phase B ran. Real source-data access, models
-and pinned tokenizers remain closed. These fictional controls and the held
-attempt add no source readings, quality findings or prior adoption.
+The third separately admitted actual metadata-only Phase A trial was **HELD**,
+exiting 2 after about 2.49 seconds. The root-parent fix reached the first built-in
+resource proof, source hashing and PARENT HELLO. It then stopped with
+EXECUTOR_CHILD_CAPTURE_PIPE before REGISTERED, INIT or metadata IO. Both monitors
+exited 0, all child IO joined, and independent terminal verification confirmed
+observer and parent process/group absence. All original 200 records remain
+unmaterialized and remaining, with no 69-case freeze or cumulative checkpoint.
 
-Two zero-RSS zombie identities leave owned process absence **unproven**.
-Further heavy continuation is held pending coordinated maintenance. The full
-goal stays active and source quality remains in progress: ten materiality holds,
-the 15,000 frozen selections versus the 1,000-record calibration, 937 accepted
-texts, 57 rejected sources and six unacquired records are unchanged. The completed
-historical 243,192-cell census and 154-case inventory of 145 unresolved candidates
-plus nine ineligible anchors are unchanged. Earlier unexecuted statements below
-describe their preparation-time checkpoints, before this later fictional attempt.
+A separate pinned-Linux-Node built-in subprocess probe confirmed that stdio
+configured as 'pipe' can expose socket descriptors. It exited 0 with joined IO
+and no files or study inputs. The narrow capture-fix scope permits literal pipe or socket descriptors while
+retaining exact descriptor, capture-file, device/inode and child-operation checks. The generated entry has not passed an actual trial of this capture fix.
+
+The environment repair retains its four passing focused controls, helper-only
+real-Node check and composition checks. The root-parent fix now has the limited
+runtime evidence of reaching the first built-in proof. Earlier 40 pure/fake
+ownership controls and one monitor-join regression retain their source-only
+scope; no whole-trial pass follows.
+
+All three failed actual attempts and fictional V3/V5 holds remain immutable.
+A later trial requires fresh admission, with all failed costs charged within
+the existing limits; retry is not automatic. No actual metadata input or source
+data was opened and no tokenizer/model call was made. All ten materiality holds
+and the full fictional two-phase prerequisite for Phase B remain unchanged.
+
+The full goal stays active. All ten materiality holds remain unresolved, and
+expansion remains at the 1,000-record calibration within the 15,000 frozen
+selections: 937 accepted texts, 57 rejected sources and six unacquired records.
+The completed historical 243,192-cell census and 154-case machine inventory of
+145 unresolved candidates plus nine ineligible anchors are unchanged. Earlier
+unexecuted statements below describe their preparation-time checkpoints.
 
 ## Observed checkpoint — 14 October 2026
 

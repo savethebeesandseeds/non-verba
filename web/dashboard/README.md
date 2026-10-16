@@ -2,7 +2,7 @@
 
 ## Open the dashboard
 
-Open [index.html](index.html) directly in your browser. It contains the interface
+Open [public/index.html](public/index.html) directly in your browser. It contains the interface
 and a validated snapshot of the Hero JSONs, so it opens populated without a file
 picker, webserver, Docker, Node or Java. Repository documentation and evidence
 links expect the original workspace location.
@@ -70,32 +70,32 @@ required outcome, rather than independent completed checklist items.
 
 ## Update progress
 
-1. Read [SCHEMA.md](SCHEMA.md) and edit the relevant Hero file beside
-   `index.html`, such as `01-sensors.json`. Keep stable IDs and preserve
+1. Read [SCHEMA.md](SCHEMA.md) and edit the relevant Hero file in `heroes/`,
+   such as `heroes/01-sensors.json`. Keep stable IDs and preserve
    concurrent changes.
 2. Record the actual milestone outcome, status, acceptance and evidence, then
    update the Hero's date.
 3. From the repository root, run:
 
 ```powershell
-./web/dashboard/refresh.ps1
+./web/dashboard/scripts/refresh.ps1
 ```
 
 From Windows Git Bash or WSL with PowerShell 7 available, the shell equivalent is:
 
 ```sh
-bash web/dashboard/refresh.sh
+bash web/dashboard/scripts/refresh.sh
 ```
 
 It delegates to the same Windows snapshot/copy-back helper. Inside the managed
-Debian container, `refresh.sh` validates and updates `index.html` in the current
+Debian container, `refresh.sh` validates and updates `public/index.html` in the current
 source snapshot; that container-side invocation does not copy it to Windows.
 Use `--check` and `--browser-check` for the equivalent shell options.
 
 The refresh command validates the JSONs and generates the HTML inside the
 existing managed Debian container through the
 [snapshot bridge](../../docs/development/CONTAINER_MIGRATION.md), then copies the
-generated `index.html` back. The documented container must be available for this
+generated `public/index.html` back. The documented container must be available for this
 maintenance step. It installs no host toolchain and starts no webserver.
 After a successful refresh, reopen or reload the HTML to see the changes.
 
@@ -116,37 +116,36 @@ the [Hero outline](../../docs/notes/WORKSTREAMS.md) defines scope.
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Generated standalone interface and last validated progress snapshot |
-| `01-sensors.json` … `11-services.json` | One maintained JSON per Hero, containing Goals and Milestones |
+| `public/index.html` | Generated standalone interface and last validated progress snapshot |
+| `heroes/` | One maintained JSON per Hero, containing Goals and Milestones |
 | `manifest.json` | Ordered Hero file list and project title |
 | `SCHEMA.md` | Progress authoring guide |
-| `refresh.ps1` | Refreshes through the existing managed container and copies back the generated HTML |
-| `refresh.sh` | Shell entry point: delegates from Windows Bash, or refreshes the current managed Debian source snapshot |
+| `scripts/refresh.ps1` | Refreshes through the existing managed container and copies back the generated HTML |
+| `scripts/refresh.sh` | Shell entry point: delegates from Windows Bash, or refreshes the current managed Debian source snapshot |
 | `src/` | Interface template, CSS, browser behavior and shared model |
-| `tools/` | Project loader, standalone generator, validator and branding preparation |
+| `scripts/` | Project loader, standalone generator, validator, refresh and branding preparation |
 | `schemas/` | Formal Hero and manifest schemas, version 2 |
 | `assets/branding/` | Small transparent PNG derivatives of the existing project artwork |
-| `test/` | Focused model and standalone browser checks |
+| `tests/` | Focused model and standalone browser checks |
 
-The root keeps the files used to open the dashboard and maintain progress easy to
-find. Hero JSON filenames and refresh commands remain stable. Implementation and
-maintenance details are grouped by purpose:
+The root holds the project metadata and authoring guides. Records, implementation,
+maintenance scripts and browser output each have their own directory:
 
 ```text
 web/dashboard/
-  index.html
   README.md, SCHEMA.md
-  01-sensors.json ... 11-services.json
   manifest.json, package.json
-  refresh.ps1, refresh.sh
+  heroes/              01-sensors.json ... 11-services.json
   src/                 template.html, dashboard.css, dashboard.js, model.js
-  tools/               project.mjs, build-standalone.mjs, validate.mjs, branding.mjs
+  scripts/             refresh.ps1, refresh.sh, project.mjs, build-standalone.mjs,
+                       validate.mjs, branding.mjs
   schemas/             hero.schema.json, manifest.schema.json
   assets/branding/     prepared PNG artwork
-  test/                model.test.mjs, browser.mjs
+  tests/               model.test.mjs, browser.mjs
+  public/index.html    generated standalone dashboard
 ```
 
-Do not edit generated `index.html` by hand. Preserve stable IDs for confirmed
+Do not edit generated `public/index.html` by hand. Preserve stable IDs for confirmed
 records and other sessions' reviewed checkpoints. Add tasks only when their
 scope and state are supported, following [SCHEMA.md](SCHEMA.md).
 
@@ -156,21 +155,21 @@ From the repository root, check data validity and HTML freshness without copying
 any host changes:
 
 ```powershell
-./web/dashboard/refresh.ps1 -Check
+./web/dashboard/scripts/refresh.ps1 -Check
 ```
 
 Add `-BrowserCheck` to run the focused model and `file://` browser checks,
 including generated-file freshness, in the same managed snapshot:
 
 ```powershell
-./web/dashboard/refresh.ps1 -Check -BrowserCheck
+./web/dashboard/scripts/refresh.ps1 -Check -BrowserCheck
 ```
 
 After interface, model, template or schema-code changes, refresh with the focused
 checks before delivery:
 
 ```powershell
-./web/dashboard/refresh.ps1 -BrowserCheck
+./web/dashboard/scripts/refresh.ps1 -BrowserCheck
 ```
 
 For visual review, set `NONVERBA_DASHBOARD_SCREENSHOTS` to `../reviews/dashboard`
@@ -183,11 +182,11 @@ remains outside homepage, browser-app and Android release exports.
 
 The sprout mark and character artwork originate in [project branding](../site/branding/README.md).
 Original artwork remains unchanged. The standalone generator includes small PNG
-copies and the SVG mark as data URIs; copying only `index.html` retains the artwork.
+copies and the SVG mark as data URIs; copying only `public/index.html` retains the artwork.
 If the selected artwork changes, regenerate its transparent thumbnails inside the
 managed container with the existing browser runtime, then retain those PNGs and
 refresh the HTML:
 
 ```sh
-NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers node ../web/dashboard/tools/branding.mjs --optimize
+NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers node ../web/dashboard/scripts/branding.mjs --optimize
 ```

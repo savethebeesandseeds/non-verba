@@ -28,7 +28,7 @@ function hero(goals = [goal()], changes = {}) {
     summary: 'Reliable acquisition and inspectable evidence.', updatedAt: DATE, goals, ...changes,
   };
 }
-function manifest(heroes = [{ id: 'sensors', file: '01-sensors.json' }], changes = {}) {
+function manifest(heroes = [{ id: 'sensors', file: 'heroes/01-sensors.json' }], changes = {}) {
   return { schemaVersion: 2, title: 'Non-verba heroes', description: 'Goals and milestones.', heroes, ...changes };
 }
 function jsonFile(value, name = 'sensors.json', changes = {}) {
@@ -113,7 +113,7 @@ test('calendar dates are real and completion uses the milestone date or falls ba
   assert.throws(() => validateHero(hero([goal([milestone('sensors-camera', 'done', { updatedAt: '2026-10-12', completedAt: '2026-10-13' })])])));
 });
 
-test('evidence paths stay inside the repository and Hero files beside the dashboard', () => {
+test('evidence paths stay inside the repository and Hero files inside the heroes folder', () => {
   for (const path of [
     'https://example.com/claim', 'javascript:alert(1)', '//example.com/claim',
     '/docs/README.md', '../private-source/README.md', 'docs/../README.md',
@@ -124,7 +124,8 @@ test('evidence paths stay inside the repository and Hero files beside the dashbo
   assert.doesNotThrow(() => validateHero(hero([goal([milestone('sensors-camera', 'ready', {
     evidence: [{ label: 'Acceptance note', path: 'docs/development/VALIDATION.md#sensor-checks' }],
   })])])));
-  for (const file of ['../outside.json', '/heroes/sensors.json', 'https://example.com/sensors.json', 'categories/01-sensors.json', 'heroes/01-sensors.json']) {
+  assert.doesNotThrow(() => validateManifest(manifest([{ id: 'sensors', file: 'heroes/01-sensors.json' }])));
+  for (const file of ['../outside.json', '/heroes/sensors.json', 'https://example.com/sensors.json', 'categories/01-sensors.json', '01-sensors.json', 'heroes/../01-sensors.json', 'heroes/nested/01-sensors.json', 'heroes\\01-sensors.json']) {
     assert.throws(() => validateManifest(manifest([{ id: 'sensors', file }])));
   }
 });
@@ -132,7 +133,7 @@ test('evidence paths stay inside the repository and Hero files beside the dashbo
 test('manifest identity, order and unique hero numbers remain consistent', () => {
   const one = hero();
   const two = hero([goal([milestone('identity-enrollment')], { id: 'identity-continuity' })], { id: 'identity', number: 2, title: 'Identity' });
-  const index = manifest([{ id: 'sensors', file: '01-sensors.json' }, { id: 'identity', file: '02-identity.json' }]);
+  const index = manifest([{ id: 'sensors', file: 'heroes/01-sensors.json' }, { id: 'identity', file: 'heroes/02-identity.json' }]);
   assert.doesNotThrow(() => validateProject(index, [one, two]));
   assert.throws(() => validateProject(index, [two, one]));
   assert.throws(() => validateProject(index, [one]));
@@ -146,7 +147,7 @@ test('IDs cannot collide across heroes, goals or milestones', () => {
     hero([goal(), goal([milestone('sensors-audio')])]),
     hero([goal([milestone('sensors-camera'), milestone('sensors-camera')])]),
   ]) assert.throws(() => validateProject(manifest(), [value]));
-  const index = manifest([{ id: 'sensors', file: '01-sensors.json' }, { id: 'identity', file: '02-identity.json' }]);
+  const index = manifest([{ id: 'sensors', file: 'heroes/01-sensors.json' }, { id: 'identity', file: 'heroes/02-identity.json' }]);
   assert.throws(() => validateProject(index, [hero(), hero([goal([milestone('sensors-camera')], { id: 'identity-continuity' })], { id: 'identity', number: 2 })]));
 });
 
@@ -229,8 +230,8 @@ test('selected local JSON files sort by Hero number and synthesize a consistent 
   assert.deepEqual(result.errors, []);
   assert.doesNotThrow(() => validateProject(result.manifest, result.heroes));
   assert.equal(result.manifest.heroes[0].id, 'sensors');
-  assert.ok(result.manifest.heroes[0].file.endsWith('01-sensors.json'));
-  assert.ok(result.manifest.heroes[1].file.endsWith('02-identity.json'));
+  assert.equal(result.manifest.heroes[0].file, 'heroes/01-sensors.json');
+  assert.equal(result.manifest.heroes[1].file, 'heroes/02-identity.json');
 });
 
 test('malformed or unreadable selections produce visible errors while valid Heroes remain readable', async () => {

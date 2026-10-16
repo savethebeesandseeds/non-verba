@@ -32,7 +32,7 @@ export function validateManifest(value) {
   const ids = new Set(), files = new Set();
   for (const entry of value.heroes) {
     shape(entry, ['id', 'file'], [], 'Manifest Hero'); id(entry.id, 'Manifest Hero id');
-    insist(typeof entry.file === 'string' && /^[0-9]{2,3}-[a-z0-9-]+\.json$/.test(entry.file), 'Manifest Hero file must be a numbered JSON beside index.html');
+    insist(typeof entry.file === 'string' && /^heroes\/[0-9]{2,3}-[a-z0-9-]+\.json$/.test(entry.file), 'Manifest Hero file must be a numbered JSON in heroes/');
     insist(!ids.has(entry.id) && !files.has(entry.file), 'Duplicate manifest Hero id or file');
     ids.add(entry.id); files.add(entry.file);
   }
@@ -134,7 +134,7 @@ export function filterHeroes(heroes, {query = '', status = 'all', heroId = 'all'
 }
 export async function loadHeroFiles(files) {
   const selected = Array.from(files || []), errors = [];
-  insist(selected.length > 0, 'Select the numbered Hero JSON files from web/dashboard.');
+  insist(selected.length > 0, 'Select the numbered Hero JSON files from web/dashboard/heroes.');
   insist(selected.length <= 100, 'Select at most 100 Hero JSON files.');
   const results = await Promise.allSettled(selected.map(async file => {
     insist(typeof file.name === 'string' && /\.json$/i.test(file.name), 'Select a Hero JSON file.');
@@ -153,7 +153,7 @@ export async function loadHeroFiles(files) {
   heroes.sort((left, right) => left.number - right.number);
   const manifest = {
     schemaVersion: 2, title: 'Non Verba project dashboard', description: 'Heroes loaded from explicitly selected local JSON files.',
-    heroes: heroes.map(hero => ({id: hero.id, file: `${String(hero.number).padStart(2, '0')}-${hero.id}.json`})),
+    heroes: heroes.map(hero => ({id: hero.id, file: `heroes/${String(hero.number).padStart(2, '0')}-${hero.id}.json`})),
   };
   try { validateProject(manifest, heroes); } catch (error) { errors.push({file: 'Selected Heroes', message: error.message}); }
   return {manifest, heroes, errors};

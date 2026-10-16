@@ -68,6 +68,7 @@ val verifyWebAssets by tasks.registering {
     doLast {
         val requiredAssets = listOf(
             "index.html", "audio.html", "audio-worklet.js", "audio-capture.js", "audio-peer.js", "audio-demo.js", "audio-platform.js",
+            "camera-set.html", "camera-set-ui.js", "camera-set-platform.js",
             "location.html", "location-platform.js", "location-capture.js", "location-ui.js", "location-policy.js", "location.css", "camera-location.js", "camera-platform.js",
             "live-location.html", "live-location-ui.js", "live-location-session.js", "live-session-storage.js", "live-peer.js",
             "agent-requester.js", "agent-evidence-storage.js",

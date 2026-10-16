@@ -35,15 +35,15 @@
             },
             {
               "label": "Data and evidence-path validation implementation",
-              "path": "web/dashboard/tools/project.mjs"
+              "path": "web/dashboard/scripts/project.mjs"
             },
             {
               "label": "Focused model checks",
-              "path": "web/dashboard/test/model.test.mjs"
+              "path": "web/dashboard/tests/model.test.mjs"
             },
             {
               "label": "Browser behavior checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -74,7 +74,7 @@
             },
             {
               "label": "Hierarchy and color browser checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -93,7 +93,7 @@
           "evidence": [
             {
               "label": "Self-contained HTML generator",
-              "path": "web/dashboard/tools/build-standalone.mjs"
+              "path": "web/dashboard/scripts/build-standalone.mjs"
             },
             {
               "label": "Direct-open and maintenance instructions",
@@ -101,7 +101,7 @@
             },
             {
               "label": "File-open and fresh-reload browser checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -121,7 +121,7 @@
           "evidence": [
             {
               "label": "Validated embedded-record generation",
-              "path": "web/dashboard/tools/build-standalone.mjs"
+              "path": "web/dashboard/scripts/build-standalone.mjs"
             },
             {
               "label": "Schema and update workflow",
@@ -129,15 +129,15 @@
             },
             {
               "label": "Container-backed refresh orchestration",
-              "path": "web/dashboard/refresh.ps1"
+              "path": "web/dashboard/scripts/refresh.ps1"
             },
             {
               "label": "Bash refresh helper",
-              "path": "web/dashboard/refresh.sh"
+              "path": "web/dashboard/scripts/refresh.sh"
             },
             {
               "label": "Automatic file-open behavior checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -157,7 +157,7 @@
           "evidence": [
             {
               "label": "Self-contained branding and record generation",
-              "path": "web/dashboard/tools/build-standalone.mjs"
+              "path": "web/dashboard/scripts/build-standalone.mjs"
             },
             {
               "label": "Existing project artwork",
@@ -165,7 +165,7 @@
             },
             {
               "label": "Embedded artwork and thumbnail mapping",
-              "path": "web/dashboard/tools/branding.mjs"
+              "path": "web/dashboard/scripts/branding.mjs"
             },
             {
               "label": "Overview and hierarchy interactions",
@@ -173,7 +173,7 @@
             },
             {
               "label": "File-open interaction and layout checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -209,7 +209,7 @@
             },
             {
               "label": "Collapse, hierarchy and detail browser checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -230,7 +230,7 @@
           "evidence": [
             {
               "label": "Standalone interface generation",
-              "path": "web/dashboard/tools/build-standalone.mjs"
+              "path": "web/dashboard/scripts/build-standalone.mjs"
             },
             {
               "label": "Hero and Goal selection behavior",
@@ -246,7 +246,7 @@
             },
             {
               "label": "File-open selection and navigation checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         },
@@ -285,7 +285,7 @@
             },
             {
               "label": "Pointer, keyboard, viewport and motion checks",
-              "path": "web/dashboard/test/browser.mjs"
+              "path": "web/dashboard/tests/browser.mjs"
             }
           ]
         }

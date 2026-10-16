@@ -40,6 +40,7 @@ class MainActivity : Activity() {
     private lateinit var webView: WebView
     private lateinit var nativeLocation: NativeLocation
     private lateinit var nativeCamera: NativeCamera
+    private lateinit var nativeCameraSet: NativeCameraSet
     private lateinit var nativeAudio: NativeAudio
     private lateinit var nativeKeyEnrollment: NativeKeyEnrollment
     private lateinit var nativeScreenAwake: NativeScreenAwake
@@ -88,6 +89,7 @@ class MainActivity : Activity() {
                     lifecycleAction("pairing page navigation") { nativeCameraPairing?.setForeground(false) },
                     lifecycleAction("location page navigation") { if (::nativeLocation.isInitialized) nativeLocation.pause() },
                     lifecycleAction("camera page navigation") { if (::nativeCamera.isInitialized) nativeCamera.pause() },
+                    lifecycleAction("camera-set page navigation") { if (::nativeCameraSet.isInitialized) nativeCameraSet.pause() },
                     lifecycleAction("audio page navigation") { if (::nativeAudio.isInitialized) nativeAudio.pause() },
                     lifecycleAction("enrollment page navigation") { if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.pause() }
                 ), complete = {}, report = ::reportLifecycleFailure)
@@ -248,8 +250,10 @@ class MainActivity : Activity() {
         nativeLocation = NativeLocation(this, ::hasForegroundAppDocument, ::requestNativeFinePermission,
             nativeGpsWarmup::prepareForRequest)
         webView.addJavascriptInterface(nativeLocation, "NativeLocation")
-        nativeCamera = NativeCamera(this, ::hasForegroundAppDocument, ::requestNativeCameraPermission)
+        nativeCamera = NativeCamera(this, { hasForegroundAppDocument() && Uri.parse(webView.url ?: "").path != CAMERA_SET_DOCUMENT_PATH }, ::requestNativeCameraPermission)
         webView.addJavascriptInterface(nativeCamera, "NativeCamera")
+        nativeCameraSet = NativeCameraSet(this, { hasForegroundAppDocument() && Uri.parse(webView.url ?: "").path == CAMERA_SET_DOCUMENT_PATH }, ::requestNativeCameraPermission)
+        webView.addJavascriptInterface(nativeCameraSet, "NativeCameraSet")
         nativeAudio = NativeAudio(this, ::hasForegroundAppDocument, ::requestNativeAudioPermission)
         webView.addJavascriptInterface(nativeAudio, "NativeAudio")
         nativeKeyEnrollment = NativeKeyEnrollment(this) {
@@ -344,6 +348,7 @@ class MainActivity : Activity() {
             lifecycleAction("enrollment pause") { nativeKeyEnrollment.pause() },
             lifecycleAction("location pause") { if (pauseLocation) nativeLocation.pause() },
             lifecycleAction("camera pause") { if (pauseCamera) nativeCamera.pause() },
+            lifecycleAction("camera-set pause") { if (pauseCamera) nativeCameraSet.pause() },
             lifecycleAction("audio pause") { if (pauseAudio) nativeAudio.pause() },
             lifecycleAction("geolocation pause") { if (runtimePermissionInFlight == null) disableGeolocation() },
             lifecycleAction("web media pause") {
@@ -392,6 +397,7 @@ class MainActivity : Activity() {
             lifecycleAction("GPS warmup stop") { nativeGpsWarmup.pause() },
             lifecycleAction("location stop") { nativeLocation.pause() },
             lifecycleAction("camera stop") { nativeCamera.pause() },
+            lifecycleAction("camera-set stop") { nativeCameraSet.pause() },
             lifecycleAction("audio stop") { nativeAudio.pause() },
             lifecycleAction("enrollment stop") { nativeKeyEnrollment.pause() },
             lifecycleAction("geolocation stop") { disableGeolocation() },
@@ -410,6 +416,7 @@ class MainActivity : Activity() {
             lifecycleAction("GPS warmup destruction") { nativeGpsWarmup.destroy() },
             lifecycleAction("location destruction") { nativeLocation.destroy() },
             lifecycleAction("camera destruction") { nativeCamera.destroy() },
+            lifecycleAction("camera-set destruction") { nativeCameraSet.destroy() },
             lifecycleAction("audio destruction") { nativeAudio.destroy() },
             lifecycleAction("enrollment destruction") { nativeKeyEnrollment.destroy() },
             lifecycleAction("geolocation destruction") { disableGeolocation() },
@@ -432,6 +439,7 @@ class MainActivity : Activity() {
     private fun revokeNativeAuthority(location: Boolean = true, camera: Boolean = true, audio: Boolean = true) = listOf(
         lifecycleAction("location authority revocation") { if (location && ::nativeLocation.isInitialized) nativeLocation.revokeAuthority() },
         lifecycleAction("camera authority revocation") { if (camera && ::nativeCamera.isInitialized) nativeCamera.revokeAuthority() },
+        lifecycleAction("camera-set authority revocation") { if (camera && ::nativeCameraSet.isInitialized) nativeCameraSet.revokeAuthority() },
         lifecycleAction("audio authority revocation") { if (audio && ::nativeAudio.isInitialized) nativeAudio.revokeAuthority() },
         lifecycleAction("enrollment authority revocation") { if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.revokeAuthority() }
     )
@@ -595,8 +603,9 @@ class MainActivity : Activity() {
         private const val NATIVE_AUDIO_PERMISSION = 106
         private const val AUDIO_DOCUMENT_PATH = "/assets/web/audio.html"
         private const val KEY_ENROLLMENT_DOCUMENT_PATH = "/assets/web/key-enrollment.html"
-        private val GPS_DOCUMENT_PATHS = setOf("/assets/web/index.html", "/assets/web/location.html", "/assets/web/live-location.html")
-        private val APP_DOCUMENT_PATHS = setOf("/assets/web/index.html", AUDIO_DOCUMENT_PATH, "/assets/web/location.html", "/assets/web/live-location.html", KEY_ENROLLMENT_DOCUMENT_PATH)
+        private const val CAMERA_SET_DOCUMENT_PATH = "/assets/web/camera-set.html"
+        private val GPS_DOCUMENT_PATHS = setOf("/assets/web/index.html", "/assets/web/location.html", "/assets/web/live-location.html", CAMERA_SET_DOCUMENT_PATH)
+        private val APP_DOCUMENT_PATHS = setOf("/assets/web/index.html", AUDIO_DOCUMENT_PATH, "/assets/web/location.html", "/assets/web/live-location.html", KEY_ENROLLMENT_DOCUMENT_PATH, CAMERA_SET_DOCUMENT_PATH)
         private val MEDIA_RUNTIME_PERMISSIONS = mapOf(
             PermissionRequest.RESOURCE_VIDEO_CAPTURE to Manifest.permission.CAMERA,
             PermissionRequest.RESOURCE_AUDIO_CAPTURE to Manifest.permission.RECORD_AUDIO

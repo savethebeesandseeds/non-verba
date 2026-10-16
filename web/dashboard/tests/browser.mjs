@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { renderStandalone } from '../tools/build-standalone.mjs';
+import { renderStandalone } from '../scripts/build-standalone.mjs';
 import { filterHeroes, flattenMilestones, summarize, validateProject } from '../src/model.js';
 
 if (process.platform !== 'linux' || process.env.NONVERBA_CONTAINER !== '1') throw new Error('Run dashboard browser checks inside non-verba-dev.');
@@ -25,7 +25,7 @@ const labels = { proposed: 'Proposed', ready: 'Ready', in_progress: 'In progress
 const first = rows[0];
 const isolatedDirectory = await mkdtemp(join(tmpdir(), 'nonverba-dashboard-file-'));
 const isolatedFile = join(isolatedDirectory, 'dashboard.html'), disposableFiles = [isolatedFile];
-await copyFile(resolve(dashboard, 'index.html'), isolatedFile);
+await copyFile(resolve(dashboard, 'public/index.html'), isolatedFile);
 let browser;
 const check = async (label, action) => { await action(); console.log('PASS ' + label); };
 
@@ -303,6 +303,8 @@ try {
   await check('the isolated file opens a compact overview and requires explicit Hero and Goal selection', async () => {
     const current = await session(), { page } = current;
     assert.deepEqual(await page.evaluate(() => window.NonVerbaDashboardRecord), record);
+    assert.equal(await page.locator('a.brand').getAttribute('href'), '../../../README.md');
+    assert.equal(await page.locator('a[href="../../../docs/notes/WORKSTREAMS.md"]').count(), 1);
     await overview(page);
     await progressMatches(page.locator('#project-progress .project-progress-meter'), summary.done, summary.total);
     for (const hero of heroes) {
@@ -574,7 +576,7 @@ try {
     const goal = { id: 'dashboard-qa-goal', title: 'Synthetic status goal', milestones: Object.keys(labels).map((status) => ({
       id: 'dashboard-qa-' + status.replaceAll('_', '-'), title: labels[status] + ' test milestone', status,
       ...(status === 'blocked' ? { description: 'Waiting for a verified dependency. ' + maliciousDescription } : {}),
-      ...(status === 'done' ? { description: maliciousDescription, acceptance: [maliciousCriterion], evidence: [{ label: 'Authored fixture source', path: 'web/dashboard/test/browser.mjs' }] } : {}),
+      ...(status === 'done' ? { description: maliciousDescription, acceptance: [maliciousCriterion], evidence: [{ label: 'Authored fixture source', path: 'web/dashboard/tests/browser.mjs' }] } : {}),
     })) };
     value.heroes[0].goals.push(goal);
     const current = await session(undefined, await fixture('states-and-text', value)), { page } = current;
@@ -617,8 +619,8 @@ try {
     const evidence = row.locator('.evidence-link');
     assert.ok((await evidence.innerText()).includes('Authored fixture source'));
     assert.ok((await evidence.locator('.evidence-path').innerText()).includes('browser.mjs'));
-    assert.ok((await evidence.getAttribute('title')).includes('web/dashboard/test/browser.mjs'));
-    assert.ok((await evidence.getAttribute('href')).includes('web/dashboard/test/browser.mjs'));
+    assert.ok((await evidence.getAttribute('title')).includes('web/dashboard/tests/browser.mjs'));
+    assert.ok((await evidence.getAttribute('href')).includes('web/dashboard/tests/browser.mjs'));
     await current.clean();
   });
 

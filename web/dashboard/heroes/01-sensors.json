@@ -3,7 +3,7 @@
   "id": "sensors",
   "number": 1,
   "title": "Sensor hardening and evidence quality",
-  "summary": "Signed sensor formats and bounded GPS, camera and audio checkpoints are retained alongside proposed Goals for reliable acquisition, durable failed-attempt records, calibrated usability, acoustic reliability, richer camera capture, bounded location/timing assurance and resistance to replay or substitution. Independent physical acceptance remains unresolved.",
+  "summary": "Signed sensor formats and bounded GPS, camera and audio checkpoints are retained alongside proposed Goals for reliable acquisition, durable failed attempts, calibrated usability, acoustic reliability, front/back camera capture and motion, device attribution, screenshot retrieval/hardening, location/timing assurance and resistance to substitution. Independent physical acceptance remains unresolved.",
   "updatedAt": "2026-10-16",
   "goals": [
     {
@@ -307,7 +307,7 @@
     {
       "id": "sensors-quality-contract-goal",
       "title": "Calibrated quality requirements for usable evidence",
-      "description": "Proposed future Goal: turn reproducible sensor guidance into task-relevant requirements only where calibration supports them. Preserve the requested single 0–100 sharpness value with one internally managed algorithm; algorithm selection, readable-text/digit evaluation and any threshold remain open. Consider subject detail, resolution, exposure, noise/compression and explicitly unassessable outcomes rather than treating one sharpness score as usability. Define how any selected metric version, region and requirement would bind to the original signed request while retained evidence keeps its original rules. Audio usability and location uncertainty require their own semantics, including the different Android/browser confidence meanings. Assignments supplies task expectations; the dispute/governance domains decide responsibility, compensation and consequences. No quality-based rejection, penalty rule or production acceptance standard is adopted by this roadmap. The proposed participant interface distinguishes unavailable or unassessable quality from partial/failed acquisition and complete evidence, retaining the exact request/policy and reason for refusal; calibrated requirements must be fixed before collection.",
+      "description": "Proposed future Goal: turn reproducible sensor guidance into task-relevant requirements only where calibration supports them. Preserve the requested single 0–100 sharpness value with one internally managed algorithm; algorithm selection, readable-text/digit evaluation and any threshold remain open. Consider subject detail, resolution, exposure, noise/compression and explicitly unassessable outcomes rather than treating one sharpness score as usability. Define how any selected metric version, region and requirement would bind to the original signed request while retained evidence keeps its original rules. Audio usability and location uncertainty require their own semantics, including the different Android/browser confidence meanings. Assignments supplies task expectations; the dispute/governance domains decide responsibility, compensation and consequences. No quality-based rejection, penalty rule or production acceptance standard is adopted by this roadmap. The proposed participant interface distinguishes unavailable or unassessable quality from partial/failed acquisition and complete evidence, retaining the exact request/policy and reason for refusal; calibrated requirements must be fixed before collection. Other retained hardening concerns include camera exposure/detail and motion guidance, audio continuity, clipping and level observations, and location uncertainty/freshness. Quiet audio or adverse environmental conditions may be the intended observation; challenge recovery, a high sharpness value or a reported accuracy radius alone cannot establish task usability or fault.",
       "milestones": [
         {
           "id": "sensors-quality-calibration",
@@ -350,9 +350,189 @@
     },
     {
       "id": "sensors-camera-motion-multicamera-goal",
-      "title": "Motion evidence and simultaneous multi-camera feasibility",
-      "description": "Proposed future Goal from the retained sensor-quality notes: assess whether capture-time preview/gyro observations can support useful motion guidance and whether the device cameras can contribute a genuinely concurrent measurement. Determine supported camera combinations, synchronization and timebase limits before choosing an implementation scope. Any later bundle would need per-camera identity, capture timing, quality and explicit unavailable/failed component outcomes bound to the same original request; sequential or partial capture must not silently count as complete simultaneous capture. Decide the task value, supported subset policy and privacy implications with the participant/privacy domains. Android capability access and presentation belong with APK buildout. No motion estimator, simultaneous-camera support or synchronization guarantee is currently claimed, and scoped steps remain undefined.",
-      "milestones": []
+      "title": "Front/back photo capture and motion evidence",
+      "description": "The owner selected explicit rear-then-front sequential capture after this phone advertised no concurrent combination. Implemented signed mode/order binding, exact comparable-clock exposure gap reporting, native release-gated camera handoff, semantic UI controls and bounded public export support; strict concurrent and explicit browser single-camera modes remain distinct. The inspected developer APK is installed with exact-hash readback. Software checks passed, but the first physical sequential attempt timed out after rear bytes arrived with front pending and no signatures. A fresh retry was refused because previous cleanup remained pending. The exact resource/callback cause is unknown. Work stopped at the owner request to continue later; no verified phone pair or measured phone gap exists. Screenshot evidence collection, durable partial retention, the wider device failure matrix, real computer validation and independent requester acceptance remain unfinished.",
+      "milestones": [
+        {
+          "id": "sensors-camera-set-profile",
+          "title": "Define required camera sets and capture timing",
+          "description": "Implemented the bounded version-1 Rust camera-set profile and preparation/outcome contract. Explicit single-camera, concurrent front/back and owner-selected sequential front/back timing are distinct. Sequential camera-list order is required, comparable exposure starts must strictly increase, and exact nanosecond span is reported without a simultaneity or default maximum-gap claim. Missing or changed clocks remain unassessable; missing members are never dropped. Fourteen focused profile tests pass, with nine additional signed-evidence tests in the 23-test camera-set suite. Capability advertisements do not grant collection authority or prove physical behavior.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "The authored profile defines explicit single-camera/front-back membership, distinct sequential/concurrent timing, consent/authority handoffs and complete, partial, failed, unsupported and unassessable outcomes.",
+            "Fourteen focused profile tests pass for identity, role, exact order/gap, no silent reduction, unavailable concurrency, strict/bounded JSON and exact timing. Sequential mode cannot be read as permission to substitute for a concurrent request."
+          ],
+          "evidence": [
+            {
+              "label": "Original multi-camera proposal and limits",
+              "path": "docs/notes/sensors/SENSOR_QUALITY_NOTES.md#camera-simultaneous-capture-from-all-cameras--future-consideration"
+            },
+            {
+              "label": "Camera-set profile contract and focused validation result",
+              "path": "docs/sensors/CAMERA_SET_PROFILE.md"
+            },
+            {
+              "label": "Shared profile and unsigned assessment implementation",
+              "path": "code/crates/nonverba-core/src/camera_set.rs"
+            },
+            {
+              "label": "Focused profile, capability and timing regressions",
+              "path": "code/crates/nonverba-core/src/camera_set_tests.rs"
+            }
+          ],
+          "completedAt": "2026-10-16"
+        },
+        {
+          "id": "sensors-camera-set-binding",
+          "title": "Implement request-bound multi-image verification",
+          "description": "Implemented strict camera-set requests and per-JPEG C2PA binding of full original request, explicit timing mode, camera order/membership and common attempt. Shared Rust/WASM verification checks exact JPEGs, expected media certificate pin, native metadata and required timing, including exact comparable-clock gap and sequential order. Sequential evidence cannot satisfy a concurrent original even when its gap fits the tolerance. All 23 focused Rust tests and 12 worker/WASM/UI cases pass; existing native-camera regressions remain valid. The index is unsigned, GPS is submitted metadata only, and physical capture/receipt authority remain separate.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Passing shared Rust and real JNI-to-WASM cases verify complete native front/rear and explicit browser single-camera sets against the independently supplied original/pin; changed bytes, members, request, key, attempt or required timing cannot verify as complete.",
+            "Legacy single-image and composed camera/location regressions pass. Camera-set metadata-only GPS scope, unsigned index, resource bounds and physical/authority/receipt limits are explicit."
+          ],
+          "completedAt": "2026-10-16",
+          "evidence": [
+            {
+              "path": "docs/sensors/CAMERA_SET_IMPLEMENTATION.md",
+              "label": "Camera-set implementation, validation and package checkpoint"
+            },
+            {
+              "path": "code/crates/nonverba-core/src/camera_set_evidence.rs",
+              "label": "Shared request, member binding and independent verifier"
+            },
+            {
+              "path": "code/crates/nonverba-core/src/camera_set_evidence_tests.rs",
+              "label": "Real C2PA binding and timing regressions"
+            },
+            {
+              "path": "code/test/camera-set-browser-tests.mjs",
+              "label": "Production JNI to worker/WASM and retrieval UI checks"
+            }
+          ]
+        },
+        {
+          "id": "sensors-camera-set-acquisition",
+          "title": "Acquire the declared cameras in one photo attempt",
+          "description": "Implemented explicit native sequential and concurrent Camera2 paths plus browser single-camera collection. One native shutter requests the full original set; sequential handoff waits for prior session/device close confirmations. Build, lint, signer/current-output inspection and installed-hash readback passed. The real first sequential trial received rear image bytes but hit its 60-second deadline with front pending and no signatures. A fresh retry was blocked by retained cleanup. Successful two-camera acquisition, real gap and complete retrieval are still pending; the exact pairing/release callback cause needs bounded diagnostics. No release guard was bypassed.",
+          "status": "in_progress",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: supported adapters collect the declared set under one original request/attempt, retain per-camera identity/timing and report a legitimate one-camera result for the selected single-camera profile.",
+            "Prospective: missing consent, unsupported combinations, expiry or loss of authority prevents an unauthorized complete result; the ordinary caller cannot provide arbitrary image bytes or acquisition timestamps for the collector to certify."
+          ],
+          "evidence": [
+            {
+              "path": "docs/sensors/CAMERA_SET_IMPLEMENTATION.md",
+              "label": "Implemented path, adapter bounds and required phone checkpoint"
+            },
+            {
+              "path": "code/android/app/src/main/kotlin/org/nonverba/camera/NativeCameraSet.kt",
+              "label": "Native camera-set collector"
+            },
+            {
+              "path": "web/src/camera-set-ui.js",
+              "label": "Developer acquisition/retrieval/verifier interface"
+            },
+            {
+              "path": "code/android/app/src/main/kotlin/org/nonverba/camera/NativeMainThreadRead.kt",
+              "label": "Bounded UI-thread lookup used by the camera-set bridge"
+            }
+          ]
+        },
+        {
+          "id": "sensors-camera-set-outcomes-cleanup",
+          "title": "Expose per-camera failures and observable cleanup",
+          "description": "Unsigned per-camera outcomes, retained failed ownership, lifecycle revocation and strict sequential release gating are implemented. Forty-five pure Kotlin handoff checks pass. Physical testing exposed a real unresolved cleanup/handoff issue: the first attempt timed out after rear bytes arrived, discarded unsigned bytes and left front pending; the next fresh begin refused because cleanup was still pending. Actual shutdown and the exact retained resource/callback are unconfirmed. Richer bounded callback/resource diagnostics and terminal cleanup refresh/retry controls are next work, not implemented yet. Durable partial retention/export and signed failure/storage reporting remain unfinished.",
+          "status": "in_progress",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: cancellation, permission loss, individual camera failure, signing failure and storage failure retain distinct per-camera outcomes and explicit unsigned/absent reports, with no partial attempt relabelled complete.",
+            "Prospective: acquired images and diagnostic records follow the selected bounded retention policy; cleanup distinguishes confirmed release, failed cleanup with retained ownership and unknown release, and stale callbacks cannot publish or restart capture."
+          ],
+          "evidence": [
+            {
+              "path": "docs/sensors/CAMERA_SET_IMPLEMENTATION.md",
+              "label": "Outcome, cleanup and unfinished retention scope"
+            },
+            {
+              "path": "code/android/app/src/main/kotlin/org/nonverba/camera/NativeCameraSet.kt",
+              "label": "Native attempt ownership and cleanup implementation"
+            },
+            {
+              "path": "code/test/camera-set-adapter-tests.mjs",
+              "label": "Transport cancellation/refusal regressions"
+            }
+          ]
+        },
+        {
+          "id": "sensors-camera-set-software-validation",
+          "title": "Validate camera-set binding and refusal in software",
+          "description": "Managed Debian checks passed: 23 focused Rust camera-set tests, 13 existing native-camera tests, 45 sequential handoff checks, ten dispatcher checks, 71 production JVM/Rust JNI checks, eight transport scenarios and 12 Chromium worker/WASM/UI cases. Build/lint and independent package inspection passed. The browser harness initially referenced a method without calling it; the test-only correction passed against the same built assets. The new standalone Rust CLI correctly refuses the future-dated synthetic fixture under the actual clock; successful real-set CLI verification remains pending. Physical timeout and retained-cleanup failure show that synthetic checks do not complete the native callback/storage matrix.",
+          "status": "in_progress",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: retained runs cover valid front/rear and single-camera sets plus omission, duplication, camera swaps, changed bytes/request/key, out-of-policy timing, partial outcomes and legacy verification.",
+            "Prospective: focused race/refusal cases cover cancellation, late callbacks, signing/storage absence and source failure; inputs, authentic verifier results and failed as well as passing runs are inspectable."
+          ],
+          "evidence": [
+            {
+              "path": "docs/sensors/CAMERA_SET_IMPLEMENTATION.md",
+              "label": "Executed checks, corrected failures and actual scope"
+            },
+            {
+              "path": "code/crates/nonverba-android/tests/CameraJniSmoke.kt",
+              "label": "Synthetic JVM signing through the production JNI path"
+            },
+            {
+              "path": "code/test/camera-set-browser-tests.mjs",
+              "label": "Real worker/WASM and browser UI checks"
+            },
+            {
+              "path": "code/test/camera-set-adapter-tests.mjs",
+              "label": "Adapter cancellation/refusal/deadline checks"
+            },
+            {
+              "path": "code/crates/nonverba-android/tests/NativeMainThreadReadSmoke.kt",
+              "label": "Thread dispatch, timeout and late-execution regressions"
+            }
+          ]
+        },
+        {
+          "id": "sensors-camera-set-device-validation",
+          "title": "Validate real front/rear and single-camera capture",
+          "description": "The owner approved explicit sequential rear-then-front capture. The inspected APK was installed with retained data/key and matching hash. Semantic controls created/saved a fresh request and submitted the native shutter once. The attempt timed out after rear image bytes arrived, with front pending and no signatures or complete bundle. A second fresh request was saved, but begin refused because prior cleanup remained pending; the native-button step correctly sent no shutter while still in a WebView. The exact resource/callback and physical release are unknown. Diagnosis and a fresh complete capture/retrieval/verifier run are required. Work stopped at the owner request to continue later; real single-camera computer and independent requester acceptance are also pending.",
+          "status": "blocked",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: a selected supported front/rear configuration produces a complete independently verified camera set, and a selected single-camera configuration produces its valid one-image set, with software/device identities and original inputs retained privately.",
+            "Prospective: actual timing/timebase limits, unavailable cameras and selected refusal/cleanup cases are recorded; the result states exactly which configuration passed and makes no universal simultaneity or device-support claim."
+          ],
+          "evidence": [
+            {
+              "path": "docs/sensors/CAMERA_SET_IMPLEMENTATION.md",
+              "label": "Owner-selected sequential implementation, checks, phone timeout and unresolved cleanup"
+            },
+            {
+              "path": "docs/development/USB_DEBUGGING.md",
+              "label": "Text-first control and page-specific accessibility observations"
+            }
+          ]
+        },
+        {
+          "id": "sensors-camera-set-requester-acceptance",
+          "title": "Independently receive and accept a complete camera set",
+          "description": "Proposed scoped contribution to sensors-independent-physical-acceptance: a separately selected independent requester retains the original profile and trusted pins before the operator captures, then receives and re-verifies the complete set and its receipt/context. Hero 1 leads measurement assurance, Hero 8 supplies request/arrival/acceptance semantics, Hero 10 platform behavior and Hero 11 only any selected hosted ledger. Devices, direct route and declared ledger scope remain unresolved; this does not complete the wider physical matrix.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: independently retained originals/pins, exact images/bundle, requester arrival/receipt context and fresh verification support one explicit acceptance in the declared ledger for the selected physical trial.",
+            "Prospective: a partial or substituted set cannot be accepted as complete, retained evidence re-verifies without new capture, and local replay checks remain separate from global replay exclusion or Assignment completion."
+          ]
+        }
+      ]
     },
     {
       "id": "sensors-location-timing-assurance-goal",
@@ -365,6 +545,107 @@
       "title": "Resistance to replay, substitution and false sensor claims",
       "description": "Proposed future Goal: define and evaluate the adversarial cases that the sensor evidence path should detect or explicitly leave outside assurance. Candidate cases grounded in current limits include old-media signing, screen or staged-scene capture, live external audio replay/digital mixing, forged native metadata and fabricated or spoofed GNSS observations. Retain exact-request, signer, transcript, complete-artifact and composition binding, and separate refusal tests from demonstrated physical resistance. Choose attacker capabilities and meaningful success criteria before making a stronger authenticity claim; neither C2PA nor key-generation attestation authenticates a later sensor stack. Identity owns enrolled-key, principal and device policy plus Operator-face liveness and trusted-capture requirements. Sensors retains generic camera/audio/GNSS acquisition provenance, substitution evaluation and capture-time evidence requirements; APK buildout implements any selected native interfaces. Infrastructure/server Heroes own durable cross-device replay/acceptance records. The sensor Goal supplies evidence semantics and scoped attack evaluation, with no assumed global replay service or production security certification.",
       "milestones": []
+    },
+    {
+      "id": "sensors-device-attribution-goal",
+      "title": "Device attribution and measurement continuity",
+      "description": "Proposed future Goal from the retained sensor-quality notes: evaluate which device-related observations can support continuity between an enrolled device, the expected Operator and its photo, audio, location or future screen-capture records. Candidate observations include an enrolled device-key identifier and, only where available and appropriate, the proposed device/MAC-derived hash; no identifier or MAC collection method is selected. Assess availability, stability, spoofing, cross-device use and privacy before binding selected observations to the original request, artifact and independently verified enrollment context. An identifier or hash alone establishes neither the human operating the device nor authenticity or anonymity. Hero 1 owns capture provenance and evidence semantics; Hero 2 owns principal/device enrollment, key authority and privacy policy; Hero 10 supplies any selected Android observations, while desktop integration and Heroes 8/11 exchange/retention remain separately scoped. This Goal records an omitted future concern, without selecting a tracking identifier, attribution guarantee or implementation plan.",
+      "milestones": []
+    },
+    {
+      "id": "sensors-screenshot-capture-goal",
+      "title": "Screenshot retrieval and capture hardening",
+      "description": "Proposed future Goal explicitly requested by the owner: add device-screen screenshot acquisition and retrieval as a distinct evidence capability, alongside camera, microphone and location. Define supported phone/desktop capture sources and whether a request concerns a display, window, application or region; no platform adapter or capture mode is selected yet. The design should preserve deliberate source/recipient consent and work-state authority, bind selected provenance and exact captured bytes to the original request and expected signer, and expose observed capture timing, dimensions, source availability and any unverified claims. Evaluate replay, imported/edited-image substitution, stale or wrong-surface capture and ambiguous screen/display identity without equating a signature with trusted OS capture or truth of the displayed content. Define explicit refusal, cancellation, permission-revocation, protected/unavailable-content and cleanup outcomes, with bounded retention and exact-byte export/retrieval. A screenshot must remain distinguishable from a camera photograph, and development/debug screenshots do not establish a hardened screen-evidence collector. Hero 1 owns the evidence format, capture provenance, quality and substitution evaluation; Hero 2 supplies privacy/authority policy, Hero 3 task consent and review, Hero 10 any Android platform integration, Hero 8 operation/status/cancellation interfaces and Hero 11 selected authorized exchange/retention. Desktop integration, request/format/signing policy, disclosure scope, assurance limits and software versus real-device acceptance remain unresolved. The new capability is proposed; no screenshot collection or implementation has begun. The proposed Milestones below separate source/consent decisions, artifact verification, acquisition, exact retrieval, failure/cleanup behavior, software checks, actual-platform results and independent requester acceptance.",
+      "milestones": [
+        {
+          "id": "sensors-screenshot-scope-consent",
+          "title": "Define screenshot sources, consent and authority",
+          "description": "Proposed specification for the requested screenshot capability: select initial phone/desktop platforms and define whether a request names a display, window, application or region. Hero 1 leads capture semantics; Heroes 2/3 supply authority, privacy and participant consent, Hero 10 Android integration and Hero 8 grant/status semantics. Desktop integration remains to be chosen. Define what source identity can actually be observed and the behavior for protected, unavailable or changed surfaces without silently widening the capture area.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: an authored profile identifies initial supported platforms, source/region semantics, explicit recipients and deliberate consent, with authority/work-state, cancellation and permission-revocation requirements.",
+            "Prospective: the profile defines source changes, protected/unavailable content, unsupported capabilities and unavailable metadata explicitly; it chooses no capture API or assurance claim merely by recording this proposal."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-artifact-verification",
+          "title": "Implement a distinct verifiable screenshot artifact",
+          "description": "Proposed Rust format and verifier: select a versioned screen-evidence request/assertion and signing policy, then bind exact screenshot bytes, original request, expected signer, selected source/region and observed dimensions/timing/provenance. Preserve unknown fields as unavailable where the chosen schema permits them. Screenshots must not masquerade as camera-acquired photographs, and artifact integrity must remain separate from honest OS capture, freshness of displayed information or truth of the content.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: actual verification checks the selected screen-artifact type, exact request/key/bytes and required provenance fields; edits, wrong context and substitution into camera evidence are refused.",
+            "Prospective: assurance output distinguishes verified integrity from unproven capture origin, clock trust and displayed-content truth, while historical camera/audio/location verification remains unchanged."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-acquisition-adapter",
+          "title": "Acquire screenshots through a bounded selected adapter",
+          "description": "Proposed collector implementation for the platform/source profile selected above. Capture only the deliberately authorized source/region and preserve available acquisition observations through the signing gate. Hero 10 owns any Android permission and app-wide lifecycle integration; desktop platform integration needs a scoped implementation decision. Hero 1 owns collector/provenance behavior. An imported image, debugging screenshot or cached prior frame must not silently become fresh screen evidence.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: the selected adapter returns exact screenshot bytes and supported provenance for the requested source within the original authority/window, without an arbitrary-file path into fresh native capture signing.",
+            "Prospective: source changes, unavailable capture, invalid bounds and lost or insufficient consent fail explicitly without widening scope or substituting earlier pixels; any capture API limitations remain visible."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-exact-retrieval",
+          "title": "Export, retrieve and reverify exact screenshot bytes",
+          "description": "Proposed bounded export/retrieval integration: retain the exact screen artifact with its original request, profile, verification context and available outcome records. Hero 10 implements selected Android-local storage/export; Hero 8 supplies retrieval/status interfaces and Hero 11 only separately selected hosted access/retention. Storage limits, recipients and deletion/export authority must be settled before implementation. Retrieval is a read of retained evidence and must not trigger another capture or renew freshness.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: independently retrieved bytes, lengths and hashes equal the original retained artifact, and fresh verifier execution uses the retained original request/context plus independently supplied expected signer.",
+            "Prospective: repeated retrieval preserves originals and explicit missing/unsigned/storage-failed states, performs no new capture/signing and records no acceptance merely because a save or transfer succeeded."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-failure-cleanup",
+          "title": "Preserve screen-capture refusals and cleanup outcomes",
+          "description": "Proposed integration with shared failure semantics for denial, protected/unavailable surfaces, source loss, revocation, expiry, cancellation and signing/storage failures. Hero 1 supplies actual collector outcomes and provenance limits; Hero 10 supplies native/app lifecycle cleanup, Hero 8 exposes status and Hero 11 retains only selected records. Respect the scoped work-state revision and prevent late permission/capture callbacks or reconnect from resuming collection. A signed screenshot failure format remains a design decision rather than an assumed capability.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: selected negative paths expose separate acquisition, artifact/report availability and storage outcomes, including honest unsigned/absent records, without replacing a prior successful or failed attempt.",
+            "Prospective: cleanup reports confirmed release, retained ownership after failure or unknown release; cancellation acknowledgment is not used as proof of shutdown, and stale callbacks cannot sign or publish revoked work."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-software-validation",
+          "title": "Test screenshot substitution, scope and lifecycle in software",
+          "description": "Proposed software-only checkpoint with synthetic screen images, actual selected artifact verification and focused adapter/lifecycle harnesses in the managed container. Exercise rejected import paths, edited bytes, stale request/timing, changed key/source context, wrong region, protected/unavailable outcomes, bounds and cancellation/revocation races; do not claim that verification detects every fabricated image on a compromised platform. Hero 8 contributes workflow conformance and Hero 10 selected native harnesses. These checks do not demonstrate real OS capture or resistance to a compromised platform.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: authentic retained results cover valid fixtures and altered bytes, wrong request/key, misleading camera type, wrong source/region, truncation and bounded-input refusals without substituting verifier verdicts.",
+            "Prospective: focused permission/source-change/cancellation and retrieval checks retain both failures and passing corrections, verify exact-byte preservation and show no stale publication or automatic recapture."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-platform-validation",
+          "title": "Validate actual screenshot capture and retrieval",
+          "description": "Proposed platform checkpoint after supported platforms, source modes and a bounded run are selected and separately authorized. Hero 1 records actual screen-capture provenance and file verification; Hero 10 supplies Android integration observations, and the selected desktop integration supplies its own results. Check known displayed content, source identity, consent boundaries, byte-preserving retrieval and selected denial/revocation behavior. A platform capture result is separate from synthetic checks, independent requester acceptance and truth of displayed content.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: every platform/source profile included in the selected scope has retained actual capture, original request/context, exact retrieved artifact and independent verifier results, with unavailable metadata and unsupported modes stated.",
+            "Prospective: the selected consent, source-change/refusal and cleanup cases are observed on the real platform; no ordinary debug screenshot or software simulation is counted as that platform acceptance."
+          ]
+        },
+        {
+          "id": "sensors-screenshot-requester-acceptance",
+          "title": "Independently receive and accept screenshot evidence",
+          "description": "Proposed independent requester/operator checkpoint for the selected real platform workflow. Hero 1 leads capture/evidence assurance; Hero 8 supplies exact request, complete-arrival receipt, verification and declared-ledger acceptance semantics; Hero 10 contributes Android behavior and Hero 11 only any selected hosted exchange. Requester identity, device/route choice, signer authority and ledger scope remain decisions. This is a screen-evidence workflow result, with no claim that it verifies the truth of another application or completes all sensor acceptance.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Prospective: an independent requester retains original authority/source requirements and trusted pins before acquisition, receives the exact artifact and receipt/context, reverifies it and explicitly accepts once in the declared scope.",
+            "Prospective: altered/swapped bytes, stale request/timing or mismatched source claims are refused under the selected profile, retained evidence can be inspected without recapture, and local replay behavior, fresh acceptance, trusted capture and displayed-content truth remain separate claims."
+          ]
+        }
+      ]
     }
   ]
 }

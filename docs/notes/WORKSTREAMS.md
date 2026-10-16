@@ -7,9 +7,9 @@ to be agreed as Goals are divided into Milestones.
 
 Use the [project dashboard](../../web/dashboard/README.md) for the hierarchy of
 Heroes, Goals and Milestones, color-coded states, dependencies and evidence.
-One JSON per Hero beside the HTML holds its progress; the
+One JSON per Hero in `web/dashboard/heroes/` holds its progress; the
 [schema](../../web/dashboard/SCHEMA.md) defines ordinary edits. After updating a
-Hero, run `./web/dashboard/refresh.ps1` from the repository root to validate and
+Hero, run `./web/dashboard/scripts/refresh.ps1` from the repository root to validate and
 refresh the standalone HTML through the existing managed container. Open the HTML
 directly to see that snapshot; JSON edits appear only after refresh. This outline
 defines the Hero boundaries.

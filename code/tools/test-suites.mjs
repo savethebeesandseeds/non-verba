@@ -9,9 +9,9 @@ export const TEST_SUITES = Object.freeze({
     'authentication-workflow-tests.mjs', 'work-privacy-controller-tests.mjs',
     'registration-workflow-tests.mjs',
     'face-workflow-tests.mjs',
-    'android-package-verifier-tests.mjs', 'audio-adapter-tests.mjs', 'audio-demo-export-tests.mjs',
+    'android-package-verifier-tests.mjs', 'participant-package-tests.mjs', 'audio-adapter-tests.mjs', 'audio-demo-export-tests.mjs',
     'audio-worklet-tests.mjs', 'browser-package-source-tests.mjs', 'browser-package-tests.mjs',
-    'camera-adapter-tests.mjs', 'camera-app-handoff-tests.mjs', 'camera-offer-stage-tests.mjs',
+    'camera-adapter-tests.mjs', 'camera-set-adapter-tests.mjs', 'camera-app-handoff-tests.mjs', 'camera-offer-stage-tests.mjs',
     'camera-peer-tests.mjs', 'camera-quality-adapter-tests.mjs', 'camera-session-capture-tests.mjs',
     'camera-session-preflight-tests.mjs', 'camera-session-ui-tests.mjs', 'core-client-tests.mjs',
     'device-preflight-tests.mjs', 'fetch-attestation-trust-tests.mjs', 'gps-attempt-adapter-tests.mjs',
@@ -28,6 +28,7 @@ export const TEST_SUITES = Object.freeze({
   ],
   cooperation: ['cooperation.test.mjs', 'wasm.test.mjs', 'simulator-config.test.mjs', 'simulator-model.test.mjs'],
   transport: ['usb-audio-export-guards.mjs'],
+  build_process: ['android-build-process-tests.mjs', 'android-build-measurement-tests.mjs'],
   face_model: ['face-model-preparation-tests.mjs'],
 });
 export const TEST_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../test');

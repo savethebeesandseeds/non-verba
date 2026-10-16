@@ -4,6 +4,8 @@ set -euo pipefail
 code_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$code_root"
 source container/env.sh
+source tools/android-build-lock.sh
+nonverba_acquire_android_build_lock
 grep -qx 'Pkg.Revision = 30.0.16248370' "$ANDROID_NDK_HOME/source.properties"
 clang=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
 abis=("${@:-}")
@@ -20,5 +22,7 @@ for abi in "${abis[@]}"; do
     "CC_$key=$clang/${triple}26-clang" "AR_$key=$clang/llvm-ar" \
     cargo build --locked --release --target "$triple" -p nonverba-android
   mkdir -p "android/app/src/main/jniLibs/$abi"
-  cp "$CARGO_TARGET_DIR/$triple/release/libnonverba_android.so" "android/app/src/main/jniLibs/$abi/"
+  library="$CARGO_TARGET_DIR/$triple/release/libnonverba_android.so"
+  destination="android/app/src/main/jniLibs/$abi/libnonverba_android.so"
+  if ! cmp -s "$library" "$destination"; then cp "$library" "$destination"; fi
 done

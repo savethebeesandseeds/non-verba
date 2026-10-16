@@ -1,4 +1,130 @@
-# Android host
+# Android applications
+
+## Two applications, one shared implementation
+
+The owner selected a branded participant shell and APK separation as the first
+increment on 16 October 2026. Keep these two applications separate:
+
+| Application | Module / package ID | Purpose |
+| --- | --- | --- |
+| Non-verba Dev | `app` / `org.nonverba.camera` | Existing developer sensor, evidence, enrollment and diagnostic tools. Its package identity, version sequence, private data and established debug signer are preserved. |
+| Non-verba | `participant` / `org.nonverba.participant` | The Requester/Operator application. Its first increment is an informational, branded role preview; account access, tasks, Contracts and service connectivity remain unavailable. |
+
+Different package IDs let the apps coexist with separate Android-private data,
+permissions and updates. Role selection in the participant preview changes only
+the introduction in memory. It creates no identity, account, task or record.
+There is no migration or automatic sharing of developer keys, evidence or grants.
+Neither a debug APK nor the participant name establishes release readiness.
+
+The participant source lives in `web/participant/src/`; canonical artwork lives
+in `web/site/branding/` (there is no separate `src/branding` directory in this
+checkout). The shell stages `sprout.svg`. The participant APK launcher uses the
+owner-selected `individual/01-sprout.png`, preserving the complete transparent
+character over the cream app background. Its reviewed 432px PNG foreground keeps
+the original square within the inner 72dp region of the 108dp adaptive layer;
+regular and round launcher masks use that same resource. The canonical image
+remains unchanged.
+
+Regenerate this small resource explicitly with
+`node tools/prepare-participant-icon.mjs --write` through the managed snapshot
+launcher, then review its circular/rounded preview; `--check` compares the
+prepared resource with the canonical artwork and recipe. Normal APK builds use
+the prepared source resource and add no Chromium preparation dependency.
+
+### Participant launcher artwork — 16 October 2026
+
+The owner selected `web/site/branding/individual/01-sprout.png` for the user APK.
+The original 909,703-byte image is unchanged; the prepared transparent foreground
+is 81,246 bytes. Both circle and rounded-square masks were visually reviewed.
+Managed participant assembly/lint, retained-signer package inspection and
+compiled resource checks passed. Regular and round manifest icons resolve to
+the same adaptive resource, and the packaged foreground PNG is byte-identical
+to the reviewed source derivative.
+
+The updated debug APK is 2,569,334 bytes, an explicitly reviewed 134,645-byte
+increase over the earlier measured participant APK for the selected artwork and
+its compiled resources. It remains below the existing 8 MiB guard; the earlier
+measurement report is preserved rather than rewritten. The four web-shell
+assets remain unchanged. This change applies to the participant launcher only;
+no phone installation was performed.
+
+## Development notes: keep the participant APK small and clear
+
+- Keep shared validation, policy, cryptography, evidence and protocol rules in
+  the existing Rust workspace. Use `rustc` through Cargo and the managed Linux
+  toolchain when a feature needs them; do not clone these rules into Kotlin or
+  JavaScript. The static shell has no such operation, so it ships no unused Rust
+  native library or WASM engine yet.
+- Add no project `.java` sources. Keep Kotlin limited to Android framework
+  integration such as Activity/WebView lifecycle, permissions, Keystore and
+  platform callbacks. Kotlin compiles to managed Android bytecode; it is not a
+  promise of a JVM-free application. JDK/Gradle remain Linux build tools, never
+  Windows development tools. Preserve the existing bounded C++ AAudio callback
+  adapter rather than reimplementing collectors as part of this split.
+- Use the system WebView and small bundled HTML/CSS/JavaScript with system fonts.
+  Do not add another embedded browser, UI runtime, dependency or model merely
+  for the shell. The initial runtime asset closure is four files, bounded to
+  64 KiB; its debug APK inspector has an 8 MiB regression guard. These are initial
+  shell budgets to revisit deliberately when a real feature is introduced.
+- Keep developer pages, synthetic demos, diagnostics, raw sensor controls and
+  models out of participant staging. `participant` is a separate application
+  module, not a hidden developer menu or a role flag over all existing bridges.
+  Its current manifest requests no Android permissions and it exposes no native
+  JavaScript bridge, file picker, account storage or remote resource loading.
+- Keep native access opt-in and scoped when actual workflows are added. Opening
+  the app or selecting a role must not warm GPS, activate a camera/microphone,
+  enroll a key or resume work. Hero 2 supplies policy, Hero 8 the grant/workflow
+  contract, Hero 1 collector semantics and Hero 11 hosted records; Android
+  implements their selected interfaces, not new authority inferred from UI.
+- Keep asset lists closed and independently inspect both APKs. Generated
+  participant assets stay in the managed module build directory, not authored
+  source. Include current license/source notices. Preserve the strict bundled
+  origin, CSP and native-bridge boundaries as connectivity is designed.
+- Add one scoped participant workflow at a time after its meaning and service
+  contracts are agreed. Keep software/browser, package, physical-device,
+  participant-comprehension and release acceptance as separate results. Size,
+  startup, memory and battery claims need measurements for the actual feature.
+
+Production participant signing, distribution channel and update acceptance still
+need review. Development builds reuse the retained debug signer without creating
+another key. Do not distribute them as an operational participant service; dirty
+builds also require their complete corresponding source, as recorded in the
+bundled source notice.
+
+## Two-APK foundation validation — 16 October 2026
+
+The selected shell/separation increment passed these managed-Debian checks:
+
+| Check | Recorded result |
+| --- | --- |
+| Focused packaging/catalog checks | 25 passed, including closed asset sets, budgets, linked inputs, native/model/developer exclusion, real compiled permission metadata and retained signer checks. |
+| Shell browser checks | Seven groups passed against exact bundled assets at widths 320, 390, 900 and 1280: brand loading, pointer/keyboard selection, truthful preview notice, no bridge or retained role, responsive layout, reload and unexpected-resource/JavaScript-error checks. Phone/desktop screenshots were inspected. |
+| Developer build | Rust/WASM and both native Rust ABIs built; Android assembly and lint passed. Existing package/version identity and export filename remain unchanged. |
+| Participant build | Assembly and lint passed, including the final participant-only build. Its four runtime assets total 9,302 bytes; no Rust/WASM/native libraries or models are packaged. |
+| Independent APK inspection | Both passed against the independently retained debug-signer baseline. The participant inspector verifies actual compiled manifest permissions; the only permission is AndroidX's own signature-protected receiver permission, not sensor, storage or network access. |
+| Local handoff | The 33,738,633-byte developer APK and 2,434,689-byte participant APK were copied to ignored local artifacts; both size/SHA-256 comparisons matched their authentic inspection reports. |
+
+The initial developer inspection exposed a pre-existing disagreement: staging
+excluded browser face models while inspection expected them. The shared exclusion
+rule corrected this; the unchanged APK then passed inspection with byte-checked
+current inspection helpers. The initial participant inspector assumed a different
+`aapt` permission-summary format. It now cross-checks the actual summary against
+the compiled manifest's typed signature-protection attribute, with negative
+regression fixtures. Failed and corrected reports remain separately retained;
+neither correction rewrote an APK or report. A participant-only rebuild included
+the final preview wording, without rebuilding the developer native libraries.
+
+Original source/build provenance and private QA records remain in their separate
+snapshots; the two delivered debug APKs need not have the same snapshot digest.
+The local handoff records each original path and hash. Existing SDK XML-version
+and future Gradle-9 deprecation warnings remain in the build logs.
+
+No phone installation, observed co-installation, sensor run, update migration,
+connected account/task journey or release distribution was performed. Package
+identity/data isolation is configured, not a new physical-device acceptance
+claim. This checkpoint completes the separate-app shell foundation only.
+
+## Existing developer host
 
 This APK packages the shared web UI and Rust WebAssembly module, plus the same
 Rust sensor/provenance core as an Android native library. Thin Kotlin adapters own
@@ -42,8 +168,80 @@ From the unified checkout with the preserved container already running:
 ```powershell
 ./code/dev.ps1 -Snapshot -Action Status
 ./code/dev.ps1 -Snapshot -Action Test
-./code/dev.ps1 -Snapshot -Action Build
+./code/dev.ps1 -Snapshot -Action Build -Command @('participant')
 ```
+
+`Build` requires an explicit target. Each path assembles and lints only its
+selected modules; use `all` deliberately when both APKs need validation:
+
+```powershell
+./code/dev.ps1 -Snapshot -Action Build -Command @('developer')
+./code/dev.ps1 -Snapshot -Action Build -Command @('participant')
+./code/dev.ps1 -Snapshot -Action Build -Command @('all')
+```
+
+| Target | Preparation before selected Android assembly/lint |
+| --- | --- |
+| `participant` | Four shell/branding files and current notices. No Cargo, WASM, native developer libraries, browser model or cooperation build. |
+| `developer` | Locked `nonverba-core` WASM with pinned bindgen, current web assets/notices, and locked `nonverba-android` Rust for both ABIs. No cooperation WASM, browser face-model preparation or local review-page generation. |
+| `all` | Both preparations once, then both modules in one Gradle invocation. |
+
+`code/dev.sh build` and `tools/build-android.sh` use this same pipeline; avoid
+adding a second build recipe. Gradle loads only the selected application projects
+via `nonverba.target` (an IDE without that property can load both). Keep shared
+Gradle/plugin/toolchain pins in their existing declarations. All generated
+assets, Java, compilers and caches remain inside Debian.
+
+Routine builds keep APKs in `/opt/nonverba-build/android/<module>/build/outputs/`
+and create no handoff copies. To request an export, supply an independently
+retained debug-signer report already available inside the container:
+
+```powershell
+./code/dev.ps1 -Snapshot -Action Build -Command @('participant', '--export', '--baseline-report', '/absolute/container/path/retained-debug-report.json')
+```
+
+The same flags apply to `developer` and `all`. Export assembles/lints first, copies
+the selected APKs and lint reports into an exclusively created
+`code/artifacts/container-builds/<UTC timestamp>/`, and independently inspects
+each exact exported APK against current source/assets and the supplied signer
+baseline. The source snapshot and its metadata remain attached throughout.
+Only a successful run gets `build-manifest.json`. A failed export preserves
+`INCOMPLETE.txt` and partial outputs for diagnosis; do not treat that directory
+as a completed handoff. Production signing and distribution remain separate.
+
+Every admitted run gets a unique `code/artifacts/qa/android-build-*.json` record
+and adjacent stage logs inside its source snapshot. Records include target,
+source revision/dirty/archive digest, performed and skipped stages, durations,
+failure status, observed Gradle `UP-TO-DATE` count and selected APK sizes/hashes.
+Records also retain individual task outcomes and Gradle's actionable-task summary,
+so regression checks can identify unnecessary compilation or packaging.
+The up-to-date counter counts matching task log lines, including aggregate
+tasks; Gradle's actionable-task summary has a narrower denominator. These records
+describe observed work, without certifying a speedup or reproducibility.
+Use the printed record path; a fresh snapshot has a different provenance notice
+and is not an identical-input performance sample.
+
+A nonblocking container-wide producer lock covers preparation through export
+because snapshots share the Android/Cargo caches. The supported standalone
+web/native builders and both asset stagers take the same lock. Canonical child
+stages reuse the real inherited file descriptor, validated against the managed
+lock path and kernel lock; an environment marker cannot claim ownership.
+Contention exits 75 before preparation;
+retry after the admitted build finishes. Missing targets/invalid flags exit 2.
+The existing `/root/.android/debug.keystore` must be present; the pipeline never
+searches for a substitute or generates a new signer. Sync refreshes the shared
+Gradle files and both small module build declarations for inspector consistency;
+only selected modules' runtime sources are copied. The unselected module's
+runtime sources, staged payloads and caches are preserved.
+
+Use the canonical build entry point for packaging. The lock protects the supported
+project commands; raw Cargo/Gradle invocations are not a second packaging recipe.
+
+Web/native staging compares bytes before replacing generated files, preserving
+unchanged timestamps. Unexpected generated files are reported and preserved;
+review them before retrying instead of deleting a cache tree. Repeated builds
+still perform the selected Cargo/Gradle freshness checks and lint. They do not
+skip correctness checks based solely on a previous success.
 
 The pinned toolchain uses Rust 1.96.0, wasm-bindgen 0.2.122, Gradle 8.14.3,
 Android Gradle Plugin 8.11.1, Kotlin 2.2.20, JDK 17, CMake 4.3.3 and Android
@@ -54,20 +252,166 @@ FileProvider, window insets and GNSS callback compatibility.
 `code/setup.sh` installs dependencies only. Toolchains reside in
 `/opt/nonverba-tools`, with build caches and an isolated Gradle/CMake build tree
 in `/opt/nonverba-build`. The existing development signing key is preserved.
-New APKs and lint/signature reports are exported under
+Explicit verified debug exports are retained under
 `code/artifacts/container-builds/<UTC timestamp>/`. Existing release files and
 Windows intermediate outputs are preserved, but are not the Linux build directory.
 
-`Build` rebuilds WebAssembly, stages shared assets, compiles Rust for arm64-v8a
+The legacy developer filename stays `nonverba-debug.apk` for compatibility with
+the existing bounded installation helper. The participant output is
+`nonverba-participant-debug.apk`; it is not an authorized phone installation or a
+production release. Inspect it with `tools/verify-participant-package.mjs`, using
+the exact `--apk` and independently retained debug `--baseline-report` paths in
+the same snapshot. The existing `tools/verify-android-package.mjs` remains the
+developer inspector. Reports are separate and never rewritten. Package/source
+metadata must be preserved through follow-up commands in that snapshot.
+
+Focused split checks, also through the managed snapshot launcher:
+
+```powershell
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', '--test', 'test/participant-package-tests.mjs', 'test/android-package-verifier-tests.mjs', 'test/test-suites-tests.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'test/participant-browser-check.mjs')
+```
+
+The browser check uses the existing managed Chromium runtime and intercepts only
+the bundled shell URLs; it starts no webserver and contacts no service. Its
+screenshots/results are ignored QA outputs, separate from Android-device checks.
+Staging and the developer inspector share the browser-only asset exclusion rule,
+including the entire face-model directory; those model files remain browser
+inspection inputs rather than a hidden Android dependency.
+
+The developer build rebuilds WebAssembly, stages shared assets, compiles Rust for arm64-v8a
 and x86_64, and assembles/lints the APK. Native code targets API 26 with 16 KiB ELF
 load alignment. This app requires 64-bit Android. C++ audio callbacks use
 preallocated buffers without JNI, allocation or cryptography.
 
 The historical Windows-Java package verifier and Kotlin/JNI smoke launchers are
 disabled with directions to maintained Linux inspectors and shell harnesses.
-The container build verifies APK signatures with Linux apksigner and runs Android
-lint. `code/dev.ps1 Test` runs Rust and JavaScript unit/adapter tests. These are
+Explicit exports verify APK signatures with Linux apksigner and independent
+package inspectors; routine builds run Android lint. `code/dev.ps1 Test` runs
+Rust and JavaScript unit/adapter tests. These are
 software checks and do not replace physical Android acceptance testing.
+
+## Build curation — 16 October 2026
+
+Hero 10 tracks build curation as its own Goal. The initial review identified an
+implicit combined build, unrelated cooperation/model preparation, unconditional
+handoff copies, shared mutable outputs without an orchestration lock, and asset
+copies that reset timestamps. The canonical pipeline above addresses these
+sources of avoidable work and makes selected work and failures observable.
+
+Keep this contract small as features grow: add a dependency to the target that
+actually uses it, retain one preparation path, preserve package inspection at
+export, and use recorded stage costs to justify optimization. A representative
+performance baseline and regression thresholds are covered by the repeatable
+checks below. No cold-cache cleanup or numerical speed claim is implied.
+
+Focused pipeline checks run in their own prerequisite group:
+
+```powershell
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/run-tests.mjs', 'build_process')
+```
+
+The full `Test` command also includes this synthetic regression group. The
+measured ten-build workload remains an explicit operation.
+
+The curation increment passed these managed-Debian checks:
+
+| Check | Recorded result |
+| --- | --- |
+| Focused source checks | 40 distinct checks passed: 15 build-process cases, 12 developer-package parser cases, 11 participant-package cases and two test-catalog cases. The orchestration harness runs the actual scripts against isolated synthetic tools, including lock contention, invalid flags, missing retained signer, stage/inspection failures, exact export paths, stale-file refusal and unchanged timestamps. |
+| Participant routine and repeat | Both assembled/linted without exports or Rust preparation, using the same source snapshot and existing shared caches. Total recorded durations were 20.4 s and 8.8 s. Gradle reported 38 then 43 of 45 actionable tasks up to date. The APK SHA-256 was identical across the pair. These are observed samples, not an agreed performance baseline. |
+| Current combined build | Both Rust native ABIs, core WASM and both Android assembly/lint tasks passed. All ten pipeline stages passed; total recorded duration including export/inspection was 45.7 s, with 38.9 s in Gradle. No cooperation WASM or browser model/review preparation ran. |
+| Explicit verified export | Both exact exported APKs passed current package/assets/notices and independently retained debug-signer checks. Developer inspection reported no errors or current-build gaps. The completed manifest matches the run and there is no incomplete marker. APK sizes were 33,790,113 bytes for developer and 2,434,689 bytes for participant. |
+| Real failure observations | Earlier combined attempts stopped at camera-adapter API/permission lint findings, retained failed run records and created no export. The camera workstream's current source guards then passed; the build pipeline kept lint required. |
+
+The existing SDK XML-version and Gradle-9 deprecation warnings remain. Source-only
+review found no blocking curation issue under the documented concurrency limit.
+No phone, production-signing or release-distribution acceptance is implied.
+
+## Repeatable build-cost checks
+
+The build-curation Goal includes a retained workload suite, not only individual
+successful builds. Run it through the managed snapshot launcher:
+
+```powershell
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/benchmark-android-builds.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/benchmark-android-builds.mjs', '--baseline', '/absolute/container/path/retained-benchmark.json')
+```
+
+Schema 1 defines one fixed warm workload for each APK: one preparation build,
+two measured unchanged builds, one CSS comment change and one restoration build.
+The suite holds the shared producer lock throughout. It uses existing caches
+without resetting them and makes no per-iteration handoff exports. It refuses
+host binds and runs only inside a launcher-verified `/tmp` source snapshot.
+
+Only that snapshot's participant CSS and developer CSS are temporarily changed.
+The report retains the exact original file backups and variant hashes; normal
+completion and failure restore the original source bytes. If execution is
+forcibly killed, the unique QA files retain those specific originals for recovery.
+Workload children explicitly omit the original source-archive digest and declare
+modified inputs, so synthetic changes cannot claim the unchanged archive's
+provenance. The original snapshot digest remains clearly labelled as the origin
+in the suite report. Do not distribute workload packages as operational builds.
+
+Hard checks require the correct target graph, assembly/lint success, identical
+unchanged APK bytes, stable runtime bytes/timestamps, and no repeated Kotlin/Java,
+asset packaging, DEX or lint-analysis work on unchanged builds. CSS-only changes
+also refuse unrelated application compilation and DEX work. Every CSS variant
+must appear exactly in its selected APK; every build preserves the other app's
+runtime inputs and cached APK. Source restoration must restore all unsigned APK
+entry names and uncompressed payload bytes. Full archive/signing bytes after an
+edit-and-restore may differ and are recorded separately; reproducible packaging
+is not claimed. Required verifiers and CMake/Ninja freshness checks may still run.
+
+Reports retain toolchain versions, architecture, Cargo.lock digest, cache policy,
+stage durations, task outcomes, APK sizes/hashes, payload digests and restoration
+results. Retained baselines must use the same workload schema. Toolchain,
+platform, architecture, dependency-lock or sample-policy differences are reported
+as non-comparable instead of silently applying time/size limits.
+
+With only two warm samples, timing is an advisory review signal. The initial
+threshold is the larger of twice the observed maximum and that maximum plus
+10 seconds, allowing JVM startup and scheduling variation. Any APK growth against
+a comparable retained baseline requires review; unchanged-input growth remains a
+hard failure. Keep the participant's separate 64 KiB runtime and 8 MiB debug APK
+guards. After an intentional feature/toolchain change, retain a new reviewed
+baseline and its reason rather than quietly widening limits. This suite covers
+warm and CSS-change costs, not cold-cache or Rust/Kotlin compilation performance.
+
+### Recorded Goal completion — 16 October 2026
+
+The complete ten-build workload passed in one managed-container snapshot, with
+existing caches and no measurement exports. The normal focused dispatcher passed
+31 regression cases; test-catalog checks also passed. All four real CSS-change
+and restoration observations additionally passed the CSS-only compilation/DEX
+reuse rule. The following retained baseline applies to this warm workload:
+
+| Application | Unchanged range | Median | Advisory review above | Debug APK bytes |
+| --- | --- | --- | --- | --- |
+| Participant | 8.158–8.249 s | 8.204 s | 18.249 s | 2,434,689 |
+| Developer | 12.022–12.911 s | 12.467 s | 25.822 s | 33,790,113 |
+
+The measured CSS-change/restoration builds took 14.766/15.604 s for participant
+and 35.326/35.430 s for developer. Both apps preserved the other application's
+runtime files and cached APK throughout. All unchanged samples retained their
+exact APK bytes and runtime timestamps; all CSS variants reached the selected
+APK, and both restorations returned every unsigned payload to its baseline.
+The developer's full restored archive differed despite identical unsigned
+payloads. The exact archive/signing difference was not diagnosed; this result
+does not establish reproducible packaging.
+
+After restoring source, the same snapshot's combined build/lint and both exact
+exported-APK inspections passed with the retained debug signer, current assets,
+license/source notices and alignment checks. The completed manifest was retained.
+The 86,609-byte measurement report and final manifest were copied unchanged into
+ignored local QA artifacts and hash-checked. Raw operational paths remain out of
+the dashboard; this authored record is its public evidence.
+
+This completes the requested curated-and-measured debug-build Goal. Continue
+using its single target contract, regression group, explicit workload suite and
+reviewed baseline policy as features change. Device acceptance, production
+signing/distribution and any broader reproducibility study keep their separate
+Goals and evidence requirements.
 
 ## Shared JavaScript integration
 

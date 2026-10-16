@@ -22,6 +22,7 @@ output="$(mktemp -d "$CARGO_TARGET_DIR/jni-smoke.XXXXXXXX")"
 compile_harness "$output" \
     "$KOTLIN_PRODUCTION/NativeLocationCore.kt" \
     "$KOTLIN_PRODUCTION/NativeCameraCore.kt" \
+    "$KOTLIN_PRODUCTION/NativeCameraSetCore.kt" \
     "$KOTLIN_PRODUCTION/NativeAudioCore.kt" \
     "$HARNESS_DIR/JniSmoke.kt" "$HARNESS_DIR/CameraJniSmoke.kt" "$HARNESS_DIR/AudioJniSmoke.kt"
 run_harness "$output" org.nonverba.camera.JniSmokeKt \

@@ -217,7 +217,7 @@ function repositoryLink(path) {
   const [file, ...fragment] = path.split("#");
   if (!file || file.startsWith("/") || file.includes("\\") || /^[a-z]+:/i.test(file)
       || file.split("/").some((part) => !part || part === ".." || part === ".")) return null;
-  return `../../${file.split("/").map(encodeURIComponent).join("/")}${fragment.length ? `#${encodeURIComponent(fragment.join("#"))}` : ""}`;
+  return `../../../${file.split("/").map(encodeURIComponent).join("/")}${fragment.length ? `#${encodeURIComponent(fragment.join("#"))}` : ""}`;
 }
 
 function renderOverview() {

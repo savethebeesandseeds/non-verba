@@ -44,9 +44,9 @@ export async function renderStandalone(record) {
 }
 export async function updateStandalone(record, {check = false} = {}) {
   const html = await renderStandalone(record);
-  const target = resolve(directory, 'index.html');
+  const target = resolve(directory, 'public/index.html');
   if (check) {
-    if (await read('index.html') !== html) throw new Error('Standalone HTML is out of date. Run web/dashboard/refresh.ps1 after JSON or interface changes.');
+    if (await read('public/index.html') !== html) throw new Error('Standalone HTML is out of date. Run web/dashboard/scripts/refresh.ps1 after JSON or interface changes.');
     console.log('Standalone HTML matches the validated Hero JSON and interface sources.');
   } else {
     await writeFile(target, html);

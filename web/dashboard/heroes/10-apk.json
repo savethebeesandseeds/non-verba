@@ -9,7 +9,7 @@
     {
       "id": "apk-android-foundation-goal",
       "title": "Android package foundation",
-      "description": "The implemented development host and historical package checkpoints are separate from a complete participant app. Registration/authentication inspection remains browser-only; the native document allowlist exposes the camera, audio, location, live-location and key-enrollment tools. Hosted account/task services, synchronization and integrated participant navigation are not established by these results.",
+      "description": "The implemented developer host, separate branded participant shell and historical package checkpoints are separate from a complete participant app. Registration/authentication inspection remains browser-only; the developer host's document allowlist exposes the camera, audio, location, live-location and key-enrollment tools. The participant shell is an independent package with an informational role preview. Hosted account/task services, synchronization and the integrated participant journey remain unimplemented.",
       "milestones": [
         {
           "id": "apk-native-foundation",
@@ -112,6 +112,106 @@
               "label": "Current reconciliation of partial physical outcomes",
               "path": "docs/sensors/STATUS.md#current-workstream-checkpoint--14-october-2026"
             }
+          ]
+        },
+        {
+          "id": "apk-two-app-shell-foundation",
+          "title": "Separate developer APK and branded participant shell",
+          "description": "The owner selected a branded shell and APK separation as the first increment. Dedicated developer and participant modules produce separately identified, inspected debug APKs. The participant preview switches Requester/Operator introductions only. Its launcher now uses the owner's selected full sprout character from individual/01-sprout.png, prepared as a small adaptive icon while preserving the original artwork and existing four-file web shell. This completes the source/package/browser foundation, not account/task services, physical co-installation, update continuity or release distribution.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-16",
+          "acceptance": [
+            "The developer package org.nonverba.camera and legacy nonverba-debug.apk export are preserved; the independent org.nonverba.participant module produces nonverba-participant-debug.apk with separate Android identity and configured private-data boundaries.",
+            "Participant staging contains only four reviewed shell/branding assets and current license/source notices, with no developer pages, native bridge, sensor/network permission, model, Rust/WASM or native-library payload. The optional AndroidX receiver permission is checked as signature-protected in the compiled manifest.",
+            "Managed-container assembly/lint and independent retained-debug-signer package inspection passed for both APKs; locally retained outputs matched their inspection sizes and hashes.",
+            "Twenty-five focused checks and seven browser check groups passed, covering packaging refusals, actual role interaction, keyboard access, reload, branding and four viewport widths. Android-device and connected participant acceptance remain separate.",
+            "The selected character is preserved in an 81,246-byte launcher foreground, reviewed under circle and rounded-square masks. Updated participant assembly/lint and independent package/signature inspection passed; compiled regular/round icons share the adaptive resource and the packaged PNG matches the prepared source bytes. Its 2,569,334-byte APK remains within the existing budget."
+          ],
+          "evidence": [
+            {
+              "label": "Two-APK development rules and recorded validation",
+              "path": "code/android/README.md#two-apk-foundation-validation--16-october-2026"
+            },
+            {
+              "label": "Separate participant package and closed generated asset contract",
+              "path": "code/android/participant/build.gradle.kts"
+            },
+            {
+              "label": "Small participant Android host without native bridges",
+              "path": "code/android/participant/src/main/kotlin/org/nonverba/participant/ParticipantActivity.kt"
+            },
+            {
+              "label": "Exact participant asset and provenance closure",
+              "path": "code/tools/participant-assets.mjs"
+            },
+            {
+              "label": "Participant package, signer and compiled permission inspection",
+              "path": "code/tools/verify-participant-package.mjs"
+            },
+            {
+              "label": "Independent browser interaction and layout checks",
+              "path": "code/test/participant-browser-check.mjs"
+            },
+            {
+              "label": "Owner-selected launcher artwork and package validation",
+              "path": "code/android/README.md#participant-launcher-artwork--16-october-2026"
+            },
+            {
+              "label": "Explicit canonical-artwork preparation without routine build dependency",
+              "path": "code/tools/prepare-participant-icon.mjs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apk-build-curation-goal",
+      "title": "Curated and measured builds for both Android applications",
+      "description": "The owner requested this Goal on 16 October 2026 and explicitly asked to pursue its complete outcome. The curated debug-build process is implemented for both APKs: one explicit target contract, protected preparation/staging, incremental inputs, verified exports and retained warm/CSS-change workloads with maintained regression checks. Java/toolchains remain in managed Debian and target dependencies stay separate. The completed scope establishes a measured maintenance process; cold-cache/Rust/Kotlin compilation benchmarks, reproducible archives, physical-device acceptance and production release policy remain outside this Goal.",
+      "milestones": [
+        {
+          "id": "apk-build-target-pipeline",
+          "title": "Standardize target preparation, incremental staging and verified exports",
+          "description": "The canonical managed-Debian pipeline requires an explicit application target, omits unrelated cooperation/model preparation, preserves unchanged staged bytes, separates routine assembly/lint from inspected exports and retains stage timing/failure records. The initial forty focused checks and actual participant/combined build inspections passed; earlier lint failures were retained without exports. Goal completion extends the shared lock to supported standalone web/native builders and both asset stagers, validating real inherited ownership rather than an environment marker. Package, physical-device and release acceptance retain their separate boundaries.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-16",
+          "acceptance": [
+            "One documented entry point requires developer, participant or all; participant builds do not invoke Rust/WASM/native developer preparation and developer builds avoid cooperation WASM and browser face-model preparation.",
+            "A shared lock covers canonical preparation through optional export; unselected module runtime inputs are preserved, unchanged generated bytes retain timestamps, and unexpected staged files are preserved and reported.",
+            "Routine builds run selected assembly/lint without handoff copies. Explicit exports require independent retained-signer package inspection and finalize a manifest only after every selected check passes.",
+            "Unique run records retain source provenance, selected/skipped stages, status, durations, logs and package sizes/hashes; focused orchestration tests and managed-container checks support the recorded result."
+          ],
+          "evidence": [
+            {"label": "Build-curation review and recorded validation", "path": "code/android/README.md#build-curation--16-october-2026"},
+            {"label": "Canonical target and export contract", "path": "code/android/README.md#build-contract"},
+            {"label": "Target-aware build orchestration", "path": "code/tools/build-android.sh"},
+            {"label": "Per-run provenance, timing and failure records", "path": "code/tools/android-build-record.mjs"},
+            {"label": "Actual orchestration and staging regression harness", "path": "code/test/android-build-process-tests.mjs"}
+          ]
+        },
+        {
+          "id": "apk-build-performance-baselines",
+          "title": "Define and retain representative build cost baselines",
+          "description": "The complete ten-build suite passed in one managed source snapshot: preparation, two unchanged builds, bounded CSS change and restoration for each APK. Unchanged APKs/runtime timestamps stayed identical, every CSS variant reached its selected APK, both unsigned payloads restored exactly and the other app's runtime/APK stayed unchanged. Warm medians were 8.204 seconds for participant and 12.467 seconds for developer; conservative advisory review limits are 18.249 and 25.822 seconds. Thirty-one maintained regression cases passed, alongside catalog checks; the four real CSS-only observations reused application compilation/DEX. Toolchain/context and source-variant provenance are retained, unlike baselines are flagged, and any comparable APK size growth requires review. Final combined assembly/lint and both independent debug-package/signature/alignment inspections passed. No cache reset, replacement container, host Java, phone action or per-iteration export was used. The restored developer archive differed despite identical unsigned payloads, so archive reproducibility is explicitly unclaimed.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-16",
+          "acceptance": [
+            "Retain the fixed preparation/two-unchanged/CSS-change/restoration workload for each APK, with real task outcomes, stage costs, toolchain/cache context and truthful derived-input provenance.",
+            "Enforce target isolation, stable unchanged inputs/APKs, selected asset propagation and exact source/unsigned-payload restoration; unchanged and CSS-only work must reuse unrelated compilation/DEX outputs.",
+            "Retain measured warm timing ranges/medians with justified advisory review limits, flag incomparable contexts and any comparable APK size growth, and include the synthetic regression group in the normal Test command.",
+            "Preserve the managed container, caches and debug signer, and pass final combined build/lint plus independent inspection of both exact exported APKs."
+          ],
+          "evidence": [
+            {"label": "Recorded complete build-curation Goal and measurements", "path": "code/android/README.md#recorded-goal-completion--16-october-2026"},
+            {"label": "Repeatable workload, isolated source variants and restoration", "path": "code/tools/benchmark-android-builds.mjs"},
+            {"label": "Task outcomes, incremental guards and comparison budgets", "path": "code/tools/android-build-metrics.mjs"},
+            {"label": "Shared producer locking and validated inheritance", "path": "code/tools/android-build-lock.sh"},
+            {"label": "Real-script isolation, lock and staging regression cases", "path": "code/test/android-build-process-tests.mjs"},
+            {"label": "Measurement and budget regression cases", "path": "code/test/android-build-measurement-tests.mjs"},
+            {"label": "Normal test command includes build-process regressions", "path": "code/tools/run-tests.mjs"}
           ]
         }
       ]
