@@ -1,0 +1,103 @@
+{
+  "schema": "literal-emphasis-exact69-disabled-preparation-protocol-v1",
+  "status": "PROTOTYPE_UNADOPTED_REPAIRED_GUARDIAN_INTEGRATION_PREPARATION_ACTUAL_DISABLED",
+  "authority": "NONE",
+  "actual_execution_enabled": false,
+  "actual_metadata_projection_executed": false,
+  "actual_source_draw_or_opening_executed": false,
+  "actual69_root_execution_sha256": null,
+  "actual_ordered69_freeze": null,
+  "phases": ["METADATA_SELECTION_ONLY", "PREPARE_SELECTED69"],
+  "selection": {
+    "development_denominator": 200,
+    "mandatory": 45,
+    "additional_ordered_quotas": [12, 6, 6],
+    "pilot_denominator": 69,
+    "source_selection_before_raw": true,
+    "source_phase_reselection": false,
+    "failure_substitution": false,
+    "rejected_placeholder_is_parent": false,
+    "parent_anchor_is_study_unit": false,
+    "full_parent_dependency_completeness_verified": false
+  },
+  "projection": {
+    "full_fresh_contract_guard_before_cache": true,
+    "fresh_private_parse_output": "CONTRACT_IDS_COUNTS_HASHES_ONLY",
+    "current_cache_private_one_contract_at_a_time": true,
+    "original_raw_or_new_tracer_during_metadata": false,
+    "numeric_feature_policy": "CURRENT874_PRIVATE_CACHE_METADATA_PROJECTION_V1",
+    "actual_source_manual_reading_claim": false
+    ,"unavailable_classification_after_all_lineage_and_manifest_record_checks": true
+    ,"supported_extraction_statuses": ["accepted", "rejected"]
+    ,"native_declaration_requirement": "MATCHING_FULL_SEALED_RECORD_AND_CACHE_REFERENCE_EVEN_REJECTED; MISSING_OR_MALFORMED_HOLDS"
+    ,"literal_focal_and_parent_bounds": "WITHIN_NORMALIZED_LENGTH_AND_CODEPOINT_BOUNDARIES"
+  },
+  "inputs": {
+    "focal_types": ["ACTUAL_UNIT", "FOCAL_PARENT_ANCHOR"],
+    "exact_id_lookup_only": true,
+    "forms": ["focal", "parent"],
+    "tokenizer_service": "ACCEPTED_TWO_PINNED_LOCAL_TOKENIZERS_ONLY_ON_FUTURE_ACTUAL_PATH",
+    "fixture_counter": "DECLARED_CODEPOINT_PLUS_TWO_ONLY_NOT_PINNED_TOKENIZER",
+    "tokens_including_special": 256,
+    "overlap": 0,
+    "whole_input_failure_retained": true,
+    "computation_reused": false,
+    "pooling_or_inference": false,
+    "finite_css_native_omissions": "../omitted-fields.json",
+    "full_native_unassigned_dictionary_preserved": true
+  },
+  "limits": {
+    "workers": 1,
+    "aggregate_rss_bytes": 1073741824,
+    "elapsed_ms": 180000,
+    "global_tokenizer_calls": 60000,
+    "per_stream_calls": 20000,
+    "per_stream_windows": 8192,
+    "raw_bytes": 2097152,
+    "decoded_characters": 2097152,
+    "selected_characters": 2097152,
+    "probe_source_characters": 8192,
+    "probe_encoded_characters": 262144,
+    "decoded_case_aggregate_bytes": 33554432,
+    "encoded_case_bytes": 8388608,
+    "new_output_bytes": 134217728,
+    "private_capture_bytes": 262144,
+    "reader_page_bytes": 65536,
+    "reader_page_utf16_units": 7500,
+    "whole_study_bytes": 25769803776,
+    "shared_whole_run_growth_baseline": 12330245718,
+    "shared_hard_growth_bytes": 536870912,
+    "admission_soft_growth_bytes": 335544320
+  },
+  "output": {
+    "case_serialization": "UTF8_JSON_STRINGIFY_PRETTY_2_FINAL_LF_V1",
+    "case_compression": "LOSSLESS_GZIP_LEVEL6",
+    "failed_case_path_same_as_original_case": true,
+    "failed_case_kind": "case",
+    "required_case_outcome_payload_preserves_original_audit_id": true,
+    "all_raw_normalized_native_windows_or_explicit_missing_scopes": true,
+    "no_successful_prefix": true
+  },
+  "guardian": {
+    "capture_before_all_project_imports": true,
+    "owned_pid_birth_registry_required": true,
+    "first_periodic_terminal_capacity_rss_time_checks_required": true,
+    "write_admission_and_hash_verification_required": true,
+    "final_output_rehash_required": true,
+    "unknown_proc_state_must_hold": true,
+    "current_four_file_guardian_status": "G1_G2_REPAIR_INDEPENDENTLY_REVIEWED; SOURCE_FREE_PHASE_CONTROLS_AND_ACTUAL_ADMISSION_DISTINCT",
+    "fixture_capacity": "SYNTHETIC_VIRTUAL_NOT_ACTUAL_RUN_CAPACITY",
+    "new_reservation": false
+  },
+  "unimplemented_before_actual_execution": [
+    "ROOT_REVIEWED_ACTUAL_ENTRY_REVISION_AND_EXACT_CONFIG_SHA",
+    "ROOT_BOUND_ACTUAL_MANDATORY45_IDS_AND_LATER_ORDERED69_FREEZE",
+    "ROOT_REVIEWED_COHERENT_NEXT_STAGE_DEPENDENCY_CLOSURE_AND_PHASE_EVIDENCE",
+    "ACTUAL_SHARED_CAPACITY_FIRST_PERIODIC_TERMINAL_OBSERVATIONS",
+    "REVIEWED_STORED_CASE_PAGED_MANUAL_READER",
+    "ACTUAL_TWO_PINNED_TOKENIZER_PREPARATION_AND_SOURCE_ADEQUACY_REVIEWS"
+  ],
+  "study_target_contracts_unchanged": 15000,
+  "study_target_units_unchanged": 30000,
+  "all_current_adverse_findings_remain_unresolved": true
+}

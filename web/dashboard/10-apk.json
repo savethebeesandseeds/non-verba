@@ -3,26 +3,27 @@
   "id": "apk",
   "number": 10,
   "title": "APK buildout",
-  "summary": "Extend the existing native development package into the complete Android participant experience and a reviewed distribution lifecycle.",
-  "updatedAt": "2026-10-14",
+  "summary": "Build on the Android development host toward an integrated participant app, reliable native behavior, protected local data, service/offline operation, wider compatibility and a reviewed release/update lifecycle. Future Goals are proposals; achieved source and debug-package checkpoints retain their bounded evidence.",
+  "updatedAt": "2026-10-16",
   "goals": [
     {
       "id": "apk-android-foundation-goal",
       "title": "Android package foundation",
-      "description": "The existing development package, shared assets, native adapters and documented managed-container build contract.",
+      "description": "The implemented development host and historical package checkpoints are separate from a complete participant app. Registration/authentication inspection remains browser-only; the native document allowlist exposes the camera, audio, location, live-location and key-enrollment tools. Hosted account/task services, synchronization and integrated participant navigation are not established by these results.",
       "milestones": [
         {
           "id": "apk-native-foundation",
           "title": "Shared UI and native Android package foundation",
-          "description": "The existing APK packages shared web UI/WASM, the Rust sensor/provenance core and Kotlin platform adapters under a documented managed Debian build/signature contract. This milestone is the development package foundation; the achievement date is unspecified.",
+          "description": "Implemented source packages shared web UI/WASM, the Rust sensor/provenance core and Kotlin platform adapters. Current Gradle metadata is org.nonverba.camera, version 0.7.0/code 9, minimum API 26 and target API 36, with arm64-v8a and x86_64. This is the development host foundation; its original achievement date is unknown. Protected identity storage covers software signing material at rest, without establishing hardware-backed signing or a complete account vault.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": null,
           "acceptance": [
-            "The APK bundles shared policy/verification and native permission, lifecycle, sensor and key adapters.",
-            "Documented Debian builds assemble/lint the package and inspect signatures without Windows Java.",
-            "Unsupported required sensor capabilities fail rather than silently using a reduced profile."
+            "Source integrates shared policy/verification with native permission, lifecycle, Camera2, AAudio, location, key-enrollment and file-export adapters.",
+            "The host restricts navigation/resources to bundled assets and gates native capture/enrollment on the foreground app document; manual direct WebRTC remains a separate peer transport.",
+            "Software identity persistence uses Android Keystore AES-GCM and app-private no-backup storage, refusing silent replacement of an existing identity.",
+            "Required native sensor profiles reject unsupported capabilities rather than silently falling back to browser or reduced-profile evidence."
           ],
           "evidence": [
             {
@@ -32,10 +33,166 @@
             {
               "label": "Recorded installed package milestones",
               "path": "docs/sensors/STATUS.md"
+            },
+            {
+              "label": "Current package identity, SDK and ABI declarations",
+              "path": "code/android/app/build.gradle.kts"
+            },
+            {
+              "label": "Bundled document, permission and lifecycle host implementation",
+              "path": "code/android/app/src/main/kotlin/org/nonverba/camera/MainActivity.kt"
+            },
+            {
+              "label": "Protected software identity persistence",
+              "path": "code/android/app/src/main/kotlin/org/nonverba/camera/NativeVault.kt"
+            },
+            {
+              "label": "Browser-only authentication inspection and integration limits",
+              "path": "docs/development/AUTHENTICATION_AND_WORK_PRIVACY.md#developer-inspection-implementation"
+            }
+          ]
+        },
+        {
+          "id": "apk-debug-package-verification",
+          "title": "Build and inspect the 6 October development APK",
+          "description": "The dated diagnostic-package checkpoint records a managed Debian debug build, lint, bounded export and independent package inspection against the retained development signer. It applies to that dirty source snapshot, not every subsequent checkout edit. Current-build inspection does not certify reproducible builds, production signing, release distribution or physical sensor behavior.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-06",
+          "acceptance": [
+            "Both Android Rust ABIs, Android assembly and lint passed for the recorded diagnostic package in the preserved managed container.",
+            "The unchanged Linux inspector passed package/current-build checks with no errors or gaps and the independently retained signing certificate; the inspection contract checks package metadata, staged assets/native outputs and source/license notices.",
+            "The exclusive APK export retained bytes identical to the built package, with its authentic inspector report preserved privately."
+          ],
+          "evidence": [
+            {
+              "label": "6 October build, export and inspector outcome",
+              "path": "docs/sensors/VALIDATION.md#microphone-diagnostic-package-and-successful-local-phone-demo--6-october-2026"
+            },
+            {
+              "label": "Earlier managed build and package inspection checkpoint",
+              "path": "docs/development/VALIDATION.md#initial-source-unification-checks--2-october-2026"
+            },
+            {
+              "label": "Managed debug build, lint and signature procedure",
+              "path": "code/tools/build-android.sh"
+            },
+            {
+              "label": "Independent package, signer, asset and native-library checks",
+              "path": "code/tools/verify-android-package.mjs"
+            },
+            {
+              "label": "Snapshot provenance and retained debug-signer contract",
+              "path": "docs/development/CONTAINER_MIGRATION.md#source-notices-and-signing-identities"
+            }
+          ]
+        },
+        {
+          "id": "apk-bounded-debug-installations",
+          "title": "Install inspected development updates on the recorded phone",
+          "description": "Published 5–6 October checkpoints record bounded updates on one test phone through the approved USB helper. Exact installed-package readback establishes those installations. The saved-JPEG panel/export and one same-device audio demo are limited physical observations; they do not establish the wider device/lifecycle matrix, independent participant acceptance or a general update process. Later source changes are not thereby installed or physically accepted.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-06",
+          "acceptance": [
+            "The prepared 5 October camera-quality debug update was installed and its exact APK hash was verified by readback.",
+            "The inspected 6 October diagnostic debug update was installed and its exact APK hash was verified by readback.",
+            "The authored checkpoints retain installation outcomes and bounded follow-up observations separately from unresolved physical cases; original operational records remain private."
+          ],
+          "evidence": [
+            {
+              "label": "5 October installed quality-panel package and saved-file check",
+              "path": "docs/sensors/VALIDATION.md#phone-quality-panel-and-saved-jpeg-export--5-october-2026"
+            },
+            {
+              "label": "6 October diagnostic update installation and local-demo limits",
+              "path": "docs/sensors/VALIDATION.md#microphone-diagnostic-package-and-successful-local-phone-demo--6-october-2026"
+            },
+            {
+              "label": "Current reconciliation of partial physical outcomes",
+              "path": "docs/sensors/STATUS.md#current-workstream-checkpoint--14-october-2026"
             }
           ]
         }
       ]
+    },
+    {
+      "id": "apk-host-device-acceptance-goal",
+      "title": "Android host device acceptance",
+      "description": "Proposed completion of the physical host acceptance procedure already defined in the Android README. Its permission, lifecycle, storage and identity/update cases remain incomplete despite bounded successful installations. Hero 10 owns Android integration and platform observations; Hero 1 owns collector-specific outcomes and physical measurement assurance, while Hero 8 owns generic workflow/agent software conformance. Shared lifecycle cases need a jointly scoped check rather than duplicate claims of full acceptance. The broader compatibility Goal separately proposes choosing a support matrix; no new physical run is selected here.",
+      "milestones": [
+        {
+          "id": "apk-host-device-acceptance",
+          "title": "Complete the documented Android host acceptance checks",
+          "description": "The authored device procedure remains open for offline initialization, runtime permission denial/retry, foreground interruption, picker handling, saved-file paths and identity continuity through restart/update. The API 26–28 save fallback is physically untested, and screen-awake restart, expiry, reboot and update behavior still needs physical acceptance. The wider sensor matrix is also partial; independent requester/operator trials await a second device and verified direct transport. These records establish remaining scope, not a scheduled run or new phone authorization.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "acceptance": [
+            "Retain physical results for the Android host permission, lifecycle, picker, storage and identity/update checks already specified in the Android README, with exact tested package and platform context.",
+            "Keep unsupported capabilities, unexecuted cases, software-only checks and bounded physical results explicit rather than treating installation or build/lint success as complete device acceptance."
+          ],
+          "evidence": [
+            {
+              "label": "Authored Android device acceptance procedure",
+              "path": "code/android/README.md#device-acceptance-checks"
+            },
+            {
+              "label": "Screen-awake software behavior and remaining physical checks",
+              "path": "code/android/README.md#temporary-foreground-screen-awake-preference"
+            },
+            {
+              "label": "Partial physical acceptance and evidence boundaries",
+              "path": "docs/sensors/DEVICE_ACCEPTANCE.md"
+            },
+            {
+              "label": "Current unresolved device and transport cases",
+              "path": "docs/sensors/STATUS.md#current-workstream-checkpoint--14-october-2026"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apk-participant-navigation-goal",
+      "title": "Integrated Android participant journey and navigation",
+      "description": "Proposed future outcome: assemble the selected Requester/Operator journey into a coherent phone application using the shared UI, Rust logic and native adapters. Intended areas include account entry, discovery/maps, requests, exact Contract review/signing, evidence, completion and notifications, plus selected dispute, incident or union handoffs. Hero 3 defines the connected journey, action/consent meanings and cross-client comprehension; Heroes 5, 6 and 7 define their domain procedures. Hero 10 implements Android navigation and platform behavior under Hero 2's policy. Presentation must distinguish evidence-ledger acceptance, Assignment formation, exact signatures, completion acknowledgment, ballot authorization/admission, collective policy approval, settlement effects, payment and case closure. Login, delivery or storage supplies none of those additional permissions or effects by itself. Decide one bounded journey's scenario, authority, service scope, devices and review/re-entry behavior before defining implementation Milestones. These responsibilities are agreed; the selected journey and its acceptance evidence remain unresolved.",
+      "milestones": []
+    },
+    {
+      "id": "apk-native-lifecycle-recovery-goal",
+      "title": "Native permissions, lifecycle and recovery across participant workflows",
+      "description": "Proposed future outcome: enforce permission, foreground, cancellation and work-privacy rules across Android. Hero 2 defines principal/key/device authority and work/privacy policy; Hero 8 defines scoped-grant, revocation, cancellation and observed-shutdown representation and propagation; Hero 11 implements selected hosted authority; Hero 10 enforces native controls. The grant interface must bind principal, device, operation, authoritative work-state revision, purpose, sensors, recipients, explicit consent and validity. An authentication-camera exception stays bound to its initiating device/operation and current revision; authentication or reconnect grants no work resumption. Concrete schemas, authority provenance, offline limits, conflicts, sign-out invalidation and shutdown acknowledgments remain unresolved. Hero 1 supplies collector acquisition/quality/signing rules and per-component outcomes; Hero 10 invokes cleanup and reports waits, confirmed shutdown, retained ownership/failed cleanup or unknown release to Hero 8. AAudio stop/close results and failure-report availability remain unresolved collector inputs. Interrupted active collection closes, and record recovery must not revive capture or stale grants. Physical host acceptance remains separate.",
+      "milestones": []
+    },
+    {
+      "id": "apk-protected-local-data-goal",
+      "title": "Protected participant data and durable local records",
+      "description": "Proposed future outcome: define Android-local protection and retention beyond the current sealed software identity and bounded export cache. Candidate records include account/session material, drafts, exact signed Contracts, pending transfers and retained artifacts/receipts or acceptance certificates. Hero 2 supplies data-class, identity/key ownership, rotation and recovery policy; Hero 10 implements on-device protection and continuity; Hero 11 supplies declared hosted records, access and retention operations. Private registration/authentication media and any selected member records need separate access and lifecycle scopes; evidence scrutiny or insurance research grants no automatic access or reuse authority. Decide encryption/key access, capacity, export/deletion, corruption handling and logout, uninstall, backup or transfer consequences under those policies. Preserve originals and distinguish pending local state, verified evidence and committed acceptance. Service authority covers declared committed records and authorized state, not participant consent, complete global history or physical truth. Backup/recovery methods and cross-device replay scope remain unselected.",
+      "milestones": []
+    },
+    {
+      "id": "apk-service-offline-integration-goal",
+      "title": "Authenticated service connectivity and explicit offline behavior",
+      "description": "Proposed future outcome: implement a reviewed Android service boundary and explicit offline/pending behavior. Hero 8 defines operation/grant/idempotency, retry/conflict/status and cancellation-versus-shutdown semantics under Hero 2's policy and each domain's action authority; Hero 11 implements scoped APIs, transactions and retained records. Android exposes native waits and component outcome/report availability while preserving exact original action, policy and context. Retry or lost-response/status lookup must create no extra signature, renewed challenge, GPS warm-up, sensor activation, recreated timing or invented closure. A local queue supplies no remote consent, formation or acceptance. Notification delivery, reading, sufficient dispute notice, acknowledgment and consent remain distinct: Hero 3 supplies presentation meaning, Heroes 2 and 5 supply privacy/notice requirements, and Hero 11 supplies delivery. Silent clock-out/sign-out handling must be reconciled with those requirements without restarting sensing. API/version/error contracts, service connectivity and permitted offline powers remain unresolved. Existing blocked WebView network loads and manual WebRTC establish no general service adapter.",
+      "milestones": []
+    },
+    {
+      "id": "apk-compatibility-accessibility-goal",
+      "title": "Declared device support, usability and accessibility",
+      "description": "Proposed future outcome: choose an Android support matrix and validate platform compatibility and accessibility. Decide Android/System WebView versions, ABIs, device/sensor capability classes, display/input conditions and required physical evidence. Current SDK and two 64-bit ABI declarations are build targets, not broad support results; required native profiles have narrower capability requirements. Hero 10 covers Android navigation/re-entry, permission/error presentation, orientation/system bars, keyboard, text scaling and assistive-technology mechanics. Hero 3 owns connected-journey content, cross-client usability/comprehension requirements and participant evaluation; Hero 1 owns sensor measurement acceptance. Shared tests need declared scope so software, human comprehension and physical device results remain distinguishable. The broader matrix and support claims remain unselected, and existing host checks and single-phone observations keep their limits.",
+      "milestones": []
+    },
+    {
+      "id": "apk-release-distribution-goal",
+      "title": "Reviewed Android release packaging, signing and distribution",
+      "description": "Proposed future outcome: turn the managed Debian development build into a reviewed release process with exact package/source/signer provenance, notices, technical verification and a selected distribution route. Hero 10 supplies packaging/signature, supported-device, native lifecycle/privacy-enforcement and update-continuity evidence. Hero 9 proposes reviewer independence/remit, accountable custody roles, risk/disclosure review and the decision process; the actual approving person/institution, criteria and launch authority remain unselected. Hero 2 supplies relevant key/device trust policy. Decide production package/version policy, signing identity and custody/recovery, provenance/reproducibility expectations and channel before scoping release Milestones. Retained debug-signer continuity or installation does not supply production signing policy, independent release acceptance or approval to operate.",
+      "milestones": []
+    },
+    {
+      "id": "apk-updates-record-continuity-goal",
+      "title": "Accepted updates, migrations and record continuity",
+      "description": "Proposed future outcome: define and validate updates that preserve required identities, exact signed artifacts, local replay/acceptance state and participant records. Hero 2 supplies key rotation/recovery and device-authorization policy, Hero 8 supplies workflow recovery semantics, and Hero 11 supplies declared server/API/record compatibility; Hero 10 implements Android migration and physical update-continuity checks. Updates, reconnect and read-only inspection must not revive interrupted collection, stale grants or elapsed challenge timing. Decide supported upgrade paths, old format/verifier compatibility, interrupted migration, downgrade/rollback, obsolete-version handling and any signing transition with those domains. A retained service certificate, evidence acceptance and Contract acknowledgment keep separate meanings after migration. Recorded debug updates and awake-lease observations establish bounded installations, not systematic update acceptance or a chosen reset/recovery policy.",
+      "milestones": []
     }
   ]
 }

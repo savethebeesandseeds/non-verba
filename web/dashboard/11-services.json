@@ -3,7 +3,68 @@
   "id": "services",
   "number": 11,
   "title": "Server side services",
-  "summary": "Implement hosted account, task and record services plus reviewed operations; no account server or durable hosted acceptance ledger is currently established.",
-  "updatedAt": "2026-10-14",
-  "goals": []
+  "summary": "Proposed hosted-service Goals cover accounts and devices, participant and collective records, discovery and coordination, notifications, evidence, dispute and incident records, access controls, technical operations and conditionally authorized provider integrations. Local preview servers, analysis tools, simulated coordination, browser/file storage and static homepage hosting establish no completed hosted-service milestones; implementation steps remain undefined.",
+  "updatedAt": "2026-10-16",
+  "goals": [
+    {
+      "id": "services-account-device-lifecycle",
+      "title": "Durable accounts and device sessions",
+      "description": "Proposed future scope: connect prepared registration records to durable account enrollment, role records and authorized device sessions. Account identifiers, uniqueness and duplicate handling, contact ownership confirmation, optional provider linking, session renewal, revocation and recovery need decisions with Identity, authentication and work privacy. Implement the agreed service-side bindings and persistent work state without treating a form, account login or device key as verified identity or contractual authority. Login or reconnect must preserve hold and clock-out. Durable infrastructure defines the shared transport and recovery semantics.",
+      "milestones": []
+    },
+    {
+      "id": "services-participant-records",
+      "title": "Persistent participant records and explicit publication",
+      "description": "Proposed future scope: retain registration details, privacy choices, certification declarations and exact applicable notice or terms records under the selected account policy. Retain any selected verification status, issuer/evidence provenance and refresh or revocation outcomes under Identity's assurance rules; storage alone supplies no verification. Keep private contact, accessibility and identity information separate from deliberately published profile fields, and self-reported certifications separate from verified status. Define correction, publication and withdrawal behavior with Assignments and Identity. Identity determines any server-side biometric handling; the local face reference does not authorize central storage. Governance reviews actual notices and terms; a stored assent record does not establish adopted terms or sufficient contractual notice.",
+      "milestones": []
+    },
+    {
+      "id": "services-discovery-coordination",
+      "title": "Authorized discovery and Assignment coordination",
+      "description": "Proposed future scope: provide authorized profile discovery and persistent coordination of Requests, quotes, exact Contract exchange and task records. Decide discovery fields, availability disclosure, deployment catalog authority and account country grants; enforce service access independently of map filtering. Resolve competing formations under the first-version one-Assignment-per-Request rule and exact certificate delivery and participant-retention outcomes without treating local signing guards as a global registry. Preserve participant-controlled signing and shared Rust verification; database state cannot supply consent or complete global history. Assignments defines participant action and review meaning, Durable infrastructure defines workflow/idempotency semantics, and APK buildout supplies phone integration. Client-visible version, status, error and reconnect contracts remain to be agreed. Tracking, tiles and routing require separately selected scope.",
+      "milestones": []
+    },
+    {
+      "id": "services-notification-delivery",
+      "title": "Notification delivery across devices",
+      "description": "Proposed future scope: deliver authorized task and account notifications across devices while preserving Identity's work-privacy policy. Hold permits normal notifications; clock-out and sign-out require silent handling. Delivery, reading, sufficient domain notice, acknowledgment and consent remain separate facts. Reconcile silent handling with Dispute procedure and Material incidents' notice requirements before selecting service behavior, without resuming work, activating sensors or treating silence as consent. Event disclosure, inbox and badge behavior, preferences, offline handling, retention and client-visible status/error/reconnect contracts remain decisions with the domain, workflow and client Heroes. Browser and Android presentation remain client responsibilities; the current synthetic inbox establishes no delivery service.",
+      "milestones": []
+    },
+    {
+      "id": "services-evidence-acceptance",
+      "title": "Authenticated evidence exchange and durable acceptance",
+      "description": "Proposed future scope: host recipient-authorized original requests, policy/context, artifacts, receipts and available failure records, with durable principal-scoped reservations and atomic acceptance under Durable infrastructure's operation/idempotency, conflict, lost-response lookup and recovery contract. Preserve shared Rust re-verification, exact original context and separate delivery, verification, freshness and committed acceptance. Evidence-ledger acceptance is distinct from a Requester completion acknowledgment or compensation authorization. Decide ledger/replay scope, requester authority, time assumptions and crash behavior with Durable infrastructure and Identity; local queues or hosted storage prove neither global completeness nor physical truth. Sensors owns artifact/failure formats and unavailable/unsigned outcomes. Any selected service for independently provisioned navigation or attestation inputs must preserve independently chosen trust policy and provenance; provider and distribution design remain open.",
+      "milestones": []
+    },
+    {
+      "id": "services-case-records",
+      "title": "Durable dispute and incident records",
+      "description": "Proposed future scope: retain and exchange exact authenticated case openings, notice evidence, attributed claims/responses, proposal revisions, challenges and scoped authorization, unresolved, closure or escalation records through shared evidence/case interfaces with domain-specific views. Support recipient-authorized scrutiny packages at supplied-history frontiers without claiming complete global history. Dispute procedure defines contractual meaning, consent and consequences; delivery or database commit supplies no notice sufficiency, payment or settlement authority. Keep separately scoped incident notices, classification, referral and disclosure records under Material incidents and insurance's purposes and procedures, without making fault, liability or coverage decisions. Preserve originals and analysis provenance; support preservation and urgent-assistance handoffs without awaiting final incident classification. Domain recipients, disclosure authority and response commitments remain unresolved. Priors defines reasoning context and policy; no case format, closure rule or resolver authority is selected.",
+      "milestones": []
+    },
+    {
+      "id": "services-collective-records",
+      "title": "Hosted collective participation records and calculation audit",
+      "description": "Proposed future scope: persist selected membership/participation records, qualifying completions, approved and disputed time/inputs, exact Operator-authorized ballots, task/agreement/policy versions, and reproducible calculation snapshots and receipts. Preserve original claims, authority references, applicable policy versions and later attributed corrections so input correction remains distinguishable from a contractual effect. Cooperation and the Operators union defines eligibility, admission, correction/challenge, calculation and disclosure rules; Dispute procedure defines authority for contested contractual consequences. Identity supplies account/key authority without establishing membership. Durable infrastructure supplies submission/retry/status semantics; this Hero supplies authorized exchange, access and retention. Demand/capacity observations remain conditional on selected policy and provenance. Controlled audit, snapshot completeness and membership methods remain unresolved; calculation, policy approval, completion acknowledgment, ballot authorization and payment retain separate meanings. No operational ledger or amendment process is selected.",
+      "milestones": []
+    },
+    {
+      "id": "services-access-data-lifecycle",
+      "title": "Service access controls and data lifecycle",
+      "description": "Proposed future scope: enforce selected hosted access and operation grants binding principal, role, device, operation/task, authoritative account work-state revision, purpose, sensors, recipients, explicit consent and validity. Identity defines authority and work-privacy policy; Durable infrastructure defines grant, revocation and observed-shutdown semantics; this Hero persists selected authority/revision records and enforces them, while APK buildout enforces native controls. Account access, reconnect or a cancellation acknowledgment supplies no new signing, ballot or sensing authority and no proof of remote shutdown. Provide protected transport/storage, scoped administration and explicit export, correction and deletion. Decide key custody, data retention, shared-copy limits, backups and restoration safeguards with Identity and Governance; scrutiny or insurance research grants no automatic access to private identity or member records. Participant signing keys remain under their owners' control. Independent review belongs to launch readiness.",
+      "milestones": []
+    },
+    {
+      "id": "services-deployment-recovery",
+      "title": "Reviewed deployment and recoverable operations",
+      "description": "Proposed future scope: establish deployment, monitoring, backups, restore and technical service/security-event response and recovery for a deliberately selected pilot. Material incidents and insurance separately defines significant-harm response around Assignments. Governance defines the accountable provider, offering, jurisdiction and reviewed commitments; this Hero designs and demonstrates feasible hosting, data controls and operations under those decisions. Availability, response, monitoring-data and restoration commitments require explicit scope and supporting evidence before adoption. Durable infrastructure supplies workflow recovery semantics, while this Hero supplies hosted persistence and operating procedures. Component checks and static homepage deployment retain their limited scope. No target, service commitment or production readiness is selected.",
+      "milestones": []
+    },
+    {
+      "id": "services-provider-integrations",
+      "title": "Explicitly authorized billing and provider integrations",
+      "description": "Conditional proposed scope: integrate a selected payment or coverage provider only under separately agreed authority, exact records and reviewed operating rules. Request-creation charging still needs its amount, charging event and operational design. Preserve the stated requester-funded policy, free Operator registration and mediation, no commission or deduction from Operator compensation, and direct Requester-to-Operator task payment. Governance defines the offering and authority; Dispute procedure defines settlement consequences and Material incidents and insurance defines any coverage. A provider observation, payee receipt or service activation must retain its actual meaning without implying irreversible payment, custody, insurance or a guarantee.",
+      "milestones": []
+    }
+  ]
 }

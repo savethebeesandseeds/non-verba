@@ -142,7 +142,7 @@ snapshot. JSON edits become visible only after refresh and reopening/reloading
 the HTML. `./web/dashboard/refresh.ps1 -Check` validates data and HTML freshness
 without host writes; add `-BrowserCheck` for focused model and file-open checks.
 
-The formal definitions are [hero.schema.json](hero.schema.json) and
-[manifest.schema.json](manifest.schema.json). Runtime validation also checks real
+The formal definitions are [hero.schema.json](schemas/hero.schema.json) and
+[manifest.schema.json](schemas/manifest.schema.json). Runtime validation also checks real
 calendar dates, date ordering, global ID uniqueness, dependency references/cycles
 and existing evidence files. See [opening instructions](README.md#open-the-dashboard).

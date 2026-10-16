@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Exact named project closure. It is NOT general dynamic dependency discovery.
+import {readFile,lstat} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {digest,sha} from '../finite-codec.mjs';
+import {immutableCopy} from '../immutable-state.mjs';
+import {computePilotEpoch,verifyCurrentProof,staticModuleRequests} from '../pilot-identity.mjs';
+import {POLICY} from './focal-selection.mjs';
+import {FEATURE_POLICY} from './metadata.mjs';
+import {ACTUAL_REVISION} from './admission.mjs';
+export const NEW_FILES=Object.freeze(['next-stage-v1/README.md','next-stage-v1/protocol.json','next-stage-v1/static-bindings.json','next-stage-v1/adapter.original.mjs','next-stage-v1/adapter.mjs','next-stage-v1/adapter-fork.json','next-stage-v1/admission.mjs','next-stage-v1/io.mjs','next-stage-v1/focal-selection.mjs','next-stage-v1/metadata.mjs','next-stage-v1/raw-loader.mjs','next-stage-v1/identity.mjs','next-stage-v1/meter.mjs','next-stage-v1/transport.mjs','next-stage-v1/worker.mjs','next-stage-v1/driver.mjs','next-stage-v1/fixtures.mjs','next-stage-v1/controls.test.mjs','pilot-execution-guardian.mjs','pilot-execution-control.mjs','pilot-execution-guardian.test.mjs','pilot-execution-API.md']);
+const ENTRY=Object.freeze({collector:new URL('../sections.prototype.mjs',import.meta.url).href,typed_adapter:new URL('./adapter.mjs',import.meta.url).href,driver:new URL('./driver.mjs',import.meta.url).href,metadata:new URL('./metadata.mjs',import.meta.url).href,raw_loader:new URL('./raw-loader.mjs',import.meta.url).href,worker:new URL('./worker.mjs',import.meta.url).href,guardian:new URL('../pilot-execution-guardian.mjs',import.meta.url).href,pinned_tokenizer_API:new URL('../pinned-tokenizers.mjs',import.meta.url).href});
+export function assertStageEntry(role,url){if(ENTRY[role]!==String(url))throw Object.assign(Error('EXACT69_UNBOUND_PROJECT_ENTRY'),{code:'EXACT69_UNBOUND_PROJECT_ENTRY'});return true;}
+export async function freezeStageFiles(){const rows=[];for(const path of NEW_FILES){const url=new URL('../'+path,import.meta.url),stat=await lstat(url);if(!stat.isFile()||stat.isSymbolicLink())throw Error('EXACT69_REGULAR_SOURCE_REQUIRED');const bytes=await readFile(url);rows.push({path,sha256:sha(bytes),bytes:bytes.length});}return rows;}
+export async function computeStageEpoch({extractionOptions,selectionOptions,currentSourceProof,fixture=false}){
+  const base=await computePilotEpoch({extractionOptions,selectionOptions});verifyCurrentProof(currentSourceProof,base,{control:fixture});const extra=await freezeStageFiles(),map=new Map(base.experiment_files.map(r=>[r.path,r]));for(const row of extra)map.set(row.path,row);
+  const files=[...map.values()],owned=new Set(files.map(r=>new URL('../'+r.path,import.meta.url).href)),staticEdges=[];
+  for(const row of files.filter(r=>r.path.endsWith('.mjs')&&!r.path.includes('/upstream/')&&!r.path.endsWith('.original.mjs'))){const url=new URL('../'+row.path,import.meta.url),text=await readFile(url,'utf8');for(const specifier of staticModuleRequests(text)){if(specifier.startsWith('node:'))continue;if(specifier==='parse5')continue;const target=specifier.startsWith('.')?new URL(specifier,url).href:null;if(!target||!owned.has(target))throw Error('EXACT69_UNBOUND_STATIC_PROJECT_DEPENDENCY');staticEdges.push({from:row.path,specifier,target});}}
+  const body={...base,schema:'exact69-typed-focal-prospective-source-epoch-v1',status:'PROTOTYPE_UNADOPTED_TWO_PHASE_EXECUTION_BLOCKED',accepted_parent_epoch_sha256:base.sha256,experiment_files:files,experiment_source_set_sha256:digest(files),current_source_proof_sha256:currentSourceProof.sha256,current_proof_parameters:currentSourceProof.parameters,typed_focal_policy:POLICY,private_metadata_feature_policy:FEATURE_POLICY,named_project_entries:ENTRY,static_project_edges:staticEdges,unexecuted_original_code_copies_are_hash_bound_data:true,actual_revision:ACTUAL_REVISION,callback_scope:'CLOSED_WORKER_TRANSPORT_AND_OWNED_METER_ONLY; no arbitrary callback/module/require/fs-code injection',runtime_dependency_scope:'COMPLETE_EXPLICIT_NAMED_PROJECT_FILE_SET_PLUS_ACCEPTED_STATIC_PARSE5_ENTITIES_GRAPH_AND_CONFIGURED_PINNED_TOKENIZER_SERVICE; NOT_GENERAL_DYNAMIC_RUNTIME_CLOSURE',dynamic_runtime_closure_verified:false,external_tokenizer_package_code_byte_enumerated:false,authority:'NONE'};delete body.sha256;
+  return immutableCopy({...body,sha256:digest(body)});
+}
+export function stageSourceDirectory(){return fileURLToPath(new URL('.',import.meta.url));}

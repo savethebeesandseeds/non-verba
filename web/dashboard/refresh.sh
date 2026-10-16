@@ -44,8 +44,8 @@ repository_root=$(cd -- "$dashboard_root/../.." && pwd)
 source "$repository_root/code/container/env.sh"
 validator_options=()
 if (( check )); then validator_options+=(--check); fi
-node "$dashboard_root/validate.mjs" "${validator_options[@]}"
-if (( ! check )); then node "$dashboard_root/validate.mjs" --check; fi
+node "$dashboard_root/tools/validate.mjs" "${validator_options[@]}"
+if (( ! check )); then node "$dashboard_root/tools/validate.mjs" --check; fi
 if (( browser_check )); then
   node --test "$dashboard_root/test/model.test.mjs"
   NONVERBA_PLAYWRIGHT_PATH=${NONVERBA_PLAYWRIGHT_PATH:-/opt/nonverba-tools/browser-tests/node_modules/playwright} \

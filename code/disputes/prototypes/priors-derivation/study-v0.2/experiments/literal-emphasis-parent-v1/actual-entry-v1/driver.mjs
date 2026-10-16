@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Separate phases: source preparation NEVER calls the selection function.
+import {digest} from '../finite-codec.mjs';
+import {admitActualExecution,admitFictionalPhase} from './admission.mjs';
+import {deriveDevelopmentMetadata,freezeSelection,parametersFromProof} from './projector.mjs';
+import {readBound,parseJSON,writeMetadata,writeGzipCase} from './io.mjs';
+import {computeStageEpoch} from './identity.mjs';
+import {loadFrozenSource} from './loader.mjs';
+import {prepareSourceBytesForPilot,measurePreparedPilotInputs,preparedPilotReadDocuments} from './adapter.mjs';
+import {createInputMeter} from './meter.mjs';
+import {assertTransport} from './transport.mjs';
+import {checkedArtifactBindings} from './bindings.mjs';
+import {makeCaseIndex} from './outboard.mjs';
+const fail=code=>{throw Object.assign(Error(code),{code});};
+const safe=error=>/^[A-Z0-9_]+$/u.test(error.code??'')?error.code:'EXACT69_SOURCE_BINDING_OR_RESOURCE_FAILURE';
+async function epochFor(source,config){const p=parametersFromProof(source,{fixture:config.mode==='SOURCE_FREE_FIXTURE'}),epoch=await computeStageEpoch({extractionOptions:p.extraction,selectionOptions:p.selection,currentSourceProof:source,fixture:config.mode==='SOURCE_FREE_FIXTURE'});if(epoch.sha256!==config.source_epoch_sha256)fail('EXACT69_CONFIG_SOURCE_EPOCH');return epoch;}
+export async function runDriver(config,transport){
+  if(config?.mode!=='SOURCE_FREE_FIXTURE')admitActualExecution(); // before ANY metadata/source file IO.
+  assertTransport(transport);const permit=await admitFictionalPhase(config.root,config.phase),outputBudget={used:config.prior_cost.admitted_output_bytes},output_refs=[];
+  const write=(name,value,kind='metadata')=>writeMetadata(config.root,name,value,{permit,outputBudget,transport,kind});
+  if(config.phase==='METADATA_SELECTION_ONLY'){
+    const manifest=parseJSON(await readBound(config.root,config.bindings.manifest.path,config.bindings.manifest,{permit}));await epochFor(manifest.source,config);
+    const projection=await deriveDevelopmentMetadata(config.root,config.bindings,{permit,mandatoryAuditIds:config.mandatory_audit_ids,rosterRef:config.roster_ref,sourceEpochSHA256:config.source_epoch_sha256});output_refs.push(await write('metadata-projection.json',projection));
+    if(projection.completeFreshProof)output_refs.push(await write('complete-fresh-guard.json',projection.completeFreshProof));
+    let freeze;if(projection.status==='COMPLETE_METADATA_PROJECTION_NOT_SOURCE_READING')freeze=freezeSelection(projection,config.mandatory_audit_ids);else{const body={schema:'typed-focal-prospective69-freeze-v2',status:'HELD_INCOMPLETE_METADATA_NO_DRAW',nominal_denominator:69,ordered:[],mandatory_ids:config.mandatory_audit_ids,metadata_projection_sha256:projection.sha256??null,failures_replaced:false,raw_opened:false,authority:'NONE'};freeze={...body,sha256:digest(body)};}
+    output_refs.push(await write('ordered69-freeze.json',freeze));const failed_ids=[...new Set((projection.failures??[]).map(r=>r.audit_id))],processed=new Set([...(projection.rows??[]),...(projection.ineligible_rows??[]),...(projection.protected_rows??[])].map(r=>r.audit_id)),completed_ids=config.expected_ids.filter(id=>processed.has(id)&&!failed_ids.includes(id)),remaining_ids=config.expected_ids.filter(id=>!completed_ids.includes(id)&&!failed_ids.includes(id));
+    const result={status:projection.status==='COMPLETE_METADATA_PROJECTION_NOT_SOURCE_READING'&&freeze.status==='ORDERED69_METADATA_FROZEN_NOT_SOURCE_AUTHORIZATION'&&!remaining_ids.length?'COMPLETE':'HELD',total_calls:0,completed_ids,failed_ids,remaining_ids,output_refs};output_refs.push(await write('summary.json',{schema:'exact69-metadata-phase-summary-v1',...result,nominal_development_denominator:200,nominal_source_pilot_denominator:69,actual_execution:false,raw_originals_opened:false,manual_source_reading:false,authority:'NONE'},'summary'));return{...result,output_refs};
+  }
+  if(config.phase!=='PREPARE_SELECTED69'||!config.selected_freeze_ref||!config.metadata_projection_ref)fail('EXACT69_SEPARATE_PHASE_REQUIRED');
+  const projection=parseJSON(await readBound(config.root,config.metadata_projection_ref.path,config.metadata_projection_ref,{permit})),freeze=parseJSON(await readBound(config.root,config.selected_freeze_ref.path,config.selected_freeze_ref,{permit}));await epochFor(projection.current_source_proof,config);
+  if(freeze.status!=='ORDERED69_METADATA_FROZEN_NOT_SOURCE_AUTHORIZATION'||freeze.ordered?.length!==69||JSON.stringify(freeze.ordered.map(r=>r.audit_id))!==JSON.stringify(config.expected_ids))fail('EXACT69_SEPARATE_SELECTED_FREEZE_BINDING');
+  const completeGuard=parseJSON(await readBound(config.root,config.complete_guard_ref.path,config.complete_guard_ref,{permit}));if(digest(completeGuard)!==digest(projection.completeFreshProof))fail('ACTUAL_COMPLETE_FRESH_GUARD_BINDING');
+  const artifactBindings=checkedArtifactBindings(parseJSON(await readBound(config.root,config.artifact_bindings_ref.path,config.artifact_bindings_ref,{permit})),{fixture:true});
+  const meter=await createInputMeter(config.root,{permit,transport,streamIDs:config.stream_ids,expectedBindings:artifactBindings,priorCost:config.prior_cost}),completed_ids=[],failed_ids=[],outcomes=[],cases=[];
+  for(const[index,row]of freeze.ordered.entries()){
+    let record;try{const loaded=await loadFrozenSource(config.root,row,projection,freeze,{permit}),handle=await prepareSourceBytesForPilot({...loaded,root:config.root,permit}),measured=await measurePreparedPilotInputs(handle,{meter}),documents=preparedPilotReadDocuments(handle);record={schema:'prospective-literal-emphasis-parent-case-v2',status:measured.all_complete?'INPUTS_PREPARED_NOT_SOURCE_REVIEW':'FAILED_WHOLE_CASE_REQUIRED_INPUT_SCOPE',original_index:index,audit_id:row.audit_id,original_denominator:69,descriptor:handle.descriptor,source_epoch_sha256:handle.epoch.sha256,measurement:measured,documents,original_source_refs:row,manual_reading:false,source_quality_passed:false,authority:'NONE'};}catch(error){record={schema:'prospective-literal-emphasis-parent-case-v2',status:'FAILED_WHOLE_CASE_REQUIRED_SCOPE_UNAVAILABLE',original_index:index,audit_id:row.audit_id,original_denominator:69,code:safe(error),original_source_refs:row,required_scopes_missing:true,partial_stream_accepted:false,manual_reading:false,source_quality_passed:false,authority:'NONE'};}
+    let ref;try{ref=await writeGzipCase(config.root,'cases/'+row.audit_id+'.json.gz',record,{permit,outputBudget,transport,caseID:row.audit_id,kind:'case'});}catch(error){if(!['EXACT69_CASE_DECODED_OUTPUT','EXACT69_CASE_OUTPUT_LIMIT'].includes(error.code))throw error;record={schema:'prospective-literal-emphasis-parent-case-v2',status:'FAILED_WHOLE_CASE_ARTIFACT_RESOURCE_BOUND',original_index:index,audit_id:row.audit_id,original_denominator:69,code:safe(error),original_source_refs:row,required_scopes_missing:true,partial_stream_accepted:false,authority:'NONE'};ref=await writeGzipCase(config.root,'cases/'+row.audit_id+'.json.gz',record,{permit,outputBudget,transport,caseID:row.audit_id,kind:'case'});}
+    output_refs.push(ref);cases.push({case_ref:ref,record});if(record.status==='INPUTS_PREPARED_NOT_SOURCE_REVIEW')completed_ids.push(row.audit_id);else failed_ids.push(row.audit_id);outcomes.push({audit_id:row.audit_id,status:record.status,output:ref,focal_kind:row.focal_kind,counts_as_study_comparison_unit:row.focal_kind==='ACTUAL_UNIT',actual_reading:false});
+  }
+  const init=assertTransport(transport).init;if(!init?.config_ref)fail('ACTUAL_OUTBOARD_OWNED_CONFIG_REQUIRED');output_refs.push(await write('stored-case-index.json',makeCaseIndex({cases,ordered69:freeze,source_epoch_ref:config.source_epoch_ref,phase_config_ref:{...init.config_ref,path:'configuration.json'},protected_guard_ref:config.complete_guard_ref,ordered69_ref:config.selected_freeze_ref,current_source_sha256:projection.current_source_proof.sha256,tokenizer_policies:artifactBindings.models.map(m=>({policy_sha256:m.prospective_policy_sha256,file_set_sha256:m.verified_file_set_sha256_expected_from_frozen_verifier}))})));
+  const result={status:failed_ids.length?'HELD':'COMPLETE',total_calls:meter.snapshot().total_calls,completed_ids,failed_ids,remaining_ids:[],output_refs};output_refs.push(await write('summary.json',{schema:'exact69-source-phase-summary-v1',...result,outcomes,work:meter.snapshot(),nominal_denominator:69,no_replacements:true,parent_anchor_is_not_study_unit:true,actual_reading:false,source_quality_pass:false,inference:false,authority:'NONE'},'summary'));return{...result,output_refs};
+}
+export function runActualDriver(){admitActualExecution();}

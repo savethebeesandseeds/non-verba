@@ -1,18 +1,37 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Bounded, immutable study artifacts. A local hash is not execution attestation.
 import { createHash, randomUUID } from 'node:crypto';
-import { createReadStream } from 'node:fs';
+import { constants, createReadStream } from 'node:fs';
 import { link, lstat, mkdir, open, readdir, readFile, stat, unlink } from 'node:fs/promises';
-import { dirname, relative, resolve } from 'node:path';
-import { digest, requireContainer } from '../../lib/common.mjs';
+import { basename, dirname, relative, resolve } from 'node:path';
+import { gzip, gunzip } from 'node:zlib';
+import { promisify } from 'node:util';
+import { digest, sha256, requireContainer } from '../../lib/common.mjs';
 
 export const STUDY_BASE = '/opt/nonverba-build/priors-derivation/study-v0.2';
+export const EXTRACTION_CACHE_STORAGE_POLICY = 'lossless-gzip-extraction-cache-v1';
+export const MAX_EXTRACTION_CACHE_ENCODED_BYTES = 64 * 1024 ** 2;
+export const MAX_EXTRACTION_CACHE_DECODED_BYTES = 64 * 1024 ** 2;
+const MAX_CACHE_RECEIPT_BYTES = 64 * 1024;
+const CACHE_SERIALIZER = 'UTF8_JSON_STRINGIFY_PRETTY_2_FINAL_LF_V1';
+const compressCache = promisify(gzip), decompressCache = promisify(gunzip);
+const hex = value => typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
+const compressedCache = name => typeof name === 'string' && name.startsWith('extraction-cache/') && name.endsWith('.json.gz');
 const MAX_SHARD_BYTES = 128 * 1024 * 1024;
 const MAX_SHARD_ROWS = 50_000;
 const SQL_TYPES = /^(?:VARCHAR|BOOLEAN|INTEGER|BIGINT|DOUBLE|FLOAT|JSON|TIMESTAMP|DATE)(?:\[\d*\])?$/;
 const quote = value => `'${String(value).replaceAll("'", "''")}'`;
 const identifier = value => `"${value.replaceAll('"', '""')}"`;
 const ledgerTimes = new Map();
+const TRANSFER_UUID = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
+const JSON_TRANSFER = new RegExp(`\\.${TRANSFER_UUID}\\.partial$`);
+const ROW_TRANSFER = new RegExp(`^rows-${TRANSFER_UUID}\\.(?:ndjson|parquet)$`);
+const RAW_TRANSFER = new RegExp(`-${TRANSFER_UUID}\\.partial$`);
+
+function isTransferArtifact(path) {
+  const name = basename(path), parent = basename(dirname(path));
+  return JSON_TRANSFER.test(name) || parent === 'partials' && ROW_TRANSFER.test(name) || parent === 'raw-partials' && RAW_TRANSFER.test(name);
+}
 
 export function validateStudyRoot(value) {
   requireContainer();
@@ -33,11 +52,13 @@ export async function assertUnlinked(path, { missing = false } = {}) {
   return absolute;
 }
 
-export async function studyPath(runDir, name, { missing = false } = {}) {
+export async function studyPath(runDir, name, { missing = false, transfer = false } = {}) {
   const root = validateStudyRoot(runDir);
   if (typeof name !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9/_.-]*$/.test(name) || name.split('/').some(part => !part || part === '.' || part === '..')) throw new Error('Study artifact requires a literal relative child path');
   const path = resolve(root, name);
   if (!path.startsWith(`${root}/`)) throw new Error('Study artifact escaped its run');
+  if (transfer === true && !isTransferArtifact(path)) throw new Error('Transfer mode requires a canonical transfer filename');
+  if (isTransferArtifact(path) && transfer !== true) throw new Error('Committed study artifact cannot use a reserved transfer filename');
   return assertUnlinked(path, { missing });
 }
 
@@ -56,7 +77,18 @@ export async function directoryBytes(path) {
     const child = resolve(path, item.name);
     if (item.isSymbolicLink()) throw new Error(`Linked study artifact refused: ${child}`);
     if (item.isDirectory()) bytes += await directoryBytes(child);
-    else if (item.isFile()) bytes += (await stat(child)).size;
+    else if (item.isFile()) {
+      let info;
+      try { info = await lstat(child); } catch (error) {
+        // Successful writers unlink only their own transfer files after commit.
+        // A live quota scan may have enumerated one just before that unlink.
+        if (error.code === 'ENOENT' && isTransferArtifact(child)) continue;
+        throw error;
+      }
+      if (info.isSymbolicLink()) throw new Error(`Linked study artifact refused: ${child}`);
+      if (!info.isFile()) throw new Error('Study artifact type changed during storage accounting');
+      bytes += info.size;
+    }
     else throw new Error('Unsupported study artifact type');
   }
   return bytes;
@@ -74,7 +106,68 @@ export async function writeJSON(runDir, name, value) {
   return { path: name, ...await hashFile(path) };
 }
 
+// Read at most the declared bounded length plus one sentinel byte. FileHandle
+// reads prevent a file growing after stat from causing an unbounded readFile.
+async function boundedBytes(runDir, name, maxBytes, expectedBytes) {
+  const path = await studyPath(runDir, name), file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+  try {
+    const info = await file.stat();
+    if (!info.isFile() || !Number.isSafeInteger(info.size) || info.size < 1 || info.size > maxBytes || expectedBytes !== undefined && info.size !== expectedBytes) throw new Error('Extraction cache file exceeds its bound or byte binding');
+    const bytes = Buffer.alloc(info.size + 1); let used = 0;
+    while (used < bytes.length) {
+      const result = await file.read(bytes, used, bytes.length - used, used);
+      if (!result.bytesRead) break;
+      used += result.bytesRead;
+    }
+    if (used !== info.size) throw new Error('Extraction cache file changed length during bounded read');
+    return bytes.subarray(0, used);
+  } finally { await file.close(); }
+}
+
+/** New extraction epochs retain the exact former JSON serialization, compressed.
+ * Neither this writer nor a retry replaces an existing cache or old JSON epoch.
+ * The workflow commits the returned storage metadata in its immutable receipt.
+ */
+export async function writeExtractionCache(runDir, name, value, { remainingBytes = Number.MAX_SAFE_INTEGER } = {}) {
+  if (!compressedCache(name) || !Number.isSafeInteger(remainingBytes) || remainingBytes < 0) throw new Error('Explicit compressed extraction cache path/budget required');
+  const path = await studyPath(runDir, name, { missing: true }); digest(value);
+  const plain = Buffer.from(JSON.stringify(value, null, 2) + '\n');
+  if (plain.length > MAX_EXTRACTION_CACHE_DECODED_BYTES) throw new Error('Extraction cache exceeds explicit decoded bound');
+  const bytes = await compressCache(plain, { level: 6 });
+  if (bytes.length > MAX_EXTRACTION_CACHE_ENCODED_BYTES) throw new Error('Extraction cache exceeds explicit encoded bound');
+  const expected = sha256(bytes); let resumed = false;
+  const same = async () => { const old = await boundedBytes(runDir, name, MAX_EXTRACTION_CACHE_ENCODED_BYTES, bytes.length); if (sha256(old) !== expected) throw new Error('Immutable compressed extraction cache differs'); };
+  try { await same(); resumed = true; }
+  catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    if (bytes.length * 2 > remainingBytes) throw new Error('Extraction cache exceeds remaining study storage budget');
+    await mkdir(dirname(path), { recursive: true }); await assertUnlinked(dirname(path));
+    const partial = `${path}.${randomUUID()}.partial`, file = await open(partial, 'wx', 0o600);
+    try { await file.writeFile(bytes); await file.sync(); } finally { await file.close(); }
+    try { await link(partial, path); }
+    catch (commitError) { if (commitError.code !== 'EEXIST') throw commitError; await same(); resumed = true; }
+    await unlink(partial); // Only this successful writer's own transfer.
+  }
+  return { artifact: { path: name, sha256: expected, bytes: bytes.length }, storage: { schema: EXTRACTION_CACHE_STORAGE_POLICY, encoding: 'gzip', serializer: CACHE_SERIALIZER, decoded_bytes: plain.length, decoded_sha256: sha256(plain) }, resumed, added_bytes: resumed ? 0 : bytes.length };
+}
+
+async function readCompressedExtractionCache(runDir, name, maxBytes) {
+  const sidecar = await boundedBytes(runDir, `${name}.manifest.json`, MAX_CACHE_RECEIPT_BYTES);
+  const receipt = JSON.parse(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(sidecar)), storage = receipt.storage;
+  if (receipt.path !== name || !hex(receipt.sha256) || !hex(receipt.result_sha256) || !Number.isSafeInteger(receipt.bytes) || receipt.bytes < 1 || receipt.bytes > MAX_EXTRACTION_CACHE_ENCODED_BYTES || storage?.schema !== EXTRACTION_CACHE_STORAGE_POLICY || storage.encoding !== 'gzip' || storage.serializer !== CACHE_SERIALIZER || !Number.isSafeInteger(storage.decoded_bytes) || storage.decoded_bytes < 1 || storage.decoded_bytes > MAX_EXTRACTION_CACHE_DECODED_BYTES || storage.decoded_bytes > maxBytes || !hex(storage.decoded_sha256)) throw new Error('Extraction cache receipt binding or decoded bound differs');
+  const bytes = await boundedBytes(runDir, name, MAX_EXTRACTION_CACHE_ENCODED_BYTES, receipt.bytes);
+  if (sha256(bytes) !== receipt.sha256) throw new Error('Extraction cache encoded digest differs');
+  const plain = await decompressCache(bytes, { maxOutputLength: storage.decoded_bytes });
+  if (plain.length !== storage.decoded_bytes || sha256(plain) !== storage.decoded_sha256) throw new Error('Extraction cache decoded byte binding differs');
+  const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(plain), value = JSON.parse(text);
+  if (JSON.stringify(value, null, 2) + '\n' !== text || digest(value) !== receipt.result_sha256) throw new Error('Extraction cache complete JSON serialization/content digest differs');
+  return value;
+}
+
 export async function readJSON(runDir, name, { maxBytes = 16 * 1024 * 1024 } = {}) {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new Error('Study JSON read requires an explicit positive byte bound');
+  if (compressedCache(name)) return readCompressedExtractionCache(runDir, name, Math.min(maxBytes, MAX_EXTRACTION_CACHE_DECODED_BYTES));
+  if (typeof name === 'string' && name.endsWith('.gz')) throw new Error('Only explicit extraction caches use the study JSON gzip reader');
   const path = await studyPath(runDir, name);
   if ((await stat(path)).size > maxBytes) throw new Error('Study JSON artifact exceeds its explicit read bound');
   return JSON.parse(await readFile(path, 'utf8'));
@@ -103,7 +196,7 @@ export async function writeRows(runDir, name, rows, { schema, maxRows = MAX_SHAR
   const destination = await studyPath(runDir, name, { missing: true });
   try { await lstat(destination); throw new Error('Existing study shard is immutable'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   await mkdir(dirname(destination), { recursive: true }); await assertUnlinked(dirname(destination));
-  const temporary = await studyPath(runDir, `partials/rows-${randomUUID()}.ndjson`, { missing: true });
+  const temporary = await studyPath(runDir, `partials/rows-${randomUUID()}.ndjson`, { missing: true, transfer: true });
   await mkdir(dirname(temporary), { recursive: true });
   let count = 0; let inputBytes = 0; let inferred = schema ? checkedSchema(schema) : null;
   const used = await directoryBytes(validateStudyRoot(runDir));
@@ -123,7 +216,7 @@ export async function writeRows(runDir, name, rows, { schema, maxRows = MAX_SHAR
     await input.sync();
   } finally { await input.close(); }
   if (!inferred) throw new Error('An empty shard requires an explicit schema');
-  const output = await studyPath(runDir, `partials/rows-${randomUUID()}.parquet`, { missing: true });
+  const output = await studyPath(runDir, `partials/rows-${randomUUID()}.parquet`, { missing: true, transfer: true });
   const db = await openDatabase();
   try {
     const types = { __study_row_number: 'BIGINT', ...inferred };

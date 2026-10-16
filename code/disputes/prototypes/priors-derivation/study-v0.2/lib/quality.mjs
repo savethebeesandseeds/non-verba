@@ -2,7 +2,7 @@
 // Structural admission for an actual authored fresh review, not its automation.
 import {readJSON,digest,sha256,within,requireContainer} from '../../lib/common.mjs';
 import {readFile} from 'node:fs/promises';
-import {studyPath,hashFile,readRows} from './store.mjs';
+import {studyPath,hashFile,readRows,readJSON as readStudyJSON} from './store.mjs';
 import {atomicJSON,extractionSourceIdentity} from './workflow.mjs';
 import {auditPurpose} from './audit.mjs';
 import {assertNoUnresolvedSourceIssues} from './source-issues.mjs';
@@ -43,7 +43,7 @@ async function verifyAuditPacket(runDir,packet,extraction,extractionPath,{purpos
     if(!item||!record||row.lineage?.cache_path!==item.path||row.lineage.cache_sha256!==item.sha256||row.lineage.raw_sha256!==record.raw_sha256||row.lineage.cohort!==record.cohort)throw new Error('Audit row differs from its actual extracted source');
     if(['development','fresh_representation'].includes(purpose)&&auditPurpose(row.contract_id,{seed:source.seed})!==purpose)throw new Error('Audit row crosses its predeclared contract-disjoint purpose pool');
     if(purpose==='fresh_representation'&&(record.status!=='accepted'||excluded.has(row.contract_id)))throw new Error('Fresh source is rejected or previously exposed');
-    await checkFile(item.path,item.sha256,item.bytes);const cached=await readJSON(await studyPath(runDir,item.path));
+    await checkFile(item.path,item.sha256,item.bytes);const cached=await readStudyJSON(runDir,item.path,{maxBytes:64*1024**2});
     if(cached.contract?.id!==row.contract_id||cached.contract.path!==row.lineage.raw_path||cached.raw_sha256!==record.raw_sha256||sha256(cached.normalized_text)!==cached.normalized_sha256)throw new Error('Audit cache raw or normalized lineage differs');
     await checkFile(row.lineage.raw_path,record.raw_sha256);
     if(record.normalized_path){if(row.lineage.normalized_path!==record.normalized_path||row.lineage.normalized_sha256!==record.normalized_sha256||cached.normalized_sha256!==record.normalized_sha256)throw new Error('Audit normalized file lineage differs');await checkFile(record.normalized_path,record.normalized_sha256);}

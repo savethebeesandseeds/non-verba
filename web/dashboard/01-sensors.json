@@ -3,25 +3,25 @@
   "id": "sensors",
   "number": 1,
   "title": "Sensor hardening and evidence quality",
-  "summary": "Build on signed evidence prototypes while establishing practical quality, lifecycle reliability and bounded physical-device assurance.",
-  "updatedAt": "2026-10-14",
+  "summary": "Signed sensor formats and bounded GPS, camera and audio checkpoints are retained alongside proposed Goals for reliable acquisition, durable failed-attempt records, calibrated usability, acoustic reliability, richer camera capture, bounded location/timing assurance and resistance to replay or substitution. Independent physical acceptance remains unresolved.",
+  "updatedAt": "2026-10-16",
   "goals": [
     {
       "id": "sensors-evidence-integrity-goal",
       "title": "Signed evidence formats",
-      "description": "Implemented challenge-bound camera, microphone and location formats, with shared verification and explicit authenticity limits.",
+      "description": "Implemented camera, microphone and location formats and shared appraisal. Integrity, policy satisfaction, requester receipts and committed acceptance are separate judgments; signatures do not establish physical sensor truth.",
       "milestones": [
         {
           "id": "sensors-signed-formats",
           "title": "Signed camera, microphone and location formats",
-          "description": "Implemented development boundaries include challenge-bound C2PA JPEGs, signed WAVs and request-bound COSE location traces. This milestone concerns formats and shared verification; it does not establish independent physical authenticity. The achievement date is unspecified.",
+          "description": "Challenge-bound C2PA JPEGs and WAVs and request-bound COSE location traces have shared Rust/WASM verification. Appraisal reruns the artifact verifier against independently supplied original authority and signer pins. Media pins identify certificates; location pins identify canonical SPKI. Native acquisition assertions remain application claims, and basic verification supplies neither hardware enrollment nor independent position assurance. The original achievement date is unknown.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": null,
           "acceptance": [
-            "Camera, microphone and location records bind to their original request and independently pinned signer.",
-            "Verification keeps artifact integrity separate from physical truth and successful acceptance."
+            "The implemented verifiers check complete sensor artifacts against their original request and independently supplied expected signer; audio also checks the retained transcript.",
+            "Appraisal distinguishes integrity and requested policy from physical authenticity, trusted clocks and committed acceptance; it writes no acceptance state."
           ],
           "evidence": [
             {
@@ -38,25 +38,43 @@
     },
     {
       "id": "sensors-acquisition-recovery-goal",
-      "title": "Recorded GPS and audio trials",
-      "description": "The dated, bounded GPS retention recheck and local audio demonstration; wider physical reliability remains unverified.",
+      "title": "Recorded phone results and saved-file verification",
+      "description": "Dated GPS recovery, failed-attempt retention, one camera capture and one local audio demo, with their separate exported-file checks. These bounded results do not establish repeatability, independent requester acceptance or general device support.",
       "milestones": [
         {
+          "id": "sensors-gps-restart-proof",
+          "title": "Verify one raw-GPS proof after the phone restart",
+          "description": "On 4 October the unchanged installed collector recovered raw callbacks after the owner restarted the stationary phone. One fresh proof passed independent Rust/WASM checking against the original saved before collection and the previously trusted location key. Its signed session lasted 5,713 ms, with three fixes spanning 2,001 ms and four raw epochs. This establishes that attempt's proof verification; receiver cause, recurrence, preparation speedup, physical position and permanent recovery remain unproven. No independent requester receipt or workflow acceptance was recorded.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-04",
+          "acceptance": [
+            "The retained proof passes its exact original request, trusted key, signature and requested location/raw-GNSS policy checks in Rust/WASM.",
+            "Tampered bytes, wrong request/key and substitution into the failed-attempt verifier are refused."
+          ],
+          "evidence": [
+            {
+              "label": "Single successful post-restart proof and limits",
+              "path": "docs/sensors/VALIDATION.md#gps-restart-comparison--4-october-2026"
+            }
+          ]
+        },
+        {
           "id": "sensors-gps-failure-retention",
-          "title": "GPS failed-attempt reports and exact retention checkpoint",
-          "description": "The 5 October phone recheck retained a separately verified signed failure report and an unsigned pending journal snapshot with exact floating-point agreement after a controlled process restart. Crash and power-loss durability remain outside this milestone.",
+          "title": "Phone GPS failure verification and exact restart retention",
+          "description": "Saved phone timeout and policy-rejection reports passed separate verification. The 5 October recheck used actual native policy rejection and a simulated final-write fault: a verified signed report remained in memory, while its earlier unsigned pending journal snapshot recovered exactly after a controlled process restart, including floating-point values. Prior records retained their bytes and the initial-write-failed memory-only outcome stayed absent. The original one-ULP failed comparison remains preserved. Natural startup-status-0 report production, crashes during collection/signing/writing, power loss and genuine signing/full-storage outages remain unverified.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-05",
           "acceptance": [
-            "Failed-attempt reports remain separate from successful location proofs.",
-            "Controlled restart preserves the observed signed and pending snapshots exactly without successful-measurement acceptance."
+            "Phone failure reports verify against independently retained originals and trusted keys; altered inputs and successful-proof substitution are refused, with successful-measurement and acceptance flags false.",
+            "The controlled restart recovers the new unsigned pending snapshot exactly against its pre-restart signed snapshot and preserves existing retained bytes without inventing a signed outcome."
           ],
           "evidence": [
             {
               "label": "5 October exact retention result",
-              "path": "docs/sensors/STATUS.md#gps-reporting-and-retention-checkpoint--4-and-5-october-2026"
+              "path": "docs/sensors/VALIDATION.md#gps-exact-retention-recheck--5-october-2026"
             },
             {
               "label": "Failed-attempt format",
@@ -65,21 +83,57 @@
           ]
         },
         {
-          "id": "sensors-audio-local-demo",
-          "title": "Local phone audio demo and independent saved-file verification",
-          "description": "One authorized local phone demo completed on 6 October. The exact saved WAV was independently verified on 7 October against the retained media key. Requester provenance remains a local demo; independent physical requester acceptance and consistent acoustic reliability are unfinished.",
+          "id": "sensors-camera-saved-jpeg-verification",
+          "title": "One native camera JPEG and independent file verification",
+          "description": "On 5 October one native shutter produced a 3000 by 4000 signed JPEG. Native Rust and WASM verified the exact pre-capture metadata-only challenge, previously trusted camera key, C2PA integrity and required camera/GPS metadata; complete quality reports agreed exactly. The bare challenge establishes no authenticated requester delivery or receipt, raw-GNSS proof, independent scene authenticity or successful-measurement acceptance. Interrupted helper transitions remain recorded separately.",
           "status": "done",
-          "owner": null,
-          "updatedAt": "2026-10-14",
-          "completedAt": "2026-10-07",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-05",
           "acceptance": [
-            "The local phone demo completes its pilot and challenged recording.",
-            "The exact retained WAV passes external verification and altered-input controls."
+            "The exact exported JPEG passes native Rust and WASM verification against the separately retained original challenge and camera pin.",
+            "Native/WASM quality reports agree exactly on those JPEG bytes; wrong request/key and unsigned quality-record substitution are refused."
           ],
           "evidence": [
             {
-              "label": "Saved audio export checkpoint",
-              "path": "docs/sensors/STATUS.md#saved-audio-demo-export-and-browser-follow-up--7-october-2026"
+              "label": "One-photo acquisition and exact-file checks",
+              "path": "docs/sensors/VALIDATION.md#one-photo-camera-quality-compatibility--5-october-2026"
+            }
+          ]
+        },
+        {
+          "id": "sensors-audio-local-demo",
+          "title": "One complete local phone audio demo",
+          "description": "On 6 October one authorized phone demo on the verified diagnostic update passed its pilot, completed four seconds with two challenges and displayed a locally verified signed WAV. WAV and receipt save notifications were observed. Requester and operator were on the same device; exact saved-byte verification is the separate 7 October milestone. Earlier readiness, format, pilot, transport and sealing refusals remain recorded, with their physical causes unresolved. The successful run did not exercise Android failure-diagnostic display/export or establish repeatability.",
+          "status": "done",
+          "owner": null,
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-06",
+          "acceptance": [
+            "One local phone demo passes the pilot, completes the four-second two-challenge recording and displays local signed-WAV verification.",
+            "Both save controls display success, while exact export bytes and independent requester acceptance remain separate claims."
+          ],
+          "evidence": [
+            {
+              "label": "Successful local demo and retained earlier failures",
+              "path": "docs/sensors/VALIDATION.md#microphone-diagnostic-package-and-successful-local-phone-demo--6-october-2026"
+            }
+          ]
+        },
+        {
+          "id": "sensors-audio-saved-file-verification",
+          "title": "Independently verify the exact saved phone WAV",
+          "description": "On 7 October quiet retrieval obtained the prior demo's exact WAV and unsigned receipt; both Downloads copies matched retained lengths/hashes. The unchanged Rust verifier passed all nine checks with the separately retained native media certificate pin, 192,000 samples and both 64-symbol challenges recovered. Wrong request, key, nonce, PCM commitment and altered samples were refused. This is saved-file verification, with no new recording or restart test. The unsigned same-device receipt supplies no independent requester history, fresh acceptance or physical acoustic-origin assurance.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-07",
+          "acceptance": [
+            "Exact retrieved WAV/receipt bytes match the retained saved-file comparisons, and the WAV passes external Rust request/transcript/PCM, C2PA, native-metadata and signal checks against the prior independent pin.",
+            "All five altered-input controls are refused and the original inputs remain unchanged; demo provenance and absent independent acceptance stay explicit."
+          ],
+          "evidence": [
+            {
+              "label": "Exact saved phone WAV verification and negative controls",
+              "path": "docs/sensors/VALIDATION.md#saved-phone-wav-externally-verified--7-october-2026"
             }
           ]
         }
@@ -87,25 +141,29 @@
     },
     {
       "id": "sensors-evidence-quality-goal",
-      "title": "Camera quality guidance",
-      "description": "Implemented unsigned JPEG guidance and the recorded deferred request for a single sharpness value.",
+      "title": "Reproducible camera-quality guidance",
+      "description": "Audited unsigned delivered-JPEG guidance and the saved phone report that agrees with Rust/WASM. Proposed calibration and noisy-audio work are recorded under their future Goals; these completed checkpoints establish reproducible guidance for tested inputs, with no calibrated usability or signed quality-contract claim.",
       "milestones": [
         {
           "id": "sensors-camera-quality-guidance",
-          "title": "Unsigned camera-quality guidance and saved-photo inspection",
-          "description": "Resolution, exposure and regional sharpness indicators are implemented. On 5 October the phone analyzed an already saved JPEG; its exported unsigned report matched native Rust and WASM. This is guidance, with calibration and a unified requester value still open.",
+          "title": "Unsigned camera-quality module and off-device checks",
+          "description": "The delivered-JPEG Rust/WASM module reports resolution, regional exposure and multiscale sharpness with versioned processing, optional subject regions and explicit insufficient-data/texture outcomes. On 5 October, 22 Rust tests, 16 adapter tests, 24 exact native/WASM image/profile cases and six real Worker/browser checks passed. Nine later browser checks reused the saved phone JPEG. This is unsigned guidance; tested agreement supplies no universal decoder guarantee, calibrated readability threshold, motion evidence, simultaneous multi-camera capture or signed quality enforcement.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-05",
           "acceptance": [
-            "Quality reports remain unsigned and cannot substitute for signed photo evidence.",
-            "The saved-photo phone export agrees with retained native and WASM results."
+            "Guidance is recomputed from the delivered JPEG and analysis profile, stays unsigned and cannot substitute for signed sensor evidence or enable successful acceptance.",
+            "Recorded analytic, adapter, native/WASM corpus and real browser/Worker checks pass for their stated inputs and bounds."
           ],
           "evidence": [
             {
-              "label": "Camera quality guidance and phone result",
-              "path": "docs/sensors/STATUS.md#camera-quality-guidance--5-october-2026"
+              "label": "Off-device module validation",
+              "path": "docs/sensors/VALIDATION.md#camera-quality-guidance--5-october-2026"
+            },
+            {
+              "label": "Browser checks on the delivered phone JPEG",
+              "path": "docs/sensors/VALIDATION.md#delivered-photo-browser-quality-checks--5-october-2026"
             },
             {
               "label": "Quality metrics and limits",
@@ -114,11 +172,149 @@
           ]
         },
         {
+          "id": "sensors-camera-phone-quality-export",
+          "title": "Saved-JPEG quality inspection and exact phone export",
+          "description": "On 5 October the verified quality update was installed and the owner selected the already saved JPEG. Android's default-profile panel/export matched the complete retained native Rust and recomputed WASM reports, including exact exported JSON bytes. No new capture, signing or successful acceptance ran. This checks one Android WebView file and the positive USB transfer path; selected-region phone checks, broader-device agreement, calibration and PowerShell negative parser fixtures remain unverified.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-05",
+          "acceptance": [
+            "The phone analyzes the retained JPEG as guidance only and saves its separate unsigned report.",
+            "The retrieved report matches the independent native/WASM expectations completely and preserves exact exported JSON bytes."
+          ],
+          "evidence": [
+            {
+              "label": "Installed panel and saved-JPEG export result",
+              "path": "docs/sensors/VALIDATION.md#phone-quality-panel-and-saved-jpeg-export--5-october-2026"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-lifecycle-failures-goal",
+      "title": "Lifecycle software hardening checkpoints",
+      "description": "Recorded software cancellation, cleanup and verification hardening retained as bounded evidence supporting sensor work. These historical checks do not assign future app-wide lifecycle integration to Sensors or duplicate whole-workflow acceptance: Hero 10 owns Android lifecycle integration, Hero 8 owns workflow software conformance, and Hero 1 owns collector-specific rules and physical measurement assurance. Physical interruption behavior and wider failed-attempt coverage remain future work under their own Goals; signed failure coverage remains limited to the three documented GPS triggers.",
+      "milestones": [
+        {
+          "id": "sensors-lifecycle-software-checks",
+          "title": "Software cancellation, cleanup and verification hardening",
+          "description": "The 6 October checks cover browser setup cancellation and late grants, native permission/queue deadlines, frozen unsigned terminal timing and exact unique audio assertions. By 8 October, shared cleanup revokes authority before independent releases, retains failed resource ownership for retry and uses typed Rust reports. Recorded software/JVM/browser checks passed. They do not prove Android callbacks under real interruption, crash or load. Native AAudio stop/close return codes are still discarded; phone failure-diagnostic export/retention, route/privacy changes and long-duration physical audio remain open.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-08",
+          "acceptance": [
+            "Recorded focused cancellation, deadline, assertion-selection and native lifecycle helper checks pass with synthetic inputs and deterministic queues.",
+            "The later shared cleanup and typed-report changes pass the recorded lifecycle, Rust/WASM and synthetic browser checks while retaining their physical-validation limits."
+          ],
+          "evidence": [
+            {
+              "label": "Focused microphone software hardening results",
+              "path": "docs/sensors/VALIDATION.md#microphone-lifecycle-and-assertion-hardening--6-october-2026"
+            },
+            {
+              "label": "Shared lifecycle and typed-verification validation",
+              "path": "docs/development/VALIDATION.md#architecture-cleanup--8-october-2026"
+            },
+            {
+              "label": "Native audio diagnostic and cleanup boundaries",
+              "path": "docs/sensors/NATIVE_AUDIO.md#bounds-and-terminal-behavior"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-requester-validation-goal",
+      "title": "Requester verification and physical acceptance",
+      "description": "Actual Rust/WASM and browser storage establish bounded software behavior; the retained synthetic checkpoint is supporting evidence, while future workflow/MCP conformance belongs to Hero 8. Hero 1 leads independent physical requester and measurement assurance for a selected standalone or composed sensor profile, using shared evidence with Hero 10 for Android permission, lifecycle and device behavior. The existing independent physical milestone remains blocked by the second-device and transport gates; the scenario, device/profile scope and physical acceptance criteria remain undefined. Hero 8 supplies operation/transport semantics and Hero 11 any selected hosted retention/transactions. Joint results must identify each scoped contribution without duplicating completion claims. Evidence-ledger acceptance is distinct from Assignment completion acknowledgment, compensation authorization and physical authenticity.",
+      "milestones": [
+        {
+          "id": "sensors-audio-requester-software-acceptance",
+          "title": "Synthetic audio requester retention, cancellation and replay checks",
+          "description": "On 7 October eleven real-browser checks exercised separate synthetic requester/operator keys, WebRTC/AudioWorklet collection, signed receipts, exact retention and reload re-verification. On 8 October six additional real Rust/WASM/IndexedDB checks covered cancellation and concurrent first acceptance in two tabs: exactly one transaction committed, with both winning acceptance rows and artifact bytes unchanged after reload/replay. The initial failed test assertion and absent-browser launch remain recorded separately from corrected passes. No physical microphone or speaker was used. Local ledgers do not exclude replay across devices, cleared storage or hidden histories; reload inspection does not restore final-session export controls.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-08",
+          "acceptance": [
+            "Recorded real-browser synthetic workflow checks retain and freshly reverify the original authority, signed receipt, transcript and exact WAV after reload, with duplicate delivery/acceptance refused.",
+            "Actual signed-audio verification and IndexedDB checks leave both keys absent on cancellation and permit exactly one concurrent first commit without changing the retained winning records."
+          ],
+          "evidence": [
+            {
+              "label": "Synthetic requester reload and replay results",
+              "path": "docs/sensors/VALIDATION.md#audio-requester-lifecycle-and-initial-reload-check--7-october-2026"
+            },
+            {
+              "label": "Real IndexedDB audio cancellation and concurrent acceptance",
+              "path": "docs/sensors/VALIDATION.md#audio-concurrent-acceptance-and-lifecycle--8-october-2026"
+            }
+          ]
+        },
+        {
+          "id": "sensors-independent-physical-acceptance",
+          "title": "Independent physical requester/operator acceptance",
+          "description": "Blocked: the owner confirmed only one available device on 8 October, and physical requester/operator trials are deferred until a second device is available. A verified direct transport route is also needed; the composed camera/location browser-to-phone WebRTC route remains unvalidated. The existing checklist defines the evidence boundary but records no completed run. The local phone audio demo, saved-file checks and synthetic acceptance races do not satisfy this independent physical result or the wider physical lifecycle matrix. New physical work requires its own bounded authorization.",
+          "status": "blocked",
+          "updatedAt": "2026-10-16",
+          "evidence": [
+            {
+              "label": "Recorded second-device dependency",
+              "path": "docs/sensors/VALIDATION.md#audio-concurrent-acceptance-and-lifecycle--8-october-2026"
+            },
+            {
+              "label": "Physical acceptance procedure and incomplete matrix",
+              "path": "docs/sensors/DEVICE_ACCEPTANCE.md"
+            },
+            {
+              "label": "Current transport and physical-validation limits",
+              "path": "docs/sensors/STATUS.md#remaining-tasks-and-dependencies"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-reliable-acquisition-goal",
+      "title": "Reliable acquisition across devices and interruptions",
+      "description": "Proposed future Goal: make camera, microphone and GPS acquisition, cancellation and fresh retry dependable within explicit supported device/profile limits. Investigate recorded GNSS startup failure and recurrence, distinguish preparation from qualifying observations, and characterize acquisition, signing and complete-file arrival separately before proposing performance changes. Physical cases include permission/provider changes, foreground loss, contention, route/privacy changes, longer supported recordings and process interruption; discarded AAudio stop/close results remain an observability gap. Hero 1 owns collector behavior, provenance and physical assurance; Hero 10 owns app-wide permissions/lifecycle integration and invokes cleanup; Hero 8 owns operation, cancellation and status semantics. Collectors must distinguish confirmed shutdown, failed cleanup with retained ownership and unknown release. A cancellation acknowledgment or expired lease alone cannot confirm that an unreachable device stopped. Collector entry points need Hero 2 authority/work-privacy policy through the shared Hero 8/10 grant interface, binding principal, device, operation, authoritative work-state revision, purpose, sensors, recipients, explicit consent and validity. An authentication-camera exception is limited to its initiating device/operation and current revision; authentication, reconnect or status lookup must not resume work or activate sensors. Actual authority provenance, offline limits, conflicts, sign-out invalidation, interface schema, supported devices and shared physical criteria remain unresolved. Domain responsibilities are adopted; implementation scope, task ownership and order are not.",
+      "milestones": []
+    },
+    {
+      "id": "sensors-failure-outcomes-goal",
+      "title": "Inspectable outcomes and durable failed-attempt retention",
+      "description": "Proposed future Goal: extend the bounded GPS precedent into inspectable sensor outcomes, preserving failed attempts when later retries succeed. Hero 1 owns collector failure formats, original request/profile and enrollment context, frozen observed timing, partial observations, signing domains and explicit signed, unsigned or absent-report states. It supplies complete versus partial/failed acquisition, unavailable/unassessable quality, per-component camera/GPS outcomes, refusal reasons and observed cleanup state. Hero 8 owns the operation/status/cancel/recovery interface consuming those facts; Hero 10 implements app-wide lifecycle and bounded on-device retention/export; Hero 11 implements selected authorized hosted retention/exchange under workflow transaction semantics. Exact schemas, covered failure classes, storage capacity, export/deletion authority and crash/power-loss guarantees remain undecided. No caller status, local journal or service record may fabricate a signed outcome, renew a challenge, prove global completeness or turn cancellation acknowledgment into observed shutdown. Case handoffs preserve exact original bytes/context, profile/metric versions, uncertainty and which timing/provenance claims were independently checked. Heroes 3, 5 and 7 define participant, dispute and incident uses, preservation/disclosure requirements and any authorized interpretation or consequences. A valid failure report alone proves neither physical effort, cause, fault nor payment entitlement. The existing broader-coverage proposal remains below; its detailed format/platform steps are not yet scoped.",
+      "milestones": [
+        {
+          "id": "sensors-broader-failure-reporting",
+          "title": "Extend inspectable failures beyond the covered GPS triggers",
+          "description": "The owner prioritized inspectable failed attempts on 30 September, with separate camera/GPS component outcomes and honest signing/storage absence. Current signed GPS reports cover raw-policy rejection, the existing zero-callback timeout and startup status 0 only; permission denial, cancellation, provider loss and other uncovered failures have no signed attempt artifact. Audio diagnostics remain bounded and unsigned, with no signed camera/audio failure format or durable audio attempt journal. The wider coverage and format breakdown remain to be defined; earlier unsigned observations must remain unsigned.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "evidence": [
+            {
+              "label": "Owner's failed-attempt priority and requirements",
+              "path": "docs/notes/sensors/SENSOR_QUALITY_NOTES.md#priority-recorded-on-30-september-failed-attempts-must-be-inspectable"
+            },
+            {
+              "label": "Implemented GPS subset and retention limits",
+              "path": "docs/sensors/GPS_ATTEMPT_REPORTS.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-quality-contract-goal",
+      "title": "Calibrated quality requirements for usable evidence",
+      "description": "Proposed future Goal: turn reproducible sensor guidance into task-relevant requirements only where calibration supports them. Preserve the requested single 0–100 sharpness value with one internally managed algorithm; algorithm selection, readable-text/digit evaluation and any threshold remain open. Consider subject detail, resolution, exposure, noise/compression and explicitly unassessable outcomes rather than treating one sharpness score as usability. Define how any selected metric version, region and requirement would bind to the original signed request while retained evidence keeps its original rules. Audio usability and location uncertainty require their own semantics, including the different Android/browser confidence meanings. Assignments supplies task expectations; the dispute/governance domains decide responsibility, compensation and consequences. No quality-based rejection, penalty rule or production acceptance standard is adopted by this roadmap. The proposed participant interface distinguishes unavailable or unassessable quality from partial/failed acquisition and complete evidence, retaining the exact request/policy and reason for refusal; calibrated requirements must be fixed before collection.",
+      "milestones": [
+        {
           "id": "sensors-quality-calibration",
           "title": "Define the requested single 0–100 sharpness value",
-          "description": "On 5 October the owner requested one user-facing sharpness value and one underlying algorithm. The source notes explicitly leave the algorithm undecided and implementation deferred. The existing unsigned guidance and acceptance rules are unchanged.",
+          "description": "On 5 October the owner requested one user-facing sharpness value, an optional minimum on a 0–100 scale, and one underlying algorithm managed internally. Algorithm selection and implementation remain deferred. The notes call for reading-fidelity evaluation of representative text/digits and adverse images before enforcement; a blur score is not a percentage of readable characters. No algorithm, cutoff or signed quality contract has been agreed or implemented.",
           "status": "proposed",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "evidence": [
             {
               "label": "Recorded owner request and deferred implementation",
@@ -127,6 +323,48 @@
           ]
         }
       ]
+    },
+    {
+      "id": "sensors-acoustic-reliability-goal",
+      "title": "Reliable acoustic challenges and honest refusal",
+      "description": "Proposed future Goal: establish repeatable challenge recovery and defensible refusal for the supported microphone/speaker path, using the deferred offline characterization before separately scoped physical work. Examine noise, attenuated signals, repeated/late markers and detector selection, with explicit compatibility decisions before changing successful signed-WAV rules. The pilot-only fallback remains distinct from evidence detection. Characterize supported recording durations, actual routes, callback continuity and failure-diagnostic export/retention across selected devices; headphones or Bluetooth would need a separately defined profile rather than an implicit fallback. Supported acoustic conditions, error-rate targets and any detector revision remain unresolved. Challenge recovery alone proves neither sound propagation through air nor useful capture of an unrelated environmental sound. Independent physical requester acceptance remains under the requester-validation Goal.",
+      "milestones": [
+        {
+          "id": "sensors-audio-noise-characterization",
+          "title": "Characterize challenge detection and refusal in noisy audio",
+          "description": "The recorded follow-up is deferred: examine offline noise and repeated-marker fixtures before deciding whether changes or a separately authorized physical check are needed. No controlled noisy-environment result, calibrated noise limit or success rate is established. The pilot-only qualifying-peak fallback does not change signed-WAV detection; generic multiple-peak selection and stronger late-repeat ambiguity remain unresolved. Challenge detectability does not establish usability of unrelated environmental sound.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "evidence": [
+            {
+              "label": "Deferred noise validation and detector limits",
+              "path": "docs/notes/sensors/SENSOR_QUALITY_NOTES.md#audio-recording-defects-and-environmental-conditions"
+            },
+            {
+              "label": "Remaining audio work at the current checkpoint",
+              "path": "docs/sensors/STATUS.md#remaining-tasks-and-dependencies"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sensors-camera-motion-multicamera-goal",
+      "title": "Motion evidence and simultaneous multi-camera feasibility",
+      "description": "Proposed future Goal from the retained sensor-quality notes: assess whether capture-time preview/gyro observations can support useful motion guidance and whether the device cameras can contribute a genuinely concurrent measurement. Determine supported camera combinations, synchronization and timebase limits before choosing an implementation scope. Any later bundle would need per-camera identity, capture timing, quality and explicit unavailable/failed component outcomes bound to the same original request; sequential or partial capture must not silently count as complete simultaneous capture. Decide the task value, supported subset policy and privacy implications with the participant/privacy domains. Android capability access and presentation belong with APK buildout. No motion estimator, simultaneous-camera support or synchronization guarantee is currently claimed, and scoped steps remain undefined.",
+      "milestones": []
+    },
+    {
+      "id": "sensors-location-timing-assurance-goal",
+      "title": "Bounded location and timing assurance",
+      "description": "Proposed future Goal: evaluate the implemented raw-GNSS and optional independent-position profiles against real device capabilities and explicitly retained external inputs. Define acceptable uncertainty/coverage for selected tasks, distinguish receiver preparation and session duration from observation span, and measure cross-sensor timebase/freshness limits without treating device or requester clocks as independently trusted. Independent position recomputation needs maintained, independently obtained navigation inputs and a reviewed provider/trust policy; numerical consistency still does not authenticate satellite RF or physical location. Supported receiver profiles, navigation-source operations and any stronger time or capture-time assurance approach remain unresolved. Identity supplies enrollment policy, and infrastructure/server Heroes would supply any chosen trust-data distribution or durable receipt service. No new provider, capture-time attestation service or physical-position assurance level is selected here. The proposed Services boundary leaves admissible navigation sources, freshness/provenance and verification requirements with Sensors; Hero 11 may retain and distribute independently provisioned inputs if separately selected under workflow access semantics. The actual source/trust policy remains undefined, and service delivery cannot make an input independently trusted or authorize automatic acquisition.",
+      "milestones": []
+    },
+    {
+      "id": "sensors-substitution-resistance-goal",
+      "title": "Resistance to replay, substitution and false sensor claims",
+      "description": "Proposed future Goal: define and evaluate the adversarial cases that the sensor evidence path should detect or explicitly leave outside assurance. Candidate cases grounded in current limits include old-media signing, screen or staged-scene capture, live external audio replay/digital mixing, forged native metadata and fabricated or spoofed GNSS observations. Retain exact-request, signer, transcript, complete-artifact and composition binding, and separate refusal tests from demonstrated physical resistance. Choose attacker capabilities and meaningful success criteria before making a stronger authenticity claim; neither C2PA nor key-generation attestation authenticates a later sensor stack. Identity owns enrolled-key, principal and device policy plus Operator-face liveness and trusted-capture requirements. Sensors retains generic camera/audio/GNSS acquisition provenance, substitution evaluation and capture-time evidence requirements; APK buildout implements any selected native interfaces. Infrastructure/server Heroes own durable cross-device replay/acceptance records. The sensor Goal supplies evidence semantics and scoped attack evaluation, with no assumed global replay service or production security certification.",
+      "milestones": []
     }
   ]
 }

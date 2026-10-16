@@ -24,6 +24,10 @@
   `web/dashboard/SCHEMA.md` and the relevant Hero JSON before updates; the schema
   is sufficient for ordinary progress edits. `docs/notes/WORKSTREAMS.md` defines
   Hero boundaries.
+- Keep author-facing Hero JSONs, manifest, schema guide, refresh entry points and
+  generated HTML at the dashboard root. Interface sources live in `src/`, build
+  and validation helpers in `tools/`, formal schemas in `schemas/`, prepared
+  artwork in `assets/branding/`, and focused checks in `test/`.
 - Keep this a partial record of confirmed work. Add Goals and Milestones only
   from explicit owner requests, agreed task records or evidenced implementation;
   do not seed guessed tasks, acceptance criteria, dependencies or active states
@@ -93,7 +97,7 @@
   empty planning Goals; invent no priority or progress.
 - Reuse the project artwork in `web/site/branding/` for the dashboard. Keep
   originals unchanged and embed its small dashboard derivatives through
-  `web/dashboard/branding.mjs`; the standalone page must retain its artwork
+  `web/dashboard/tools/branding.mjs`; the standalone page must retain its artwork
   without neighboring assets or network requests. Completion indicators count
   tracked milestones, and the current-work panel reflects actual active/blocked
   records; do not invent priorities or imply production readiness.

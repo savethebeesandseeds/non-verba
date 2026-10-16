@@ -4,16 +4,19 @@ import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
 import {sha256,digest,readJSON,requireContainer,within} from '../../lib/common.mjs';
-import {hashFile,writeRows,readRows,studyPath} from './store.mjs';
+import {hashFile,writeRows,readRows,studyPath,readJSON as readStudyJSON} from './store.mjs';
 import {atomicJSON} from './workflow.mjs';
 import {createBatchEmbedder} from './embedding.mjs';
 import {createChunkVectorCache} from './vector-cache.mjs';
+import {sourceNavigationLabel,HEADING_INPUT_POLICY,createNativeSourceContext,createNativeRepresentation,modelInputIdentity,NATIVE_REPRESENTATION_POLICY} from './representation.mjs';
+import {loadNativeDecoration} from './native-decoration-store.mjs';
+import {NATIVE_DECORATION_INPUT_POLICY} from './source-decoration.mjs';
 import {createBalancedReservoir,fitMiniBatch,assignVectors,evaluationDigest,comparePartitions} from './geometry.mjs';
 
 async function commitBytes(path,bytes) {
   await mkdir(dirname(path),{recursive:true});
   try{const old=await readFile(path);if(sha256(old)!==sha256(bytes))throw new Error('Immutable binary shard changed');return {bytes:old.length,sha256:sha256(old)};}catch(error){if(error.code!=='ENOENT')throw error;}
-  const temporary=`${path}.partial-${randomUUID()}`;
+  const temporary=`${path}.${randomUUID()}.partial`;
   try{await writeFile(temporary,bytes,{flag:'wx'});await link(temporary,path);}finally{await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
   return {bytes:bytes.length,sha256:sha256(bytes)};
 }
@@ -24,24 +27,66 @@ function unitShards(admission) {const shards=Array.isArray(admission.shards)?adm
 async function boundFile(runDir,item) {const path=await studyPath(runDir,item.path);const actual=await hashFile(path);if(actual.sha256!==item.sha256||(item.bytes!=null&&actual.bytes!==item.bytes))throw new Error(`Artifact binding changed: ${item.path}`);return path;}
 async function maybeJSON(path) {try{return await readJSON(path);}catch(error){if(error.code==='ENOENT')return null;throw error;}}
 
+/** One hydrated contract/view at a time; returned representations are ephemeral.
+ * The caller must finish a chunk before retaining another contract's view. */
+export function createStudyNativeInputLoader(runDir,admission) {
+  requireContainer();
+  let metadata=null,current=null;
+  const readMetadata=async()=>{
+    if(metadata)return metadata;
+    const input=admission.input??{},path=input.extraction_manifest_path;
+    if(!path){metadata={legacy:true,records:new Map()};return metadata;}
+    const exactFileBinding=!!input.extraction_manifest_file?.sha256;
+    const extraction=await readJSON(exactFileBinding?await boundFile(runDir,{path,...input.extraction_manifest_file}):await studyPath(runDir,path));
+    if(artifactDigest(extraction)!==input.extraction_manifest_sha256||extraction.source?.sha256!==input.extraction_source_sha256)throw new Error('Native input extraction manifest differs from admission');
+    const {sha256:sourceSHA,...sourceBody}=extraction.source??{};if(digest(sourceBody)!==sourceSHA)throw new Error('Native extraction source identity digest differs');
+    const records=new Map();for(const record of extraction.contract_records??[]){if(records.has(record.id))throw new Error('Duplicate native input contract metadata');records.set(record.id,record);}
+    const legacy=![...records.values()].some(record=>record.native_source_decorations!==undefined);
+    if(!legacy&&!exactFileBinding)throw new Error('Native input loading requires the exact admission extraction manifest file binding');
+    metadata={legacy,records,extraction};return metadata;
+  };
+  return async(unit,{bodyRange,includeHeading=false}={})=>{
+    if(!['discovery-broad','discovery-relevant'].includes(unit?.cohort))throw new Error('Reserve unit attempted to enter discovery native input preparation');
+    const info=await readMetadata(),record=info.records.get(unit.contract_id);
+    if(info.legacy){if(unit.native_source_decorations_ref!==undefined)throw new Error('Current native unit lacks bound extraction metadata');return {...unit,contextual_text:`${sourceNavigationLabel(unit)}\n${unit.text}`};}
+    if(!record||record.status!=='accepted'||!record.native_source_decorations||!unit.native_source_decorations_ref)throw new Error('Current native contract/unit metadata missing; plain fallback forbidden');
+    if(!current||current.id!==unit.contract_id){
+      const expected=async name=>{const declared=info.extraction.source.files?.find(file=>file.path===name)?.sha256,actual=sha256(await readFile(new URL(`./${name}`,import.meta.url)));if(declared!==actual)throw new Error(`Current native method differs: ${name}`);return actual;};
+      const expectedTracerSourceSHA256=await expected('source-decoration.mjs'),expectedCollectorSourceSHA256=await expected('sections.mjs');
+      if(record.normalized_path!==unit.normalized_path)throw new Error('Native unit normalized artifact differs from its contract');
+      const normalizedText=await readFile(await studyPath(runDir,record.normalized_path),'utf8');if(sha256(normalizedText)!==record.normalized_sha256)throw new Error('Native normalized source byte binding differs');
+      const cacheRef=info.extraction.cache?.find(item=>item.id===unit.contract_id);if(!cacheRef)throw new Error('Native contract extraction cache reference missing');
+      await boundFile(runDir,cacheRef);const cache=await readStudyJSON(runDir,cacheRef.path,{maxBytes:64*1024**2});
+      if(cache.contract?.id!==unit.contract_id||cache.contract?.cohort!==unit.cohort||cache.source?.sha256!==info.extraction.source.sha256||cache.raw_sha256!==record.raw_sha256||cache.normalized_sha256!==record.normalized_sha256||cache.normalized_text!==normalizedText||digest(cache.native_source_decorations)!==digest(record.native_source_decorations))throw new Error('Native cache contract/source reference differs');
+      if(typeof cache.contract.path!=='string'||!cache.contract.path.startsWith('raw/'))throw new Error('Bound original native raw path required');
+      const rawBytes=await readFile(await studyPath(runDir,cache.contract.path));if(sha256(rawBytes)!==record.raw_sha256||cache.contract.acquisition?.sha256!==record.raw_sha256||rawBytes.length!==cache.contract.acquisition.bytes)throw new Error('Native raw source byte binding differs');
+      const envelope=await loadNativeDecoration(runDir,record.native_source_decorations),context=createNativeSourceContext({raw:rawBytes.toString('utf8'),normalizedText,envelope,expectedTracerSourceSHA256,expectedCollectorSourceSHA256});
+      current={id:unit.contract_id,context,parents:new Map(cache.sections.map(parent=>[parent.id,{...parent,cohort:parent.cohort??cache.contract.cohort}])),normalized_path:record.normalized_path};
+    }
+    if(current.normalized_path!==unit.normalized_path)throw new Error('Native normalized unit path changed within contract');
+    return {...unit,native_input:createNativeRepresentation(unit,{context:current.context,parent:current.parents.get(unit.parent_section_id),bodyRange,includeHeading})};
+  };
+}
+
 export async function embedStudy(runDir,admission,{log=console.log,createEmbedder=createBatchEmbedder}={}) {
   requireContainer();const recipe=await readJSON(within(runDir,'recipe.json'));
-  const identity={admission_sha256:artifactDigest(admission),config:recipe.embedding,embedding_source:sha256(await readFile(resolve(dirname(fileURLToPath(import.meta.url)),'embedding.mjs'))),orchestration_source:sha256(await readFile(fileURLToPath(import.meta.url)))};
+  const identity={admission_sha256:artifactDigest(admission),config:recipe.embedding,heading_input_policy:HEADING_INPUT_POLICY,native_representation_policy:NATIVE_REPRESENTATION_POLICY,native_input_policy:NATIVE_DECORATION_INPUT_POLICY,native_source:sha256(await readFile(new URL('./source-decoration.mjs',import.meta.url))),native_store_source:sha256(await readFile(new URL('./native-decoration-store.mjs',import.meta.url))),representation_source:sha256(await readFile(new URL('./representation.mjs',import.meta.url))),embedding_source:sha256(await readFile(resolve(dirname(fileURLToPath(import.meta.url)),'embedding.mjs'))),orchestration_source:sha256(await readFile(fileURLToPath(import.meta.url)))};
   const prefix=`embeddings/${digest(identity).slice(0,16)}`;
   const finalPath=within(runDir,`${prefix}/manifest.json`);
   const completed=await maybeJSON(finalPath);if(completed){for await(const ignored of readEmbeddingBatches(runDir,completed)){}return {...completed,manifest_path:`${prefix}/manifest.json`};}
   const embedder=await createEmbedder({...recipe.embedding,max_units:500,token_budget:recipe.embedding.tokenBudget});
   let cache;try{cache=await createChunkVectorCache(runDir,{model:embedder.model,window_policy:embedder.window_policy,embedding_source:identity.embedding_source},{dimensions:recipe.embedding.dimensions});}catch(error){await embedder.dispose();throw error;}
-  const shards=[];const batch=[];let number=0;let count=0;let inferenceCalls=0;const started=Date.now();
+  const shards=[];const batch=[];let number=0;let count=0;let inferenceCalls=0;const started=Date.now(),nativeInput=createStudyNativeInputLoader(runDir,admission);
   const flush=async()=>{
     if(!batch.length)return;const units=batch.splice(0);const tag=String(number++).padStart(6,'0');
-    const ids=units.map(unit=>unit.id);const inputs=units.map(unit=>`${(unit.heading_path??[]).join(' > ')||unit.heading||''}\n${unit.text}`);
-    const input_sha256=digest(inputs.map(sha256));const manifestName=`${prefix}/batch-${tag}.json`;
+    const prepared=[];for(const unit of units)prepared.push(await nativeInput(unit));
+    const ids=units.map(unit=>unit.id),inputs=prepared.map(modelInputIdentity);
+    const input_sha256=digest(inputs.map(input=>input.input_sha256));const manifestName=`${prefix}/batch-${tag}.json`;
     let shard;
     try{shard=await readJSON(within(runDir,manifestName));if(shard.ordered_ids_sha256!==digest(ids)||shard.input_sha256!==input_sha256)throw new Error('Resume input chunk changed');const actual=await hashFile(within(runDir,shard.vectors.path));if(actual.sha256!==shard.vectors.sha256)throw new Error('Resume vector chunk changed');}
     catch(error){if(error.code!=='ENOENT')throw error;const packed=new Float32Array(units.length*recipe.embedding.dimensions);const retainedInputs=new Array(units.length);const missing=[];let hits=0;
-      for(let i=0;i<units.length;i++){const found=await cache.get(sha256(inputs[i]));if(found){packed.set(found.vector,i*recipe.embedding.dimensions);retainedInputs[i]={...found.input,unit_id:units[i].id};hits++;}else missing.push({unit:units[i],text:inputs[i],index:i});}
-      let fresh=null;if(missing.length){fresh=await embedder.embedUnits(missing.map(item=>({...item.unit,contextual_text:item.text})));inferenceCalls++;for(let i=0;i<missing.length;i++){if(fresh.inputs[i].input_sha256!==sha256(missing[i].text))throw new Error('Actual embedding input differs from frozen text');packed.set(fresh.packed_vectors.subarray(i*recipe.embedding.dimensions,(i+1)*recipe.embedding.dimensions),missing[i].index*recipe.embedding.dimensions);retainedInputs[missing[i].index]=fresh.inputs[i];}await cache.put(fresh);}
+      for(let i=0;i<units.length;i++){const found=await cache.get(inputs[i].input_sha256);if(found){if(found.input.native_evidence_status!==inputs[i].native_evidence_status&&inputs[i].native_representation)throw new Error('Cached current native evidence differs');packed.set(found.vector,i*recipe.embedding.dimensions);retainedInputs[i]={...found.input,unit_id:units[i].id,native_evidence_status:inputs[i].native_evidence_status};hits++;}else missing.push({unit:prepared[i],identity:inputs[i],index:i});}
+      let fresh=null;if(missing.length){fresh=await embedder.embedUnits(missing.map(item=>item.unit));inferenceCalls++;for(let i=0;i<missing.length;i++){if(fresh.inputs[i].input_sha256!==missing[i].identity.input_sha256)throw new Error('Actual embedding input differs from frozen source representation');if(missing[i].identity.native_representation&&fresh.inputs[i].native_evidence_status!=='BOUND_NATIVE_SOURCE_EVIDENCE')throw new Error('Actual embedding omitted bound native source evidence');packed.set(fresh.packed_vectors.subarray(i*recipe.embedding.dimensions,(i+1)*recipe.embedding.dimensions),missing[i].index*recipe.embedding.dimensions);retainedInputs[missing[i].index]={...fresh.inputs[i],native_evidence_status:missing[i].identity.native_evidence_status};}await cache.put({...fresh,inputs:missing.map((item,i)=>({...fresh.inputs[i],native_evidence_status:item.identity.native_evidence_status}))});}
       const result={packed_vectors:packed,dimensions:recipe.embedding.dimensions,inputs:retainedInputs,provenance:{model:embedder.model,window_policy:embedder.window_policy,vector_cache:cache.prefix,cache_hits:hits,new_units:missing.length,fresh_inference:fresh?.provenance??null,execution_attested:false}};
       const vectorName=`${prefix}/batch-${tag}.f32`;const vectorInfo=await commitBytes(within(runDir,vectorName),encode(result.packed_vectors));
       shard={schema_version:2,rows:units.length,dimensions:result.dimensions,encoding:'float32-le',ordered_ids_sha256:digest(ids),input_sha256,unit_ids:ids,units:units.map(unit=>({id:unit.id,contract_id:unit.contract_id,cohort:unit.cohort,family_id:unit.family_id??unit.id,template_blocking_id:unit.template_blocking_id??null,partition:'fit'})),inputs:result.inputs,provenance:result.provenance,vectors:{path:vectorName,...vectorInfo}};
@@ -51,7 +96,7 @@ export async function embedStudy(runDir,admission,{log=console.log,createEmbedde
     log(`Verified embedding progress ${count} units (${inferenceCalls} new bounded chunks)`);
   };
   try {
-    for(const shard of unitShards(admission)){await boundFile(runDir,shard);for await(const row of readRows(runDir,shard.path)){const unit=JSON.parse(row.payload);if(!unit.cohort?.startsWith('discovery-'))throw new Error('Reserve unit attempted to enter discovery embedding');if(unit.id!==row.id)throw new Error('Representative payload ID differs from storage ID');batch.push(unit);if(batch.length===500)await flush();}}
+    for(const shard of unitShards(admission)){await boundFile(runDir,shard);for await(const row of readRows(runDir,shard.path)){const unit=JSON.parse(row.payload);if(!unit.cohort?.startsWith('discovery-'))throw new Error('Reserve unit attempted to enter discovery embedding');if(unit.id!==row.id)throw new Error('Representative payload ID differs from storage ID');if(batch.length&&(unit.native_source_decorations_ref!==undefined||batch[0].native_source_decorations_ref!==undefined)&&batch[0].contract_id!==unit.contract_id)await flush();batch.push(unit);if(batch.length===500)await flush();}}
     await flush();
   }finally{await embedder.dispose();}
   const manifest={schema_version:2,status:'REAL_CPU_EMBEDDINGS_RESEARCH_ONLY',identity,model:embedder.model,window_policy:embedder.window_policy,rows:count,dimensions:recipe.embedding.dimensions,shards,elapsed_seconds:(Date.now()-started)/1000,authority:'NONE',execution_attested:false};

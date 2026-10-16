@@ -1,0 +1,129 @@
+{
+  "schema": {
+    "replay": "partial-representation-exact-source-replay-v1",
+    "required": [
+      "original_issue exact ref",
+      "original actual review and blocked corroboration exact refs",
+      "original preparation index/bundle and complete affected scope",
+      "current extraction manifest and exact recomputed source identity",
+      "current method/protocol refs and complete ordered method file identity",
+      "live observed registry exact digest",
+      "trusted canonical reviewer assignment/alias registry",
+      "original/current complete raw/normalized/cache/parent/unit/native bindings",
+      "each complete baseline/context production descriptor/source-ranges/encoding/projection and bounded pages",
+      "source-only reuse or newly read native coverage for every component",
+      "case-specific actual authored review and actual ordered page journal"
+    ],
+    "resolution": "partial-representation-prefix-role-resolution-v1",
+    "resolution_status": "RESOLVED_PREFIX_ROLE_FOR_EXACT_SOURCE_ONLY",
+    "resolution_scope": "PREFIX_ROLE_INJECTION_ONLY",
+    "location": "representation-issues/resolutions/<exact-current-source-sha256>/<original-issue-id>.json",
+    "immutable": "Original observed issue remains UNRESOLVED and byte-identical. All replay and resolution artifacts are immutable; exact idempotent reuse only.",
+    "limits": [
+      "human:false",
+      "whole_parent_adequacy_established:false",
+      "context_sufficiency_established:false",
+      "source_quality_gate_pass:false",
+      "fresh_audit_pass:false",
+      "model_token_readiness_established:false",
+      "model_inference_performed:false",
+      "transformer_semantic_equivalence_established:false",
+      "effectiveness_verified:false",
+      "clean_operative_version_derived:false"
+    ]
+  },
+  "status": "FROZEN_IMPLEMENTATION_PROTOCOL_ACTIVATION_REQUIRES_ROOT_REVIEW",
+  "prototype": true,
+  "authority": "NONE",
+  "human": false,
+  "created_at": "2026-10-15T11:44:54.965Z",
+  "supersedes_design": {
+    "path": "qa/v13-representation-guard-and-finite-feature-design-20261015/prospective-partial-representation-replay-protocol.json",
+    "sha256": "4d767bfa6e17c95215ebd6f7aaeb416db242a03a814f5759dcfec089a6b20be3",
+    "bytes": 19103
+  },
+  "purpose": "Independently replay only an observed model prefix/role defect for one exact current extraction epoch. Original adverse evidence and all other gates remain intact.",
+  "implementation_ownership": [
+    "new lib/representation-replay.mjs",
+    "new tests/representation-replay.test.mjs",
+    "representation-issues.mjs resolver hook only"
+  ],
+  "first_version_fail_closed": {
+    "raw": "Entire original/current raw SHA, bytes and literal contents must be identical; exact original/current source refs remain authenticated.",
+    "normalized": "Entire original/current normalized SHA, bytes and literal contents must be identical. No changed-normalized mapping is supported.",
+    "structure": "Same parent IDs, unit IDs, parent/unit normalized bounds and exact parent/unit text. Same deterministic ordered affected selected-unit scope as original preparation; no dropping, reordering, remapping or changed-boundary equivalence.",
+    "unknown": "Missing or ambiguous authoritative original scope, any changed source/boundary/identity, unsupported native equality or failed actual review leaves issue unresolved."
+  },
+  "api": {
+    "prepareRepresentationReplay": "Authenticate issue, original evidence, exact-current source/protocol/method/registry, scope and production reconstruction. Return machine-prepared actual_reading:false obligations and bounded input artifacts; never actual reading.",
+    "verifyRepresentationReplay": "Independently reauthenticate all dependencies and exact current production reconstruction, original/current equality, reviewer assignment and every actual current input page. Verify native reuse/current reading dispositions. Return prefix-role-only verification, no authority/quality/readiness upgrade.",
+    "resolver_hook": "The live global representation registry enumerates every observed issue. For an exact requested epoch, accept only a matching exact-source replay that is independently verified under current code/protocol/method/registry. Old epochs and unmatched new epochs remain held. No actual-run clearance writes before ROOT reviews implementation."
+  },
+  "production_reconstruction": {
+    "input": "Current production createNativeRepresentation/current source context/current native window serializer and shared parent-context selector are executed, rather than trusting supplied descriptors or matching body substrings.",
+    "baseline": "Exactly one contiguous source body span equal to current unit bounds; no navigation prefix, literal heading part, synthetic literal separator or legacy fallback.",
+    "context": "Exactly the current shared production selector's contiguous source span within the same unchanged parent; policy-defined complete neighbor limits, no caller-selected replacement.",
+    "aliases": "All current baseline/L12/lexical source aliases and current parent-context source path are bound to the same declared production path. No actual inference or token-window reading is inferred.",
+    "native": "Literal source, source atom order, native marks/styles/zero groups/joint origins/RLE/filters/repetitions/unknown attribution and source ranges remain authenticated in full. No reduced evidence payload substitutes for complete equality.",
+    "projection": "Every exact projection/encoding/source-range hash is rederived. Recursive codepoint-safe splitting only when the exact production bound requires it, preserving sourcepart order and terminal-zero ownership. Fragments are preparatory source displays, not tokenizer windows."
+  },
+  "source_only_reuse": {
+    "literal": "Historical actual source-only evidence may support exact unchanged components only; it is not newly read by the independent reviewer.",
+    "native_default": "Require independently recomputed full canonical equality of ALL native content fields and trace/projection policies, identical entire raw/normalized contents, exact component ranges and source hashes. Tags, full CSS, raw/tag/style intervals, ordered repeated origins, unmarked origins, all joint witness RLE, filters and zero groups/ownership remain present.",
+    "scoped_identity_exception": "Collector/envelope identity hashes alone may differ only when an authenticated complete population delta proof establishes that the collector-file change is navigation-only, includes every original population member with no missing/failed/extra member, and independently compares every native content field plus unchanged trace/projection policies. Exclusions are an exact reviewed JSON-pointer allowlist of identity hash fields; no broad metadata omission or wildcard key removal.",
+    "exception_not_yet_sufficient": "A summary assertion, reduced payload hash, caller-provided nav-only boolean or a proof for a different source/method/population is insufficient. Until exact proof schema is implemented and authenticated, native reuse fails closed and current native actual reading is required.",
+    "no_reuse": [
+      "old heading/role adequacy",
+      "old current-model-input reading",
+      "changed native or source evidence",
+      "old body/context adequacy",
+      "whole-parent/full-original/human/model readiness or embedding claims"
+    ],
+    "coverage": "Every current source/native component has exactly one explicit disposition: exact historical source-only reuse with its complete equality proof, or new current bounded actual reading. No missing/duplicate/NA upgrade."
+  },
+  "actual_review": {
+    "identity": "Reviewer must be canonically assigned by trusted parent/owner assignment and alias registry and differ from every canonical original reader whose evidence supports reuse. Free-text inequality is insufficient.",
+    "inputs": "The independent reviewer must newly actually read every complete current baseline and context literal input span, including all applicable selected units. Machine-prepared/emitted files remain actual_reading:false.",
+    "journal": "Authenticate each exact ordered bounded page, emission schema/status, reviewer, header/index/total/start/end, response text/SHA/character length, actual observed-and-read declaration and retained tool call reference. A machine cannot supply the actual declaration.",
+    "bound": "Page maximum is taken from the frozen authenticated review policy; no unbounded or truncated string metadata. Codepoint-safe complete coverage.",
+    "judgment": "Require case-specific authored reason and uncertainty, explicitly confirming absence of the observed prefix/role injection in every affected current input. Generic pass, unresolved or adverse judgment leaves held.",
+    "raw_exposure": "Bind exact actually read raw ranges and complete retained raw-character exposure where applicable while preserving limits on full original presentation, legal/computed style, effectiveness and whole-parent qualification.",
+    "separate": "Current source-only reuse and actual current literal input reading remain separately named; no automatic full-native-reading or quality upgrade."
+  },
+  "gate": {
+    "scope": "Only prefix/role defect; all source/native/fresh/quality/context/encoding/reserve/coding gates remain unchanged.",
+    "epoch": "Exact current source, current method, current protocol and live registry bindings must match at every gate use. An old or unrelated source can never consume another epoch's resolution.",
+    "registry": "Enumerate all current immutable observed issues, reauthenticate original evidence and every exact-source replay. Missing one issue or a newly appended issue blocks. Cached success cannot bypass registry changes.",
+    "activation": "Synthetic preparation and verification may run now. Actual-run resolution/clearance writes remain explicitly held until ROOT implementation review."
+  },
+  "proof_obligations": [
+    "Bind all refs by exact path/SHA/bytes through safe study paths; canonical finite JSON and immutable writes.",
+    "Independently recompute extraction and method identities, exact raw/entire norm equality and original/current structural scope.",
+    "Authenticate original adverse partial receipt and every historical page emission separately from blocked strict corroboration.",
+    "Reconstruct current baseline/context production inputs and every exact native/source-range/projection binding.",
+    "Prove trusted canonical reviewer independence and actual current input reading, never inferred from output generation.",
+    "Full native equality is exhaustive; identity-hash exception requires authenticated complete navigation-only population proof and exact validated pointer allowlist.",
+    "Reject source/structure/scope/method/protocol/registry drift, unsupported schema/fields or adverse/partial judgments.",
+    "No resolution authority beyond exact-source prefix/role scope; preserve every other hold."
+  ],
+  "mutation_tests": [
+    "changed raw or entire normalized bytes/hash",
+    "changed parent/unit IDs, bounds, text or affected ordered unit scope",
+    "stale source/method/protocol/registry or new observed issue",
+    "inserted preceding heading, generated separator, second source span or hidden legacy path",
+    "different current production context or source ranges/projection/encoding hashes",
+    "changed CSS, native tag/scope, origin/repetition/order, unmarked joint origin/RLE/filter or zero ownership",
+    "unreviewed/wildcard identity exclusions, changed trace/projection policy or incomplete population delta proof",
+    "same canonical reviewer through alias or unassigned reviewer",
+    "missing/reordered/duplicated/unobserved pages, wrong emission/header/reviewer/tool reference or hash/size",
+    "generic/adverse authored judgment or forbidden adequacy/inference/human claims",
+    "one issue resolved while another remains held; old/unrelated epochs held",
+    "immutable collision and stale cached clearance"
+  ],
+  "not_performed": [
+    "No new corpus actual opening",
+    "No inference/adoption",
+    "No original evidence rewrite",
+    "No actual-run resolution or clearance"
+  ]
+}

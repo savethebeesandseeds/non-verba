@@ -6,7 +6,7 @@ import {randomUUID} from 'node:crypto';
 import {mkdir,readFile,rm,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {digest,sha256} from '../../lib/common.mjs';
-import {STUDY_BASE,hashFile,readJSON,readRows,studyPath,validateStudyRoot,writeJSON,writeRows} from '../lib/store.mjs';
+import {STUDY_BASE,hashFile,readJSON,readRows,studyPath,validateStudyRoot,writeJSON,writeRows,writeExtractionCache} from '../lib/store.mjs';
 import {extractSections} from '../lib/sections.mjs';
 import {auditPurpose,buildAuditPackets} from '../lib/audit.mjs';
 
@@ -15,7 +15,7 @@ const purposes=['development','fresh_representation','coding','negative'];
 const counts={development:4,fresh_representation:3,coding:6,negative:4};
 
 function fixtureIds(){const ids=Object.fromEntries(purposes.map(purpose=>[purpose,[]]));for(let i=0;purposes.some(purpose=>ids[purpose].length<2);i++){const id=`synthetic-contract-${i}`;const purpose=auditPurpose(id,{seed});if(ids[purpose].length<2)ids[purpose].push(id);}return Object.values(ids).flat();}
-async function fixture(t){
+async function fixture(t,{compressed=false}={}){
   const root=join(STUDY_BASE,`test-audit-${randomUUID()}`);validateStudyRoot(root);await mkdir(root,{recursive:true});t.after(()=>rm(root,{recursive:true,force:true}));
   const ids=fixtureIds();const recipe={seed:'synthetic-study',name:'Declared synthetic audit fixture',maxPerFiler:2,cohorts:[{id:'discovery-broad',target:ids.length,labels:['services'],minYear:2000,maxYear:2021}],limits:{contractBytes:4*1024**2,rawBytes:8*1024**3,totalBytes:24*1024**3,requestIntervalMs:1000},extraction:{maxChunkWords:100,maxPerContract:1,maxUnits:1000}};
   await writeJSON(root,'recipe.json',recipe);const members=ids.map(id=>({id,cohort:'discovery-broad'}));const selection=await writeRows(root,'selection.parquet',members,{schema:{id:'VARCHAR',cohort:'VARCHAR'}});
@@ -27,9 +27,9 @@ async function fixture(t){
     const raw=`<h1>ARTICLE I WORK</h1><h2>1. Performance</h2><p>The Operator shall perform the agreed work. ${Array.from({length:680},(_,i)=>`word${i}`).join(' ')} Except that no unsafe extra work is required unless the parties agree.</p><h2>2. Notice</h2><p>Written notice shall identify the observed problem and permit discussion of a practical correction without extending the agreed scope.</p><h2>3. Contents</h2><p>TABLE OF CONTENTS</p><p hidden>Omitted hidden source text.</p><script>globalThis.auditFixtureExecuted=true</script>`;
     const rawPath=`raw/${id}.html`;await writeFile(join(root,rawPath),raw);
     const result=extractSections({id,cohort:'discovery-broad',path:rawPath,format:'html',source_url:'https://example.invalid/declared-synthetic-source',metadata:{amend:true},content:raw},recipe.extraction);
-    const saved={...result,raw_sha256:sha256(raw),source};const cachePath=`cache/${id}.json`;await writeJSON(root,cachePath,saved);
+    const saved={...result,raw_sha256:sha256(raw),source};const cachePath=compressed?`extraction-cache/${id}.json.gz`:`cache/${id}.json`;let storage;if(compressed){const stored=await writeExtractionCache(root,cachePath,saved);storage=stored.storage;await writeJSON(root,cachePath+'.manifest.json',{...stored.artifact,storage,result_sha256:digest(saved)});}else await writeJSON(root,cachePath,saved);
     const normalizedPath=`normalized/${id}.txt`;await writeFile(join(root,normalizedPath),saved.normalized_text);
-    cache.push({id,path:cachePath,...await hashFile(join(root,cachePath))});contracts.push({id,cohort:'discovery-broad',status:saved.status,raw_sha256:sha256(raw),normalized_path:normalizedPath,normalized_sha256:saved.normalized_sha256});
+    cache.push({id,path:cachePath,...await hashFile(join(root,cachePath)),...(storage?{storage}:{})});contracts.push({id,cohort:'discovery-broad',status:saved.status,raw_sha256:sha256(raw),normalized_path:normalizedPath,normalized_sha256:saved.normalized_sha256});
     const unit=saved.units.find(unit=>unit.kind!=='structural_noise');admitted.push({id:unit.id,contract_id:id,cohort:'discovery-broad',kind:unit.kind,payload:JSON.stringify(unit)});
   }
   const shard=await writeRows(root,'admitted.parquet',admitted,{schema:{id:'VARCHAR',contract_id:'VARCHAR',cohort:'VARCHAR',kind:'VARCHAR',payload:'VARCHAR'}});
@@ -52,6 +52,11 @@ test('full-cache packets include unselected source and omission cues with exact 
   }
   assert.equal(incomplete,true);const negative=await readJSON(root,result.packets.negative.path);assert.ok(negative.rows.some(row=>row.source_omission_cues.length));assert.ok(negative.universe.categories.unselected_unit>0);
   assert.deepEqual(await buildAuditPackets(root,manifest,{seed,counts}),result);
+});
+
+test('full-cache audit packets preserve encoded lineage and complete decoded parent spans for gzip caches',async t=>{
+  const {root,manifest}=await fixture(t,{compressed:true}),result=await buildAuditPackets(root,manifest,{seed,counts});
+  for(const purpose of purposes){const packet=await readJSON(root,result.packets[purpose].path);assert.equal(packet.count,counts[purpose]);for(const row of packet.rows){assert.ok(row.lineage.cache_path.endsWith('.json.gz'));const cached=await readJSON(root,row.lineage.cache_path);assert.equal(cached.normalized_text.slice(row.excerpt.start,row.excerpt.end),row.excerpt.text);assert.equal((await hashFile(await studyPath(root,row.lineage.cache_path))).sha256,row.lineage.cache_sha256);}}
 });
 
 test('coding packet carries no machine function/category/cluster/candidate labels or supplied codebook',async t=>{

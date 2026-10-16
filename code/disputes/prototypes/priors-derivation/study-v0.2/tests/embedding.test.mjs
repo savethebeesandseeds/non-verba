@@ -5,7 +5,10 @@ import { mkdtemp, readFile, writeFile, readdir, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { PINNED_MODEL, embeddingWindows, planWindowBatches, normalizeFloat32, embeddingCacheKey, createBatchEmbedder } from '../lib/embedding.mjs';
+import { PINNED_MODEL, embeddingWindows, nativeEmbeddingWindows, prepareEmbeddingInput, createPinnedTokenCounter, planWindowBatches, normalizeFloat32, embeddingCacheKey, createBatchEmbedder } from '../lib/embedding.mjs';
+import {traceNativeDecoration,bindNativeDecoration} from '../lib/source-decoration.mjs';
+import {NATIVE_COLLECTOR_POLICY} from '../lib/sections.mjs';
+import {createNativeSourceContext,createNativeRepresentation,modelInputIdentity,NAVIGATION_SCOPE} from '../lib/representation.mjs';
 
 const wordTokens = text => (text.match(/\S+/gu) || []).length + 2;
 function mockRuntime() {
@@ -15,6 +18,15 @@ function mockRuntime() {
 }
 async function cacheFixture(t) { const directory = await mkdtemp(path.join(os.tmpdir(), 'priors-embedding-test-')); t.after(() => rm(directory, { recursive: true, force: true })); return directory; }
 const norm = vector => Math.sqrt([...vector].reduce((sum, value) => sum + value ** 2, 0));
+
+function nativeFixture(raw,{dropZeroWidth=false}={}) {
+  const sha=value=>createHash('sha256').update(value).digest('hex'),trace=traceNativeDecoration(raw),mapped=trace.runs.map(run=>dropZeroWidth?run.decoded_text.replace(/[\u200B\uFEFF]/gu,''):run.decoded_text),normalizedText=mapped.join('');let offset=0;
+  const envelope=bindNativeDecoration(trace,{raw,normalizedText,tracerSourceSHA256:'a'.repeat(64),collectorSourceSHA256:'b'.repeat(64),collectorSegments:trace.runs.map((run,index)=>{const start=offset;offset+=mapped[index].length;return {normalized_start:start,normalized_end:offset,sources:[{run_id:run.id,decoded_start:0,decoded_end:run.decoded_text.length}],normalization:mapped[index]===run.decoded_text?'EXACT_DECODED':'EXTRACTOR_NFC_FILTER_WHITESPACE_V1'};})});
+  const parent={id:'synthetic-parent',contract_id:'synthetic-contract',cohort:'discovery-broad',start:0,end:normalizedText.length,sha256:sha(normalizedText)};
+  const unit={id:'synthetic-unit',parent_section_id:parent.id,contract_id:parent.contract_id,cohort:parent.cohort,start:0,end:normalizedText.length,text:normalizedText,sha256:sha(normalizedText),source_navigation:{nearest_anchor:null,within_unit:[],scope:NAVIGATION_SCOPE,governing_hierarchy_verified:false},native_source_decorations_ref:{envelope_sha256:envelope.sha256,raw_sha256:envelope.raw.sha256,normalized_sha256:envelope.normalized.sha256,tracer_source_sha256:envelope.tracer_source_sha256,collector_source_sha256:envelope.collector_source_sha256,policy:envelope.policy,collector_policy:NATIVE_COLLECTOR_POLICY,start:0,end:normalizedText.length,mapping_status:envelope.mapping_status,input_eligibility:envelope.input_eligibility,projection_required:true}};
+  const context=createNativeSourceContext({raw,normalizedText,envelope,expectedTracerSourceSHA256:'a'.repeat(64),expectedCollectorSourceSHA256:'b'.repeat(64)});
+  unit.native_input=createNativeRepresentation(unit,{context,parent});return {unit,raw,trace,envelope,normalizedText,parent,context};
+}
 
 test('measured complete-word windows cover every word and weight new words once', () => {
   const words = Array.from({ length: 17 }, (_, index) => `word${index}`);
@@ -44,6 +56,87 @@ test('overlong CJK segments preserve every literal codepoint and UTF16 offset wi
   const windows=embeddingWindows(text,count,{maxTokens:256,overlapWords:16});const covered=new Set();
   for(const window of windows){assert.equal(window.text,text.slice(window.source_utf16_start,window.source_utf16_end));assert.ok(window.tokens<=256);assert.equal(window.weight_unit,'new_source_codepoints');for(let i=window.source_character_start;i<window.source_character_end;i++)covered.add(i);}
   assert.equal(covered.size,Array.from(text).length);assert.equal(windows.reduce((sum,w)=>sum+w.weight,0),Array.from(text).length);
+});
+
+test('native windows recount annotation overhead, retain whole words and cover all source gaps',()=>{
+  const f=nativeFixture('<p>first words <strike>alpha beta gamma delta epsilon zeta eta theta</strike> last words</p>');
+  const count=text=>Array.from(text).length+2,windows=nativeEmbeddingWindows(f.unit.native_input,count,{maxTokens:128,overlapWords:0}),covered=new Set();
+  assert.ok(windows.length>1);
+  for(const window of windows){assert.equal(window.tokens,count(window.text));assert.ok(window.tokens<=128);assert.ok(window.weight>0);assert.equal((window.text.match(/\[NATIVE_SOURCE_MARKS_UNVERIFIED /gu)??[]).length,(window.text.match(/\[\/NATIVE_SOURCE_MARKS_UNVERIFIED\]/gu)??[]).length);for(let i=window.source_utf16_start;i<window.source_utf16_end;i++)covered.add(i);}
+  assert.equal(covered.size,f.normalizedText.length);assert.equal(windows.reduce((n,w)=>n+w.weight,0),f.normalizedText.split(/\s+/u).length);
+  for(const window of windows.filter(w=>w.source_ranges.some(r=>r.start<59&&r.end>12)))assert.match(window.text,/"tag":"strike"/);
+  assert.equal(windows.at(-1).source_ranges.at(-1).include_end_zero_width,true);
+  assert.ok(windows.slice(0,-1).every(w=>w.source_ranges.at(-1).include_end_zero_width===false));
+});
+
+test('nested native marks and repeated identical text stay associated with actual source ranges',()=>{
+  const f=nativeFixture('<p>same <strike><u>same same same same same same same same</u></strike> same</p>');
+  const windows=nativeEmbeddingWindows(f.unit.native_input,text=>Array.from(text).length+2,{maxTokens:128,overlapWords:1});
+  assert.ok(windows.length>1);for(const window of windows){const source=window.source_ranges[0];if(source.start<44&&source.end>5){assert.match(window.text,/"tag":"strike"/);assert.match(window.text,/"tag":"u"/);}assert.equal(window.envelope_sha256,f.envelope.sha256);assert.ok(source.projection_sha256.match(/^[a-f0-9]{64}$/u));}
+  assert.notEqual(windows[0].source_ranges[0].projection_sha256,windows.at(-1).source_ranges[0].projection_sha256);
+});
+
+test('external navigation cannot inflate windows while in-span caption annotations count toward the token limit',()=>{
+  const f=nativeFixture('<p><strike>Title</strike> gap <u>alpha beta gamma delta epsilon zeta</u></p>'),start=10,sha=value=>createHash('sha256').update(value).digest('hex');
+  const heading={label:'Title',start:0,end:5,parts:[{text:'Title',start:0,end:5}],scope:NAVIGATION_SCOPE,governing_hierarchy_verified:false};
+  const unit={...f.unit,start,text:f.normalizedText.slice(start),sha256:sha(f.normalizedText.slice(start)),source_navigation:{nearest_anchor:heading,within_unit:[],scope:NAVIGATION_SCOPE,governing_hierarchy_verified:false},native_source_decorations_ref:{...f.unit.native_source_decorations_ref,start}};
+  const representation=createNativeRepresentation(unit,{context:f.context,parent:f.parent}),count=value=>Array.from(value).length+2,windows=nativeEmbeddingWindows(representation,count,{maxTokens:128,overlapWords:0});
+  const unknown={...unit,source_navigation:{...unit.source_navigation,nearest_anchor:null}},withoutNavigation=nativeEmbeddingWindows(createNativeRepresentation(unknown,{context:f.context,parent:f.parent}),count,{maxTokens:128,overlapWords:0});
+  assert.deepEqual(windows,withoutNavigation,'External navigation metadata must not alter encoded windows, token counts or source provenance');
+  assert.equal(representation.text,unit.text);assert.equal(windows.length,1);assert.doesNotMatch(windows[0].text,/Title|"tag":"strike"/);assert.match(windows[0].text,/"tag":"u"/);
+  assert.deepEqual(windows.flatMap(window=>window.source_ranges.map(range=>[range.start,range.end,range.role])),[[start,unit.end,'unit_body']]);
+  const full=createNativeRepresentation({...f.unit,source_navigation:unit.source_navigation},{context:f.context,parent:f.parent}),fullWindows=nativeEmbeddingWindows(full,count,{maxTokens:128,overlapWords:0});
+  assert.equal(embeddingWindows(f.normalizedText,count,{maxTokens:128,overlapWords:0}).length,1);assert.ok(fullWindows.length>1,'Native annotation overhead must split a source span that fits without annotations');
+  assert.equal((full.text.match(/Title/gu)||[]).length,1,'An in-span caption remains once as actual source text');assert.ok(fullWindows.some(window=>window.text.includes('"tag":"strike"')));assert.ok(fullWindows.some(window=>window.text.includes('"tag":"u"')));
+  for(const window of [...windows,...fullWindows]){assert.equal(window.tokens,count(window.text));assert.ok(window.tokens<=128);assert.equal(window.source_ranges.length,1);assert.equal(window.source_ranges[0].role,'unit_body');}
+  assert.equal(fullWindows.map(window=>f.normalizedText.slice(window.source_ranges[0].start,window.source_ranges[0].end)).join(''),f.normalizedText,'Nonoverlapping windows cover the complete exact selected source span');
+});
+
+test('native CJK fallback uses codepoint-safe source windows and repeats complete mark metadata',()=>{
+  const f=nativeFixture('<p><u>'+'甲乙丙丁𠀀'.repeat(65)+'</u></p>'),count=text=>Array.from(text).length+2;
+  const windows=nativeEmbeddingWindows(f.unit.native_input,count,{maxTokens:128,overlapWords:3}),covered=new Set();
+  for(const window of windows){assert.ok(window.tokens<=128);assert.equal(window.weight_unit,'new_source_codepoints');assert.match(window.text,/"tag":"u"/);for(let i=window.source_character_start;i<window.source_character_end;i++)covered.add(i);}
+  assert.equal(covered.size,Array.from(f.normalizedText).length);assert.equal(windows.reduce((n,w)=>n+w.weight,0),covered.size);
+});
+
+test('native metadata too large for one source word fails retained without an inference call',async()=>{
+  const f=nativeFixture('<p><u style="text-decoration:'+'unknown '.repeat(100)+'">safe</u></p>'),runtime=mockRuntime();runtime.tokenCount=text=>Array.from(text).length+2;
+  assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,runtime.tokenCount,{maxTokens:256}),/complete source word plus native annotation/);
+  const embedder=await createBatchEmbedder({dimensions:2},{runtime});await assert.rejects(embedder.embedUnits([f.unit]),/complete source word plus native annotation/);assert.equal(runtime.calls.length,0);await embedder.dispose();
+});
+
+test('zero-output native origins at intermediate and terminal boundaries each have an explicit owner',()=>{
+  const f=nativeFixture('<p>alpha <u>\u200B</u>beta gamma<u>\u200B</u></p>',{dropZeroWidth:true});
+  const windows=nativeEmbeddingWindows(f.unit.native_input,wordTokens,{maxTokens:8,overlapWords:0});
+  assert.ok(windows.length>1);assert.equal(windows.reduce((n,w)=>n+(w.text.match(/"tag":"u"/gu)??[]).length,0),2);
+  assert.equal(windows.at(-1).source_ranges[0].include_end_zero_width,true);assert.ok(windows.slice(0,-1).every(window=>window.source_ranges[0].include_end_zero_width===false));
+  assert.equal(windows.map(window=>f.normalizedText.slice(window.source_utf16_start,window.source_utf16_end)).join(''),f.normalizedText);
+});
+
+test('native cache identity cannot reuse plain or differently originated text and current refs cannot downgrade',async t=>{
+  const cacheDir=await cacheFixture(t),runtime=mockRuntime(),embedder=await createBatchEmbedder({dimensions:2,cache_dir:cacheDir,max_tokens:128},{runtime});
+  const f=nativeFixture('<p>same <strike>same</strike></p>'),plain=await embedder.embedUnits([{id:'legacy',text:f.normalizedText}]),native=await embedder.embedUnits([f.unit]);
+  assert.notEqual(plain.inputs[0].input_sha256,native.inputs[0].input_sha256);assert.equal(plain.inputs[0].native_evidence_status,'LEGACY_NATIVE_EVIDENCE_UNAVAILABLE');assert.equal(native.inputs[0].native_evidence_status,'BOUND_NATIVE_SOURCE_EVIDENCE');
+  assert.ok(runtime.calls.flat().some(text=>text.includes('"tag":"strike"')));
+  const calls=runtime.calls.length,resumed=await embedder.embedUnits([f.unit]);assert.equal(resumed.cache_stats.hits,1);assert.equal(runtime.calls.length,calls);
+  const other=nativeFixture('<p><strike>same</strike> same</p>');assert.equal(other.normalizedText,f.normalizedText);assert.notEqual(modelInputIdentity(other.unit).input_sha256,modelInputIdentity(f.unit).input_sha256);
+  await embedder.embedUnits([other.unit]);assert.ok(runtime.calls.length>calls);
+  const downgraded={...f.unit};delete downgraded.native_input;await assert.rejects(embedder.embedUnits([downgraded]),/plain fallback forbidden/);await embedder.dispose();
+});
+
+test('production pinned-tokenizer readiness and inference use identical synthetic source windows and references',async()=>{
+  const counter=await createPinnedTokenCounter();
+  assert.equal(counter.model.verification_status,'VERIFIED_EXISTING_PINNED_ARTIFACTS');assert.equal(counter.model.downloads_attempted,0);
+  assert.equal(counter.model.files.find(file=>file.path==='tokenizer.json').sha256,'da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0');
+  assert.equal(counter.policy.verified_file_set_sha256,counter.model.verified_file_set_sha256);assert.equal(counter.policy.onnx_session_created,false);assert.equal(counter.policy.model_inference,false);assert.equal(counter.tokenCount('hello world'),4);
+  const f=nativeFixture('<p><strike>'+Array.from({length:90},(_,i)=>'word'+i).join(' ')+'</strike> <u>same same</u></p>');
+  const prepared=prepareEmbeddingInput(f.unit,counter.tokenCount,{maxTokens:128,overlapWords:2});
+  assert.ok(prepared.windows.length>1);assert.equal(prepared.input.input_sha256,modelInputIdentity(f.unit).input_sha256);
+  for(const window of prepared.windows){assert.equal(window.tokens,counter.tokenCount(window.text));assert.ok(window.tokens<=128);assert.equal(window.envelope_sha256,f.envelope.sha256);assert.ok(window.window_annotations_self_contained);}
+  const calls=[],runtime={model:{synthetic_runtime_id:'pinned-tokenizer-synthetic-vectors-only'},tokenCount:counter.tokenCount,extractBatch:async texts=>{calls.push(...texts);return texts.map(()=>[1,1]);}};
+  const embedder=await createBatchEmbedder({dimensions:2,max_tokens:128,overlap_words:2},{runtime});
+  try{const result=await embedder.embedUnits([f.unit]);assert.deepEqual(result.inputs[0].windows,prepared.input.windows);assert.equal(result.inputs[0].input_sha256,prepared.input.input_sha256);assert.equal(new Set(calls).size,new Set(prepared.windows.map(window=>window.text)).size);assert.deepEqual(new Set(calls),new Set(prepared.windows.map(window=>window.text)));}finally{await embedder.dispose();}
+  await assert.rejects(createPinnedTokenCounter({max_tokens:257}),/max_tokens/);await assert.rejects(createPinnedTokenCounter({revision:'f'.repeat(40)}),/exact existing MiniLM/);
 });
 
 test('cross-unit batching aggregates weighted windows and returns original ordered Float32 units', async () => {
@@ -106,10 +199,12 @@ test('bounds, model identity and invalid runtime values fail explicitly', async 
 test('existing pinned MiniLM tokenizer and CPU model smoke, explicit opt-in', { skip: process.env.NONVERBA_EMBEDDING_SMOKE !== '1' ? 'Set NONVERBA_EMBEDDING_SMOKE=1 inside the managed container to verify existing model inference; no downloads.' : false }, async () => {
   const embedder = await createBatchEmbedder({ token_budget: 1024, max_batch_windows: 4 });
   try {
-    const result = await embedder.embedUnits([{ id: 'short', text: 'The parties shall give written notice before changing the agreed task.' }, { id: 'long', text: Array.from({ length: 400 }, (_, index) => `obligation${index}`).join(' ') }]);
-    assert.equal(result.dimensions, 384); assert.equal(result.vectors.length, 2); assert.ok(result.inputs[1].windows.length > 1);
+    const native=nativeFixture('<p><strike>earlier rate</strike> <u>replacement rate</u> applies unless notified.</p>');
+    const result = await embedder.embedUnits([{ id: 'short', text: 'The parties shall give written notice before changing the agreed task.' }, { id: 'long', text: Array.from({ length: 400 }, (_, index) => `obligation${index}`).join(' ') },native.unit]);
+    assert.equal(result.dimensions, 384); assert.equal(result.vectors.length, 3); assert.ok(result.inputs[1].windows.length > 1);
     for (const input of result.inputs) for (const window of input.windows) assert.ok(window.tokens <= 256);
     assert.equal(result.inputs[1].windows.reduce((sum, window) => sum + window.weight, 0), 400);
+    assert.equal(result.inputs[2].native_evidence_status,'BOUND_NATIVE_SOURCE_EVIDENCE');assert.equal(result.inputs[2].input_sha256,modelInputIdentity(native.unit).input_sha256);assert.ok(result.inputs[2].windows.some(window=>window.source_ranges.some(range=>range.encoded_annotation_groups>=2)));
     assert.equal(result.provenance.model.downloads_attempted, 0); assert.equal(result.provenance.model.execution_attested, false); assert.equal(result.provenance.model.verification_status, 'VERIFIED_EXISTING_PINNED_ARTIFACTS');
   } finally { await embedder.dispose(); }
 });

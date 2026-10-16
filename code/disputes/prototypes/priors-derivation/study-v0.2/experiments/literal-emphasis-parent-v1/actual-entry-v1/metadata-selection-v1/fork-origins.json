@@ -1,0 +1,11 @@
+{
+  "schema": "metadata-selection-isolated-fork-origins-v1",
+  "status": "SOURCE_PREPARATION_ONLY_ACTUAL_CLOSED",
+  "accepted_base_snapshot": "/tmp/nonverba-unified-source/b5b9bb207c0c4d3c88be896cd3f553a7/code",
+  "projector_original": {"path":"actual-entry-v1/projector.mjs","sha256":"99d1d31b28af2cb11c63899508f16b7eb54477aa5d8cc57c86012ebb004d30b4","bytes":19060},
+  "projector_changes": "Exactly five static import specifier changes; all projector predicates/features/failure behavior and selector calls remain byte-identical after reversing those substitutions.",
+  "new_adapters": ["admission.mjs","input-io.mjs","preflight.mjs","control.mjs","io.mjs","output-io.mjs","driver.mjs","bootstrap.mjs","resources.mjs","configuration.mjs"],
+  "unchanged_reuse": "Seven exact source-only helpers listed and rehashed in identity.mjs; b5 original projector is a reference-only eighth binding.",
+  "not_implemented": ["actual bootstrap first capacity/capture/RSS probe","real worker process guardian","actual external exit observer/issuer","actual execution manifest or ROOT admission","tokenizer/runtime connection","source preparation or reader access"],
+  "authority": "NONE"
+}

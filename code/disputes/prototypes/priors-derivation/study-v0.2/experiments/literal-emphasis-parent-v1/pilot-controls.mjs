@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Source-free construction using the REAL frozen production origin collector.
+import {pathToFileURL} from 'node:url';
+import {computePilotEpoch,syntheticCurrentProof,UPSTREAM,assertConfiguredEntryPoint} from './pilot-identity.mjs';
+import {digest,sha} from './finite-codec.mjs';
+import {metadataAccessRequest} from './pilot-sampling.mjs';
+export function syntheticFreshGuard(ids=Array.from({length:100},(_,i)=>'SYNTHETIC_FRESH_'+i)){const body={schema:'CONTRACT_ID_ONLY_FRESH_GUARD_V1',fresh_packet_sha256:sha('DECLARED_SYNTHETIC_FRESH100'),fresh_packet_rows:100,contract_ids:ids};return {...body,projection_sha256:digest(body)};}
+export async function makeAdapterControl(){
+  const extractionOptions={maxRawBytes:2097152,maxCharacters:2097152,minSectionWords:1,maxChunkWords:20,contextWords:60,sectionBoundaryLevel:2,maxPerContract:20},selectionOptions={seed:'DECLARED_SYNTHETIC_ACTUAL_ADAPTER_CONTROL_V1',maxPerContract:20,maxUnits:Number.MAX_SAFE_INTEGER},epoch=await computePilotEpoch({extractionOptions,selectionOptions}),source=syntheticCurrentProof(epoch);
+  const record={id:'SYNTHETIC_PRODUCTION_COLLECTOR_CONTROL',format:'html',source_url:'https://example.invalid/declared-synthetic',cohort:'discovery-broad'},raw='<p><font color="Black"><b>DECLARED FICTIONAL CONTROL.</b></font> <i>A fictional operator must not export a record without approval.</i> '+('A neutral fictional record describes a shelf. '.repeat(22))+'<strong>The operator requests record Q.</strong> <em>A later fictional exception permits an approved export during a stated window.</em><span style="font-weight:700;font-style:italic"> Literal CSS remains uncomputed.</span><u> A source note remains visible.</u></p>',rawBytes=Buffer.from(raw);
+  assertConfiguredEntryPoint('control_upstream_collector',UPSTREAM+'/lib/sections.mjs');const {extractSections}=await import(pathToFileURL(UPSTREAM+'/lib/sections.mjs')),file=name=>source.files.find(f=>f.path===name).sha256;
+  const currentCache={...extractSections({...record,content:raw},{...extractionOptions,nativeDecorationIdentity:{tracerSourceSHA256:file('source-decoration.mjs'),collectorSourceSHA256:file('sections.mjs')}}),raw_sha256:sha(rawBytes),source};
+  const unit=currentCache.units.filter(u=>u.kind!=='structural_noise').at(-1),parent=currentCache.sections.find(p=>p.id===unit?.parent_section_id);if(!unit||!parent)throw new Error('Synthetic production fixture did not emit a focal unit');
+  const row={audit_id:'SYNTHETIC_AUDIT_CONTROL',contract_id:record.id,unit_id:unit.id,parent_id:parent.id,source_sha256:source.sha256,metadata_basis_sha256:sha('DECLARED_SYNTHETIC_CONTROL_BASIS'),development_row:true,raw_sha256:sha(rawBytes),raw_bytes:rawBytes.length,unit_start:unit.start,unit_end:unit.end,parent_start:parent.start,parent_end:parent.end,normalized_sha256:currentCache.normalized_sha256,unit_sha256:unit.sha256,css_emphasis_sources:1,native_mark_sources:1,emphasized_caption_count:1,joint_groups:0,zero_events:0,parent_units:parent.units.length};
+  const freshGuard=syntheticFreshGuard(),request=metadataAccessRequest(row,freshGuard,{control:true});return {mode:'SOURCE_FREE_CONTROL',request,freshGuard,rawBytes,record,currentCache,extractionOptions,selectionOptions};
+}

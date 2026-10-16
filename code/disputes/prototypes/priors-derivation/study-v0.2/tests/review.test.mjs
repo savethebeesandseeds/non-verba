@@ -8,15 +8,17 @@ import path from 'node:path';
 import http from 'node:http';
 import { STUDY_BASE, writeRows, writeJSON } from '../lib/store.mjs';
 import { createStudyReviewServer, localReviewCsp, sourceUrl } from '../lib/review.mjs';
+import {traceNativeDecoration,bindNativeDecoration} from '../lib/source-decoration.mjs';
+import {storeNativeDecoration} from '../lib/native-decoration-store.mjs';
 
 const sha = text => createHash('sha256').update(text).digest('hex');
 const schema = { id: 'VARCHAR', contract_id: 'VARCHAR', cohort: 'VARCHAR', kind: 'VARCHAR', payload: 'VARCHAR' };
 const container = process.platform === 'linux' && process.env.NONVERBA_CONTAINER === '1';
 
-async function fixture(t, { reserve = false, payloadMismatch = false, assignmentReserve = false } = {}) {
+async function fixture(t, { reserve = false, payloadMismatch = false, assignmentReserve = false, navigation = false, badNavigation = false,native=false } = {}) {
   await mkdir(STUDY_BASE, { recursive: true }); const runDir = path.join(STUDY_BASE, `review-test-${randomUUID()}`); await mkdir(runDir, { recursive: false });
   t.after(async () => { assert.equal(path.dirname(runDir), STUDY_BASE); assert.match(path.basename(runDir), /^review-test-[a-f0-9-]+$/); await rm(runDir, { recursive: true, force: true }); });
-  const unitRows = []; const parentRows = []; const contractRecords = [];
+  const unitRows = []; const parentRows = []; const contractRecords = [];const caches=[];
   for (let contract = 0; contract < 3; contract++) {
     const id = `contract-${contract}`; const cohort = contract % 2 ? 'discovery-relevant' : 'discovery-broad';
     const textPieces = Array.from({ length: 6 }, (_, item) => {
@@ -27,18 +29,34 @@ async function fixture(t, { reserve = false, payloadMismatch = false, assignment
     const parentId = `parent-${contract}`;
     parentRows.push({ id: parentId, contract_id: id, cohort, kind: 'operative', payload: JSON.stringify({ id: parentId, contract_id: id, start: 0, end: normalized.length, text: normalized, sha256: sha(normalized), heading_path: ['Synthetic contract', 'Duties'], normalized_path: normalizedPath }) });
     contractRecords.push({ id, normalized_path: normalizedPath, normalized_sha256: sha(normalized), raw_sha256: sha(`synthetic raw ${normalized}`) });
+    let nativeEnvelope=null;
+    if(native){
+      const escape=value=>value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),first=textPieces[0];
+      const raw='<BODY style="font-size:10pt"><STRIKE>'+escape(first)+'</STRIKE><U>'+escape(normalized.slice(first.length))+'</U></BODY>',rawPath=path.join(runDir,`${id}.html`);await writeFile(rawPath,raw);
+      const trace=traceNativeDecoration(raw);let end=0;
+      nativeEnvelope=bindNativeDecoration(trace,{raw,normalizedText:normalized,tracerSourceSHA256:'a'.repeat(64),collectorSourceSHA256:'b'.repeat(64),collectorSegments:trace.runs.map(run=>{const start=end;end+=run.decoded_text.length;return {normalized_start:start,normalized_end:end,sources:[{run_id:run.id,decoded_start:0,decoded_end:run.decoded_text.length}],normalization:'EXACT_DECODED'};})});
+      const {reference}=await storeNativeDecoration(runDir,`native/${id}.json.gz`,nativeEnvelope);
+      const artifact=await writeJSON(runDir,`cache/${id}.json`,{contract:{id,raw_path:rawPath},raw_sha256:sha(raw),normalized_text:normalized,normalized_sha256:sha(normalized),native_source_decorations:reference});caches.push({id,...artifact});contractRecords.at(-1).raw_sha256=sha(raw);contractRecords.at(-1).native_source_decorations=reference;
+    }
     let offset = 0;
     for (const [item, text] of textPieces.entries()) {
       const index = contract * 6 + item; const unitId = `unit-${String(index).padStart(3, '0')}`;
       const columnCohort = reserve && index === 17 ? 'reserve-evaluation' : cohort;
       const payloadCohort = payloadMismatch && index === 17 ? 'reserve-evaluation' : columnCohort;
       const unit = { id: unitId, contract_id: id, cohort: payloadCohort, parent_section_id: parentId, normalized_path: normalizedPath, text, sha256: sha(text), start: offset, end: offset + text.length, source_url: index === 17 ? 'javascript:bad()' : `https://example.com/synthetic/${id}`, heading_path: ['Synthetic contract', 'Duties'], kind: 'operative', family_id: `family-${index}`, vector: [9999, 9999] };
+      if(nativeEnvelope)unit.native_source_decorations_ref={envelope_sha256:nativeEnvelope.sha256,raw_sha256:nativeEnvelope.raw.sha256,normalized_sha256:nativeEnvelope.normalized.sha256,policy:nativeEnvelope.policy,mapping_status:nativeEnvelope.mapping_status,start:unit.start,end:unit.end};
+      if (navigation && index===5) {
+        const label=text.slice(0,8),scope='LITERAL_SOURCE_NAVIGATION_ONLY';
+        const anchor={id:'synthetic-navigation',label,start:offset,end:offset+label.length,parts:[{text:label,start:offset,end:offset+label.length,machine_labels:['must not leak']}],kind:'declared_synthetic_literal_caption',scope,governing_hierarchy_verified:false,source_evidence:{source_kind:'DECLARED_SYNTHETIC',html_level:2,vector:[9999]},ambiguity:{source_quote_context:true,other_coding:['must not leak']}};
+        unit.source_navigation={scope,governing_hierarchy_verified:false,status:'LITERAL_ANCHORS_PRESENT',nearest_anchor:anchor,within_unit:Array.from({length:40},(_,i)=>({...anchor,id:`synthetic-navigation-${i}`})),vector:[9999]};
+        if (badNavigation) unit.source_navigation.within_unit[39].governing_hierarchy_verified=true;
+      }
       unitRows.push({ id: unitId, contract_id: id, cohort: columnCohort, kind: 'operative', payload: JSON.stringify(unit) }); offset += text.length + 2;
     }
   }
   const units = [await writeRows(runDir, 'admission/units-0.parquet', unitRows.slice(0, 9), { schema }), await writeRows(runDir, 'admission/units-1.parquet', unitRows.slice(9), { schema })];
   const sections = [await writeRows(runDir, 'extraction/sections.parquet', parentRows, { schema })];
-  const extraction = await writeJSON(runDir, 'extraction/manifest.json', { schema_version: 2, contract_records: contractRecords });
+  const extraction = await writeJSON(runDir, 'extraction/manifest.json', { schema_version: 2, contract_records: contractRecords,cache:caches });
   const assignmentRows = unitRows.map((row, index) => ({ id: row.id, cluster: `cluster-${index % 3 + 1}`, payload: JSON.stringify({ unit_id: row.id, contract_id: row.contract_id, cluster_id: `cluster-${index % 3 + 1}`, label: index % 3, similarity: 0.6, second_similarity: 0.4, margin: 0.2, partition: assignmentReserve && index === 17 ? 'holdout' : 'fit', vector: [9999, 9999] }) }));
   const assigned = [await writeRows(runDir, 'geometry/assigned.parquet', assignmentRows, { schema: { id: 'VARCHAR', cluster: 'VARCHAR', payload: 'VARCHAR' } })];
   const admission = { schema_version: 2, status: 'DECLARED_SYNTHETIC_ADMISSION', authority: 'NONE', adopted_catalog: false, counts: { input_units: 18, admitted_units: 18, representatives: 18, contracts_input: 3, contracts_admitted: 3 },
@@ -54,6 +72,15 @@ async function running(t, f) {
 function request(port, target, method = 'GET') {
   return new Promise((resolve, reject) => { const req = http.request({ host: '127.0.0.1', port, path: target, method }, res => { const parts = []; res.on('data', part => parts.push(part)); res.on('end', () => { const body = Buffer.concat(parts).toString('utf8'); resolve({ status: res.statusCode, headers: res.headers, body, json: () => JSON.parse(body) }); }); }); req.on('error', reject); req.end(); });
 }
+
+test('native source context hydrates one bound sidecar and shows relevant and full style evidence',{skip:!container},async t=>{
+  const f=await fixture(t,{native:true}),port=await running(t,f),unit=(await request(port,'/api/unit?id=unit-005')).json();assert.equal(unit.native_source_evidence.status,'BOUND_NATIVE_SOURCE_EVIDENCE_AVAILABLE_IN_CONTEXT');
+  const response=await request(port,'/api/context?unit=unit-005');assert.equal(response.status,200);const context=response.json(),projection=context.native_source_decorations;
+  assert.equal(projection.annotations.length,2);assert.deepEqual(projection.annotations.map(a=>a.marks.map(m=>m.native_tag)),[['strike'],['u']]);assert.equal(projection.effectiveness_verified,false);assert.equal(projection.computed_style_verified,false);assert.equal(projection.envelope_sha256,unit.native_source_evidence.envelope_sha256);
+  assert.ok(context.excerpt.text.includes('<script>'));assert.ok(!JSON.stringify(projection).includes('9999'));
+  const full=(await request(port,'/api/context?unit=unit-005&native_styles=all')).json();assert.ok(full.native_source_decorations.annotations.some(a=>a.marks.some(m=>m.tag==='body')));
+  assert.equal((await request(port,'/api/context?unit=unit-005&native_styles=invalid')).status,400);
+});
 
 test('actual representative pagination is stable across shards and cursor filters are bound', { skip: !container }, async t => {
   const f = await fixture(t); const port = await running(t, f); const ids = []; let cursor = null;
@@ -76,6 +103,35 @@ test('source/cluster/contract lineage is bounded and excludes vector payloads an
   const hostileUrl = (await request(port, '/api/unit?id=unit-017')).json(); assert.equal(hostileUrl.source_url, null);
   const context = (await request(port, '/api/context?unit=unit-005')).json(); assert.equal(context.parent_section_id, 'parent-0'); assert.equal(context.excerpt.complete_parent, true); assert.equal(context.parent.text, undefined); assert.equal(context.normalized_source_sha256, f.contractRecords[0].normalized_sha256); assert.equal(context.normalized_hash_bound_to_extraction, true); assert.ok(context.excerpt.text.includes(unit.text)); assert.match(context.offsets, /UTF-16/);
   assert.equal((await request(port, '/api/context?unit=unit-005&start=999999')).status, 400);
+});
+
+test('literal navigation is bounded, unverified and excludes nested vectors or coder labels',{skip:!container},async t=>{
+  const f=await fixture(t,{navigation:true}),port=await running(t,f);
+  const response=await request(port,'/api/unit?id=unit-005');assert.equal(response.status,200);
+  const unit=response.json(),nav=unit.source_navigation;
+  assert.equal(nav.nearest_anchor.label,'<script>');assert.equal(nav.governing_hierarchy_verified,false);
+  assert.equal(nav.nearest_anchor.governing_hierarchy_verified,false);assert.equal(nav.nearest_anchor.scope,'LITERAL_SOURCE_NAVIGATION_ONLY');
+  assert.equal(nav.within_unit.length,32);assert.equal(nav.within_unit_total,40);assert.equal(nav.within_unit_truncated,true);
+  assert.equal(nav.vector,undefined);assert.equal(nav.nearest_anchor.source_evidence.vector,undefined);
+  assert.equal(nav.nearest_anchor.parts[0].machine_labels,undefined);assert.equal(nav.nearest_anchor.ambiguity.other_coding,undefined);
+  const context=(await request(port,'/api/context?unit=unit-005')).json();assert.equal(context.source_navigation.nearest_anchor.label,'<script>');
+  assert.equal(context.source_navigation.within_unit_total,40);assert.equal(context.source_navigation.within_unit_truncated,true);
+  assert.equal(context.source_navigation.nearest_anchor.governing_hierarchy_verified,false);
+  const malformed=await fixture(t,{navigation:true,badNavigation:true}),badPort=await running(t,malformed);
+  assert.equal((await request(badPort,'/api/unit?id=unit-005')).status,500);
+});
+
+test('summary and context recheck later gate records instead of displaying an unchecked historical pass',{skip:!container},async t=>{
+  const f=await fixture(t),source='a'.repeat(64);f.admission.input.extraction_source_sha256=source;
+  const port=await running(t,f),before=(await request(port,'/api/summary')).json();
+  assert.equal(before.gates.representation.status,'NOT_PASSED_CALIBRATION_IN_PROGRESS');
+  await writeJSON(f.runDir,`quality-gates/${source}/gate.json`,{status:'CALIBRATION_GATE_PASSED',extraction_source_sha256:source,authority:'NONE',data_classification:'DECLARED_SYNTHETIC_UNVERIFIED_PASS_RECORD'});
+  const after=(await request(port,'/api/summary')).json();
+  assert.equal(after.gates.representation.historical_status,'CALIBRATION_GATE_PASSED');
+  assert.equal(after.gates.representation.status,'CURRENT_SOURCE_GATE_NOT_PASSED');
+  const context=(await request(port,'/api/context?unit=unit-005')).json();
+  assert.equal(context.representation_gate.historical_status,'CALIBRATION_GATE_PASSED');
+  assert.equal(context.representation_gate.status,'CURRENT_SOURCE_GATE_NOT_PASSED');
 });
 
 test('reserve, mismatched payload and heldout assignments fail closed before serving', { skip: !container }, async t => {

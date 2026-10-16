@@ -3,8 +3,8 @@
   "id": "priors",
   "number": 4,
   "title": "Priors and the reasoning system",
-  "summary": "Priors Derivation Lab v0.2 is an isolated research prototype: calibration engineering is complete; source review and independent coding are active; full discovery remains gated. Candidate validation, case inclusion, reasoning evaluation and the decision on the first priors remain open.",
-  "updatedAt": "2026-10-14",
+  "summary": "Priors Derivation Lab v0.2 remains an isolated research prototype. All 45 current component cases and 631 accepted page declarations are complete; ten materiality holds remain unresolved. Historical declarations are authenticated; the completed 154-case machine-only inventory retains 145 candidates with producer/quality unresolved and nine typed ineligible rejected/unavailable sources. Earlier failed and held attempts remain preserved. The historical same-rule tokenizer census is complete: 936 groups, 20,266 units and all 243,192 cells, with every failure retained; this is an engineering milestone only. The separate emphasis/full-parent prototype remains unadopted. Its 25 fake utility and 11 pure observer controls have independent source-only acceptance; the later fictional V3 Phase A attempt is HELD with all original 200 records unattempted and no B_PREPARE or Phase B. Owned process absence remains unproven, so further heavy continuation is held pending coordinated maintenance. Real source data, models and pinned tokenizers remain closed. The source-quality gate stays in progress; the full 15,000-record study, 30,000-unit comparison and first-prior decision remain open.",
+  "updatedAt": "2026-10-16",
   "goals": [
     {
       "id": "priors-corpus-discovery-goal",
@@ -86,14 +86,14 @@
         },
         {
           "id": "priors-study-v9-calibration",
-          "title": "Complete current V9 calibration engineering",
+          "title": "Retain the completed V9 calibration engineering",
           "description": "The authored checkpoint records 14,408 parents, 20,642 admitted units, 20,399 verified pinned-model vectors and all 20 geometry attempts on the same calibration selections. All 188 integrated tests passed. Verified cache reuse is distinguished from new inference; the 72 focused provenance tests overlap this test surface and are not an additional study sample. This establishes engineering execution, not adequate source reconstruction or valid prior meanings.",
           "status": "done",
           "updatedAt": "2026-10-14",
           "completedAt": "2026-10-14",
           "acceptance": [
             "Account for all 1,000 calibration selections, including six acquisition failures and 57 explicit text exclusions.",
-            "Retain source-bound extraction, actual verified vectors and all 20 predeclared geometry attempts for the current V9 representation.",
+            "Retain source-bound extraction, actual verified vectors and all 20 predeclared geometry attempts for the retained V9 representation.",
             "Keep cache reuse, test results and geometry diagnostics distinct from source audit results and semantic findings."
           ],
           "evidence": [
@@ -108,6 +108,84 @@
           ],
           "dependsOn": [
             "priors-study-metadata-selection"
+          ]
+        },
+        {
+          "id": "priors-study-v10-calibration",
+          "title": "Retain V10 vectors and geometry after the body repairs",
+          "description": "The same 1,000 calibration selections yielded 937 accepted texts, 57 exclusions, six acquisition failures, 13,532 parents and 20,525 provisional units. V10 retains 20,287 verified pinned-model vectors and all 20 geometry attempts. All 281 integrated tests passed, including native inference. Four observed material issues have actual V10 source rereadings and exact-method resolutions. This is a retained engineering checkpoint; the source-quality gate remains unpassed.",
+          "status": "done",
+          "updatedAt": "2026-10-15",
+          "completedAt": "2026-10-15",
+          "acceptance": [
+            "Preserve the original calibration membership and retain source-bound repaired extraction and all explicit failures.",
+            "Verify all 20,287 pinned-model vectors and all 20 predeclared geometry attempts for exact V10.",
+            "Retain the passing integrated checks and actual issue rereadings while distinguishing engineering from source adequacy and prior-meaning validation."
+          ],
+          "evidence": [
+            {
+              "label": "V10 execution and source-reading checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+            },
+            {
+              "label": "Vector and geometry verification",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/analysis.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-metadata-selection"
+          ]
+        },
+        {
+          "id": "priors-study-v11-navigation-isolation",
+          "title": "Verify the V11 navigation correction preserves source output",
+          "description": "V11 changes navigation for 916 contracts while preserving every other extractor field across all 994 cached contracts. The same 25 mechanical controls and all 290 integrated tests passed, including the 95 focused tests and native inference. Independent code and metadata review found no blocking defect. The unchanged calibration membership was re-extracted successfully. Caption adequacy, current reading qualification and the fresh audit remain separate outstanding work.",
+          "status": "done",
+          "updatedAt": "2026-10-15",
+          "completedAt": "2026-10-15",
+          "acceptance": [
+            "Restrict differences to the four declared navigation/policy fields, preserving every other retained output field for all 994 contracts.",
+            "Retain passing focused, historical-control and integrated native checks plus independent bounded review.",
+            "Preserve failed attempts and missing-title uncertainty; claim no source-quality pass or new actual reading from mechanical comparisons."
+          ],
+          "evidence": [
+            {
+              "label": "V11 correction, parity and re-extraction checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#navigation-only-continuation--15-october-2026"
+            },
+            {
+              "label": "Literal source navigation implementation",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/sections.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-v10-calibration"
+          ]
+        },
+        {
+          "id": "priors-study-v12-reference-continuity",
+          "title": "Repair reference-list continuity and replay known boundaries",
+          "description": "V12 retains introduced attachment references with their literal governor across page breaks. The same calibration yields 13,487 parents and 20,504 provisional units. All 371 integrated checks passed, including pinned native inference. Mechanical coverage verifies all accepted normalized words within parents and units. The five then-known boundary issues were resolved for this exact source through one new actual repaired-parent reading and four strict qualifications. Later supporting reviews are complete, but a newly observed native strike/underline distinction loss holds expansion; the fresh quality gate remains unpassed.",
+          "status": "done",
+          "updatedAt": "2026-10-15",
+          "completedAt": "2026-10-15",
+          "acceptance": [
+            "Retain literal source text and generic page-transparent reference continuity, with scoped controls and passing integrated native checks.",
+            "Verify complete normalized parent/unit coverage and preserve the coarse affected-contract comparison's limits.",
+            "Resolve all five known boundaries only for exact V12 using actually read or strictly qualified original reading scopes, preserving historical failures and claiming no source-quality pass."
+          ],
+          "evidence": [
+            {
+              "label": "V12 repair, coverage and exact-source replay checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#attachment-reference-boundary-hold--15-october-2026"
+            },
+            {
+              "label": "Actual-reading and source-only qualification guard",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/source-issues.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-v11-navigation-isolation"
           ]
         },
         {
@@ -139,13 +217,13 @@
         },
         {
           "id": "priors-study-development-review",
-          "title": "Complete 200 actual development source judgments",
-          "description": "The last authored checkpoint, 14 October at 10:44 UTC, records 184/200 completed judgments: 99 in one assigned half and 85 in the other. They comprise 117 new full V9 readings, 66 exact prior-reading equivalents and one transparently combined prior-parent/new-source-context completion. Sixteen judgments remain incomplete at that checkpoint. A completed reading can still fail adequacy; original judgments, failures and rubric adjudications remain visible.",
-          "status": "in_progress",
+          "title": "Complete 200 actual V9 development source judgments",
+          "description": "All 200 V9 development judgments are complete: 102 by the extraction author and 98 by the root reviewer, comprising 133 new full V9 readings, 66 exact prior-reading equivalents and one transparent prior-parent/new-source-context completion. Effective context scores are 138 adequate, 57 inadequate and five not applicable; headings are 116 adequate, 79 inadequate and five not applicable. Original failures, separate authorship and actual rubric adjudications remain visible. This completes reading coverage; it does not pass source adequacy or fresh validation.",
+          "status": "done",
           "updatedAt": "2026-10-14",
-          "completedAt": null,
+          "completedAt": "2026-10-14",
           "acceptance": [
-            "Complete all 200 source-bound development judgments against the current extraction, including original source, complete parent context and headings.",
+            "Complete all 200 source-bound development judgments against V9, including original source, complete parent context and headings.",
             "Distinguish new readings, strictly equivalent prior readings and partial records; retain failed and adjudicated judgments.",
             "Resolve observed material reconstruction issues with actual current-source replays before the fresh audit."
           ],
@@ -166,10 +244,10 @@
         {
           "id": "priors-study-source-quality-audit",
           "title": "Pass the fresh source-quality gate before expansion",
-          "description": "The gate remains unpassed. All three known material boundary issues have actual V9 repair replays, but development review is incomplete and the 100-parent fresh packet, drawn from 29 contracts, remains unopened at the recorded checkpoint. Freeze the repaired representation before fresh review. Correlated sections and unavailable material must remain explicit.",
+          "description": "The fresh source-quality gate remains unpassed. All 45 current cases have completed authored component reviews and 631 accepted explicit page-read declarations: root 13 cases/125 pages, documentation reviewer 15/253 and gzip reviewer 17/253. Independent metadata aggregation bound 2,767 artifacts and 631 distinct qualifying tool/chunk references; maximum accepted complete response was 7,353 characters. An incidental escaped redisplay for already-read case 0174 remains retained and unACKed, so no bound on every incidental tool response is claimed. Thirty-five reviews are mechanically bound without a current materiality hold; ten cases remain BLOCKED and unresolved: 0045, 0047, 0055, 0085, 0086, 0092, 0094, 0147, 0149 and 0174. This is not a quality rate or legal/final defect adjudication. Original context, adverse, N/A, null and strict-check outcomes remain unchanged. The strict current-45 raw-scope/frozen-page check passed mechanically and clears none of these holds. V6 authentication verifies all 154 historical complete declaration roots and 2,068 declared pages only; original case 0170 remains partial at 31/90. It supplies no current qualification or producer bridge. The first historical 154-case current-component comparison attempt remains HELD after 52 saved files at its 16 MiB metadata cap, without a summary or complete proof. An earlier full gzip attempt retained 145 candidate comparison records plus nine durable rejected-source failures and remains HELD; its records and the 52-file cap attempt remain immutable. Typed rejected-source preparation passed 98 fictional controls, while earlier launches were held for inherited process-observation and physical reservation-floor monitor gaps. The repaired v16 guardian has now completed the whole 154-case machine-only inventory with exit zero, zero failures and zero unattempted records. The v8 summary retains 145 candidates with producer and quality questions UNRESOLVED, plus nine explicitly INELIGIBLE rejected/unavailable anchors, without inventing parents or units. ROOT and independent readback verified all encoded/decoded records, 84 executed source bindings, native/raw metadata and historical judgment joins, 458 named refs, the full method-difference ledger, 35 capacity boundaries, three terminal checks and owned process-group absence. The recorded run stayed within its original metadata and resource limits. This is completed comparison metadata only: no new actual source reading, current source/native qualification, producer bridge, issue clearance, quality pass or adoption. All prior failures, adverse judgments, original partial case 0170 and caps remain preserved. Calibration remains 1,000 selected records: 994 acquired, six terminal failures, 937 accepted and 57 rejected. Gzip engineering/storage-equivalence proofs remain distinct from source quality. Five ordinary boundary findings have exact 874c source-only resolutions with zero new readings; six prefix/role resolutions remain exact to 0ac7 and the legacy native-input issue stays separately held. The historical same-rule tokenizer census is now complete on the older five-tag a985 / source 5948 basis: 936 groups, 20,266 units and all 243,192 cells, comprising 208,620 retained plus 34,572 new cells in an exact disjoint union. All outcomes remain accounted for: 221,448 passing capacity cells, 21,736 minimum-codepoint failures, eight projection-bound failures and zero source-binding, invariant or timeout cells. ROOT verified all 936 encoded/decoded shards, the typed ordered index and full semantic replay of the 311 new log chains, while retaining the earlier proof for reused cells. This completes a historical engineering milestone only; it establishes no current 874c or nine-tag readiness, semantic equivalence, quality rate, inference, pooling or adoption. The isolated literal-emphasis-parent-v1 prototype has independently reviewed synthetic checks and a full-budget measurement on one simple source-free fixture; it establishes no actual-parent feasibility, source reading, inference, pooling, quality or adoption. Post-run supervisor assertions retain their independent source-verification limit. The proposed 69-case actual-source pilot remains preparation only, with 45 mandatory cases plus 24 strata and no old-envelope promotion. The exact source-free adapter2c8afe preparation passed 55 controls and an independent 55-control rerun, including empty native sources, complete envelope bindings and invalid UTF-8 refusal. ROOT accepted only that exact preparation. The next-stage 18-component revision d2117 passed 16 source-free controls and independent component review without a component blocker; the separate four-file G1/G2 guardian repair revision 491423 passed 16 source-free controls and independent review without a repair blocker. ROOT accepted only those exact component preparation scopes. ROOT accepted coherent source-free integration under quiet revision 563eab: a fictional 200-record metadata fixture produced the fixed 69-case selection, with 48 project files, 96 named configuration refs, 73 lossless outputs including 69 case gzips, 276 literal streams, 1,116 fictional windows and 8,096 fake codepoint-counter calls. No pinned tokenizer or model was called. Peak sampled RSS was 360,349,696 bytes; full periodic history was not retained and capacity checks used a virtual fixture. No routine rerun was performed. Actual admission, configuration of the 45 mandatory cases, real metadata draw, raw loading, pinned tokenizers, the full 69-case pilot and manual reader remain UNEXECUTED/HELD. The three-document plan was accepted for closed source-only implementation: 29 new files and 128 named dependencies retain 20 passing focused fictional controls. The six-file stored reader separately passed 19 fictional controls and independent/ROOT component review; its exact fictional one-forward response was 5,912 UTF16 units / 6,272 bytes. The exact closed-runner b5b9bb F1/F2 and monotonic-accounting repairs are independently and ROOT accepted as source-only preparation after 28 retained fictional controls. Prior failures and counterexamples remain retained. No new two-phase integration suite has run; a separately frozen source-free observer/issuer runner is being prepared, while the runtime component and closed source preparation remain separate. The 19-control reader acceptance is unchanged. Fictional-policy b5 outputs intentionally do not match the pinned-policy reader factory and cannot be relabelled as real inputs. The tokenizer dependency decision accepts only named installed-service provenance with unenumerated transitive/native components, while actual wrapper/configuration/epoch and counter opening stay held. Future saved reader responses, journals and evidence share the original growth baseline and combined 128 MiB budget. These component checks grant no actual-run, reading or activation authority. The current pipeline, prior catalog and financial runtime are unchanged by this unadopted experiment. Existing 200 development body/57 control qualifications preserve their original outcomes; current component qualification, unopened 100-parent/29-contract fresh audit, full vectors/20 geometry attempts, 30,000-unit comparison, coding, novelty, fixed-facts validation, candidate freeze and reserves remain open. Current continuation record - 16 October 2026: The 25 fake utility controls and 11 pure observer controls passed and received independent source-only acceptance. The later fictional V3 Phase A attempt ran and was HELD by a bootstrap CLI/top-level-await import cycle and parent IPC shutdown. All original 200 records remain unattempted; neither B_PREPARE nor Phase B ran. Two zero-RSS zombie identities leave owned process absence unproven, and further heavy continuation is held pending coordinated maintenance. Real source data, models and pinned tokenizers remain closed. These fictional controls and the held attempt add no source readings, quality findings or prior adoption. The full goal stays active and source quality stays in progress; ten materiality holds, 15,000 selected versus the 1,000-record calibration, 937 accepted, 57 rejected, six unacquired, the historical 243,192-cell census and the 154-case inventory of 145 unresolved candidates plus nine ineligible anchors remain unchanged. Earlier unexecuted statements retain their preparation-time scope.",
           "status": "in_progress",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": null,
           "acceptance": [
             "Complete current-source development review and retain the 57 rejection controls with their exact reading provenance.",
@@ -179,8 +257,12 @@
           ],
           "evidence": [
             {
-              "label": "Unpassed gate and repair state",
-              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
+          "label": "Current fictional attempt and coordinated continuation hold",
+          "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#current-continuation-hold--16-october-2026"
+        },
+        {
+              "label": "Current component readings, unresolved emphasis concerns and unpassed source gate",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#current-representation-review-and-native-markup-hold--15-october-2026"
             },
             {
               "label": "Source-reading and adequacy rubric",
@@ -193,7 +275,54 @@
           ],
           "dependsOn": [
             "priors-study-development-review",
-            "priors-study-source-integrity-controls"
+            "priors-study-source-integrity-controls",
+            "priors-study-v13-native-calibration"
+          ]
+        },
+        {
+          "id": "priors-study-historical-native-tokenizer-census",
+          "title": "Complete the historical same-rule tokenizer census",
+          "description": "The isolated prototype completed the frozen historical a985 / source 5948 census: 936 groups, 20,266 units and all 243,192 cells, using an exact union of 208,620 retained and 34,572 new cells. All failures remain recorded: 221,448 passing capacity cells, 21,736 minimum-codepoint failures, eight projection-bound failures, and zero source-binding, invariant or timeout cells. Independent readback bound all encoded/decoded shards, the complete typed ordered index and new-cell semantic replay while preserving prior proof scope. This older five-tag tokenizer engineering result supplies no current 874c or nine-tag qualification, semantic equivalence, source-quality pass, inference, pooling, adoption or completion of the 15,000-record study.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-16",
+          "acceptance": [
+            "Account for all frozen 936 groups, 20,266 ordered units and 243,192 cells through the exact 208,620-plus-34,572 disjoint union, preserving failures and the original denominator.",
+            "Retain all six statuses and independently authenticate the encoded/decoded shards, typed ordered index and correctly scoped prior/new write-ahead-log evidence.",
+            "Retain terminal worker and resource evidence while keeping this historical engineering result separate from current-source qualification, quality, model inference and adoption."
+          ],
+          "evidence": [
+            {
+              "label": "Completed historical census, retained failures and independent terminal readback",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#historical-same-rule-tokenizer-census-completed--16-october-2026"
+            }
+          ]
+        },
+        {
+          "id": "priors-study-v13-native-calibration",
+          "title": "Preserve native source evidence and restore deep bodies in calibration",
+          "description": "The final V13 extraction candidate passed 539 integrated software checks with no skips, including pinned CPU inference on declared synthetic marked text. A complete 994-source preflight preserved all prior body/navigation outputs for 993 sources and restored the one accepted depth-truncated body, retaining complete exact or explicitly joint-whitespace origin evidence with no gaps. Actual calibration reconstruction is complete: 937 accepted, 57 excluded, six terminal acquisition failures, 13,583 parents and 20,504 provisional units. This extraction checkpoint includes no current study vectors, geometry, source-quality pass, native issue clearance or candidate adoption.",
+          "status": "done",
+          "updatedAt": "2026-10-15",
+          "completedAt": "2026-10-15",
+          "acceptance": [
+            "Retain complete bounded native evidence with source-origin bindings and explicit whitespace-attribution uncertainty.",
+            "Verify every retained calibration source, isolate intentional source restoration and preserve the same declared selection and failures.",
+            "Retain actual current calibration artifacts and passing integrated checks without claiming study inference or source-quality approval."
+          ],
+          "evidence": [
+            {
+              "label": "Current native-source engineering and actual calibration checkpoint",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#current-representation-review-and-native-markup-hold--15-october-2026"
+            },
+            {
+              "label": "Bounded source collector and native origin evidence",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/lib/sections.mjs"
+            }
+          ],
+          "dependsOn": [
+            "priors-study-metadata-selection",
+            "priors-study-v12-reference-continuity"
           ]
         }
       ]
@@ -304,9 +433,9 @@
         {
           "id": "priors-study-independent-coding",
           "title": "Complete two independent 500-section open codings",
-          "description": "Both reviewers have begun the same frozen 500-section packet, but both codings remain incomplete in the authored checkpoint. Packet construction and provenance checks are complete engineering components, not completed readings. Code without supplying the original five or pilot six as categories.",
+          "description": "Both 500-section codings remain incomplete on frozen V12 inputs. After qualifying their own earlier actual readings and independently rereading changed case 0096, A preserves 98 final cases plus partial 0099 and 401 wholly unopened; B preserves 161 finals, zero partials and 339 wholly unopened. B completed already-opened 0161 with the full 237,717-character parent and relevant original scopes. A's complete 299,416-character parent reading exposed a native strike/underline rate-distinction loss in separately read original context. Root's new bounded reading and dedicated replay now resolve that issue for a985 only. The rebuilt current packet preserves all 500 ordered case and contract identities. New openings remain held for current input qualification and actual new component review. Neither reader sees the other's meanings, proposed navigation, accepted catalog or fresh audit source; partial or unavailable sources remain explicit.",
           "status": "in_progress",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-15",
           "completedAt": null,
           "acceptance": [
             "Retain two separately conducted, complete 500-section open codings with author-declared independence.",
@@ -423,9 +552,9 @@
         {
           "id": "priors-study-fixed-facts-pairs",
           "title": "Prepare at least 50 independently authored disagreement pairs",
-          "description": "The protocol defines this preparatory task and it can proceed alongside source review. Actual completion is not recorded. Pairs must include counterparty-benefiting invocations, irrelevant candidates and close concepts, with facts held fixed. Agent judgments do not establish participant understanding.",
-          "status": "ready",
-          "updatedAt": "2026-10-14",
+          "description": "Fifty independently authored synthetic pairs are prepared: 20 counterparty-benefit, 15 irrelevant-emphasis and 15 near-confusion situations, with both declaring roles represented equally. Fixed facts, evidence, missing information and mandatory rules remain identical across both emphases. Eleven structural mutation checks pass; a separate reviewer read all 50 situations and four corrected cases. Author predictions and challenge labels are withheld from future model input until judgments are sealed. Candidate binding and actual challenge judgments remain pending; no model, participant or legal findings are claimed.",
+          "status": "in_progress",
+          "updatedAt": "2026-10-15",
           "completedAt": null,
           "acceptance": [
             "Retain at least 50 independently authored disagreement pairs and their source-independent authorship records.",
@@ -436,6 +565,14 @@
             {
               "label": "Predeclared v0.2 study protocol",
               "path": "code/disputes/prototypes/priors-derivation/plans/STUDY_0_2_PLAN.md"
+            },
+            {
+              "label": "Authored synthetic fixed-fact pairs",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/challenges/fixed-facts-prototype.json"
+            },
+            {
+              "label": "Recorded preparation and independent review limits",
+              "path": "code/disputes/prototypes/priors-derivation/study-v0.2/README.md#observed-checkpoint--14-october-2026"
             }
           ],
           "dependsOn": []

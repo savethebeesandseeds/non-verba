@@ -1,0 +1,23 @@
+{
+  "schema": "typed-focal-adapter-minimal-successor-delta-v1",
+  "original": {
+    "accepted_snapshot": "2c8afe4f7a774631999f4308967c03a0",
+    "accepted_path": "pilot-adapter.mjs",
+    "copy": "adapter.original.mjs",
+    "sha256": "1874d099219eafc42322aeb89459333e1d4fe75a6756db420480a9e574767ca2",
+    "bytes": 16738
+  },
+  "successor": "adapter.mjs",
+  "declared_changes": [
+    "Route imports to the same accepted immutable codec/tracer/collector/planner/resources through parent paths",
+    "New named source epoch and module-owned fixture permit replace old control-mode request",
+    "Exact typed focal lookup chooses cache.units or cache.sections; parent anchor is full real stored parent",
+    "Descriptor focal fields, projection/freeze bindings and duplicate focal-parent input disclosure",
+    "Owned job-wide meter replaces standalone tokenizer opening; form names focal and parent",
+    "Keep exact UTF8, every native reference binding, unassigned/no-run rich dictionary, omission ledger and non-native bridge checks"
+  ],
+  "accepted_parent_files_modified": false,
+  "collector_or_normalizer_fork_delta_added": false,
+  "actual_activation": false,
+  "authority": "NONE"
+}

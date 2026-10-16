@@ -1,0 +1,19 @@
+{
+  "schema": "prototype-finite-emphasis-reduction-ledger-v1",
+  "status": "PROTOTYPE_UNADOPTED_INFORMATION_REDUCED",
+  "authority": "NONE",
+  "source_layer": "Exact original native tokens, literal CSS declarations and original decoded/normalized origin evidence remain in the rich fork trace/envelope. That is distinct from model-input fidelity.",
+  "literal_tags_distinct": ["strike", "s", "del", "ins", "u", "b", "strong", "i", "em"],
+  "model_reductions": [
+    {"field": "native_nesting_order_and_multiplicity", "model_treatment": "presence-set union; adjacent equal masks may merge", "retained_elsewhere": "rich exact source/DOM scopes"},
+    {"field": "arbitrary_CSS_property_values_and_cascade", "model_treatment": "CSS_UNKNOWN presence, including literal font/font-weight/font-style; never translated to native emphasis or computed appearance", "retained_elsewhere": "complete literal style attributes and declarations, exact source tokens"},
+    {"field": "joint_whitespace_per_origin_marks_and_order", "model_treatment": "JOINT_ORIGIN_ATTRIBUTION_UNKNOWN; no native tag assigned to normalized output space, including same-path joint groups", "retained_elsewhere": "all ordered origin evidence and literal mark chains"},
+    {"field": "zero_event_origin_multiplicity_order_RLE", "model_treatment": "ZERO_EVENT plus presence-set at an owned normalized boundary; nonlocalized filter events anchored at group start as an explicit model choice", "retained_elsewhere": "all exact raw/decoded origins and normalization filter events"},
+    {"field": "synthetic_separator_origin", "model_treatment": "NORMALIZED_LAYOUT_SOURCE_UNKNOWN; only literal whitespace/pipe gaps permitted, never native-neutral or verified origin", "retained_elsewhere": "exact normalized gap ranges and hashes"},
+    {"field": "raw_coordinates_hashes_and_evidence_IDs", "model_treatment": "external provenance only; not semantic model text", "retained_elsewhere": "bound descriptor, trace, envelope and source interval metadata"}
+  ],
+  "tokenizer_reduction": "Existing pinned tokenizers may map source strings to unknown/subword tokens. Token-count feasibility is not semantic preservation.",
+  "text_roundtrip": "Only escaped normalized literal text is exactly reversible from model strings; this is not full evidence or meaning roundtrip.",
+  "materiality_rule": "Any observed material loss from omitted fields rejects the candidate. The experiment cannot clear an actual finding or alter the quality gate.",
+  "effects": {"computed_style_verified": false, "effectiveness_verified": false, "semantic_equivalence": false, "dependency_completeness_verified": false}
+}

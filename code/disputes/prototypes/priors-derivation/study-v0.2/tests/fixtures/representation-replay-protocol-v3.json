@@ -1,0 +1,75 @@
+{
+  "schema_version": "v13-exact-unchanged-source-partial-representation-replay-protocol-v3",
+  "status": "FROZEN_RESTRICTIVE_FIRST_RELEASE_CURRENT_NATIVE_READING_ONLY",
+  "prototype": true,
+  "authority": "NONE",
+  "human": false,
+  "created_at": "2026-10-15T12:06:24.849Z",
+  "amends": {
+    "path": "qa/v13-representation-guard-and-finite-feature-design-20261015/exact-unchanged-source-replay-protocol-v2.json",
+    "sha256": "38c234c3e094b217e1480b79be541a8b5c9f6c1f16d27fb95c53041522e30dfc",
+    "bytes": 12249
+  },
+  "protocol_tag": "EXACT_UNCHANGED_SOURCE_PREFIX_ROLE_REPLAY_V3_CURRENT_NATIVE_ONLY",
+  "release_scope": "PREFIX_ROLE_INJECTION_ONLY",
+  "decision": "ROOT explicitly restricts the first release. Historical native reuse and the V2/994-bridge designs stay unactivated. Every prepare/verify/gate path rejects PRIOR_SOURCE_ONLY_REUSED_EXACT and every unknown mode.",
+  "allowed_mode": "NEW_CURRENT_NATIVE_ACTUAL_READING_REQUIRED",
+  "unchanged_requirements": [
+    "Exact identical entire original/current raw and normalized text; identical parent/unit IDs, bounds and literal text.",
+    "Authoritative scope derives only from the authenticated original packet row's source ID, parent, fixed focal excerpt and cache lineage. Original bundle fields and complete ordered applicability must match it exactly.",
+    "Complete current production extractionSourceIdentity, ordered methods, runtime and parameters; full affected raw re-extraction comparing every current cache field and hydrated native envelope field.",
+    "Exact original adverse evidence, historical page-index schema, full frozen lossless display hash, complete ordered contiguous codepoint-safe actual pages, canonical dictionary roundtrip to entire bundle and required full projection artifact bindings.",
+    "Trusted canonical reviewer assignments/aliases; independent current reader differs from original reader. Unknown aliases reject.",
+    "All exact issue/source/method/protocol/policy/assignment/live-registry bindings are rechecked before gate use; changed epochs need matching replay.",
+    "Original observed issues stay immutable and UNRESOLVED. Exact-source resolutions establish only prefix/role repair; all other gates persist."
+  ],
+  "mandatory_new_actual_scope": [
+    "Every complete current affected baseline and exact production parent-context literal source input, all applicable units in original order.",
+    "Every complete production source-part native encoding and descriptor; recursive codepoint-safe fragments only on the exact explicit production projection bound, preserving order, all source characters and terminal-zero ownership.",
+    "Full native projections for current focal and all source-part ranges; all native tags, complete literal CSS/metadata, origins including unmarked, ordered joint witnesses/RLE/filter events/repetitions/zero-output ownership retained.",
+    "Every required raw whole trace origin and literal mark start/element-start/end/style/DOM-scope interval; union, expand exactly120 UTF16 characters on either side, clamp and preserve codepoints, then union again. Actual full source text/metadata in those bounded contexts is displayed."
+  ],
+  "machine_only": [
+    "Entire raw, normalized text and hydrated native envelope are authenticated and reproduced, but unrelated whole-contract payloads are not included merely to enlarge the actual reading.",
+    "Complete population navigation-only proof and native-equality experiment do not establish new current reading or clearance and are not an active qualification path."
+  ],
+  "display": {
+    "encoding": "lossless-recursive-shared-object-dictionary-v1",
+    "specification": "Deterministic dictionary of repeated canonical JSON values of size>=80, sorted SHA keys; complete original payload retained. Full canonical roundtrip required. No source evidence omitted.",
+    "page_characters": "From exact immutable owner epoch policy; total response never exceeds9000UTF16 characters and pages split only at codepoint boundaries.",
+    "projection_bounds": {
+      "maxRuns": 10000,
+      "maxCharacters": 1000000,
+      "maxOrigins": 65536
+    },
+    "raw_context_utf16": 120
+  },
+  "authored_review": [
+    "Case-specific independent reason/uncertainty and ordered judgment for every current input; actual observed/read tool reference for every exact bounded page.",
+    "Current input/native-fragment reading and complete required current native/raw component reading are true; entire native envelope reading remains false.",
+    "Raw exposure declares exact actually displayed/read union with SHA per interval. Complete retained raw-character exposure is true if and only if the union covers the entire raw file. A fixed whole-original presentation/adequacy limit never denies actual characters read.",
+    "No historical-native-reuse qualification, inferred actual reading or automatic pass from preparation."
+  ],
+  "claims_all_false": [
+    "human",
+    "whole_parent_adequacy_established",
+    "whole_original_presentation_verified",
+    "new_whole_source_adequacy_established",
+    "context_sufficiency_established",
+    "source_quality_gate_pass",
+    "fresh_audit_pass",
+    "model_token_readiness_established",
+    "model_inference_performed",
+    "transformer_semantic_equivalence_established",
+    "effectiveness_verified",
+    "clean_operative_version_derived"
+  ],
+  "activation": "Actual-run resolution writes remain forbidden until ROOT independent code/test review, real six metadata/preparation compatibility, and explicitly authorized actual independent current component reviews. No new corpus actual opening is authorized by this amendment.",
+  "mutation_tests": [
+    "Reject every historical reuse/unknown mode at prepare/verify/gate.",
+    "Reject old metadata-only/unrelated/incomplete pages and dictionary/projection mismatch, including both retained e8db reproductions.",
+    "Reject smaller bundle focal/parent/source ID/cache lineage or missing/reordered affected unit.",
+    "Reject any current source/producer/native/cache/projection/encoding/raw-context bytes not exactly reproduced.",
+    "Reject incorrect raw-exposure union or false whole-raw exposure, same-reader alias, partial pages, unsupported claims and stale epoch/policy/assignment/method/registry."
+  ]
+}

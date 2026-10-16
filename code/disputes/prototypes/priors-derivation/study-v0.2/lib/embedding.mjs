@@ -4,6 +4,8 @@ import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { mkdir, readFile, writeFile, lstat, link, unlink } from 'node:fs/promises';
 import path from 'node:path';
+import {modelInputIdentity,nativeRepresentationWindow,NATIVE_REPRESENTATION_POLICY} from './representation.mjs';
+import {NATIVE_DECORATION_INPUT_POLICY} from './source-decoration.mjs';
 
 export const PINNED_MODEL = Object.freeze({ repository: 'Xenova/all-MiniLM-L6-v2', revision: '751bff37182d3f1213fa05d7196b954e230abad9', dimensions: 384, max_tokens: 256, dtype: 'fp32', device: 'cpu', pooling: 'mean' });
 const MODEL_ROOT = '/opt/nonverba-tools/priors-derivation-0.1/models';
@@ -53,6 +55,45 @@ export function embeddingWindows(text, countTokens, { maxTokens = 256, overlapWo
     start = Math.max(start + 1, end - Math.min(overlapWords, end - start - 1));
   }
   return windows;
+}
+
+/** Choose boundaries before encoding. Every independently measured model input
+ * carries its own native marks; encoded strings are never subsequently cut. */
+export function nativeEmbeddingWindows(representation,countTokens,{maxTokens=256,overlapWords=16}={}) {
+  integer(maxTokens,8,256,'maxTokens');integer(overlapWords,0,128,'overlapWords');
+  const text=representation?.text;if(typeof text!=='string'||!text.trim())throw new Error('Native representation must contain source text');
+  const words=Array.from(text.matchAll(/\S+/gu),match=>({start:match.index,end:match.index+match[0].length,text:match[0]}));
+  const measured=(start,end)=>{let encoded;try{encoded=nativeRepresentationWindow(representation,{start,end});}catch(error){if(error.code==='NATIVE_DECORATION_PROJECTION_BOUND')return {tokens:Infinity};throw error;}const tokens=countTokens(encoded.text);if(!Number.isSafeInteger(tokens)||tokens<1)throw new Error('Tokenizer returned an invalid count');return {...encoded,tokens};};
+  const characterFallback=()=>{
+    const points=Array.from(text),offsets=[0];for(const value of points)offsets.push(offsets.at(-1)+value.length);
+    const windows=[];let start=0,previousEnd=0;
+    while(start<points.length){let low=start+1,high=Math.min(points.length,start+maxTokens*4),end=start;
+      while(low<=high){const middle=(low+high)>>>1;if(measured(offsets[start],offsets[middle]).tokens<=maxTokens){end=middle;low=middle+1;}else high=middle-1;}
+      if(end===start)throw new Error('A native source codepoint plus complete annotation exceeds tokenizer capacity; source retained as failed');
+      const window=measured(offsets[start],offsets[end]);if(window.tokens>maxTokens)throw new Error('Native character window exceeds measured tokenizer capacity');
+      windows.push({...window,source_character_start:start,source_character_end:end,source_utf16_start:offsets[start],source_utf16_end:offsets[end],weight:end-Math.max(start,previousEnd),weight_unit:'new_source_codepoints',segmentation:'native_cjk_codepoint_boundaries_before_encoding'});
+      previousEnd=end;if(end===points.length)break;start=Math.max(start+1,end-Math.min(overlapWords,end-start-1));
+    }return windows;
+  };
+  const windows=[];let start=0,previousEnd=0;
+  while(start<words.length){let low=start+1,high=words.length,end=start;
+    const left=start===0?0:words[start].start,right=index=>index===words.length?text.length:words[index].start;
+    while(low<=high){const middle=(low+high)>>>1;if(measured(left,right(middle)).tokens<=maxTokens){end=middle;low=middle+1;}else high=middle-1;}
+    if(end===start){if(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(words[start].text))return characterFallback();throw new Error('A complete source word plus native annotation exceeds tokenizer capacity; source retained as failed rather than truncated');}
+    const window=measured(left,right(end));if(window.tokens>maxTokens)throw new Error('Native word window exceeds measured tokenizer capacity');
+    windows.push({...window,word_start:start,word_end:end,source_utf16_start:left,source_utf16_end:right(end),weight:end-Math.max(start,previousEnd),weight_unit:'new_source_words',segmentation:'native_complete_words_before_encoding'});
+    previousEnd=end;if(end===words.length)break;start=Math.max(start+1,end-Math.min(overlapWords,end-start-1));
+  }
+  return windows;
+}
+
+/** Source-only readiness and inference share this exact planner. The caller
+ * binds its token counter to the frozen model artifacts, never a claimed count. */
+export function prepareEmbeddingInput(unit,countTokens,{maxTokens=256,overlapWords=16,maxWords=4096}={}) {
+  integer(maxWords,1,4096,'maxWords');const identity=modelInputIdentity(unit),text=identity.text;
+  if((text.match(/\S+/gu)??[]).length>maxWords)throw new Error('Unit exceeds the bounded complete-word input limit');
+  const windows=unit.native_input?nativeEmbeddingWindows(unit.native_input,countTokens,{maxTokens,overlapWords}):embeddingWindows(text,countTokens,{maxTokens,overlapWords});
+  return {schema:'prepared-model-source-windows-v1',policy:{native_representation:NATIVE_REPRESENTATION_POLICY,native_input:NATIVE_DECORATION_INPUT_POLICY,max_tokens:maxTokens,overlap_words:overlapWords,max_source_words:maxWords,encoded_strings_truncated:false},input:{input_sha256:identity.input_sha256,source_text_sha256:sha256(text),native_evidence_status:identity.native_evidence_status,...(identity.native_representation?{native_representation:identity.native_representation}:{}),windows:windows.map(({text:ignored,...metadata})=>metadata)},windows};
 }
 
 // Whitespace is not a word boundary in many CJK passages. Preserve literal
@@ -130,18 +171,40 @@ async function productionRuntime(config) {
     extractBatch: async texts => (await extractor(texts, { pooling: 'mean', normalize: true, padding: true, truncation: false })).tolist(), dispose: () => extractor.dispose() };
 }
 
-/** Test runtimes must be explicitly injected; production never fetches model files. */
-export async function createBatchEmbedder(inputConfig = {}, { log = () => {}, runtime = null } = {}) {
+/** Exact existing artifacts and tokenizer only: no ONNX session, fitting,
+ * model inference or remote access is needed for mechanical input readiness. */
+export async function createPinnedTokenCounter(inputConfig={}, {manifest=null}={}) {
+  const config={...PINNED_MODEL,...inputConfig};integer(config.max_tokens,8,256,'max_tokens');
+  const model=manifest?await verifyArtifactModel(config,manifest):await verifyExistingModel(config);
+  const {AutoTokenizer,env}=await import('@huggingface/transformers');
+  env.allowRemoteModels=false;env.allowLocalModels=true;env.useFSCache=false;env.useBrowserCache=false;env.useCustomCache=false;
+  const tokenizer=await AutoTokenizer.from_pretrained(model.directory,{local_files_only:true});
+  if(Number.isFinite(tokenizer.model_max_length)&&config.max_tokens>tokenizer.model_max_length)throw new Error('Declared token limit exceeds the pinned tokenizer capacity');
+  const policy={version:'PINNED_EXISTING_TOKENIZER_ONLY_NO_INFERENCE_V1',model_repository:config.repository,model_revision:config.revision,verified_file_set_sha256:model.verified_file_set_sha256,special_tokens:true,truncation:false,runtime:'@huggingface/transformers@3.8.1',downloads_attempted:0,onnx_session_created:false,model_inference:false};
+  return {model,policy,policy_sha256:digest(policy),tokenCount:text=>{if(typeof text!=='string'||text.length>1024**2)throw new Error('Tokenizer readiness input exceeds its explicit text bound');return tokenizer.encode(text,{add_special_tokens:true}).length;}};
+}
+
+/** Pure shared policy identity. Read-only replay needs no inference session. */
+export function embeddingWindowPolicy(inputConfig={},model={}, {syntheticRuntime=false}={}){
   const config = { ...PINNED_MODEL, max_units: 500, max_words_per_unit: 4096, token_budget: 8192, max_batch_windows: 32, bucket_width: 32, overlap_words: 16, intra_op_threads: 2, ...inputConfig };
   integer(config.max_units, 1, 500, 'max_units'); integer(config.dimensions, 1, 2048, 'dimensions'); integer(config.max_tokens, 8, 256, 'max_tokens'); integer(config.intra_op_threads, 1, 32, 'intra_op_threads');
   integer(config.max_words_per_unit, 1, 4096, 'max_words_per_unit'); integer(config.token_budget, 8, 1048576, 'token_budget'); integer(config.max_batch_windows, 1, 512, 'max_batch_windows'); integer(config.bucket_width, 1, 256, 'bucket_width'); integer(config.overlap_words, 0, 128, 'overlap_words');
+  if(typeof syntheticRuntime!=='boolean')throw new Error('Explicit policy runtime scope required');
+  return { version: 'complete-source-ranges-native-window-encoding-v4', native_representation_policy:NATIVE_REPRESENTATION_POLICY,native_input_policy:NATIVE_DECORATION_INPUT_POLICY,native_window_order:'unencoded_source_boundaries_then_complete_native_encoding_then_actual_tokenizer_recount; no_encoded_string_truncation',legacy_native_evidence:'LEGACY_NATIVE_EVIDENCE_UNAVAILABLE', max_tokens: config.max_tokens, overlap_words: config.overlap_words, token_budget: config.token_budget, max_batch_windows: config.max_batch_windows, bucket_width: config.bucket_width,
+    padding_budget: 'longest_measured_input_times_window_count', window_weight: 'new_source_words; new_source_codepoints for overlong CJK whitespace segments', cjk_fallback:'literal source slices, codepoint boundaries, UTF16 offsets, overlap measured in codepoints; language-model suitability remains unvalidated', aggregation: 'Float64 weighted window means then Float32 L2 normalization', pooling: config.pooling, dtype: config.dtype, device: config.device, intra_op_threads: config.intra_op_threads, inter_op_threads: 1,
+    dimensions: config.dimensions, max_words_per_unit: config.max_words_per_unit, normalization: 'window and final L2 normalization',
+    runtime: syntheticRuntime ? 'DECLARED_SYNTHETIC_INJECTED_RUNTIME' : '@huggingface/transformers@3.8.1', synthetic_runtime_id: syntheticRuntime ? model?.synthetic_runtime_id || null : null, model_files_sha256: model?.verified_file_set_sha256 || model?.file_set_sha256 || null };
+}
+
+/** Test runtimes must be explicitly injected; production never fetches model files. */
+export async function createBatchEmbedder(inputConfig = {}, { log = () => {}, runtime = null } = {}) {
+  const config = { ...PINNED_MODEL, max_units: 500, max_words_per_unit: 4096, token_budget: 8192, max_batch_windows: 32, bucket_width: 32, overlap_words: 16, intra_op_threads: 2, ...inputConfig };
+  // Validate before opening the model, as well as constructing its exact policy.
+  embeddingWindowPolicy(config);
   const engine = runtime || await productionRuntime(config);
   const syntheticRuntime = !!runtime && !engine[verifiedArtifactRuntime];
   if (typeof engine.tokenCount !== 'function' || typeof engine.extractBatch !== 'function') throw new Error('Embedding runtime must provide tokenCount and extractBatch.');
-  const policy = { version: 'complete-tokenized-word-or-cjk-character-overlap-v3', max_tokens: config.max_tokens, overlap_words: config.overlap_words, token_budget: config.token_budget, max_batch_windows: config.max_batch_windows, bucket_width: config.bucket_width,
-    padding_budget: 'longest_measured_input_times_window_count', window_weight: 'new_source_words; new_source_codepoints for overlong CJK whitespace segments', cjk_fallback:'literal source slices, codepoint boundaries, UTF16 offsets, overlap measured in codepoints; language-model suitability remains unvalidated', aggregation: 'Float64 weighted window means then Float32 L2 normalization', pooling: config.pooling, dtype: config.dtype, device: config.device, intra_op_threads: config.intra_op_threads, inter_op_threads: 1,
-    dimensions: config.dimensions, max_words_per_unit: config.max_words_per_unit, normalization: 'window and final L2 normalization',
-    runtime: syntheticRuntime ? 'DECLARED_SYNTHETIC_INJECTED_RUNTIME' : '@huggingface/transformers@3.8.1', synthetic_runtime_id: syntheticRuntime ? engine.model?.synthetic_runtime_id || null : null, model_files_sha256: engine.model?.verified_file_set_sha256 || engine.model?.file_set_sha256 || null };
+  const policy=embeddingWindowPolicy(config,engine.model,{syntheticRuntime});
   const policyHash = digest(policy); let busy = false; let disposed = false;
   const cacheDir = config.cache_dir ? path.resolve(config.cache_dir) : null;
   if (cacheDir && !path.isAbsolute(config.cache_dir)) throw new Error('cache_dir must be an absolute managed-container path.');
@@ -188,14 +251,14 @@ export async function createBatchEmbedder(inputConfig = {}, { log = () => {}, ru
       const groups = new Map(); const inputs = new Array(units.length); const vectors = new Array(units.length); const windows = [];
       const stats = { enabled: !!cacheDir, hits: 0, unique_inputs_embedded: 0, repeated_inputs_reused: 0, entries_written: 0 };
       for (const [index, unit] of units.entries()) {
-        abort(signal); const text = unit.contextual_text ?? unit.embedding_text ?? unit.text; if (typeof text !== 'string') throw new Error(`Unit ${ids[index]} has no embedding text.`);
+        abort(signal); const identity=modelInputIdentity(unit),text=identity.text;
         if ((text.match(/\S+/gu) || []).length > config.max_words_per_unit) throw new Error(`Unit ${ids[index]} exceeds the bounded complete-word input limit.`);
-        const inputHash = sha256(text); const key = embeddingCacheKey(inputHash, config.revision, policyHash);
+        const inputHash = identity.input_sha256; const key = embeddingCacheKey(inputHash, config.revision, policyHash);
         if (groups.has(key)) { groups.get(key).indices.push(index); stats.repeated_inputs_reused++; continue; }
         const cached = await readCache(key, inputHash);
-        const sourceWindows = cached ? null : embeddingWindows(text, engine.tokenCount, { maxTokens: config.max_tokens, overlapWords: config.overlap_words });
-        const input = cached?.input || { input_sha256: inputHash, cache_key: key, window_policy_sha256: policyHash,
-          windows: sourceWindows.map(({ text: ignored, ...metadata }) => metadata) };
+        if(cached&&(cached.input.native_evidence_status!==identity.native_evidence_status||digest(cached.input.native_representation??null)!==digest(identity.native_representation??null)))throw new Error('Cached native input evidence differs from current source');
+        const prepared=cached?null:prepareEmbeddingInput(unit,engine.tokenCount,{maxTokens:config.max_tokens,overlapWords:config.overlap_words,maxWords:config.max_words_per_unit}),sourceWindows=prepared?.windows;
+        const input = cached?.input || { ...prepared.input, cache_key: key, window_policy_sha256: policyHash };
         const group = { key, inputHash, input, indices: [index], vector: cached?.vector || null, sum: cached ? null : new Float64Array(config.dimensions), complete: 0, totalWeight: input.windows.reduce((sum, window) => sum + window.weight, 0) };
         groups.set(key, group);
         if (cached) stats.hits++; else {
@@ -232,8 +295,7 @@ export async function createBatchEmbedder(inputConfig = {}, { log = () => {}, ru
     dispose: async () => { if (busy) throw new Error('Cannot dispose an active embedding runtime.'); if (!disposed) { disposed = true; await engine.dispose?.(); } } };
 }
 
-/** Explicit comparison artifact set; baseline loading above remains pinned independently. */
-export async function createArtifactBatchEmbedder(config, manifest, options={}) {
+async function verifyArtifactModel(config,manifest) {
   if(process.platform!=='linux'||process.env.NONVERBA_CONTAINER!=='1')throw new Error('Comparison inference requires the managed Linux container.');
   const base='/opt/nonverba-tools/priors-derivation-0.2/models';
   const directory=path.resolve(base,config.repository,config.revision);
@@ -241,7 +303,12 @@ export async function createArtifactBatchEmbedder(config, manifest, options={}) 
   let ancestor=directory;while(ancestor!=='/'){const info=await lstat(ancestor);if(info.isSymbolicLink()||!info.isDirectory())throw new Error('Linked model directory rejected.');ancestor=path.dirname(ancestor);}
   const files=[];
   for(const name of Object.keys(EXPECTED_FILES)) {const declared=manifest.files?.find(item=>item.path===name);if(!declared||!/^[a-f0-9]{64}$/.test(declared.sha256))throw new Error('Missing comparison model file binding.');const file=path.join(directory,name);if(await hashFile(file)!==declared.sha256||(await lstat(file)).size!==declared.bytes)throw new Error(`Comparison artifact changed: ${name}`);files.push(declared);}
-  const model={...manifest,files,verified_file_set_sha256:digest(files),verification_status:'VERIFIED_EXPLICIT_COMPARISON_ARTIFACTS',downloads_attempted:0,execution_attested:false};
+  return {...manifest,files,verified_file_set_sha256:digest(files),verification_status:'VERIFIED_EXPLICIT_COMPARISON_ARTIFACTS',downloads_attempted:0,execution_attested:false};
+}
+
+/** Explicit comparison artifact set; baseline loading above remains pinned independently. */
+export async function createArtifactBatchEmbedder(config, manifest, options={}) {
+  const model=await verifyArtifactModel(config,manifest),directory=model.directory;
   const {pipeline,env}=await import('@huggingface/transformers');env.allowRemoteModels=false;env.allowLocalModels=true;env.useFSCache=false;env.useBrowserCache=false;env.useCustomCache=false;
   const extractor=await pipeline('feature-extraction',directory,{device:'cpu',dtype:'fp32',session_options:{intraOpNumThreads:config.intra_op_threads??2,interOpNumThreads:1}});
   if(Number.isFinite(extractor.tokenizer.model_max_length)&&config.max_tokens>extractor.tokenizer.model_max_length){await extractor.dispose();throw new Error('Comparison token limit exceeds tokenizer.');}

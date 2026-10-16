@@ -3,35 +3,79 @@
   "id": "assignments",
   "number": 3,
   "title": "Assignments and participant experience",
-  "summary": "Connect proven local protocol and map components into an understandable, authorized participant journey.",
-  "updatedAt": "2026-10-14",
+  "summary": "Completed local protocol, terminal, registration and map checkpoints, with proposed Goals for a connected Requester/Operator journey. Future scope remains to be agreed; the local results establish no deployed participant service.",
+  "updatedAt": "2026-10-16",
   "goals": [
     {
       "id": "assignments-contract-consent-goal",
-      "title": "Signed Assignment prototype",
-      "description": "The bounded Protocol-2 implementation and tested local signing/verification behavior.",
+      "title": "Signed Assignment and exact local consent",
+      "description": "The bounded protocol-2 core and guided terminal adapter support synthetic signing, completion and independent inspection. They establish neither participant identity nor a connected marketplace, operational readiness or payment service.",
       "milestones": [
         {
           "id": "assignments-protocol-two",
           "title": "Protocol-2 signed Assignment prototype",
-          "description": "Package 0.2.1 supplies strict versioned records, pinned-role verification, exact financial grants, immutable terms and local signing/import/export workflows. The 28 September milestone and later checks cover synthetic protocol behavior, not real-money launch readiness.",
+          "description": "Package 0.2.1 supplies versioned signed records, independently pinned role keys, immutable terms, exact financial unit grants, scoped reversals, amendment cutover and encrypted local signing/import/export. The 28 September core checkpoint records 152 native tests and 21 native/WASM parity cases; the 2 October terminology check records 176 Assignment tests plus the separately enabled signing interoperability test. These are bounded synthetic protocol results, not proof of physical performance, complete history, trusted identity or real-money launch readiness.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-09-28",
           "acceptance": [
-            "The tested Protocol-2 cases enforce exact signed terms, role authority and admitted grants/revisions.",
-            "Covered correction cases preserve established obligations and expose unresolved alternatives.",
-            "Local signing/export and native/WASM parity checks cover the bounded prototype."
+            "The Requester's signed Request accepts embedded platform terms; the Operator's signed quote binds their exact digest. A Contract forms only with valid R/O/M signatures over the same exact Contract under independently supplied trust.",
+            "Covered grant, reversal and amendment cases preserve established obligations, count overlapping units once and expose conditional alternatives separately. Authenticated legacy records retain an unresolved aggregate rather than an invented zero balance.",
+            "Recorded local signing/storage/export, adversarial regression and native/WASM parity checks pass for their stated synthetic cases; no payment transfer or physical-truth result is inferred."
           ],
           "evidence": [
             {
-              "label": "Protocol readiness and 28 September checks",
+              "label": "Core readiness, historical checks and current limits",
               "path": "docs/requests/READINESS.md"
             },
             {
-              "label": "Contract specification",
+              "label": "Contract formation, exact terms and supported authority",
               "path": "docs/requests/CONTRACT.md"
+            },
+            {
+              "label": "Implemented Request, quote and three-role Contract verification",
+              "path": "code/requests/src/contract.rs"
+            },
+            {
+              "label": "Synthetic protocol regression fixtures and provenance",
+              "path": "code/requests/tests/fixtures/nv2-01/README.md"
+            }
+          ]
+        },
+        {
+          "id": "assignments-terminal-consent",
+          "title": "Guided terminal signing, completion and inspection prototype",
+          "description": "Adapter 1 prepares synthetic Request/quote/Contract drafts, retains exact signing reviews and exchanges independently verifiable records using participant-owned logical vault contexts. AN-2 explains consequential authorizations from the exact object and verified context. The 28 September integration record reports 168 native tests and 27 parity cases; the later AN-2 pass reports 24 focused tests, without repeating the full core/parity run. Separate folders are not OS isolation. Participant and Contract notes are explanatory drafts; the participant walkthrough remains deferred, with no comprehension result or adopted launch terms.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-09-28",
+          "acceptance": [
+            "Authorization displays the retained object, exact digest, signing context and independently supplied trust, requires the full digest before using the local vault, and rejects changed reviews. Blank confirmation cancels without signing; partial formation remains incomplete.",
+            "Completion claims and message/file acknowledgments remain distinct from Requester milestone acceptance. Consequence review identifies the exact Contract, milestone and compensation, avoids charging an established obligation twice, and separates evidence availability/integrity from financial authorization.",
+            "Payee-receipt review separates stated amount, exact allocated units, prior overlap and unallocated excess. Scoped R/O releases preserve unrelated claims and M's rights. Readiness is labelled as protocol record checks with operational readiness unassessed; receipts neither move funds nor prove bank settlement.",
+            "Recorded synthetic terminal workflows cover signing, completion, readable core inspection, encrypted retention/merge and explicit export/exchange. Active obligations, conditional alternatives, disputes, narrative due conditions and unknown history remain separately visible."
+          ],
+          "evidence": [
+            {
+              "label": "Terminal workflow, validation and exchange limits",
+              "path": "docs/requests/INTEGRATION.md"
+            },
+            {
+              "label": "AN-2 consequential signing display and executed-check record",
+              "path": "docs/notes/assignments/CONTRACT_NOTES.md#consequential-signing-display"
+            },
+            {
+              "label": "Participant explanation and deferred walkthrough",
+              "path": "docs/notes/assignments/PARTICIPANT_NOTES.md"
+            },
+            {
+              "label": "Exact-object completion, receipt and release review implementation",
+              "path": "code/requests/src/bin/nonverba-workflow/review.rs"
+            },
+            {
+              "label": "Synthetic CLI lifecycle and consent regression assertions",
+              "path": "code/requests/tests/workflow.rs"
             }
           ]
         }
@@ -39,22 +83,58 @@
     },
     {
       "id": "assignments-participant-journey-goal",
-      "title": "Shared map inspection",
-      "description": "The reusable map component and its recorded geographic-policy and browser checks.",
+      "title": "Local registration and shared map inspection",
+      "description": "Reusable browser components for Requesters and Operators. They do not connect accounts, discovery, Request/quote/Contract review, evidence collection, completion and notifications into one participant product. The future Goals below propose that integration; their Milestone breakdowns remain undefined.",
       "milestones": [
+        {
+          "id": "assignments-registration-inspection",
+          "title": "Isolated Requester and Operator registration review",
+          "description": "The 9 October component prepares a reviewed local registration record through shared Rust policy and a reusable browser workflow. Requesters have five steps; Operators have a sixth, separately consented local face-reference step under a synthetic account binding. Personal form data stays in page memory; deliberately enrolled encrypted feature references have their own device-local retention/deletion lifecycle. No account, verified identity or qualification, published profile, cross-device access or signing authority is created. Recorded browser checks use synthetic inputs, with no physical-participant result.",
+          "status": "done",
+          "updatedAt": "2026-10-16",
+          "completedAt": "2026-10-09",
+          "acceptance": [
+            "Both roles can review supplied personal details, optional private accessibility/support notes, self-reported certifications and sharing choices. Public profile candidates allow only explicitly selected fields and are never published by this workflow.",
+            "Local preparation requires deliberate confirmation of the current reviewed revision. Edits, changed/deleted Operator references and reset invalidate prior review/results; stale asynchronous replies cannot restore discarded private data or preparation.",
+            "Requesters instantiate no face workflow. The selected Operator step requires separately reviewed local enrollment; reference metadata remains separate from the public candidate and proves neither legal identity, liveness nor trusted authentication.",
+            "The 9 October validation records passing Rust policy, adapter and compiled-WASM browser scenarios for role separation, privacy defaults, safe review, invalidation and reset/reload. These results establish local component behavior only."
+          ],
+          "evidence": [
+            {
+              "label": "Registration journey, storage distinctions and missing account services",
+              "path": "docs/development/REGISTRATION_PIPELINES.md"
+            },
+            {
+              "label": "9 October registration validation",
+              "path": "docs/development/VALIDATION.md#isolated-registration-pipelines--9-october-2026"
+            },
+            {
+              "label": "9 October selected Operator step and synthetic browser validation",
+              "path": "docs/development/VALIDATION.md#selected-operator-face-components--9-october-2026"
+            },
+            {
+              "label": "Implemented review freshness and late-reply boundaries",
+              "path": "web/src/registration-workflow.js"
+            },
+            {
+              "label": "Shared registration policy and explicit no-account results",
+              "path": "code/crates/nonverba-core/src/registration.rs"
+            }
+          ]
+        },
         {
           "id": "assignments-map-component",
           "title": "Isolated shared map inspection component",
-          "description": "The 10 October shared map checkpoint covers geographic/deployment inspection and browser behavior. Its snapshot route collections are isolated from caller mutation across construction, clear, access and catalog resets. The component remains a local inspection surface; it establishes no deployed participant discovery or task marketplace.",
+          "description": "The 10 October checkpoint records 14 component tests and eight Chromium scenarios for a reusable Canvas map, geographic/access display policy and bounded overlay/tile lifecycle. The bundled Norway mainland/coastal administrative geometry is display coverage, not an operational boundary or a deployed service. Current controller snapshots isolate route and position collections from caller mutation, including empty/reset states. Browser tile checks use synthetic responses; the component supplies no account discovery, tracking feed, routing engine, deployed curated tiles or Android map route.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-10",
           "acceptance": [
-            "Shared map behavior and geographic policy are explicit and inspectable.",
-            "Controller snapshots isolate route collections from caller mutation, including empty/reset states.",
-            "Browser checks cover the documented component and narrow layouts.",
-            "Deployment/discovery fixtures do not imply a live service."
+            "Requester display follows active catalog entries; Operator display additionally requires explicit country grants. Registration's self-reported country grants no access, and client filtering supplies no server authorization.",
+            "Controller snapshots isolate route and position collections from caller mutation across construction, clear, access changes and catalog replacement; overlays are bounded and expire or clear under the documented policy.",
+            "Recorded browser checks cover deliberate tile opt-in, masking, pan/zoom, attribution/Referer, cache reuse, cancellation/teardown, strict CSP and narrow layouts using synthetic tile responses.",
+            "The initial Norway display catalog, synthetic positions/routes and browser-only street preview remain explicitly separate from deployed discovery, continuous tracking, navigation and physical-device validation."
           ],
           "evidence": [
             {
@@ -64,10 +144,66 @@
             {
               "label": "10 October map validation",
               "path": "docs/development/VALIDATION.md#shared-map-component--10-october-2026"
+            },
+            {
+              "label": "Current overlay lifecycle and snapshot isolation implementation",
+              "path": "web/src/map-controller.js"
+            },
+            {
+              "label": "Map policy and snapshot isolation regression assertions",
+              "path": "code/test/map-component-tests.mjs"
             }
           ]
         }
       ]
+    },
+    {
+      "id": "assignments-account-onboarding-goal",
+      "title": "Registration, profile consent and account handoff",
+      "description": "Proposed future Goal: turn the local registration review into a clear account journey, showing supplied details, verification results and task eligibility separately, with explicit preview and consent before profile publication. Decide which checks each role needs, how participants correct details and recover an interrupted submission, and what sensitive information a named counterparty may receive. Assignments defines task-specific qualification requirements; Identity defines what certification, identity, authentication and device/key decisions establish, including revocation. Server side services supplies durable enrollment and enforcement of the selected rules. This Goal covers participant-facing composition, without treating a prepared form, self-reported qualification or face reference as authorization.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-discovery-map-goal",
+      "title": "Authorized discovery and map experience",
+      "description": "Proposed future Goal: compose profiles, discovery and the reusable map into an understandable way to find supported work and counterparties. Decide what participants can discover, how availability is expressed, which actively supported countries appear, and whether live positions or routes belong in the initial journey. Country grants, disclosure rules and tracking consent must be explicit; viewing a map grants no tracking permission, and existing profiles must remain discoverable without fresh sensing during hold or clock-out. Server side services supplies authorized discovery/data and any selected tile or routing services; Identity supplies access and work-privacy controls, while Governance resolves actual deployment scope. The Norway inspection catalog establishes no deployment.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-request-quote-journey-goal",
+      "title": "Participant Request and quote preparation",
+      "description": "Proposed future Goal: provide participant interfaces for describing work, exclusions, prerequisites, safety/stop conditions, completion criteria and evidence expectations, then preparing and reviewing the Operator's exact quote. Preserve the distinction between publishing a Request, accepting platform terms, receiving a quote and forming an Assignment; scope changes need a fresh supported quote or amendment. Decide the first work categories and how unclear criteria or narrative payment conditions are clarified. Present any separately adopted qualification/coverage admission rule before formation: Identity defines assurance, Material incidents and insurance defines coverage-verification meaning, Governance resolves pilot/authority decisions, and Server side services enforces selected rules. Missing coverage cannot erase an already formed Contract. If collective remuneration is adopted, show its effective policy version and calculation without substituting it for signed consent; the union Hero owns that policy and calculation. Requester billing remains separately unselected.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-participant-contract-consent-goal",
+      "title": "Participant Contract review, signing and retention",
+      "description": "Proposed future Goal: Hero 3 defines participant actions, exact consent and formation meaning under the first-version one-Assignment-per-Request rule. Compose exact Contract review with visible principal/key authority, compensation, expenses, destinations, service terms and outstanding signatures. Distinguish platform assent, base formation, additional consent, certificate delivery and participant retention; storing or delivering a record supplies no signature or formation effect. Lookup/retry must preserve the original action and context rather than create another signature or formation attempt. Hero 8 defines operation/conflict/lookup semantics; Hero 11 implements selected authoritative coordination and record transactions; Hero 10 implements Android presentation and local storage; Hero 2 defines principal/key/delegation authority. Global formation concurrency, registry authority, replay scope and certificate custody remain unresolved. Governance must resolve terms adoption and practical start/stop accountability; protocol readiness grants no physical-work permission. Consequential agent/MCP permissions need separate domain authorization beyond login or evidence-workflow access.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-evidence-completion-journey-goal",
+      "title": "Work evidence and exact completion review",
+      "description": "Proposed future Goal: connect the agreed Assignment to deliberate collection, inspectable failed attempts, the Operator's completion claim and the Requester's exact acknowledgment. Hero 3 defines those actions and their review meaning; delivery, verification and evidence-ledger acceptance remain separate from completion, compensation, due conditions, payee receipts and balances. Define participant consent against the shared grant's principal, device, operation, authoritative work-state revision, purpose, sensors, recipients and validity; authentication or reconnect grants no work resumption. Hero 2 supplies authority/privacy policy, Hero 8 grant and operation semantics, Hero 11 selected enforcement/records, and Hero 10 native controls. Hero 1 supplies supported profiles and request-bound evidence/quality/failure outcomes; calibrated requirements must be fixed before collection. Distinguish complete, partial/failed, unavailable/unassessable and signed/unsigned/absent reports without inferring fault or compensation. Recipients, retention and disputed-material review remain decisions. Completion acknowledgment authorizes no union ballot or payment: Hero 6 defines eligible work/time and ballot rules, while settlement authority and provider integration remain separate.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-changes-dispute-handoffs-goal",
+      "title": "Changes, stopping and dispute handoffs",
+      "description": "Proposed future Goal: provide participant paths for clarification, supported all-party amendments, interruption, stopping and disagreement while preserving signed history and accrued rights. Hero 3 presents exact case/proposal identity, remaining claims/balances and authenticated outcomes; Hero 5 defines permitted consequences, consent and closure, including cancellation, partial completion and disputed scope/time. Use shared evidence/case interfaces with dispute and material-incident views, rather than duplicate case systems; Hero 8 supplies workflow semantics and Hero 11 selected records/exchange. Distinguish work changes, releases, payment, case closure and safe resumption; revising a proposal does not withdraw an earlier signature, and silence or interruption implies no waiver. Hero 7 defines incident classification, preservation, disclosure and assistance; urgent help and evidence preservation must not await final classification. A notice establishes neither fault nor coverage benefits. Governance supplies reviewed terms and institutional accountability. No remedy, staffed incident service or analysis-based financial authority is selected here.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-notifications-recovery-goal",
+      "title": "Participant notifications and workflow recovery",
+      "description": "Proposed future Goal: make pending requests, signatures, evidence submissions and completion reviews understandable after departure, connectivity loss or authorized-device return. Hero 3 defines participant action/status meaning; Hero 8 defines retry, conflict, cancellation and recovery semantics, Hero 11 selected delivery/persistence, Hero 2 device/session and work-privacy rules, and Hero 10 native behavior/presentation. Distinguish notification delivery, reading, sufficient dispute notice, acknowledgment and consent; reconcile silent clock-out/sign-out with Hero 5's notice requirements without resuming sensing. Hold retains normal notification handling. Expose cancellation acknowledgment separately from confirmed shutdown, failed cleanup or unknown release; an unreachable device cannot be shown as stopped merely because a request or lease ended. Preserve the original action/context through lookup and retry. Notifications, authentication or reconnect must not resume work; expiry and offline queues imply neither waiver nor remote acceptance. Chosen offline powers, notice policy, status schemas and shutdown evidence remain unresolved.",
+      "milestones": []
+    },
+    {
+      "id": "assignments-participant-validation-goal",
+      "title": "Accessible participant comprehension and journey validation",
+      "description": "Proposed future Goal: assess whether intended Requesters and Operators understand and complete the selected connected journey, including optional accommodations, private/public information, consequential consent, evidence limits and completion/payment distinctions. Hero 3 defines cross-client content, action meaning and participant comprehension; APK implements the agreed phone journey and validates Android navigation/re-entry, accessibility mechanics, native permissions and physical behavior. Include selected dispute, incident or union handoffs only when the proposed pilot needs them. Define the first slice, audience, clients, walkthrough scope and prospective criteria before evaluation; the earlier optional walkthrough is still deferred. Governance supplies proposed audience/terms and adoption decisions. Keep synthetic checks, human comprehension, physical results and launch approval separate; no evaluation schedule or readiness claim is established.",
+      "milestones": []
     }
   ]
 }

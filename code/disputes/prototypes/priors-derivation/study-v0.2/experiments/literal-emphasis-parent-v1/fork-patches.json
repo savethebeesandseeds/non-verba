@@ -1,0 +1,97 @@
+{
+  "schema": "prototype-explicit-fork-patches-v1",
+  "native": {
+    "sha256": "a857d39a2da390175a1f817b4d2704ed1adbacff84ba6a27fefff7aee70f77fd",
+    "patches": [
+      {
+        "old": "'NATIVE_SOURCE_DECORATION_COLLECTOR_ORIGIN_V4'",
+        "new": "'PROTOTYPE_LITERAL_EMPHASIS_NATIVE_TRACE_V1_UNADOPTED'"
+      },
+      {
+        "old": "'NATIVE_MARKS_COMPACT_PER_EXPLICIT_NORMALIZED_WINDOW_V4'",
+        "new": "'PROTOTYPE_RICH_LITERAL_EMPHASIS_WINDOW_V1_UNADOPTED'"
+      },
+      {
+        "old": "const NATIVE = new Set(['strike','s','del','ins','u']);",
+        "new": "const NATIVE = new Set(['strike','s','del','ins','u','b','strong','i','em']);"
+      },
+      {
+        "old": "['font','font-family','font-size','font-style','font-weight','font-variant'",
+        "new": "['font-family','font-size','font-variant'"
+      },
+      {
+        "old": "  if(NATIVE.has(tag))return 'NATIVE_MARK';",
+        "new": "  if(NATIVE.has(tag))return 'NATIVE_MARK';\n  if(parsed.declarations.some(d=>/^(?:font|font-weight|font-style)$/u.test(d.property??'')))return 'LITERAL_EMPHASIS_DECLARATION_EFFECT_UNVERIFIED';"
+      }
+    ],
+    "upstream": "upstream/source-decoration.original.mjs"
+  },
+  "authority": "NONE",
+  "status": "PROTOTYPE_UNADOPTED_SYNTHETIC_ONLY",
+  "codec": {
+    "sha256": "6b4885f4f58ce0ff005562bbf1b49bc6d9c02ec89447a157f478f4dba75647f5",
+    "patches": [
+      {
+        "old": "QA_INFORMATION_REDUCED_FINITE_NATIVE_FEATURES_LAYOUT_UNKNOWN_V3",
+        "new": "PROTOTYPE_UNADOPTED_INFORMATION_REDUCED_LITERAL_EMPHASIS_9_V1"
+      },
+      {
+        "old": "['strike','s','del','ins','u']",
+        "new": "['strike','s','del','ins','u','b','strong','i','em']"
+      },
+      {
+        "old": "CSS=32,JOINT=64,ZERO=128,LAYOUT=256",
+        "new": "CSS=512,JOINT=1024,ZERO=2048,LAYOUT=4096"
+      },
+      {
+        "old": "unavailable_tag_features:['b','strong','i','em','font']",
+        "new": "unavailable_tag_features:['font']"
+      },
+      {
+        "old": "mask<256&&(!(mask&JOINT)||!(mask&31))",
+        "new": "mask<4096&&(!(mask&JOINT)||!(mask&511))"
+      },
+      {
+        "old": "deriveFiniteV3",
+        "new": "deriveFiniteNine"
+      },
+      {
+        "old": "export function prepareFiniteWindows(input,tokenCounter,{maxTokens=256}={}){\n  if(!Number.isSafeInteger(maxTokens)||maxTokens<8||maxTokens>256||typeof tokenCounter?.tokenCount!=='function'||!/^[a-f0-9]{64}$/u.test(tokenCounter.policy_sha256??''))fail('Verified pinned tokenizer and bounded token capacity required');\n  const text=input.normalizedText.slice(input.start,input.end),words=[...text.matchAll(/\\S+/gu)],wordCuts=[0,...words.slice(1).map(m=>m.index),text.length],pointCuts=[0];for(const c of text)pointCuts.push(pointCuts.at(-1)+c.length);\n  const measured=(a,b)=>{let window;try{window=input.encodeWindow({start:input.start+a,end:input.start+b,includeEndZeroWidth:b===text.length});}catch(error){if(error.code==='NATIVE_DECORATION_PROJECTION_BOUND')return {tokens:Infinity};throw error;}const tokens=tokenCounter.tokenCount(window.text);if(!Number.isSafeInteger(tokens)||tokens<1)fail('Pinned tokenizer returned invalid count');return {...window,tokens};};\n  const plan=(cuts,mode)=>{const windows=[];let i=0;while(i<cuts.length-1){let lo=i+1,hi=cuts.length-1,best=-1;while(lo<=hi){const mid=(lo+hi)>>>1;if(measured(cuts[i],cuts[mid]).tokens<=maxTokens){best=mid;lo=mid+1;}else hi=mid-1;}if(best<0)return null;const w=measured(cuts[i],cuts[best]);if(w.tokens>maxTokens)fail('Measured finite window exceeds token capacity');windows.push({...w,segmentation:mode,tokenizer_policy_sha256:tokenCounter.policy_sha256});if(windows.length>policy.maximum_windows)fail('Retained window count bound exceeded');i=best;}return windows;};\n  const normal=words.length?plan(wordCuts,'COMPLETE_SOURCE_WORDS'):null,windows=normal??plan(pointCuts,'ALL_LANGUAGE_CODEPOINT_FALLBACK');\n  if(!windows)throw Object.assign(new Error('A literal source codepoint plus complete encoding exceeds tokenizer capacity; retained failure'),{code:'QA_MINIMUM_CODEPOINT_ENCODING_OVERFLOW'});\n  let cursor=input.start;for(const w of windows){if(w.source_range.start!==cursor)fail('Window source coverage gap');cursor=w.source_range.end;}if(cursor!==input.end)fail('Window source coverage incomplete');\n  const owned=windows.flatMap(w=>w.zero_events),expected=input.features.zero_events;if(digest(owned)!==digest(expected))fail('Zero-output ownership lost or repeated');\n  return {schema:'qa-finite-native-feature-windows-v1',policy_sha256:digest(policy),input_sha256:digest(input.binding),tokenizer_policy_sha256:tokenCounter.policy_sha256,source_range:input.binding.source_range,windows,status:'INFORMATION_REDUCED_TOKENIZER_ONLY_NOT_INFERENCE',fallback_used:!normal,zero_event_coverage_sha256:digest(owned),inference:false,adopted:false};\n}\n",
+        "new": "",
+        "reason": "Remove the legacy QA planner export. Only the separately bounded window-planner.mjs is routed by this prototype."
+      },
+      {
+        "reason": "P1: shared copied recursive immutable-state contract",
+        "old": "import {createHash} from 'node:crypto';",
+        "new": "import {createHash} from 'node:crypto';\nimport {immutableCopy} from './immutable-state.mjs';"
+      },
+      {
+        "reason": "P1: recursively freeze public policy flags and nested arrays",
+        "old": "export const policy=Object.freeze(",
+        "new": "export const policy=immutableCopy("
+      },
+      {
+        "reason": "P1: private frozen state, separate recursively frozen public copies, detached evidence/qualification, and stable construction-time input SHA",
+        "old": "  function encodeWindow({start:low=start,end:high=end,includeEndZeroWidth=false}={}){\n    range(normalizedText,low,high);if(low<start||high>end||includeEndZeroWidth&&high!==end)fail('Window exceeds exact selected source span or terminal ownership');\n    const cuts=new Set([low,high]);for(const s of spans)if(s.end>low&&s.start<high){cuts.add(Math.max(low,s.start));cuts.add(Math.min(high,s.end));}for(const p of zero.keys())if(p>=low&&p<=high)cuts.add(p);\n    const ordered=[...cuts].sort((a,b)=>a-b),parts=[],owned=[];let at=0;\n    for(let i=0;i<ordered.length;i++){const a=ordered[i],b=ordered[i+1];if(zero.has(a)&&(a<high||includeEndZeroWidth)){parts.push(featureAtom('',zero.get(a)));owned.push({position:a,mask:zero.get(a)});}if(b===undefined)continue;while(spans[at]?.end<=a)at++;const span=spans[at];if(!span||span.start>a||span.end<b)fail('Feature range missing');parts.push(featureAtom(normalizedText.slice(a,b),span.mask));}\n    const text=parts.join(''),literal=normalizedText.slice(low,high);if(decodeModelText(text)!==literal)fail('Exact literal source roundtrip differs');\n    return {text,sha256:sha(text),source_range:{start:low,end:high,sha256:sha(literal)},zero_events:owned,include_end_zero_width:includeEndZeroWidth,feature_sha256:binding.feature_sha256,input_sha256:digest(binding),status:binding.status,source_literal_roundtrip:true,external_evidence:evidence};\n  }\n  return Object.freeze({binding,features,externalSegments,normalizedText,start,end,encodeWindow});\n}\n",
+        "new": "  // Encoding closes only over a detached, recursively immutable snapshot.\n  // Public diagnostics are a separate copy, never the encoder's own arrays.\n  const privateState=immutableCopy({binding,features,externalSegments});\n  const privateSpans=privateState.features.spans,privateZeroEvents=privateState.features.zero_events;\n  const privateZero=Object.freeze(Object.fromEntries(privateZeroEvents.map(event=>[event.position,event.mask])));\n  const inputSHA=digest(privateState.binding),publicState=immutableCopy(privateState);\n  function encodeWindow({start:low=start,end:high=end,includeEndZeroWidth=false}={}){\n    range(normalizedText,low,high);if(low<start||high>end||includeEndZeroWidth&&high!==end)fail('Window exceeds exact selected source span or terminal ownership');\n    const cuts=new Set([low,high]);for(const s of privateSpans)if(s.end>low&&s.start<high){cuts.add(Math.max(low,s.start));cuts.add(Math.min(high,s.end));}for(const {position} of privateZeroEvents)if(position>=low&&position<=high)cuts.add(position);\n    const ordered=[...cuts].sort((a,b)=>a-b),parts=[],owned=[];let at=0;\n    for(let i=0;i<ordered.length;i++){const a=ordered[i],b=ordered[i+1];if(Object.hasOwn(privateZero,a)&&(a<high||includeEndZeroWidth)){parts.push(featureAtom('',privateZero[a]));owned.push({position:a,mask:privateZero[a]});}if(b===undefined)continue;while(privateSpans[at]?.end<=a)at++;const span=privateSpans[at];if(!span||span.start>a||span.end<b)fail('Feature range missing');parts.push(featureAtom(normalizedText.slice(a,b),span.mask));}\n    const text=parts.join(''),literal=normalizedText.slice(low,high);if(decodeModelText(text)!==literal)fail('Exact literal source roundtrip differs');\n    return immutableCopy({text,sha256:sha(text),source_range:{start:low,end:high,sha256:sha(literal)},zero_events:owned,include_end_zero_width:includeEndZeroWidth,feature_sha256:privateState.binding.feature_sha256,input_sha256:inputSHA,status:privateState.binding.status,source_literal_roundtrip:true,external_evidence:privateState.binding.evidence});\n  }\n  return Object.freeze({...publicState,normalizedText,start,end,encodeWindow:Object.freeze(encodeWindow)});\n}\n"
+      },
+      {
+        "new": "maximum_windows:8192",
+        "old": "maximum_windows:100000",
+        "reason": "P2: align advertised finite policy maximum with the unchanged 8192-window protocol/planner ceiling; no encoding grammar change"
+      }
+    ],
+    "upstream": "upstream/finite-feature-v3.original.mjs"
+  },
+  "collector": {
+    "sha256": "06375de4af1cccb3f56778db459760d1cdffe14eed6b5842565167c629f90f2a",
+    "upstream": "upstream/sections.original.mjs",
+    "patches": [
+      {
+        "old": "from './source-decoration.mjs'",
+        "reason": "Exact single-import prototype fork; original normalizer/parents/units/navigation/selection unchanged",
+        "new": "from './source-decoration.prototype.mjs'"
+      }
+    ]
+  }
+}

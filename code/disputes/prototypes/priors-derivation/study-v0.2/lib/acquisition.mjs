@@ -180,7 +180,7 @@ export async function acquireStudy(runDir,{limit=1000,cohorts=['discovery-broad'
       if(failed.has(row.id))continue;
       if(ready.has(row.id)) {
         const event=ready.get(row.id);validateDownloadEvent(row,event,recipe);const destination=await studyPath(runDir,event.raw_path,{missing:true});
-        let actual;try{actual=await hashFile(destination);}catch(error){if(error.code!=='ENOENT')throw error;const partial=await studyPath(runDir,event.partial_path);actual=await hashFile(partial);if(actual.sha256!==event.sha256||actual.bytes!==event.bytes)throw new Error('Interrupted ready artifact changed');await link(partial,destination);await unlink(partial);}
+        let actual;try{actual=await hashFile(destination);}catch(error){if(error.code!=='ENOENT')throw error;const partial=await studyPath(runDir,event.partial_path,{transfer:true});actual=await hashFile(partial);if(actual.sha256!==event.sha256||actual.bytes!==event.bytes)throw new Error('Interrupted ready artifact changed');await link(partial,destination);await unlink(partial);}
         if(actual.sha256!==event.sha256||actual.bytes!==event.bytes)throw new Error('Recovered raw artifact changed');
         const {entry_sha256,path,recorded_at,schema_version,...body}=event;
         const recovered=await writeEvent({...body,kind:'download-committed',recovered:true});
@@ -190,7 +190,7 @@ export async function acquireStudy(runDir,{limit=1000,cohorts=['discovery-broad'
       let terminalError=null;
       for(let attempt=1;attempt<=3;attempt++) {
         const delay=Math.max(0,lastRequest+recipe.limits.requestIntervalMs-now());if(delay)await wait(delay);
-        lastRequest=now();const partialName=`raw-partials/${row.id}-${randomUUID()}.partial`;const partial=await studyPath(runDir,partialName,{missing:true});await mkdir(dirname(partial),{recursive:true});
+        lastRequest=now();const partialName=`raw-partials/${row.id}-${randomUUID()}.partial`;const partial=await studyPath(runDir,partialName,{missing:true,transfer:true});await mkdir(dirname(partial),{recursive:true});
         await writeEvent({kind:'request-started',id:row.id,cohort:row.cohort,url:urls.corpus,attempt,started_ms:lastRequest,partial_path:partialName});
         const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),60_000);let file=null,bytes=0,readyCommitted=false;const hash=createHash('sha256');
         try {

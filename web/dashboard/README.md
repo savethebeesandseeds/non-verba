@@ -28,6 +28,8 @@ available for later refinement.
 
 The dashboard starts at the project overview with no Hero or Goal selected.
 Overview state counts filter the Hero map. Select one Hero to see its header and
+the navigation list, where a small state dot beside each Hero number matches
+that Hero's recorded milestone summary and colors. The selected Hero shows
 compact choices for all its Goals. Each keeps its original number, a
 done/total completion ring, recorded milestone state dots, clear selected styling
 and a fixed chevron cue. Action text remains available to screen readers. Select
@@ -103,7 +105,7 @@ Only Milestones store states. Hero and Goal summaries are calculated, including
 a distinct Partially complete label.
 
 [SCHEMA.md](SCHEMA.md) defines the minimal example, optional fields, five states
-and update rules; [hero.schema.json](hero.schema.json) is the formal schema
+and update rules; [hero.schema.json](schemas/hero.schema.json) is the formal schema
 version 2. Completion requires acceptance criteria and evidence. Keep private
 captures and credentials outside these authored records. The manifest has no
 shared update date and changes only when its Hero file list changes.
@@ -117,13 +119,32 @@ the [Hero outline](../../docs/notes/WORKSTREAMS.md) defines scope.
 | `index.html` | Generated standalone interface and last validated progress snapshot |
 | `01-sensors.json` … `11-services.json` | One maintained JSON per Hero, containing Goals and Milestones |
 | `manifest.json` | Ordered Hero file list and project title |
-| `SCHEMA.md`, `hero.schema.json`, `manifest.schema.json` | Authoring guide and formal schema version 2 |
+| `SCHEMA.md` | Progress authoring guide |
 | `refresh.ps1` | Refreshes through the existing managed container and copies back the generated HTML |
 | `refresh.sh` | Shell entry point: delegates from Windows Bash, or refreshes the current managed Debian source snapshot |
-| `template.html`, `dashboard.css`, `dashboard.js`, `model.js` | Interface and model source bundled into the standalone HTML |
-| `branding.mjs`, `branding/` | Embedded branding map and small transparent PNG derivatives of the existing artwork |
-| `build-standalone.mjs` | Container-side generator for the interface and validated data snapshot |
-| `validate.mjs`, `test/` | Data validation and focused checks |
+| `src/` | Interface template, CSS, browser behavior and shared model |
+| `tools/` | Project loader, standalone generator, validator and branding preparation |
+| `schemas/` | Formal Hero and manifest schemas, version 2 |
+| `assets/branding/` | Small transparent PNG derivatives of the existing project artwork |
+| `test/` | Focused model and standalone browser checks |
+
+The root keeps the files used to open the dashboard and maintain progress easy to
+find. Hero JSON filenames and refresh commands remain stable. Implementation and
+maintenance details are grouped by purpose:
+
+```text
+web/dashboard/
+  index.html
+  README.md, SCHEMA.md
+  01-sensors.json ... 11-services.json
+  manifest.json, package.json
+  refresh.ps1, refresh.sh
+  src/                 template.html, dashboard.css, dashboard.js, model.js
+  tools/               project.mjs, build-standalone.mjs, validate.mjs, branding.mjs
+  schemas/             hero.schema.json, manifest.schema.json
+  assets/branding/     prepared PNG artwork
+  test/                model.test.mjs, browser.mjs
+```
 
 Do not edit generated `index.html` by hand. Preserve stable IDs for confirmed
 records and other sessions' reviewed checkpoints. Add tasks only when their
@@ -168,5 +189,5 @@ managed container with the existing browser runtime, then retain those PNGs and
 refresh the HTML:
 
 ```sh
-NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers node ../web/dashboard/branding.mjs --optimize
+NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers node ../web/dashboard/tools/branding.mjs --optimize
 ```

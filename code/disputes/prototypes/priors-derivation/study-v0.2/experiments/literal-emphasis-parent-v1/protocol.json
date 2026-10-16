@@ -1,0 +1,30 @@
+{
+  "schema": "prototype-literal-emphasis-parent-protocol-v1",
+  "status": "PROTOTYPE_UNADOPTED_SYNTHETIC_ONLY",
+  "authority": "NONE",
+  "engineering_revision": "P1_PRIVATE_IMMUTABLE_STATE_P2_EXACT_EXISTING_CEILINGS",
+  "state_contract": "Private detached recursively frozen encoding state; separate recursively frozen public features/binding/external segments/descriptors/arms; caller aliases cannot change encoded text or identities. Plain data only;100000 containers and256 nesting levels maximum.",
+  "intent": "Bounded source-free engineering pilot before independent review. No method adoption, source audit, factual-answer evaluation or inference.",
+  "frozen_current_method": {"snapshot": "/tmp/nonverba-unified-source/f7cd9407508443b8a20ad70bc46349ab/code", "reported_sha256": "874c6b505ae5fc09fd3d92d46c64cd5474abf90fe574537c5e101b4fcaac6afa", "modified": false},
+  "import_routing": [
+    "source-fixtures.mjs -> source-decoration.prototype.mjs -> existing pinned parse5",
+    "parent-stream.mjs -> finite-codec.mjs and source-decoration.prototype.mjs",
+    "window-planner.mjs -> finite-codec.mjs; no inference or production planner",
+    "tokenizer-controls.mjs -> pinned-tokenizers.mjs -> exact frozen embedding.mjs createPinnedTokenCounter only",
+    "upstream modules are test/reference inputs, not live monkey patches"
+  ],
+  "source_grammar": {"native_tags": ["strike", "s", "del", "ins", "u", "b", "strong", "i", "em"], "literal_emphasis_css": ["font", "font-weight", "font-style"], "computed_style_verified": false, "effectiveness_verified": false, "unknown_stylesheets_or_origin_ambiguities": "BLOCKED; no relaxed mapping"},
+  "context": {"forms": ["UNIT_ONLY_ABLATION", "FULL_STORED_PARENT_AVAILABILITY_ONLY"], "navigation_prefix": false, "semantic_ranker": false, "word_cap": null, "dependency_completeness_verified": false, "pooling": "NOT_IMPLEMENTED; count/coverage/duplicate-input diagnostics only"},
+  "model_reduction": {"policy": "PROTOTYPE_UNADOPTED_INFORMATION_REDUCED_LITERAL_EMPHASIS_9_V1", "ledger": "omitted-fields.json", "text_roundtrip_only": true, "full_fidelity_or_semantic_equivalence": false, "material_omission": "REJECT_CANDIDATE_AND_RETAIN_FINDING"},
+  "resource_budget": {"synthetic_raw_bytes": 2097152, "trace_nodes": 20000, "decoded_characters": 2097152, "trace_work_units": 268435456, "rss_bytes": 1073741824, "selected_source_characters": 2097152, "probe_source_characters": 8192, "probe_encoded_characters": 262144, "windows_per_stream": 8192, "tokenizer_calls_per_stream": 20000, "global_tokenizer_calls": 60000, "tokenizer_control_wall_ms": 180000, "long_parent_characters": 1107802, "long_parent_stress_tokenizer_calls_per_model": 512},
+  "window_policy": {"max_tokens_including_special": 256, "overlap": 0, "boundaries": "UNENCODED_WORDS_THEN_ALL_LANGUAGE_CODEPOINT_FALLBACK", "encoded_string_chopping": false, "largest_window_guaranteed": false, "resource_or_minimum_overflow": "RETAIN_WHOLE_INPUT_FAILED; NO_PARTIAL_SUCCESS_OR_FALLBACK", "weights": "NO_POOLING; source codepoint counts recorded"},
+  "controls": ["replayable minimal fork delta", "nine literal tags", "CSS weight/style/shorthand unknown effects", "nested and recovered marks", "inert/hidden markup", "Black wrapper with bare B caption", "duplicate strings", "all finite masks", "escaped markers", "joint whitespace", "zero ownership at start/cut/final", "NFC/emoji", "cross-run NFC blocked", "stylesheet uncertainty blocked", "far prohibition and later exception availability", "fixed facts differing emphasis only", "same-parent duplicate input", "irreducible and work failures", "long CSS", "long word and CJK", "1.1M-character parent stress", "private/public nested mutation rejection", "caller evidence/qualification/envelope/parent/unit alias detachment", "fresh equivalent deterministic encoding", "exact protocol ceiling positives", "over-ceiling/nonfinite/invalid options reject before tokenization"],
+  "factual_answer_evaluation": false,
+  "model_inference": false,
+  "corpus_or_coder_access": false,
+  "unchanged_adverse_cases": ["0045", "0047", "0055", "0085", "0086"],
+  "actual_journal_count": 45,
+  "journal_0085": "ALREADY_INCLUDED_IN45_NOT_AN_ADDITIONAL_REVIEW",
+  "next_gate": "Freeze exact source/API/control deltas and resources for independent review. Any actual pilot, corpus census or inference needs separate authorization and current dynamic quality gates. No current finding is cleared.",
+  "final_target_unchanged": {"contracts": 15000, "comparison_units": 30000, "arms": 4, "codec_failure_exclusion": false}
+}

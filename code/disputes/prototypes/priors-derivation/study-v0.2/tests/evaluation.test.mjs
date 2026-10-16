@@ -6,7 +6,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {digest,sha256} from '../../lib/common.mjs';
 import {STUDY_BASE,writeJSON,hashFile} from '../lib/store.mjs';
-import {validateCandidateCards,assessSelectedCoverage,validateNormalizedSpan,assertReserveAccess,acquireEvaluation,extractEvaluation,verifyCandidateFreeze,readEvaluationBatches} from '../lib/evaluation.mjs';
+import {validateCandidateCards,assessSelectedCoverage,validateNormalizedSpan,assertReserveAccess,acquireEvaluation,extractEvaluation,verifyCandidateFreeze,readEvaluationBatches,evaluationMethodBindings} from '../lib/evaluation.mjs';
 import {fitMiniBatch} from '../lib/geometry.mjs';
 import {syntheticFrozenFixture} from './helpers/quality-fixture.mjs';
 
@@ -29,6 +29,16 @@ test('a tampered freeze fails before reading any study artifact',{skip:!containe
 
 test('a self-consistent freeze still refuses changed method source identity and changed input bytes',{skip:!container},async t=>{const f=await syntheticFrozenFixture(t);assert.equal((await verifyCandidateFreeze(f.run)).freeze.freeze_sha256,f.freeze.freeze_sha256);await writeFile(`${f.run}/synthetic-input.json`,'{"data_classification":"ALTERED_SYNTHETIC"}\n');await assert.rejects(verifyCandidateFreeze(f.run),/binding changed/);
   const g=await syntheticFrozenFixture(t);const changed=structuredClone(g.freeze);changed.methods[0].sha256='f'.repeat(64);const {freeze_sha256,...body}=changed;await writeFile(`${g.run}/evaluation/candidate-freeze.json`,JSON.stringify({...body,freeze_sha256:digest(body)}));await assert.rejects(verifyCandidateFreeze(g.run),/method source/);
+});
+
+test('changing a frozen navigation method refuses reserve access before any request',{skip:!container},async t=>{
+  const f=await syntheticFrozenFixture(t),bindings=await evaluationMethodBindings();
+  const method=bindings.files.find(file=>file.path==='representation.mjs');assert.ok(method);
+  const changed=structuredClone(f.freeze),frozenMethod=changed.methods.find(file=>file.path===method.path);assert.ok(frozenMethod);
+  frozenMethod.sha256='f'.repeat(64);const {freeze_sha256,...body}=changed;
+  await writeFile(`${f.run}/evaluation/candidate-freeze.json`,JSON.stringify({...body,freeze_sha256:digest(body)}));
+  let requests=0;await assert.rejects(acquireEvaluation(f.run,{cohort:'confirmation',fetcher:async()=>{requests++;throw new Error('reserve must remain sealed');}}),/method source/);
+  assert.equal(requests,0);
 });
 test('reserved vector readers bind ordered identities and totals without permitting fit rows',{skip:!container},async t=>{const f=await syntheticFrozenFixture(t);const bytes=Buffer.alloc(2*384*4);bytes.writeFloatLE(1,0);bytes.writeFloatLE(1,384*4);await writeFile(`${f.run}/synthetic-vectors.f32`,bytes);const vectors={path:'synthetic-vectors.f32',...await hashFile(`${f.run}/synthetic-vectors.f32`)};
   const units=[{id:'synthetic-eval-1',cohort:'confirmation',partition:'evaluation'},{id:'synthetic-eval-2',cohort:'confirmation',partition:'evaluation'}];const batch={rows:2,dimensions:384,partition:'evaluation',freeze_sha256:f.freeze.freeze_sha256,ordered_ids_sha256:digest(units.map(unit=>unit.id)),units,vectors};await writeJSON(f.run,'synthetic-batch.json',batch);const item={path:'synthetic-batch.json',...await hashFile(`${f.run}/synthetic-batch.json`),rows:2};const manifest={cohort:'confirmation',freeze_sha256:f.freeze.freeze_sha256,fit_access:false,rows:2,shards:[item]};let seen=0;for await(const result of readEvaluationBatches(f.run,manifest))seen+=result.rows.length;assert.equal(seen,2);

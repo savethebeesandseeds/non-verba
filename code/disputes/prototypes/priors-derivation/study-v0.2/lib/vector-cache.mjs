@@ -6,7 +6,7 @@ import {dirname} from 'node:path';
 import {digest,sha256,within,readJSON} from '../../lib/common.mjs';
 import {hashFile,studyPath} from './store.mjs';
 import {atomicJSON} from './workflow.mjs';
-async function binary(path,bytes) {await mkdir(dirname(path),{recursive:true});try{const old=await readFile(path);if(sha256(old)!==sha256(bytes))throw new Error('Vector cache binary collision');return {sha256:sha256(old),bytes:old.length};}catch(error){if(error.code!=='ENOENT')throw error;}const temporary=`${path}.partial-${randomUUID()}`;try{await writeFile(temporary,bytes,{flag:'wx'});await link(temporary,path);}finally{await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}return {sha256:sha256(bytes),bytes:bytes.length};}
+async function binary(path,bytes) {await mkdir(dirname(path),{recursive:true});try{const old=await readFile(path);if(sha256(old)!==sha256(bytes))throw new Error('Vector cache binary collision');return {sha256:sha256(old),bytes:old.length};}catch(error){if(error.code!=='ENOENT')throw error;}const temporary=`${path}.${randomUUID()}.partial`;try{await writeFile(temporary,bytes,{flag:'wx'});await link(temporary,path);}finally{await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}return {sha256:sha256(bytes),bytes:bytes.length};}
 export async function createChunkVectorCache(runDir,identity,{dimensions}={}) {
   const prefix=`vector-cache/${digest(identity).slice(0,24)}`;await studyPath(runDir,prefix,{missing:true});await mkdir(within(runDir,prefix),{recursive:true});
   const index=new Map();const loaded=new Map();

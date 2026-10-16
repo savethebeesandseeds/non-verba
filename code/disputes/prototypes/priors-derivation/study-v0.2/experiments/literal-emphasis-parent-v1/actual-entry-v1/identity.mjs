@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Full explicit new source set; no package-tree or dynamic-runtime claim.
+import {readFile,lstat} from 'node:fs/promises';
+import {digest,sha} from '../finite-codec.mjs';
+import {immutableCopy} from '../immutable-state.mjs';
+import {computeStageEpoch as acceptedEpoch} from '../next-stage-v1/identity.mjs';
+import {staticModuleRequests} from '../pilot-identity.mjs';
+import {ACTUAL_REVISION} from './admission.mjs';
+export const OWNED_FILES=Object.freeze(['README.md','API.md','admission.mjs','bindings.mjs','control.mjs','checkpoint.mjs','finalizer.mjs','resource-journal.mjs','io.mjs','projector.mjs','loader.mjs','adapter.mjs','meter.mjs','outboard.mjs','transport.mjs','driver.mjs','worker.mjs','guardian.mjs','bootstrap.mjs','identity.mjs','fixtures.mjs','controls.test.mjs','fork-origins.json','reader/schema.mjs','reader/index.mjs','reader/journal.mjs','reader/transport.mjs','reader/controls.test.mjs','reader/API.md']);
+export async function computeStageEpoch(options){
+  const accepted=await acceptedEpoch(options),files=[...accepted.experiment_files],own=[];for(const path of OWNED_FILES){const url=new URL(path,import.meta.url),s=await lstat(url);if(!s.isFile()||s.isSymbolicLink())throw Error('ACTUAL_SOURCE_NONREGULAR');const b=await readFile(url);own.push({path:'actual-entry-v1/'+path,sha256:sha(b),bytes:b.length});}files.push(...own);
+  for(const path of['README.md','api-proposal.json','resource-and-reader-plan.json']){const b=await readFile(new URL('../actual-entry-preparation-v1/'+path,import.meta.url));files.push({path:'actual-entry-preparation-v1/'+path,sha256:sha(b),bytes:b.length});}
+  const allowed=new Set(files.map(r=>new URL('../'+r.path,import.meta.url).href)),edges=[];for(const row of own.filter(r=>r.path.endsWith('.mjs'))){const url=new URL('../'+row.path,import.meta.url),text=await readFile(url,'utf8');for(const specifier of staticModuleRequests(text)){if(specifier.startsWith('node:'))continue;const target=specifier.startsWith('.')?new URL(specifier,url).href:null;if(!target||!allowed.has(target))throw Error('ACTUAL_UNBOUND_STATIC_PROJECT_DEPENDENCY');edges.push({from:row.path,specifier,target});}}
+  const body={...accepted,schema:'closed-actual-entry-source-only-method-epoch-v1',status:'SOURCE_ONLY_ACTUAL_ENTRY_CLOSED',accepted_coherent_epoch_sha256:accepted.sha256,experiment_files:files,experiment_source_set_sha256:digest(files),actual_source_files:own,actual_static_edges:edges,actual_revision:ACTUAL_REVISION,actual_execution_enabled:false,actual_runtime_boundary:'EXACT_NAMED_PINNED_SERVICE_PLUS_ROOT_STATIC_DIRECT_ENTRY_PROPOSAL; TRANSITIVE_CJS_NATIVE_RUNTIME_UNENUMERATED_ACTUAL_SERVICE_CLOSED',dynamic_runtime_closure_verified:false,actual_tokenizer_execution_verified:false,authority:'NONE'};delete body.sha256;return immutableCopy({...body,sha256:digest(body)});
+}
+export function assertStageEntry(role,url){const targets={collector:new URL('../sections.prototype.mjs',import.meta.url).href,driver:new URL('./driver.mjs',import.meta.url).href,worker:new URL('./worker.mjs',import.meta.url).href,guardian:new URL('./guardian.mjs',import.meta.url).href};if(targets[role]!==String(url))throw Object.assign(Error('ACTUAL_UNBOUND_PROJECT_ENTRY'),{code:'ACTUAL_UNBOUND_PROJECT_ENTRY'});return true;}

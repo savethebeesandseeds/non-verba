@@ -6,14 +6,14 @@ $dashboardRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 $repositoryRoot = [IO.Path]::GetFullPath((Join-Path $dashboardRoot '../..'))
 $launcherPath = Join-Path $repositoryRoot 'code/dev.ps1'
 $manifest = Get-Content -LiteralPath (Join-Path $dashboardRoot 'manifest.json') -Raw | ConvertFrom-Json
-$inputs = @('manifest.json', 'model.js', 'project.mjs', 'template.html', 'dashboard.js',
-    'dashboard.css', 'build-standalone.mjs', 'branding.mjs', 'validate.mjs', 'refresh.ps1', 'refresh.sh',
-    'hero.schema.json', 'manifest.schema.json', 'test/model.test.mjs', 'test/browser.mjs')
+$inputs = @('manifest.json', 'src/model.js', 'tools/project.mjs', 'src/template.html', 'src/dashboard.js',
+    'src/dashboard.css', 'tools/build-standalone.mjs', 'tools/branding.mjs', 'tools/validate.mjs', 'refresh.ps1', 'refresh.sh',
+    'schemas/hero.schema.json', 'schemas/manifest.schema.json', 'test/model.test.mjs', 'test/browser.mjs')
 $inputs += @(
-    'branding/portrait.png', 'branding/identity.png', 'branding/assignments.png',
-    'branding/priors.png', 'branding/disputes.png', 'branding/union.png',
-    'branding/incidents.png', 'branding/workflows.png', 'branding/governance.png',
-    'branding/apk.png', 'branding/services.png', '../site/branding/sprout.svg',
+    'assets/branding/portrait.png', 'assets/branding/identity.png', 'assets/branding/assignments.png',
+    'assets/branding/priors.png', 'assets/branding/disputes.png', 'assets/branding/union.png',
+    'assets/branding/incidents.png', 'assets/branding/workflows.png', 'assets/branding/governance.png',
+    'assets/branding/apk.png', 'assets/branding/services.png', '../site/branding/sprout.svg',
     '../site/branding/individual/01-sprout.png', '../site/branding/individual/02-leafy.png',
     '../site/branding/individual/14-vine.png', '../site/branding/individual/09-mushroom.png',
     '../site/branding/individual/15-lotus.png', '../site/branding/individual/13-clover.png',

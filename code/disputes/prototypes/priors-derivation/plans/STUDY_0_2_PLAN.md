@@ -129,12 +129,29 @@ versions retained.
 
 Use the pinned MiniLM CPU model as a measured baseline, with actual token lengths
 and complete admitted inputs. Batch inference and cache by normalized input,
-model/revision, tokenizer and window-policy digest. Compare heading-plus-clause
-with verified-section context on a fixed stratified subset. Compare a second,
-separately pinned and license-checked sentence model on approximately 30,000 of
+model/revision, tokenizer and window-policy digest. The original comparison was
+heading-plus-clause against verified-section context on a fixed stratified subset.
+The prospective 15 October amendment below supersedes separate heading prefixes.
+Compare a second, separately pinned and license-checked sentence model on approximately 30,000 of
 the same units. Select that model and its configuration before inspecting which
 one gives preferred candidate names. Preserve a lexical retrieval/grouping
 baseline to identify language and drafting-topic effects.
+
+**Prospective input amendment, 15 October 2026, before opening the fresh audit:**
+six actual development findings showed that literal nearby labels could be
+inserted before unrelated units or promote prose into a heading role. Current
+native model inputs therefore use exactly one contiguous source span. Baseline,
+second-model and lexical arms use the selected unit; the context arm retains
+the existing at-most-60-neighbor-word span within its authenticated parent.
+Navigation remains separately authenticated metadata. Captions inside the
+selected span occur once at their original positions, with native evidence.
+Historical arm IDs containing `heading` remain compatibility identifiers; the
+new source-span policy and method identity must be recorded explicitly. Earlier
+inputs, failures and incomplete reviews remain retained. This amendment does
+not reduce the fresh adequacy target, clear any observed issue, or authorize
+expansion. Exact-source independent repair replay and the unopened fresh audit
+remain required. Encoding alternatives are separate prospective ablations;
+externalizing evidence is not equivalent to supplying it to the model.
 
 Benchmark scalable mini-batch clustering; predeclare k=32,64,128,256 and five
 repeats, with a fixed primary schedule and contract/family-balanced influence.

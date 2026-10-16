@@ -5,7 +5,7 @@ import test from 'node:test';
 import {
   deriveGoalStatus, deriveHeroStatus, filterHeroes, flattenMilestones,
   loadHeroFiles, summarize, summarizeGoal, validateHero, validateManifest, validateProject,
-} from '../model.js';
+} from '../src/model.js';
 
 const DATE = '2026-10-14';
 function milestone(id, status = 'proposed', changes = {}) {

@@ -3,25 +3,25 @@
   "id": "governance",
   "number": 9,
   "title": "Governance and launch readiness",
-  "summary": "Turn working principles into accountable institutions, a bounded pilot and independently reviewed operating commitments.",
-  "updatedAt": "2026-10-14",
+  "summary": "The local project dashboard is implemented. The roadmap proposes institutional safeguards, accountable services, sustainable economics, a bounded pilot, independent review and an evidence-based launch gate. Constitutional principles remain a draft; these institutional and deployment outcomes are not established by the audited records.",
+  "updatedAt": "2026-10-16",
   "goals": [
     {
       "id": "governance-project-organization-goal",
-      "title": "Standalone project dashboard",
-      "description": "The maintained local hierarchy, evidence record and navigation implemented in this session.",
+      "title": "Maintain a standalone local project dashboard",
+      "description": "Implemented project organization and navigation. These completed software milestones describe the maintained local tool; its counts cover listed records and do not establish institutional adoption, independently reviewed operations or launch readiness.",
       "milestones": [
         {
           "id": "governance-project-dashboard",
           "title": "Establish the maintained workstream dashboard",
-          "description": "The maintained dashboard has one independent JSON per Hero, a documented schema, validation, safe evidence links and a generated standalone HTML page. AGENTS.md requires evidence-backed milestone upkeep. The record is deliberately partial; unconfirmed Goals and Milestones are left empty.",
+          "description": "The local dashboard has one independent JSON per Hero, a documented schema, structural validation, repository-relative evidence links and a generated standalone HTML page. AGENTS.md requires evidence-backed milestone upkeep and leaves unconfirmed breakdowns empty. Validation checks data integrity and evidence-path existence; it does not assess whether linked material proves an outcome.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
-            "All eleven Heroes retain independent source files; confirmed entries expose their actual scoped state and evidence while unconfirmed breakdowns stay empty.",
-            "The schema, validator and focused checks cover data integrity, filtering and responsive presentation.",
+            "All eleven Heroes retain independent source files, and the authoring contract requires actual scoped states and evidence while leaving unconfirmed breakdowns empty.",
+            "The validator checks record shape, dates, global IDs, dependencies and existing evidence paths; focused checks cover filtering and responsive presentation.",
             "AGENTS.md requires evidence-backed updates and root documentation makes the dashboard easy to find."
           ],
           "evidence": [
@@ -32,6 +32,10 @@
             {
               "label": "Repository maintenance rule",
               "path": "AGENTS.md#project-progress-dashboard"
+            },
+            {
+              "label": "Data and evidence-path validation implementation",
+              "path": "web/dashboard/tools/project.mjs"
             },
             {
               "label": "Focused model checks",
@@ -45,10 +49,10 @@
         },
         {
           "id": "governance-hero-hierarchy",
-          "title": "Adopt the Heroes, Goals and Milestones hierarchy",
-          "description": "Schema version 2 supports eleven independent Hero files with the fixed Hero, Goal and Milestone hierarchy, optional metadata and empty planning records. Milestone states are color-coded and Hero/Goal summaries count only listed records. Reviewed Priors checkpoints remain under that session's ownership.",
+          "title": "Implement the Heroes, Goals and Milestones hierarchy",
+          "description": "Schema version 2 and the local interface implement eleven independent Hero files with the fixed Hero, Goal and Milestone hierarchy, optional metadata and empty planning records. Only Milestones store states; computed summaries count listed records. This is adoption of a project-record format, with no institutional authority implied.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "Each Hero has one independent JSON file containing Goals and their flat Milestones.",
@@ -62,7 +66,11 @@
             },
             {
               "label": "Formal Hero schema version 2",
-              "path": "web/dashboard/hero.schema.json"
+              "path": "web/dashboard/schemas/hero.schema.json"
+            },
+            {
+              "label": "Hierarchy validation and computed summaries",
+              "path": "web/dashboard/src/model.js"
             },
             {
               "label": "Hierarchy and color browser checks",
@@ -75,7 +83,7 @@
           "title": "Open the dashboard as a standalone HTML file",
           "description": "The dashboard opens directly as a self-contained HTML file. Its initial file-selection workflow was superseded by the validated embedded record and refresh helpers. Opening the page requires no webserver, adjacent runtime assets or network requests.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "Opening index.html directly with file:// renders the self-contained interface without HTTP requests or neighboring runtime assets.",
@@ -84,8 +92,8 @@
           ],
           "evidence": [
             {
-              "label": "Standalone dashboard HTML",
-              "path": "web/dashboard/index.html"
+              "label": "Self-contained HTML generator",
+              "path": "web/dashboard/tools/build-standalone.mjs"
             },
             {
               "label": "Direct-open and maintenance instructions",
@@ -102,18 +110,18 @@
           "title": "Show project progress immediately when the HTML opens",
           "description": "The Hero JSONs and schema sit beside index.html. The generated HTML embeds the validated record and opens populated without a chooser or server. PowerShell and Bash helpers refresh it in the preserved managed container; the Windows workflow copies back the result and checks for concurrent edits.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "An isolated HTML file immediately renders the project overview from its validated embedded record without file selection or external requests.",
             "Each Hero remains one independent JSON beside the page and formal schema; the authoring guide distinguishes the included snapshot from live source files.",
             "The documented refresh command validates records, updates the workspace HTML and preserves concurrent edits; AGENTS.md requires it after milestone updates.",
-            "The fixed hierarchy, filters, dependency links, distinct milestone colors and phone layout pass focused browser checks."
+            "Focused browser checks exercise the fixed hierarchy, filters, dependency links, distinct milestone colors and phone layout."
           ],
           "evidence": [
             {
-              "label": "Standalone dashboard",
-              "path": "web/dashboard/index.html"
+              "label": "Validated embedded-record generation",
+              "path": "web/dashboard/tools/build-standalone.mjs"
             },
             {
               "label": "Schema and update workflow",
@@ -138,18 +146,18 @@
           "title": "Make project progress easier to explore with the existing branding",
           "description": "The standalone page embeds the existing sprout mark and eleven character illustrations. Its overview, completion counts and active/blocked working set are derived from the recorded Milestones. Artwork remains available when only index.html is copied, and the original branding assets remain unchanged.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "The existing project artwork is used without changing the originals, and copying only index.html preserves the interface and all branding.",
             "The overview shows every Hero, completion counts and navigable active or blocked milestones derived from the maintained records.",
             "Hero, Goal and Milestone detail, color-coded states, filters, criteria, evidence and dependencies remain usable on desktop and phone layouts.",
-            "Focused checks confirm file-open behavior without a picker or external requests, correct progress counts and literal rendering of authored text."
+            "Focused checks cover file-open behavior without a picker or external requests, source-derived progress counts and literal rendering of authored text."
           ],
           "evidence": [
             {
-              "label": "Standalone project dashboard",
-              "path": "web/dashboard/index.html"
+              "label": "Self-contained branding and record generation",
+              "path": "web/dashboard/tools/build-standalone.mjs"
             },
             {
               "label": "Existing project artwork",
@@ -157,11 +165,11 @@
             },
             {
               "label": "Embedded artwork and thumbnail mapping",
-              "path": "web/dashboard/branding.mjs"
+              "path": "web/dashboard/tools/branding.mjs"
             },
             {
               "label": "Overview and hierarchy interactions",
-              "path": "web/dashboard/dashboard.js"
+              "path": "web/dashboard/src/dashboard.js"
             },
             {
               "label": "File-open interaction and layout checks",
@@ -174,7 +182,7 @@
           "title": "Make Goals and Milestones clearer to read and navigate",
           "description": "Goals display original numbering and recorded milestone counts. Expanded Milestones show literal descriptions, numbered acceptance criteria, evidence paths and optional dependencies. Unknown achievement dates remain absent; record IDs are secondary disclosures. Requirements have no invented checkbox completion states.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "Goal outcomes, progress and state counts remain visible when their Milestones are hidden, and filtered views preserve original numbering and total counts.",
@@ -184,16 +192,16 @@
           ],
           "evidence": [
             {
-              "label": "Refined standalone dashboard",
-              "path": "web/dashboard/index.html"
+              "label": "Standalone dashboard template",
+              "path": "web/dashboard/src/template.html"
             },
             {
               "label": "Goal and Milestone rendering",
-              "path": "web/dashboard/dashboard.js"
+              "path": "web/dashboard/src/dashboard.js"
             },
             {
               "label": "Responsive detail presentation",
-              "path": "web/dashboard/dashboard.css"
+              "path": "web/dashboard/src/dashboard.css"
             },
             {
               "label": "Exploration and maintenance guide",
@@ -208,28 +216,29 @@
         {
           "id": "governance-focused-dashboard-navigation",
           "title": "Explore one Hero and one Goal at a time",
-          "description": "The dashboard opens at an overview with no selected details. Selecting a Hero shows compact Goal choices; selecting a Goal shows only its details and Milestones. Filters retain that context and separate full recorded counts from matching counts. Explicit focus/dependency links reveal their actual target.",
+          "description": "The dashboard opens at an overview with no selected details. Selecting a Hero shows compact Goal choices; selecting a Goal shows only its details and Milestones. Filters retain that context and separate full recorded counts from matching counts. Explicit focus/dependency links reveal their actual target. Each Hero in the navigation list has an accessible state dot beside its number, using the same recorded-state summary and colors as its header.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "The default overview renders no Hero or Goal detail, and explicit selection renders at most one Hero and one Goal.",
             "Every Goal remains available as a compact card with original numbering, recorded state and full-scope progress; filtered matches are labelled separately without losing the selected context.",
             "Overview and Goal return controls, scoped resets, milestone details and cross-Goal dependencies navigate to the correct context on desktop and phone layouts.",
-            "The standalone file opens with embedded data and branding without a server, file picker, adjacent runtime files or network requests; the guide and AGENTS.md describe the selection workflow."
+            "The standalone file opens with embedded data and branding without a server, file picker, adjacent runtime files or network requests; the guide and AGENTS.md describe the selection workflow.",
+            "Desktop and compact Hero navigation show one state dot per Hero; its accessible label and color match the same full-record header summary, including partial completion and empty planning records."
           ],
           "evidence": [
             {
-              "label": "Focused standalone dashboard",
-              "path": "web/dashboard/index.html"
+              "label": "Standalone interface generation",
+              "path": "web/dashboard/tools/build-standalone.mjs"
             },
             {
               "label": "Hero and Goal selection behavior",
-              "path": "web/dashboard/dashboard.js"
+              "path": "web/dashboard/src/dashboard.js"
             },
             {
               "label": "Responsive Goal cards and detail presentation",
-              "path": "web/dashboard/dashboard.css"
+              "path": "web/dashboard/src/dashboard.css"
             },
             {
               "label": "Exploration and upkeep guide",
@@ -244,9 +253,9 @@
         {
           "id": "governance-interactive-goal-selection",
           "title": "Browse Goal progress without losing the current position",
-          "description": "Goal choices show completion rings, actual milestone state dots and a clear selected indicator in a taller bounded sage navigator with compact ivory buttons. Phones use a short swipeable strip above the detail panel. Selecting or clearing a Goal preserves buttons, panel, keyboard focus and document position; same-Hero filters and resets retain the list's scroll offsets. Translucent sand milestone headers fade gently across the underlying state tint and contain each description once, previewing two lines when closed and the full text when open. The actual milestone state colors its strong left rail, header rule, marker and badge outline, with a subtle body tint. Acceptance criteria use soft sage surfaces and evidence uses warm parchment, following the established earthy theme. Explicit dependency and current-work jumps still reveal their requested milestone. The validator, 24 model tests and eight isolated file-open browser scenarios passed in the managed container, including scrolling, literal text, state accents and contrast checks; desktop and phone detail views were visually inspected.",
+          "description": "Goal choices show source-derived completion rings and state dots in a bounded sage navigator; phones use a swipeable strip above the detail panel. Selecting or clearing a Goal preserves the buttons, panel, focus and document position, while same-Hero filtering retains navigator offsets. Each Milestone description appears once in its header, with a closed preview and full expanded text. State accents, sage criteria and parchment evidence follow the existing theme. The authored browser checks cover pointer and keyboard selection, scrolling, literal text, state colors, contrast and reduced motion; they are local interface checks, with no operational governance review implied.",
           "status": "done",
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-14",
           "acceptance": [
             "Goal completion rings and state dots describe the original source Milestones, with separate filtered match counts and honest empty planning records.",
@@ -259,16 +268,16 @@
           ],
           "evidence": [
             {
-              "label": "Interactive standalone dashboard",
-              "path": "web/dashboard/index.html"
+              "label": "Interactive dashboard template",
+              "path": "web/dashboard/src/template.html"
             },
             {
               "label": "Persistent Goal selection and detail rendering",
-              "path": "web/dashboard/dashboard.js"
+              "path": "web/dashboard/src/dashboard.js"
             },
             {
               "label": "Completion rings and responsive Goal navigator",
-              "path": "web/dashboard/dashboard.css"
+              "path": "web/dashboard/src/dashboard.css"
             },
             {
               "label": "Interaction and maintenance guide",
@@ -281,6 +290,90 @@
           ]
         }
       ]
+    },
+    {
+      "id": "governance-service-readiness-goal",
+      "title": "Define accountable services and reviewed operating terms",
+      "description": "Proposed future Goal grounded in the unresolved Contract decisions and service worksheet. Identify the actual provider, participant relationships, authority, operating contact, deliverable help, response commitment, failure/challenge route and data responsibilities before adopting terms. Hero 3 defines exact consent/retention presentation and supplies comprehension evidence; Hero 11 implements versioned notices, assent records and demonstrable service operations. Adopted text would need exact retained versions rather than a changing terms URL. Hero 5 defines the proposed dispute procedure and permitted consequences; this Goal frames provider/resolver accountability, jurisdiction review and challenge or independent scrutiny of that role. Hero 7 supplies significant-harm and coverage requirements. Service notice duties need reconciliation between Hero 5's domain requirements and Hero 2's silent work-privacy policy, with Hero 3's presentation, Hero 8's workflow semantics and Hero 11's delivery records. Delivery, reading, sufficient notice, acknowledgment and consent remain distinct, without resuming sensing. Mediation, optional assurance and financial protection remain distinct. Provider, staffing, terms and jurisdiction are unselected; neither database state nor institutional approval creates missing contractual powers.",
+      "milestones": [
+        {
+          "id": "governance-service-operating-decisions",
+          "title": "Resolve the recorded decisions before offering real services",
+          "description": "The Contract notes explicitly retain unresolved service-provider, jurisdiction/audience, work-responsibility, consent, payment, liability, data and key-operation decisions. The service worksheet leaves the actual provider, operating owner/contact, response commitment, delivery evidence, optional fee, failure route and data handling UNSELECTED. Requester-funded services, free Operator registration and free mediation are recorded product directions; amounts, charging events and actual service terms remain unresolved. No responsible provider, selected pilot jurisdiction, operating service commitment or adopted production terms are evidenced here.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "evidence": [
+            {
+              "label": "Explicit unresolved decisions before real terms",
+              "path": "docs/notes/assignments/CONTRACT_NOTES.md#decisions-needed-before-adopting-real-terms"
+            },
+            {
+              "label": "Unselected service and accountability worksheet",
+              "path": "docs/notes/assignments/CONTRACT_NOTES.md#unadopted-service-decision-worksheet"
+            },
+            {
+              "label": "Draft principles and unselected legal implementation",
+              "path": "GOVERNANCE.md"
+            },
+            {
+              "label": "Adopted domain boundaries and unresolved notice/accountability handoff",
+              "path": "docs/notes/WORKSTREAMS.md#disputes-material-incidents-and-institutional-responsibility"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "governance-institutional-safeguards-goal",
+      "title": "Translate draft principles into accountable institutions",
+      "description": "Proposed future Goal grounded in GOVERNANCE.md, which remains draft constitutional design v0.1. Explore legal form, contracts, control rights and observable behavior protecting the project's purpose and three-party invariant. Open choices include constitutional authority, reserved matters, amendment rules, conflicts, stewardship incentives, founder succession, financing/control changes, bounded emergency powers and treatment of obligations/assets on failure or dissolution. Hero 6 develops union membership, ballots, collective authority, policy changes and a union-specific pilot proposal; this Goal considers the union's accountable legal relationship to Non Verba and institutional funding/representation choices. Completion-ballot weighting must not silently determine constitutional or administrative authority. Hero 5 defines contractual dispute powers; forming an institution does not add them. No legal form, body, voting threshold or adoption process is selected.",
+      "milestones": []
+    },
+    {
+      "id": "governance-sustainable-economics-goal",
+      "title": "Define sustainable economics consistent with participant rights",
+      "description": "Proposed future Goal grounded in the draft purpose/surplus principles and requester-funded product direction. Examine Non Verba service costs, Request-creation charging, optional-service fees, resilience, reserves, surplus and financing without weakening protected rights. Free Operator registration/mediation, direct Requester-to-Operator task payment and no commission or deduction from Operator compensation remain recorded design directions; prices, charging events, budgets and commitments are unresolved. Hero 3 handles signed fee obligations and participant explanations; Hero 11 implements any separately authorized billing/provider interface. Hero 7 researches insurance-specific risk quality, pricing, funding, reserves and surplus options, comparing institutional alternatives; this Goal addresses project-wide operating economics and review/adoption of the actual entity's responsibilities. No coverage, entity, funding, solvency or tariff is established.",
+      "milestones": []
+    },
+    {
+      "id": "governance-bounded-pilot-goal",
+      "title": "Choose a bounded pilot scope and jurisdiction",
+      "description": "Proposed future Goal grounded in the workstream direction and unresolved launch decisions. Choose participants, locations, work categories and services, then determine the admission, qualification, protection and support that pilot would need. Explicit practical start/stop responsibility must address access, supplied inputs and safe stopping; protocol ready_to_start or three signatures do not authorize physical work. Jurisdiction, audience, exposure limits and success criteria remain unselected. The respective Heroes would supply physical-evidence, identity/privacy, participant, Android and hosted-operation capabilities and results; Heroes 5 and 7 would define applicable dispute and incident/coverage arrangements. Hero 6's union pilot proposal would inform its own participation scope, rather than confer overall launch authority. A proposal, an authorized pilot, observed outcomes and wider deployment would remain separate records.",
+      "milestones": []
+    },
+    {
+      "id": "governance-independent-review-goal",
+      "title": "Obtain independent security, privacy and release review",
+      "description": "Proposed future Goal extending READINESS.md's deployment-review work. Define independent reviewer/remit, required evidence, findings and residual-risk handling for the actual proposed service/release. Review would address consent/identity, sensitive-data purposes, recipients/retention, biometric/model/training-data licensing, key custody/recovery, dependencies, storage/crash and distribution/update trust. Hero 2 develops assurance and privacy boundaries; Hero 3 supplies consent/comprehension evidence; Hero 10 supplies exact package/source/signer, supported-device and update-continuity results; Hero 11 demonstrates access controls, backups/restore and technical service/security-event operations. Relevant scope also needs Hero 1's physical assurance, Heroes 5/6/7's domain validation and Hero 8's workflow/agent conformance. Joint review work must name one primary Hero, contributors, output/dependency interfaces and shared evidence, retaining each scoped result without duplicate completion claims. Corrections stay with the contributing domains. This Goal frames reviewer independence and institutional custody/accountability for owner/adoption decisions; no approving person or institution is selected. Synthetic checks, source availability, debug installation and local document reviews do not establish independent operational acceptance. Reviewer, timetable and sign-off remain unresolved.",
+      "milestones": [
+        {
+          "id": "governance-independent-deployment-review",
+          "title": "Complete the independent reviews required before deployment",
+          "description": "The readiness record calls for review of actual consent and identity, service/employment/consumer classification, payment control, protection/insurance, privacy/retention and enforceability for the selected jurisdiction before real-money or protection deployment. It also requires independent implementation, dependency, storage/crash, key-custody and distribution/update review before advertising complete mediator resistance. Existing component tests and bounded documentation reviews do not establish those deployment outcomes. Reviewer, scope, schedule, findings, sign-off and launch authority are not recorded; a real launch gate remains unconfirmed.",
+          "status": "proposed",
+          "updatedAt": "2026-10-16",
+          "evidence": [
+            {
+              "label": "Explicit deployment review work and unsupported capabilities",
+              "path": "docs/requests/READINESS.md#unsupported-or-unreviewed-capabilities"
+            },
+            {
+              "label": "Limits of prior documentation review",
+              "path": "docs/notes/assignments/CONTRACT_NOTES.md#provenance-and-updating-this-record"
+            },
+            {
+              "label": "Adopted validation responsibilities and distinct scoped outcomes",
+              "path": "docs/notes/WORKSTREAMS.md#reasoning-and-cross-cutting-assurance"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "governance-launch-accountability-goal",
+      "title": "Define a launch gate and continuing public accountability",
+      "description": "Proposed future Goal grounded in the absence of a real launch gate and GOVERNANCE.md's transparency, emergency and failure principles. Decide who could authorize a bounded launch, which service-specific evidence and review findings would inform it, how residual risks/limitations would be disclosed, and when changes would require reconsideration, pause or withdrawal. Keep software conformance, physical-device results, participant comprehension, hosted operating demonstrations, independent review and an actual authorized decision distinct. This Goal owns the prospective record of actual institutional pilot/launch adoption, including the selected authority, scope, versioned terms/policies, relied-on evidence and unresolved conditions; a planning brief or favorable review is not that adoption. Explore meaningful reporting of promises, rights/control changes, conflicts, exceptions and outcomes while preserving privacy and outstanding obligations. Technical service/security-event operations belong with Hero 11; Assignment significant-harm response belongs with Hero 7. Launch authority, criteria, reporting and oversight remain undefined. Governance roadmap ownership grants no institutional authority, dependency ordering or permission to operate.",
+      "milestones": []
     }
   ]
 }

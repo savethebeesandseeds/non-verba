@@ -1,30 +1,38 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Four frozen comparison arms. Geometry agreement supplies no normative authority.
-import {readFile, writeFile, mkdir, link, unlink, stat} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, link, unlink, stat, readdir} from 'node:fs/promises';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
 import {digest, sha256, requireContainer} from '../../lib/common.mjs';
 import {validateStudyRoot, studyPath, hashFile, readJSON, readRows, writeRows, openDatabase, sqlQuote} from './store.mjs';
 import {atomicJSON} from './workflow.mjs';
-import {createBatchEmbedder, createArtifactBatchEmbedder, normalizeFloat32} from './embedding.mjs';
+import {createBatchEmbedder, createArtifactBatchEmbedder, normalizeFloat32,prepareEmbeddingInput,createPinnedTokenCounter,embeddingCacheKey,embeddingWindowPolicy} from './embedding.mjs';
+import {createStudyNativeInputLoader} from './analysis.mjs';
 import {createChunkVectorCache} from './vector-cache.mjs';
+import {sourceNavigationLabel,verifySourceNavigation,HEADING_INPUT_POLICY,LEGACY_HEADING_INPUT_POLICY,modelInputIdentity,NATIVE_REPRESENTATION_POLICY} from './representation.mjs';
+import {NATIVE_DECORATION_INPUT_POLICY} from './source-decoration.mjs';
+import {verifyCalibrationGate} from './quality.mjs';
+import {assertNoUnresolvedSourceIssues} from './source-issues.mjs';
 import {createBalancedReservoir, fitMiniBatch, assignVectors, evaluationDigest, comparePartitions, exactSmallComparator} from './geometry.mjs';
 
 const directory = dirname(fileURLToPath(import.meta.url));
 const cohorts = new Set(['discovery-broad', 'discovery-relevant']);
 const schema = {id:'VARCHAR', contract_id:'VARCHAR', cohort:'VARCHAR', kind:'VARCHAR', payload:'VARCHAR'};
-const policy = Object.freeze({version:'frozen-four-arm-sensitivity-v1', chunk_units:500, exact_subset:2000, per_family:2,
+const policy = Object.freeze({version:'frozen-four-arm-sensitivity-v3-contiguous-native-source-span', chunk_units:500, exact_subset:2000, per_family:2,
+  native_input:NATIVE_DECORATION_INPUT_POLICY,native_representation:NATIVE_REPRESENTATION_POLICY,native_memory:'Hydrate, encode and infer one current source unit at a time; never retain a 500-contract array of full native views.',
+  arm_identifiers:'Historical IDs containing heading are compatibility identifiers. Current native representation fields select contiguous source spans with navigation metadata excluded; legacy unavailable inputs retain their historical prefix.',
+  native_lexical:'Production native source windows using the verified baseline tokenizer, joined with a literal newline; retain every annotation and encoded window without truncation.',
   context:'At most 60 nearest complete whitespace words in the verified actual parent: 30 each side, unused capacity redistributed; no relevance ranker.',
   lexical:'UTF-8 FNV1a32 namespaced word/bigram buckets, high-bit sign, per-feature sublinear TF, unsigned bucket DF on the frozen training subset, smooth IDF, final L2 normalization.',
   exact:{maximum_rows:2000, repeats:1, max_iterations:30, silhouette_sample_size:64, representative_count:1},
   selection_ties:'sha256(seed + colon + unit ID), then unit ID; contract round robin by SHA256 contract priority',
   evaluation:'Common frozen discovery units; in-sample geometric comparison, not heldout or blinded validation.'});
 const armDefinitions = [
-  {id:'baseline-heading-unit', representation:'heading-plus-unit', model:'baseline'},
-  {id:'baseline-parent-context', representation:'heading-plus-verified-parent-context', model:'baseline'},
-  {id:'second-model-heading-unit', representation:'heading-plus-unit', model:'second'},
-  {id:'lexical-heading-unit', representation:'heading-plus-unit', model:'lexical'}
+  {id:'baseline-heading-unit', representation:'unit-source-span', model:'baseline'},
+  {id:'baseline-parent-context', representation:'verified-parent-context-source-span', model:'baseline'},
+  {id:'second-model-heading-unit', representation:'unit-source-span', model:'second'},
+  {id:'lexical-heading-unit', representation:'unit-source-span', model:'lexical'}
 ];
 
 function identityOf(value) {const {manifest_path, ...record} = value; return digest(record);}
@@ -45,7 +53,7 @@ async function binary(run, name, vectors) {
   await mkdir(dirname(path), {recursive:true});
   try {const old = await readFile(path); if (sha256(old) !== sha256(bytes)) throw new Error('Immutable comparison vector shard differs.'); return receipt(run, name);}
   catch (error) {if (error.code !== 'ENOENT') throw error;}
-  const temporary = `${path}.partial-${randomUUID()}`;
+  const temporary = `${path}.${randomUUID()}.partial`;
   try {await writeFile(temporary, bytes, {flag:'wx'}); await link(temporary, path);}
   finally {await unlink(temporary).catch(error=>{if (error.code !== 'ENOENT') throw error;});} return receipt(run, name);
 }
@@ -92,17 +100,19 @@ export function verifiedParentRepresentation(unit, parent, normalized, contextWo
   if (![parent.start,parent.end,unit.start,unit.end].every(Number.isSafeInteger) || parent.start < 0 || parent.end > normalized.length || parent.start > unit.start || unit.end > parent.end || unit.start > unit.end) throw new Error('Verified parent does not contain the exact admitted unit span.');
   if (!validHash(unit.sha256) || sha256(unit.text) !== unit.sha256 || normalized.slice(unit.start,unit.end) !== unit.text) throw new Error('Unit text/hash differs from its normalized source span.');
   if (!validHash(parent.sha256) || sha256(normalized.slice(parent.start,parent.end)) !== parent.sha256) throw new Error('Parent text/hash differs from its normalized source span.');
+  verifySourceNavigation(unit,normalized);
   const before = nearestWords(normalized,parent.start,unit.start,true); const after = nearestWords(normalized,unit.end,parent.end,false);
   let left = Math.min(30,before.length); let right = Math.min(30,after.length);
   left += Math.min(60-left-right,before.length-left); right += Math.min(60-left-right,after.length-right);
   const beforeStart = left ? before[before.length-left].start : unit.start;
   const afterEnd = right ? after[right-1].end : unit.end;
-  const heading = (unit.heading_path || []).join(' > ') || unit.heading || '';
-  return {primary:`${heading}\n${unit.text}`, contextual:`${heading}\n${normalized.slice(beforeStart,afterEnd)}`,
+  const heading = sourceNavigationLabel(unit);
+  const currentNative=unit.native_source_decorations_ref!==undefined||unit.native_source_decorations!==undefined;
+  return {primary:currentNative?unit.text:`${heading}\n${unit.text}`, contextual:currentNative?normalized.slice(beforeStart,afterEnd):`${heading}\n${normalized.slice(beforeStart,afterEnd)}`,
     provenance:{unit_id:unit.id, parent_section_id:parent.id, unit_sha256:unit.sha256, parent_sha256:parent.sha256, heading_sha256:sha256(heading),
       unit_start:unit.start, unit_end:unit.end, parent_start:parent.start, parent_end:parent.end, context_start:beforeStart, context_end:afterEnd,
       before_words:left, after_words:right, maximum_neighbor_words:60, offsets:'JavaScript UTF16 normalized-source offsets, not raw byte offsets',
-      policy:policy.context, inherited_heading_is_provisional:true}};
+      policy:policy.context, heading_input_policy:currentNative?HEADING_INPUT_POLICY:LEGACY_HEADING_INPUT_POLICY, heading_source:currentNative?'EXCLUDED_NAVIGATION_METADATA_ONLY':Object.hasOwn(unit,'source_navigation')?'LITERAL_SOURCE_NAVIGATION_UNVERIFIED':'LEGACY_INHERITED_HEADING_UNVERIFIED', inherited_heading_is_provisional:true}};
 }
 
 function featureHash(value) {let hash = 2166136261; for (const byte of Buffer.from(value, 'utf8')) hash = Math.imul(hash ^ byte, 16777619) >>> 0; return hash;}
@@ -124,11 +134,13 @@ export function lexicalVector(text, model) {
 }
 
 async function sourceBindings() {
-  const names = ['sensitivity.mjs','embedding.mjs','geometry.mjs','vector-cache.mjs','store.mjs','workflow.mjs','../../lib/common.mjs','../../lib/discover.mjs','../../package-lock.json','../comparison-recipe.json'];
+  const names = ['sensitivity.mjs','representation.mjs','embedding.mjs','analysis.mjs','source-decoration.mjs','native-decoration-store.mjs','sections.mjs','source-issues.mjs','quality.mjs','audit.mjs','geometry.mjs','vector-cache.mjs','store.mjs','workflow.mjs','../../lib/common.mjs','../../lib/discover.mjs','../../package-lock.json','../comparison-recipe.json'];
   const files = []; for (const name of names) {const bytes = await readFile(resolve(directory,name)); files.push({path:name,bytes:bytes.length,sha256:sha256(bytes)});} return files;
 }
 async function qualityGate(run, admission, fullTarget) {
   const source = admission.input?.extraction_source_sha256; if (!validHash(source)) throw new Error('Admission must bind its exact extraction source identity.');
+  let authoritative=null;
+  if(fullTarget){await assertNoUnresolvedSourceIssues(run,source);authoritative=await verifyCalibrationGate(run);if(authoritative.source_sha256!==source)throw new Error('Full sensitivity admission differs from the authoritative current extraction source');}
   const path = `quality-gates/${source}/gate.json`; const gate = await optional(run,path);
   if (!gate) {if (fullTarget) throw new Error('Full comparison requires the exact source-specific calibration quality gate; no inference started.'); return {status:'NOT_AVAILABLE_PRE_GATE_ENGINEERING_ONLY',path,source_sha256:source,semantic_validity_established:false};}
   const fresh = gate.fresh_audit;
@@ -141,8 +153,59 @@ async function qualityGate(run, admission, fullTarget) {
     if (name) {const record = await receipt(run,name); if (record.sha256 !== hash) throw new Error('Quality-gate actual judge-record digest differs.'); reviews.push(record);}
   }
   if (fullTarget && reviews.length !== 2) throw new Error('Full comparison gate must bind both actual development and fresh judge-record paths.');
-  return {status:gate.status,binding:await receipt(run,path),source_sha256:source,calibration_extraction:calibrationBinding,fresh_audit:fresh,review_bindings:reviews,
+  return {status:gate.status,binding:await receipt(run,path),source_sha256:source,calibration_extraction:calibrationBinding,fresh_audit:fresh,review_bindings:reviews,verification_scope:fullTarget?'AUTHORITATIVE_CURRENT_SOURCE_AND_GLOBAL_HOLD':'STORED_GATE_METADATA_ONLY_PARTIAL_ENGINEERING',...(authoritative?{authoritative}:{}),
     semantic_validity_established:false,interpretation:'Passing representation audit permits this engineering comparison; it does not validate prior meanings or participant suitability.'};
+}
+
+/** Public real check for callers/tests; stored passing JSON is insufficient. */
+export async function verifyFullSensitivityGate(run,admission){requireContainer();return qualityGate(run,admission,true);}
+
+async function gateFingerprint(run,source){
+  const entries=[];
+  for(const name of ['source-issues/observed',`source-issues/resolutions/${source}`,'representation-issues/observed',`representation-issues/resolutions/${source}`]){
+    let files;try{files=await readdir(await studyPath(run,name),{withFileTypes:true});}catch(error){if(error.code==='ENOENT'){entries.push({directory:name,files:[]});continue;}throw error;}
+    if(files.length>1000||files.some(file=>!file.isFile()||!/^issue-[a-f0-9]{64}\.json$/u.test(file.name)))throw new Error('Source gate registry fingerprint has unsupported entries');
+    const boundFiles=[];for(const file of files.sort((a,b)=>a.name.localeCompare(b.name))){const path=`${name}/${file.name}`,binding=await hashFile(await studyPath(run,path));if(binding.bytes>1024**2)throw new Error('Source gate registry fingerprint exceeds its metadata bound');boundFiles.push({path,...binding});}entries.push({directory:name,files:boundFiles});
+  }
+  const path=`quality-gates/${source}/gate.json`;let gate;try{gate={path,...await hashFile(await studyPath(run,path))};}catch(error){if(error.code!=='ENOENT')throw error;gate=null;}
+  const policyPath=`representation-issues/replay-policies/${source}.json`,replayControls=[];
+  let replayPolicy=null;try{replayPolicy=await readJSON(run,policyPath,{maxBytes:128*1024});}catch(error){if(error.code!=='ENOENT')throw error;}
+  if(replayPolicy){
+    if(replayPolicy.schema!=='partial-representation-replay-policy-v1'||replayPolicy.extraction_source_sha256!==source)throw new Error('Replay policy control scope differs');
+    const policyBinding=await hashFile(await studyPath(run,policyPath));if(policyBinding.bytes>128*1024)throw new Error('Replay policy control exceeds its metadata bound');replayControls.push({path:policyPath,...policyBinding});
+    for(const ref of [replayPolicy.protocol_ref,replayPolicy.reviewer_assignments]){
+      if(typeof ref?.path!=='string'||!validHash(ref.sha256)||!Number.isSafeInteger(ref.bytes)||ref.bytes<1||ref.bytes>128*1024)throw new Error('Exact bounded replay policy control reference required');
+      const actual=await hashFile(await studyPath(run,ref.path));if(actual.sha256!==ref.sha256||actual.bytes!==ref.bytes)throw new Error('Replay policy control binding differs');
+      replayControls.push({path:ref.path,...actual});
+    }
+  }
+  const observed=entries.filter(entry=>entry.directory.endsWith('/observed')).flatMap(entry=>entry.files);
+  return {sha256:digest({gate,entries,replayControls}),observed_paths:observed.map(file=>file.path),observed_refs:observed};
+}
+
+/** Content checks detect gate/registry changes between bounded full checks.
+ * The production verifier is hard-wired, including in synthetic tests. */
+export async function createSensitivitySourceGuard(run,admission,{fullTarget=false}={}){
+  requireContainer();if(typeof fullTarget!=='boolean')throw new Error('Explicit full-target source guard scope required');
+  if(!fullTarget)return {scope:'PARTIAL_PRE_GATE_ENGINEERING_ONLY',checkpoint:async()=>{},beforeInference:async()=>{}};
+  const source=admission.input?.extraction_source_sha256;if(!validHash(source))throw new Error('Full sensitivity source guard requires its admission source');
+  let verified=null,gateSHA=null;const observed=new Map(),memoryPath=`sensitivity-source-guards/${source}/observed`;
+  const remember=async ref=>{
+    if(!/^(?:source-issues|representation-issues)\/observed\/issue-[a-f0-9]{64}\.json$/u.test(ref?.path??'')||!validHash(ref.sha256)||!Number.isSafeInteger(ref.bytes)||ref.bytes<1||ref.bytes>1024**2)throw new Error('Persisted source guard requires exact bounded observed receipt references');
+    const previous=observed.get(ref.path);if(previous&&digest(previous)!==digest(ref))throw new Error('Previously observed source-issue receipt changed; no inference may replace a known issue');
+    if(!previous){const name=(ref.path.startsWith('representation-issues/')?'representation-':'')+ref.path.split('/').at(-1);await json(run,`${memoryPath}/${name}`,{schema:'sensitivity-observed-source-reference-v1',source_sha256:source,issue:ref,authority:'NONE'});observed.set(ref.path,ref);}
+  };
+  let retained=[];try{retained=await readdir(await studyPath(run,memoryPath),{withFileTypes:true});}catch(error){if(error.code!=='ENOENT')throw error;}
+  if(retained.length>2000||retained.some(file=>!file.isFile()||!/^(?:representation-)?issue-[a-f0-9]{64}\.json$/u.test(file.name)))throw new Error('Persisted source guard contains unsupported records');
+  for(const file of retained){const record=await readJSON(run,`${memoryPath}/${file.name}`,{maxBytes:4096}),expected=file.name.startsWith('representation-')?`representation-issues/observed/${file.name.slice('representation-'.length)}`:`source-issues/observed/${file.name}`;if(record.schema!=='sensitivity-observed-source-reference-v1'||record.source_sha256!==source||record.authority!=='NONE'||record.issue?.path!==expected)throw new Error('Persisted source guard record differs');await remember(record.issue);}
+  // The sealed gate is an independent historical snapshot even if this stage
+  // has never run before. Remember it before testing today's registry contents.
+  const sealed=await optional(run,`quality-gates/${source}/gate.json`),legacySeed=sealed?.observed_source_issues?.issues??[],representationSeed=sealed?.observed_source_issues?.representation_issues?.issues??[];
+  if(!Array.isArray(legacySeed)||legacySeed.length>1000||!Array.isArray(representationSeed)||representationSeed.length>1000)throw new Error('Sealed observed-source snapshot exceeds its bound');for(const item of [...legacySeed,...representationSeed])await remember(item.issue);
+  const retainedIssues=async state=>{const current=new Map(state.observed_refs.map(ref=>[ref.path,ref]));for(const [path,ref]of observed){if(!current.has(path))throw new Error('Previously observed source-issue receipt removed; no inference may forget a known issue');if(digest(current.get(path))!==digest(ref))throw new Error('Previously observed source-issue receipt changed; no inference may replace a known issue');}for(const ref of state.observed_refs)await remember(ref);};
+  const checkpoint=async()=>{const before=await gateFingerprint(run,source);await retainedIssues(before);const result=await verifyFullSensitivityGate(run,admission);const after=await gateFingerprint(run,source);await retainedIssues(after);if(before.sha256!==after.sha256)throw new Error('Source gate/registry changed during authoritative verification; retry before inference');if(gateSHA!==null&&gateSHA!==result.binding.sha256)throw new Error('Frozen full-target quality-gate bytes changed; retry with a new study identity');gateSHA=result.binding.sha256;verified=after.sha256;return result;};
+  const beforeInference=async()=>{const current=await gateFingerprint(run,source);await retainedIssues(current);if(current.sha256!==verified)await checkpoint();};
+  await checkpoint();return {scope:'AUTHORITATIVE_FULL_TARGET_CHECKPOINTS',checkpoint,beforeInference};
 }
 
 async function frozenSelection(run, admission, comparison, prefix, db) {
@@ -186,7 +249,7 @@ async function freezeInputs(run, admission, selection, prefix, db, tracker, log)
   const extractionEncoding = declared===extractionBinding.sha256?'exact-file-sha256':'canonical-finite-json-sha256';
   if (extraction.source?.sha256 !== admission.input.extraction_source_sha256) throw new Error('Extraction source identity differs from sensitivity admission.');
   const contracts = new Map((extraction.contract_records||[]).map(row=>[row.id,row])); if (contracts.size !== (extraction.contract_records||[]).length) throw new Error('Extraction contract identity is repeated.');
-  const normalizedBindings = new Map(); const loaded = new Map(); const shards = []; let total = 0;
+  const normalizedBindings = new Map(); const loaded = new Map(); const shards = []; let total = 0;const prepareNative=createStudyNativeInputLoader(run,admission);
   for (let start=0; start<selection.rows.length; start+=500) {
     const desired = selection.rows.slice(start,start+500); const ids = desired.map(row=>sqlQuote(row.id));
     const found = (await db.connection.runAndReadAll(`SELECT u.id,u.contract_id,u.cohort,u.payload,json_extract_string(p.payload,'$.id') AS parent_id,json_extract_string(p.payload,'$.contract_id') AS parent_contract_id,json_extract_string(p.payload,'$.cohort') AS parent_cohort,p.cohort AS parent_row_cohort,json_extract(p.payload,'$.start') AS parent_start,json_extract(p.payload,'$.end') AS parent_end,json_extract_string(p.payload,'$.sha256') AS parent_sha256 FROM units u LEFT JOIN parents p ON p.id=json_extract_string(u.payload,'$.parent_section_id') WHERE u.id IN (${ids.join(',')})`)).getRowObjectsJS();
@@ -215,11 +278,15 @@ async function freezeInputs(run, admission, selection, prefix, db, tracker, log)
       const payload = {row:frozen,primary:representation.primary,contextual:representation.contextual,source_text:unit.text,
         primary_sha256:sha256(representation.primary),contextual_sha256:sha256(representation.contextual),source_url:unit.source_url||null,
         provenance:{...representation.provenance,normalized_path:unit.normalized_path,normalized_sha256:record.normalized_sha256,raw_source_sha256:record.raw_sha256}};
+      if(unit.native_source_decorations_ref){
+        const primary=await prepareNative(unit),contextual=await prepareNative(unit,{bodyRange:{start:representation.provenance.context_start,end:representation.provenance.context_end}});
+        payload.native={source_unit:unit,primary:{descriptor:primary.native_input.descriptor,input_sha256:modelInputIdentity(primary).input_sha256},contextual:{descriptor:contextual.native_input.descriptor,input_sha256:modelInputIdentity(contextual).input_sha256}};
+      }else if(record.native_source_decorations)throw new Error('Current native comparison unit lost its source reference; plain fallback forbidden');
       inputs.push({id:unit.id,contract_id:unit.contract_id,cohort:unit.cohort,kind:'FROZEN_SENSITIVITY_INPUT',payload:JSON.stringify(payload)});
     }
     const path = `${prefix}/inputs/batch-${String(start/500).padStart(6,'0')}.parquet`; shards.push(await shard(run,path,inputs)); total += inputs.length; tracker.sample(); log(`Frozen verified comparison inputs: ${total}/${selection.selected_units}`);
   }
-  const result = {schema_version:2,status:'ALL_INPUT_STRINGS_FROZEN_BEFORE_INFERENCE',rows:total,ordered_units_sha256:selection.ordered_units_sha256,shards,
+  const result = {schema_version:2,status:'ALL_SOURCE_STRINGS_AND_NATIVE_DESCRIPTORS_FROZEN_BEFORE_INFERENCE',rows:total,ordered_units_sha256:selection.ordered_units_sha256,shards,
     source_bindings:[extractionBinding,...[...normalizedBindings.values()].sort((a,b)=>a.path.localeCompare(b.path,'en'))],verified_parent_coverage:total/selection.selected_units,
     extraction_manifest_digest_encoding:extractionEncoding,extraction_manifest_exact_file_binding:extractionBinding,context_neighbor_word_limit:60,source_representation_is_provisional:true,reserve_accessed:false};
   const binding = await json(run,`${prefix}/inputs/manifest.json`,result); return {...result,binding};
@@ -239,11 +306,47 @@ async function* inputBatches(run, inputs, selection) {
   if (ordinal!==selection.selected_units) throw new Error('Comparison inputs omit frozen identities.');
 }
 
-async function lexicalModel(run, inputs, selection, prefix) {
+/** Shared preparation for every arm. Persisted descriptors authenticate source
+ * selection; only the loader can restore the private native view for encoding.
+ */
+export async function prepareSensitivityInput(item,definition,prepareNative){
+  if(!['unit-source-span','verified-parent-context-source-span'].includes(definition?.representation))throw new Error('Comparison requires the current contiguous source-span representation policy');
+  const contextual=definition.representation==='verified-parent-context-source-span',text=contextual?item.contextual:item.primary;
+  if(!item.native)return {id:item.row.id,contextual_text:text};
+  if(!item.native.source_unit?.native_source_decorations_ref)throw new Error('Frozen native sensitivity source reference is missing');
+  const source=item.native.source_unit;
+  const aligned=unit=>unit?.id===item.row.id&&unit.contract_id===item.row.contract_id&&unit.cohort===item.row.cohort&&cohorts.has(unit.cohort)&&(unit.family_id??unit.id)===(item.row.family_id??item.row.id);
+  if(!aligned(source))throw new Error('Frozen native sensitivity outer/source identity, cohort or family differs');
+  const expected=contextual?item.native.contextual:item.native.primary,prepared=await prepareNative(item.native.source_unit,contextual?{bodyRange:{start:item.provenance.context_start,end:item.provenance.context_end}}:{}),identity=modelInputIdentity(prepared);
+  if(!aligned(prepared)||identity.native_evidence_status!=='BOUND_NATIVE_SOURCE_EVIDENCE'||identity.input_sha256!==expected.input_sha256||digest(identity.native_representation)!==digest(expected.descriptor))throw new Error('Frozen native sensitivity prepared identity or source descriptor differs');
+  return prepared;
+}
+
+function nativeModelProvenance(prepared,engine,metadata){
+  if(typeof engine.tokenCount!=='function'||!validHash(engine.window_policy_sha256))throw new Error('Native comparison proof requires the actual model tokenizer/window policy');
+  const policy=engine.window_policy,result=prepareEmbeddingInput(prepared,engine.tokenCount,{maxTokens:policy.max_tokens,overlapWords:policy.overlap_words,maxWords:policy.max_words_per_unit});
+  if(metadata?.unit_id!==prepared.id||metadata.window_policy_sha256!==engine.window_policy_sha256||metadata.model_revision!==engine.model.revision||metadata.cache_key!==embeddingCacheKey(result.input.input_sha256,engine.model.revision,engine.window_policy_sha256)||Object.keys(result.input).some(key=>digest(metadata[key]??null)!==digest(result.input[key])))throw new Error('Native comparison model provenance differs from actual source windows');
+  return result.input;
+}
+function nativeLexicalProvenance(prepared,tokenCounter,metadata,trainingSHA){
+  const {text:ignored,...expected}=sensitivityLexicalInput(prepared,tokenCounter);
+  if(metadata?.unit_id!==prepared.id||metadata.lexical_training_sha256!==trainingSHA||Object.keys(expected).some(key=>digest(metadata[key]??null)!==digest(expected[key])))throw new Error('Native lexical provenance differs from actual source windows');
+}
+
+export function sensitivityLexicalInput(prepared,tokenCounter){
+  const identity=modelInputIdentity(prepared);
+  if(!prepared.native_input)return {text:identity.text,input_sha256:identity.input_sha256,native_evidence_status:identity.native_evidence_status};
+  if(!tokenCounter?.tokenCount||!validHash(tokenCounter.policy_sha256))throw new Error('Native lexical input requires the verified baseline tokenizer');
+  const result=prepareEmbeddingInput(prepared,tokenCounter.tokenCount),text=result.windows.map(window=>window.text).join('\n');
+  return {text,input_sha256:identity.input_sha256,native_evidence_status:identity.native_evidence_status,encoded_sha256:sha256(text),tokenizer_policy_sha256:tokenCounter.policy_sha256,window_policy:result.policy,windows:result.input.windows};
+}
+
+async function lexicalModel(run, inputs, selection, prefix,prepareNative,tokenCounter,guard) {
   const training = new Set(selection.training.unit_ids); const df = new Uint32Array(2048); let documents=0; let tokens=0; let features=0;
-  for await (const batch of inputBatches(run,inputs,selection)) for (const item of batch) if (training.has(item.row.id)) {
-    const feature = lexicalFeatures(item.primary); for (const bucket of feature.present) df[bucket]++; documents++; tokens+=feature.tokens; features+=feature.features;
-  }
+  for await (const batch of inputBatches(run,inputs,selection)){await guard.checkpoint();for (const item of batch) if (training.has(item.row.id)) {
+    await guard.beforeInference();
+    const prepared=await prepareSensitivityInput(item,armDefinitions[3],prepareNative),actual=sensitivityLexicalInput(prepared,tokenCounter),feature = lexicalFeatures(actual.text); for (const bucket of feature.present) df[bucket]++; documents++; tokens+=feature.tokens; features+=feature.features;
+  }}
   if (documents!==training.size) throw new Error('Lexical DF omits a frozen training unit.');
   const model = {schema_version:2,method:'signed-hashed-word-bigram-tfidf',dimensions:2048,documents,training_sha256:selection.training.sha256,document_frequency:Array.from(df),
     idf:Array.from(df,n=>Math.log((1+documents)/(1+n))+1),policy:policy.lexical,lowercase:true,min_token_chars:2,normalization:'final L2',tokens,features,
@@ -261,36 +364,49 @@ async function readVectorShard(run,item,selection,armId) {
   return {manifest,vectors:decode(bytes,manifest.dimensions,manifest.rows)};
 }
 
-async function runArm(run, definition, engine, lexical, inputs, selection, comparison, prefix, tracker, log) {
+async function runArm(run, definition, engine, lexical, inputs, selection, comparison, prefix, tracker, log,prepareNative,tokenCounter,guard) {
   const dimensions = definition.model==='lexical' ? 2048 : engine.model.dimensions;
   if (definition.model!=='lexical' && dimensions!==384) throw new Error('Comparison model dimensions must match the frozen 384-dimension CPU recipe.');
   const embeddingSource = (await sourceBindings()).find(item=>item.path==='embedding.mjs').sha256;
   const cache = engine ? await createChunkVectorCache(run,{model:engine.model,window_policy:engine.window_policy,embedding_source:embeddingSource},{dimensions}) : null;
   const armPrefix = `${prefix}/${definition.id}`; const shards = []; let ordinal=0; let hits=0; let newUnits=0; let calls=0; const started=Date.now();
   for await (const batch of inputBatches(run,inputs,selection)) {
+    await guard.checkpoint();
     const path = `${armPrefix}/batch-${String(ordinal++).padStart(6,'0')}.json`; const ids = batch.map(item=>item.row.id);
-    const texts = batch.map(item=>definition.representation==='heading-plus-verified-parent-context'?item.contextual:item.primary); const inputHash = digest(texts.map(sha256));
+    const texts = batch.map(item=>definition.representation==='verified-parent-context-source-span'?item.contextual:item.primary),keys=batch.map((item,i)=>item.native?(definition.representation==='verified-parent-context-source-span'?item.native.contextual:item.native.primary).input_sha256:sha256(texts[i])); const inputHash = digest(keys);
     let retained = await optional(run,path);
     if (retained) {
       if (retained.arm!==definition.id || retained.dimensions!==dimensions || retained.ordered_ids_sha256!==digest(ids) || retained.input_sha256!==inputHash || retained.frozen_units_sha256!==selection.ordered_units_sha256 || retained.rows!==batch.length || retained.inputs?.length!==batch.length) throw new Error('Comparison resume arm inputs changed.');
       const expectedModel = engine?.model||{method:lexical.method,dimensions:2048,model_binding:lexical.binding};
       if (digest(retained.model)!==digest(expectedModel) || digest(retained.window_policy)!==digest(engine?.window_policy||null)) throw new Error('Comparison resume model or window policy differs.');
-      for (let i=0;i<ids.length;i++) if (retained.inputs[i].unit_id!==ids[i] || retained.inputs[i].input_sha256!==sha256(texts[i])) throw new Error('Comparison resume ordered input provenance differs.');
+      for (let i=0;i<ids.length;i++) if (retained.inputs[i].unit_id!==ids[i] || retained.inputs[i].input_sha256!==keys[i]) throw new Error('Comparison resume ordered input provenance differs.');
+      for(let i=0;i<ids.length;i++)if(batch[i].native){const prepared=await prepareSensitivityInput(batch[i],definition,prepareNative);if(engine)nativeModelProvenance(prepared,engine,retained.inputs[i]);else nativeLexicalProvenance(prepared,tokenCounter,retained.inputs[i],lexical.training_sha256);}
       await bound(run,retained.vectors); decode(await readFile(await studyPath(run,retained.vectors.path)),dimensions,batch.length);
     } else {
-      const packed = new Float32Array(batch.length*dimensions); const records = new Array(batch.length); const missing = []; let cacheHits=0;
+      const packed = new Float32Array(batch.length*dimensions); const records = new Array(batch.length); const missing = []; let cacheHits=0,directNative=0;
       if (engine) {
-        for (let i=0; i<batch.length; i++) {const found = await cache.get(sha256(texts[i])); if (found) {packed.set(found.vector,i*dimensions); records[i]={...found.input,unit_id:ids[i]}; cacheHits++;} else missing.push({id:ids[i],contextual_text:texts[i],index:i});}
+        for (let i=0; i<batch.length; i++) {
+          const found = await cache.get(keys[i]);if(found){if(batch[i].native)nativeModelProvenance(await prepareSensitivityInput(batch[i],definition,prepareNative),engine,found.input);packed.set(found.vector,i*dimensions);records[i]={...found.input,unit_id:ids[i]};cacheHits++;continue;}
+          if(batch[i].native){
+            // Await and release each authenticated view before hydrating the
+            // next round-robin contract. Vectors/receipts are the only retained data.
+            const prepared=await prepareSensitivityInput(batch[i],definition,prepareNative);await guard.beforeInference();const fresh=await engine.embedUnits([prepared]);calls++;
+            if(fresh.dimensions!==dimensions||fresh.inputs.length!==1||fresh.packed_vectors.length!==dimensions||fresh.inputs[0].input_sha256!==keys[i])throw new Error('Native comparison inference differs from frozen source identity');
+            nativeModelProvenance(prepared,engine,fresh.inputs[0]);
+            packed.set(fresh.packed_vectors,i*dimensions);records[i]={...fresh.inputs[0],unit_id:ids[i]};await cache.put(fresh);directNative++;
+          }else missing.push({id:ids[i],contextual_text:texts[i],index:i});
+        }
         if (missing.length) {
+          await guard.beforeInference();
           const fresh = await engine.embedUnits(missing); calls++;
           if (fresh.dimensions!==dimensions || fresh.inputs.length!==missing.length || fresh.packed_vectors.length!==missing.length*dimensions) throw new Error('Comparison inference output does not align with actual frozen inputs.');
           for (let i=0; i<missing.length; i++) {if (fresh.inputs[i].input_sha256!==sha256(missing[i].contextual_text)) throw new Error('Comparison inference used a different text.'); packed.set(fresh.packed_vectors.subarray(i*dimensions,(i+1)*dimensions),missing[i].index*dimensions); records[missing[i].index]={...fresh.inputs[i],unit_id:missing[i].id};}
           await cache.put(fresh);
         }
-      } else for (let i=0; i<batch.length; i++) {packed.set(lexicalVector(texts[i],lexical),i*dimensions); records[i]={unit_id:ids[i],input_sha256:sha256(texts[i]),lexical_training_sha256:lexical.training_sha256};}
+      } else for (let i=0; i<batch.length; i++) {await guard.beforeInference();const prepared=await prepareSensitivityInput(batch[i],definition,prepareNative),actual=sensitivityLexicalInput(prepared,tokenCounter);packed.set(lexicalVector(actual.text,lexical),i*dimensions);const {text:ignored,...provenance}=actual;records[i]={unit_id:ids[i],...provenance,lexical_training_sha256:lexical.training_sha256};}
       const vectorReceipt = await binary(run,`${armPrefix}/batch-${String(ordinal-1).padStart(6,'0')}.f32`,packed);
       retained = {schema_version:2,arm:definition.id,representation:definition.representation,rows:batch.length,dimensions,unit_ids:ids,ordered_ids_sha256:digest(ids),
-        frozen_units_sha256:selection.ordered_units_sha256,input_sha256:inputHash,inputs:records,vectors:vectorReceipt,encoding:'float32-le',cache_hits:cacheHits,new_units:engine?missing.length:batch.length,
+        frozen_units_sha256:selection.ordered_units_sha256,input_sha256:inputHash,inputs:records,vectors:vectorReceipt,encoding:'float32-le',cache_hits:cacheHits,new_units:engine?missing.length+directNative:batch.length,
         model:engine?.model||{method:lexical.method,dimensions:2048,model_binding:lexical.binding},window_policy:engine?.window_policy||null,synthetic_runtime:engine?.window_policy?.runtime==='DECLARED_SYNTHETIC_INJECTED_RUNTIME',execution_attested:false};
       await json(run,path,retained);
     }
@@ -343,6 +459,44 @@ async function geometryForArm(run, arm, selection, comparison, prefix, tracker) 
 }
 
 /** Explicit factory injection is labelled synthetic; it never establishes a real-study result. */
+async function verifyCompletedProvenance(run,admission,existing,inputs,selection,{recipe,comparison,comparisonModel,synthetic,createBaselineEmbedder,createSecondEmbedder,guard}){
+  const expected=armDefinitions.map(({id,model,representation})=>({id,model,representation,rows:selection.selected_units}));
+  if(digest(existing.arms?.map(({id,model,representation,rows})=>({id,model,representation,rows}))??null)!==digest(expected))throw new Error('Completed sensitivity arm identities or row counts differ');
+  await bound(run,existing.lexical_model);
+  const prepareNative=createStudyNativeInputLoader(run,admission),engines=new Map();let lexicalCounter=null,lexicalModel=null;
+  const engineFor=async definition=>{
+    if(engines.has(definition.model))return engines.get(definition.model);
+    const config={...(definition.model==='second'?comparison.secondModel:recipe.embedding),max_units:500,token_budget:recipe.embedding.tokenBudget};
+    let engine;
+    if(synthetic)engine=definition.model==='second'?await createSecondEmbedder(config,comparisonModel,{log:()=>{}}):await createBaselineEmbedder(config,{log:()=>{}});
+    else{const counter=await createPinnedTokenCounter(config,definition.model==='second'?{manifest:comparisonModel}:{}),window_policy=embeddingWindowPolicy(config,counter.model);if(definition.model==='baseline')lexicalCounter=counter;engine={model:counter.model,tokenCount:counter.tokenCount,window_policy,window_policy_sha256:digest(window_policy)};}
+    engines.set(definition.model,engine);return engine;
+  };
+  try{
+    for(const [index,definition]of armDefinitions.entries()){
+      await guard.checkpoint();const arm=existing.arms[index];await bound(run,arm.manifest);const record=await readJSON(run,arm.manifest.path),dimensions=definition.model==='lexical'?2048:384;let ordinal=0,shardIndex=0;
+      if(arm.dimensions!==dimensions||record.dimensions!==dimensions||record.arm!==definition.id)throw new Error('Completed sensitivity arm dimensions or identity differ');
+      for await(const batch of inputBatches(run,inputs,selection)){
+        await guard.checkpoint();const item=record.shards[shardIndex++];if(!item)throw new Error('Completed sensitivity arm omits an input batch');await bound(run,item);
+        const {manifest:retained}=await readVectorShard(run,item,selection,definition.id),ids=batch.map(item=>item.row.id),keys=batch.map(item=>item.native?(definition.representation==='verified-parent-context-source-span'?item.native.contextual:item.native.primary).input_sha256:sha256(definition.representation==='verified-parent-context-source-span'?item.contextual:item.primary));
+        if(retained.dimensions!==dimensions||retained.rows!==batch.length||digest(retained.unit_ids)!==digest(ids)||retained.input_sha256!==digest(keys)||retained.inputs?.length!==batch.length)throw new Error('Completed sensitivity ordered input provenance differs');
+        for(let i=0;i<batch.length;i++){
+          if(retained.inputs[i].unit_id!==ids[i]||retained.inputs[i].input_sha256!==keys[i])throw new Error('Completed sensitivity ordered input provenance differs');
+          if(!batch[i].native)continue;
+          const prepared=await prepareSensitivityInput(batch[i],definition,prepareNative);await guard.beforeInference();
+          if(definition.model==='lexical'){
+            lexicalCounter??=await createPinnedTokenCounter(recipe.embedding);lexicalModel??=await readJSON(run,existing.lexical_model.path);nativeLexicalProvenance(prepared,lexicalCounter,retained.inputs[i],lexicalModel.training_sha256);
+          }else{
+            const engine=await engineFor(definition);if(digest(retained.model)!==digest(engine.model)||digest(retained.window_policy)!==digest(engine.window_policy))throw new Error('Completed sensitivity model or window policy differs');nativeModelProvenance(prepared,engine,retained.inputs[i]);
+          }
+        }
+        ordinal+=retained.rows;
+      }
+      if(ordinal!==selection.selected_units||shardIndex!==record.shards.length)throw new Error('Completed sensitivity arm omits or adds retained rows');
+    }
+  }finally{for(const engine of engines.values())await engine.dispose?.();}
+}
+
 export async function runSensitivity(runDirectory, admission, {log=console.log, createBaselineEmbedder=createBatchEmbedder, createSecondEmbedder=createArtifactBatchEmbedder}={}) {
   requireContainer(); const run = validateStudyRoot(runDirectory); const tracker = memoryTracker();
   if (!admission || admission.authority!=='NONE' || admission.adopted_catalog===true || admission.gates?.reserve_accessed===true) throw new Error('Sensitivity requires research-only discovery admission with reserve untouched.');
@@ -364,24 +518,29 @@ export async function runSensitivity(runDirectory, admission, {log=console.log, 
     inputs = await freezeInputs(run,admission,selection,prefix,db,tracker,log);
   } finally {db.close();}
   tracker.sample();
+  const guard=await createSensitivitySourceGuard(run,admission,{fullTarget:selection.selected_units===comparison.unitTarget});
   const existing = await optional(run,finalName);
   if (existing) {
     const {manifest_sha256,...payload} = existing; if (manifest_sha256!==digest(payload)) throw new Error('Completed comparison manifest checksum differs.');
     if (digest(existing.identity)!==digest(identity) || existing.selection.sha256!==selection.binding.sha256 || existing.inputs.sha256!==inputs.binding.sha256 || digest(existing.quality_gate)!==digest(gate)) throw new Error('Completed comparison identity or gate changed; preserved.');
     for (const item of existing.artifact_bindings) await bound(run,item);
-    for (const arm of existing.arms) {const record = await readJSON(run,arm.manifest.path); let total=0; for (const item of record.shards) {await bound(run,item); const retained=await readVectorShard(run,item,selection,arm.id); total+=retained.manifest.rows;} if (total!==selection.selected_units) throw new Error('Retained comparison arm omits rows.');}
-    return {...existing,manifest_path:finalName};
+    await verifyCompletedProvenance(run,admission,existing,inputs,selection,{recipe,comparison,comparisonModel,synthetic,createBaselineEmbedder,createSecondEmbedder,guard});
+    await guard.checkpoint();return {...existing,manifest_path:finalName};
   }
   // This receipt is committed before either model is constructed or any inference begins.
   const preInference = await json(run,`${prefix}/pre-inference-freeze.json`,{schema_version:2,status:'FROZEN_BEFORE_INFERENCE',identity,selection:selection.binding,inputs:inputs.binding,quality_gate:gate,
     common_training_sha256:selection.training.sha256,common_evaluation_sha256:selection.evaluation.sha256,exact_subset_sha256:selection.exact.sha256});
-  const started = Date.now(); const lexical = await lexicalModel(run,inputs,selection,prefix); const arms = []; const partitions = []; let exactComparison=null;
+  const prepareNative=createStudyNativeInputLoader(run,admission);let nativeInputs=false;for await(const batch of inputBatches(run,inputs,selection))if(batch.some(item=>item.native)){nativeInputs=true;break;}
+  await guard.checkpoint();const tokenCounter=nativeInputs?await createPinnedTokenCounter(recipe.embedding):null;
+  const started = Date.now(); const lexical = await lexicalModel(run,inputs,selection,prefix,prepareNative,tokenCounter,guard); const arms = []; const partitions = []; let exactComparison=null;
   for (const definition of armDefinitions) {
     let engine=null;
     try {
+      await guard.checkpoint();
       if (definition.model==='baseline') engine=await createBaselineEmbedder({...recipe.embedding,max_units:500,token_budget:recipe.embedding.tokenBudget},{log});
       if (definition.model==='second') engine=await createSecondEmbedder({...comparison.secondModel,max_units:500,token_budget:recipe.embedding.tokenBudget},comparisonModel,{log});
-      const arm = await runArm(run,definition,engine,lexical,inputs,selection,comparison,prefix,tracker,log);
+      await guard.checkpoint();const arm = await runArm(run,definition,engine,lexical,inputs,selection,comparison,prefix,tracker,log,prepareNative,tokenCounter,guard);
+      await guard.checkpoint();
       const geometric = await geometryForArm(run,arm,selection,comparison,prefix,tracker);
       arms.push({id:definition.id,model:definition.model,representation:definition.representation,rows:arm.rows,dimensions:arm.dimensions,manifest:arm.binding,geometry:geometric.binding,effective_k:geometric.effective_k,
         ordered_units_sha256:arm.ordered_units_sha256,training_sha256:geometric.training_sha256,evaluation_sha256:geometric.evaluation_sha256});
@@ -402,5 +561,6 @@ export async function runSensitivity(runDirectory, admission, {log=console.log, 
       'Agreement at fixed k64 can reflect templates and bargaining conventions; frequency is not normative validity.','Exact comparator uses <=2000 frozen baseline units and distinct initialization; it cannot certify full-corpus equivalence.',
       'Only bounded training/evaluation subsets are resident; binary vector shards remain preserved for source-bound replay.','Measured process-memory samples do not establish a continuous operating-system peak.']};
   const manifest = {...result,manifest_sha256:digest(result)};
+  await guard.checkpoint();
   await json(run,finalName,manifest); return {...manifest,manifest_path:finalName};
 }

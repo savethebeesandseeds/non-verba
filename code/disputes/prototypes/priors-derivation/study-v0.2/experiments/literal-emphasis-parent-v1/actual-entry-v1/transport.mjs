@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Closed worker IPC, never an arbitrary execution or IO callback.
+import {immutableCopy} from '../immutable-state.mjs';
+import {assertPermit} from './admission.mjs';
+const owned=new WeakSet();
+const error=code=>Object.assign(Error(code),{code});
+export function assertTransport(value){if(!owned.has(value))throw error('EXACT69_OWNED_TRANSPORT_REQUIRED');return value;}
+export function createWorkerTransport(init){
+  if(typeof process.send!=='function'||!process.connected||init?.type!=='INIT'||init.schema!=='pilot-owned-worker-init-v1')throw error('EXACT69_REGISTERED_IPC_REQUIRED');let pending=null,sequence=0;
+  const send=value=>{if(!process.connected)throw error('EXACT69_GUARDIAN_DISCONNECTED');process.send(value);};
+  process.on('message',message=>{if(!pending||message.request_id!==pending.id)return;if(message.type==='WRITE_GRANTED'&&pending.phase==='GRANT'){pending.phase='COMMIT';pending.resolve(message.request_id);}else if(message.type==='WRITE_VERIFIED'&&pending.phase==='VERIFY'){const finish=pending.resolve;pending=null;finish();}else if(message.type==='WRITE_DENIED'){const fail=pending.reject;pending=null;fail(error('EXACT69_WRITE_DENIED'));}});
+  process.on('disconnect',()=>{if(pending){pending.reject(error('EXACT69_GUARDIAN_DISCONNECTED'));pending=null;}});
+  const value=Object.freeze({kind:'OWNED_GUARDIAN_IPC',init:immutableCopy(init),requestWrite(request){if(pending)throw error('EXACT69_WRITE_ALREADY_PENDING');const id='write-'+(++sequence);return new Promise((resolve,reject)=>{pending={id,phase:'GRANT',resolve,reject};send({type:'WRITE_REQUEST',request_id:id,...request});});},committed(id,ref,decoded_sha256,decoded_bytes){if(!pending||pending.id!==id||pending.phase!=='COMMIT')throw error('EXACT69_UNGRANTED_COMMIT');return new Promise((resolve,reject)=>{pending={id,phase:'VERIFY',resolve,reject};send({type:'WRITE_COMMITTED',request_id:id,ref,decoded_sha256,decoded_bytes});});},progress(record){send({type:'PROGRESS',...record});},done(record){if(pending)throw error('EXACT69_PENDING_WRITE_AT_DONE');return new Promise((resolve,reject)=>{if(!process.connected){reject(error('EXACT69_GUARDIAN_DISCONNECTED'));return;}process.send({type:'DONE',...record},err=>err?reject(err):resolve());});}});owned.add(value);return value;
+}
+/** Pure declared control transport, no actual authority, callbacks or IPC. */
+export function createFixtureTransportForControl(root,permit){assertPermit(permit,root);const records=[];let sequence=0,pending=null;const value=Object.freeze({kind:'DECLARED_LOCAL_CONTROL_NOT_GUARDIAN',requestWrite(request){if(pending)throw error('EXACT69_WRITE_ALREADY_PENDING');pending='control-'+(++sequence);records.push({type:'WRITE_REQUEST',request_id:pending,...immutableCopy(request)});return Promise.resolve(pending);},committed(id,ref,decoded_sha256,decoded_bytes){if(id!==pending)throw error('EXACT69_UNGRANTED_COMMIT');records.push({type:'WRITE_COMMITTED',request_id:id,ref:immutableCopy(ref),decoded_sha256,decoded_bytes});pending=null;return Promise.resolve();},progress(record){records.push({type:'PROGRESS',...immutableCopy(record)});},done(record){records.push({type:'DONE',...immutableCopy(record)});},snapshot(){return immutableCopy(records);}});owned.add(value);return value;}

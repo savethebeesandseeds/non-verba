@@ -3,26 +3,27 @@
   "id": "identity",
   "number": 2,
   "title": "Identity, authentication and work privacy",
-  "summary": "Keep local inspection prototypes distinct from verified accounts, genuine authentication and account-wide privacy enforcement.",
-  "updatedAt": "2026-10-14",
+  "summary": "Local registration drafts, device-local face continuity and simulated work privacy are implemented. Proposed future Goals cover account trust, genuine authentication and enforceable privacy; verified accounts and cross-device enforcement remain unimplemented.",
+  "updatedAt": "2026-10-16",
   "goals": [
     {
       "id": "identity-account-trust-goal",
       "title": "Local registration inspection",
-      "description": "Reviewed local Operator and Requester drafts; this component creates no verified account or published profile.",
+      "description": "Prepare reviewed, self-reported Operator and Requester records in page memory. Account creation, contact ownership, identity/certification verification, account recovery and publication remain unimplemented; the roadmap does not establish agreed implementation milestones for them.",
       "milestones": [
         {
           "id": "identity-registration-prototype",
           "title": "Local Operator and Requester registration inspection",
-          "description": "The reusable guided browser flow prepares reviewed local records with optional accessibility/certification information and limited public-field choices. The 9 October milestone creates no server account, verified identity or published profile.",
+          "description": "The 9 October browser component prepares synthetic local drafts through shared Rust policy and a reusable workflow. Requesters have five guided steps; Operators have a sixth, separate face-enrollment step. Form details remain in page memory, while deliberate face-reference retention has the separate persistence boundary recorded below. Preparation issues no account, verified identity, signing authority or work/sensor grant and publishes or transmits nothing.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-09",
           "acceptance": [
-            "Both roles prepare only the deliberately reviewed draft.",
-            "Optional private fields stay out of the public candidate unless explicitly eligible and selected.",
-            "Edits, reset and late replies cannot restore stale review or private form data."
+            "Both roles require a current review and deliberate preparation; edits and changed/deleted Operator references invalidate review and preparation.",
+            "Accessibility notes and certifications are optional and self-reported. The public candidate permits only explicitly selected display name and organization, both off by default; private contact/legal details, notes, credential references and face data stay excluded even when future counterparty sharing is selected.",
+            "Reset, departure and reload discard form drafts and results; delayed replies cannot restore stale review or private form data. Reset/reload does not delete a separately committed face reference.",
+            "Compiled-WASM browser checks exercise both roles, privacy defaults, safe review, invalid inputs, imported trust-claim rejection and stale/reset replies without account services or physical sensors."
           ],
           "evidence": [
             {
@@ -32,6 +33,10 @@
             {
               "label": "9 October validation",
               "path": "docs/development/VALIDATION.md#isolated-registration-pipelines--9-october-2026"
+            },
+            {
+              "label": "Face-integrated registration regressions",
+              "path": "docs/development/VALIDATION.md#selected-operator-face-components--9-october-2026"
             }
           ]
         }
@@ -40,20 +45,23 @@
     {
       "id": "identity-presence-assurance-goal",
       "title": "Local face-reference prototype",
-      "description": "Consented local reference handling and experimental comparison; real-person accuracy and liveness remain unverified.",
+      "description": "Consented local Operator reference handling and experimental comparison under synthetic account bindings. Threshold calibration, liveness, trusted capture, real-person accuracy and older-phone performance remain unverified; Requesters have no face requirement.",
       "milestones": [
         {
           "id": "identity-face-prototype",
-          "title": "Local Operator face reference and comparison",
-          "description": "The selected local face pipeline implements account-bound encrypted reference retention, explicit replacement/deletion and experimental feature comparison. The 9 October component validation used synthetic inputs; it measured no real-person accuracy or phone performance and establishes no liveness, legal identity or genuine authentication.",
+          "title": "Local Operator face reference and experimental comparison",
+          "description": "The pinned 128D MobileFaceNet/YuNet browser pipeline implements local detection/alignment, feature comparison and encrypted IndexedDB reference retention. The 9 October checks exercised the real CPU-WASM runtime and shared Rust policy with synthetic streams, tensors and features. They establish component behavior, not real-person accuracy, liveness, trusted capture, legal identity, genuine authentication or phone performance. The encrypted reference and its usable non-extractable key share the browser origin; this is not a server vault, backup or cross-device store. Native Android staging excludes this browser model bundle.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-09",
           "acceptance": [
-            "Operator reference processing and retention require deliberate consent and review.",
+            "Operator capture requires deliberate processing consent and a bounded camera-only operation; the camera closes before inference. Retention separately requires review and explicit consent, storing features and reference metadata rather than the photograph.",
+            "References bind the synthetic account/principal and selected model profile. Deliberate replacement/deletion checks the exact current reference ID; changed references and delayed inference or policy replies cannot restore stale authority or review.",
+            "Committed references persist across form reset/reload until explicitly replaced or deleted; transient cleanup discards capture media and features without silently deleting retained references. Unreadable references fail closed and require deliberate recovery actions.",
             "Requester paths instantiate no face model or biometric reference store.",
-            "Transient captures are discarded and experimental comparison preserves unresolved assurance."
+            "Missing/incompatible references or models, invalid acquisition, unset threshold, match and nonmatch remain distinct. The default threshold is unset; an entered threshold is uncalibrated, and every result keeps genuine authentication, verified presence and work authority false.",
+            "Synthetic Rust/adapter and compiled-WASM browser checks cover storage, reference races, cleanup and comparison outcomes; real-runtime synthetic tensor checks establish interface/parity behavior without measuring biometric accuracy."
           ],
           "evidence": [
             {
@@ -71,20 +79,23 @@
     {
       "id": "identity-work-privacy-goal",
       "title": "Authentication and work-state inspection",
-      "description": "Isolated policy and browser lifecycle behavior with simulated linked devices; account-wide enforcement remains unimplemented.",
+      "description": "Isolated authentication/reuse policy and browser resource lifecycle with simulated linked devices, profiles and notification dispositions. Real account/device authorization, native integration, privacy-state transport, delivered notifications and account-wide sensor enforcement remain unimplemented.",
       "milestones": [
         {
           "id": "identity-privacy-prototype",
           "title": "Isolated authentication and work-state policies",
-          "description": "The 8 October developer inspection implements shared Rust policy plus browser cancellation, leases, callback fencing, local work state and simulated linked-device behavior. Genuine authentication and global sensor shutdown remain false.",
+          "description": "The 8 October developer inspection implements shared Rust authentication/work-state policy plus browser cancellation, resource cleanup, leases, callback fencing and simulated linked devices. Genuine authentication and account-wide protection remain false in every result; other developer tools are not governed by this controller. Thirty-second sensor leases and five-minute authentication validity are fixtures, not selected production policy. The 9 October face-component run retained focused authentication/privacy regression coverage.",
           "status": "done",
           "owner": null,
-          "updatedAt": "2026-10-14",
+          "updatedAt": "2026-10-16",
           "completedAt": "2026-10-08",
           "acceptance": [
-            "Inspect authentication reuse, hold/clock-out and sensor-access policy independently.",
-            "Cancellation and lifecycle loss discard transient authority and fence late results.",
-            "Reload never restores active operations or sensor grants."
+            "Both modes distinguish capture from validation and simulation; reuse checks account/principal, mode, policy, scope, freshness, expiry and revocation. Imported claims or stripped simulation labels cannot establish genuine authentication; the Requester method remains unspecified.",
+            "Within the inspection controller, hold/clock-out/sign-out revoke active operation authority. The deliberately started authentication exception permits only camera use on its initiating operation/device, leaves work stopped and cannot override a newer stop decision.",
+            "Cancellation, lifecycle loss and lease expiry stop inspection resources and fence late callbacks; pending or failed cleanup is reported without false shutdown confirmation.",
+            "Simulated disconnected devices remain unconfirmed; lease expiry alone is not a remote shutdown acknowledgment. Reconnection requires new operation authority.",
+            "Synthetic policy keeps hold notifications normal and clock-out/sign-out silent, with profiles visible without fresh sensing. It performs no push delivery or real discovery publication.",
+            "Reload retains only the local work decision and fixture clock offset, never active operations or sensor grants. Browser checks use synthetic streams, not physical sensor-shutdown or cross-device trials."
           ],
           "evidence": [
             {
@@ -94,10 +105,62 @@
             {
               "label": "8 October validation",
               "path": "docs/development/VALIDATION.md#isolated-authentication-and-work-privacy--8-october-2026"
+            },
+            {
+              "label": "9 October authentication/privacy regressions",
+              "path": "docs/development/VALIDATION.md#selected-operator-face-components--9-october-2026"
             }
           ]
         }
       ]
+    },
+    {
+      "id": "identity-account-enrollment-goal",
+      "title": "Trustworthy account enrollment and linking",
+      "description": "Proposed future work: define how a deliberately reviewed local registration becomes a confirmed account with verified contact ownership. Resolve account/principal identifiers, role changes, uniqueness, duplicate handling and safe retry/error recovery. Select any Google/provider linking flow, scopes, conflict handling, unlinking and recovery explicitly; provider login must not imply legal identity or certification verification. Identity defines the trust requirements; Server side services supplies durable enrollment and account records, while Assignments and participant experience and APK buildout supply the integrated journey. No provider or deployment choice is made here.",
+      "milestones": []
+    },
+    {
+      "id": "identity-registration-verification-goal",
+      "title": "Explicit registration identity assurance",
+      "description": "Proposed future work: decide when each participant role needs identity verification and what assurance a resulting decision actually establishes. Choose evidence, validators, review/appeal, account/reference binding and evidence recipients, retention and deletion. Keep contact ownership, supplied names, organization claims, face enrollment continuity and recurring authentication distinguishable from verified identity. No identity-proof method or universal verification requirement is selected. Governance and launch readiness must address the applicable institutional and product rules; Server side services and APK buildout would implement the selected record and collection boundaries.",
+      "milestones": []
+    },
+    {
+      "id": "identity-certification-assurance-goal",
+      "title": "Trustworthy certification status",
+      "description": "Proposed future work: define a separate certification-verification process rather than promoting self-reported registration entries into trusted qualifications. Resolve issuer lookup or evidence review, credential identifiers, pending/verified/rejected/expired outcomes, renewal, revocation and disputed decisions. Certifications remain optional at registration; any task-specific qualification requirement belongs to Assignments and participant experience. Server side services would retain and refresh selected verification records under the sensitive-data policy. Issuers, methods, task eligibility rules and sharing authority remain unselected.",
+      "milestones": []
+    },
+    {
+      "id": "identity-keys-devices-recovery-goal",
+      "title": "Account key control, authorized devices and recovery",
+      "description": "Proposed future work: establish who controls an account's keys and which devices may act for its principal, including enrollment approval, session/key binding, revocation, lost-device recovery and authorized rebinding after compromise. Preserve historical evidence and rights when designing rotation or recovery. Existing Android key attestation and artifact signatures provide bounded key evidence, not a verified human or a general account-recovery service. Define responsible principals and delegated account/device authority for organizations, teams and agents. Assignments retains exact Contract consent and action-specific authorization; Dispute procedure defines settlement authority, Cooperation and the Operators union defines membership and ballot authorization, and Governance addresses institutional adoption. Login, a face match or delegated account access grants none of those powers by itself. APK buildout implements native key handling; Server side services and Durable infrastructure supply selected durable records and synchronization.",
+      "milestones": []
+    },
+    {
+      "id": "identity-genuine-authentication-goal",
+      "title": "Genuine, reusable role-aware authentication",
+      "description": "Proposed future work: turn the isolated authentication policy into a trusted account-bound workflow for login, explicit clock-in and tasks that require a check. Select the Requester method and the credential/assurance inputs required for each mode; Requesters retain no face requirement. Define trustworthy completion time, validity, revocation, permitted reuse scope, task freshness and recovery without assuming daily or per-task capture. Authentication must remain separate from availability, task acceptance, signing authority and sensor consent. Server side services must provide real session authority; Assignments and participant experience, APK buildout and agent interfaces must preserve these distinctions at their callers.",
+      "milestones": []
+    },
+    {
+      "id": "identity-operator-assurance-goal",
+      "title": "Evaluated Operator continuity, liveness and capture assurance",
+      "description": "Proposed future work: evaluate the exact selected face pipeline and decide how comparison, account credentials, liveness and trusted capture would combine into an Operator authentication decision. Calibrate an explicitly chosen low false-match operating point while accounting for acquisition failures, relevant people/capture conditions, aging references and deliberate attacks. Select production capture, threshold, reference-version and recovery policies; no liveness method or production threshold is selected. Measure complete latency, RAM and battery on representative older phones with APK buildout. Identity defines face-assurance and enrolled-key requirements; Sensor hardening owns general measurement provenance, capture-time evidence requirements and substitution evaluation, with APK implementing selected native interfaces. Synthetic parity checks remain separate from real-person and physical-device results.",
+      "milestones": []
+    },
+    {
+      "id": "identity-enforced-work-privacy-goal",
+      "title": "Enforceable hold, clock-out and sign-out across devices",
+      "description": "Proposed future work: enforce the agreed work/privacy boundary across every app, native and agent sensor path, stopping active collection and rejecting stale grants or callbacks. Policy inputs must bind the authorized principal/device/operation, current account work-state revision, purpose, sensors, recipients, consent and validity. The deliberate authentication-camera exception stays bound to its initiating device/operation and current revision; authentication or reconnect alone cannot resume work or revive cancelled operations. Resolve real authority provenance, sign-out session invalidation, offline bounds, conflicts, shutdown timing and acknowledgments; lease expiry alone cannot confirm an unreachable device stopped. Identity defines those policy requirements; Durable infrastructure defines grant, revocation, cancellation and observed-shutdown semantics; Server side services implements hosted state/notification enforcement and APK implements native controls. Preserve discoverability without sensing and define normal/silent notification and interrupted-evidence behavior. Reconcile silent clock-out/sign-out with domain notice requirements without resuming sensing; delivery, reading, sufficient notice, acknowledgment and consent remain distinct. Integrated physical multi-device validation remains future work.",
+      "milestones": []
+    },
+    {
+      "id": "identity-sensitive-data-lifecycle-goal",
+      "title": "Protected identity, accessibility and biometric data lifecycles",
+      "description": "Proposed future work: define product storage, transport, access controls, recipients, retention, correction/deletion, backup and recovery for private registration, accessibility, credential and face data before retaining real participant information. Decide cross-device reference handling and explain limits of deleting already shared copies; browser-origin encryption alone is insufficient account protection and authorizes no central biometric store. Scope sharing to a named purpose/recipient, require deliberate profile preview/publication, and exclude private notes and authentication media from discovery and ordinary task evidence. Dispute and incident Heroes define case-specific scrutiny, preservation and recipient needs; the union defines membership/ballot disclosure and challenges. Such access does not automatically expose private identity/authentication media or all member records, or authorize underwriting reuse. Identity supplies common custody/access requirements, Server side services hosted enforcement, APK local controls, and Assignments disclosure flows; Governance supplies institutional/privacy review, notices and biometric/model/training-data/license review for owner decisions.",
+      "milestones": []
     }
   ]
 }

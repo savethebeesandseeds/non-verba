@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Prospective typed-focal revision. No source text, filesystem or callbacks.
+import {immutableCopy} from '../immutable-state.mjs';
+import {sha,digest} from '../finite-codec.mjs';
+import {SAMPLING_POLICY,checkedFreshGuard,CURRENT_SOURCE} from '../pilot-sampling.mjs';
+export const POLICY=immutableCopy({...SAMPLING_POLICY,id:'PROTOTYPE_PROSPECTIVE_TYPED_FOCAL_45_PLUS24_V2',rank_identifier:'EXACT_FOCAL_ID_IN_FORMER_UNIT_ID_POSITION',parent_anchor:'FOCAL_PARENT_ANCHOR_IS_NOT_A_COMPARISON_STUDY_UNIT',unavailable:'DECLARED_EXISTING_REJECTED_OR_UNAVAILABLE_ANCHOR_INELIGIBLE; MANDATORY_UNAVAILABLE_HOLDS; ORIGINAL_IDS_AND_DENOMINATORS_RETAINED',failure_substitution:false});
+const HASH=/^[a-f0-9]{64}$/u;
+const KEYS=new Set(['audit_id','contract_id','focal_kind','focal_id','focal_start','focal_end','focal_sha256','parent_id','parent_start','parent_end','parent_sha256','source_sha256','metadata_basis_sha256','development_row','raw_path','raw_sha256','raw_bytes','normalized_path','normalized_sha256','cache_path','cache_sha256','cache_bytes','cache_receipt_sha256','native_reference_sha256','css_emphasis_sources','native_mark_sources','emphasized_caption_count','joint_groups','zero_events','parent_units']);
+export function checkedFocal(input,{fixture=false}={}){
+  if(!input||Object.keys(input).some(k=>!KEYS.has(k))||Object.keys(input).length!==KEYS.size)throw Error('EXACT69_TYPED_SOURCE_ONLY_METADATA_REQUIRED');
+  const row=immutableCopy(input);for(const key of ['audit_id','contract_id','focal_id','parent_id','raw_path','normalized_path','cache_path'])if(typeof row[key]!=='string'||!row[key])throw Error('EXACT69_METADATA_ID_REQUIRED');
+  for(const key of ['focal_sha256','parent_sha256','source_sha256','metadata_basis_sha256','raw_sha256','normalized_sha256','cache_sha256','cache_receipt_sha256','native_reference_sha256'])if(!HASH.test(row[key]??''))throw Error('EXACT69_METADATA_HASH_REQUIRED');
+  for(const key of ['focal_start','focal_end','parent_start','parent_end','raw_bytes','cache_bytes','css_emphasis_sources','native_mark_sources','emphasized_caption_count','joint_groups','zero_events','parent_units'])if(!Number.isSafeInteger(row[key])||row[key]<0)throw Error('EXACT69_METADATA_COUNT_REQUIRED');
+  if(row.development_row!==true||!fixture&&row.source_sha256!==CURRENT_SOURCE||fixture&&!row.contract_id.startsWith('SYNTHETIC_'))throw Error('EXACT69_CURRENT_DEVELOPMENT_REQUIRED');
+  if(!['ACTUAL_UNIT','FOCAL_PARENT_ANCHOR'].includes(row.focal_kind)||row.focal_start<row.parent_start||row.focal_end<=row.focal_start||row.focal_end>row.parent_end)throw Error('EXACT69_TYPED_FOCAL_GEOMETRY');
+  if(row.focal_kind==='FOCAL_PARENT_ANCHOR'&&(row.focal_id!==row.parent_id||row.focal_start!==row.parent_start||row.focal_end!==row.parent_end||row.focal_sha256!==row.parent_sha256))throw Error('EXACT69_PARENT_ANCHOR_IDENTITY');
+  return row;
+}
+const eligible=(r,s)=>s==='CSS_EMPHASIS_PROXY'?r.css_emphasis_sources+r.native_mark_sources+r.emphasized_caption_count>0:s==='PARENT_DISTANCE_GEOMETRY_PROXY'?Math.max(r.focal_start-r.parent_start,r.parent_end-r.focal_end)>=512:r.joint_groups+r.zero_events>0||r.native_mark_sources>=32||r.parent_end-r.parent_start>=8192||r.parent_units>=8;
+export function selectTypedFocals({rows,mandatoryAuditIds,freshGuard,ineligibleRows=[],fixture=false}){
+  if(!Array.isArray(rows)||!Array.isArray(mandatoryAuditIds)||mandatoryAuditIds.length!==45||new Set(mandatoryAuditIds).size!==45)throw Error('EXACT69_45_MANDATORY_IDS_REQUIRED');
+  const guard=checkedFreshGuard(freshGuard),pool=rows.map(r=>checkedFocal(r,{fixture})),byId=new Map();for(const row of pool){if(byId.has(row.audit_id))throw Error('EXACT69_DUPLICATE_AUDIT_ID');byId.set(row.audit_id,row);}
+  const mandatory=[],missing=[],protectedMandatory=[],unavailableMandatory=[];for(const id of mandatoryAuditIds){const row=byId.get(id);if(!row){if(ineligibleRows.some(r=>r.audit_id===id))unavailableMandatory.push(id);else missing.push(id);continue;}mandatory.push(row);if(guard.contract_ids.includes(row.contract_id))protectedMandatory.push(id);}
+  const focalIds=new Set(mandatory.map(r=>r.focal_id)),contracts=new Set(mandatory.map(r=>r.contract_id)),mandatorySet=new Set(mandatoryAuditIds),additional=[],shortages=[];
+  const candidates=pool.filter(r=>!guard.contract_ids.includes(r.contract_id)&&!mandatorySet.has(r.audit_id)&&!focalIds.has(r.focal_id)&&!contracts.has(r.contract_id));
+  const rank=r=>sha(JSON.stringify([POLICY.seed,r.contract_id,r.focal_id,r.audit_id]));
+  for(const rule of POLICY.additional){let n=0;for(const row of candidates.filter(r=>eligible(r,rule.stratum)).sort((a,b)=>rank(a).localeCompare(rank(b))||a.audit_id.localeCompare(b.audit_id))){if(n===rule.quota)break;if(contracts.has(row.contract_id)||focalIds.has(row.focal_id))continue;additional.push({stratum:rule.stratum,row});contracts.add(row.contract_id);focalIds.add(row.focal_id);n++;}if(n<rule.quota)shortages.push({stratum:rule.stratum,wanted:rule.quota,selected:n,missing:rule.quota-n});}
+  const ordered=[...mandatory,...additional.map(a=>a.row)],body={schema:'typed-focal-prospective69-freeze-v2',status:missing.length||protectedMandatory.length||unavailableMandatory.length||shortages.length?'HELD_INCOMPLETE_PLAN':'ORDERED69_METADATA_FROZEN_NOT_SOURCE_AUTHORIZATION',policy:POLICY,pool_sha256:digest(pool),fresh_guard_sha256:guard.projection_sha256,mandatory_ids:mandatoryAuditIds,mandatory,additional,ordered,missing_mandatory:missing,protected_mandatory:protectedMandatory,unavailable_mandatory:unavailableMandatory,ineligible_rows:ineligibleRows,shortages,nominal_denominator:69,planned_denominator:ordered.length,parent_anchor_count:ordered.filter(r=>r.focal_kind==='FOCAL_PARENT_ANCHOR').length,parent_anchors_are_study_units:false,duplicate_arm_inputs_require_disclosure:true,failures_replaced:false,raw_opened:false,authority:'NONE'};return immutableCopy({...body,sha256:digest(body)});
+}

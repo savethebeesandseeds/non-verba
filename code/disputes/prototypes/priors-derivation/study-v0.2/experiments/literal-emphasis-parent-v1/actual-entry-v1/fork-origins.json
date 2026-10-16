@@ -1,0 +1,99 @@
+{
+  "status": "SOURCE_ONLY_FORKS_CLOSED_ACTUAL_ENTRY",
+  "schema": "closed-actual-source-only-fork-origins-v1",
+  "forks": [
+    {
+      "initial_import_changes": [],
+      "original": "next-stage-v1/io.mjs",
+      "fork": "io.mjs",
+      "original_sha256": "d0d76afff001a42a471d882db860efeb7ebd8da4a18098a589d8c110c6fbd90a"
+    },
+    {
+      "initial_import_changes": [
+        {
+          "old": "./focal-selection.mjs",
+          "new": "../next-stage-v1/focal-selection.mjs"
+        }
+      ],
+      "original": "next-stage-v1/metadata.mjs",
+      "fork": "projector.mjs",
+      "original_sha256": "0d322a64b632edf028afd3b985857fe27b4aefc022e69263b8239e7569a8f034"
+    },
+    {
+      "initial_import_changes": [
+        {
+          "old": "./focal-selection.mjs",
+          "new": "../next-stage-v1/focal-selection.mjs"
+        },
+        {
+          "old": "./metadata.mjs",
+          "new": "./projector.mjs"
+        }
+      ],
+      "original": "next-stage-v1/raw-loader.mjs",
+      "fork": "loader.mjs",
+      "original_sha256": "df7930ea7f730e67e15dab5e4d6ccc8dfa929baa0cfd472e2c47848109da4b07"
+    },
+    {
+      "initial_import_changes": [
+        {
+          "old": "./focal-selection.mjs",
+          "new": "../next-stage-v1/focal-selection.mjs"
+        }
+      ],
+      "original": "next-stage-v1/adapter.mjs",
+      "fork": "adapter.mjs",
+      "original_sha256": "463ce9b94f5c782602834e999d8eb87e0e2392c8bb4c8ed57ffa37cc29ac1393"
+    },
+    {
+      "initial_import_changes": [
+        {
+          "old": "./metadata.mjs",
+          "new": "./projector.mjs"
+        },
+        {
+          "old": "./raw-loader.mjs",
+          "new": "./loader.mjs"
+        }
+      ],
+      "original": "next-stage-v1/driver.mjs",
+      "fork": "driver.mjs",
+      "original_sha256": "01f29d0dd4a28104a35a7b325534ec454880c042a23eed2b2b20374f293c2170"
+    },
+    {
+      "initial_import_changes": [],
+      "original": "next-stage-v1/worker.mjs",
+      "fork": "worker.mjs",
+      "original_sha256": "091bd891e8c59220281bef3d482ef5837c5e50d7b47701e1a10c005cab6c600f"
+    },
+    {
+      "initial_import_changes": [],
+      "original": "next-stage-v1/transport.mjs",
+      "fork": "transport.mjs",
+      "original_sha256": "6685823f122887f6c99bc09dbe3944dc7072628b1d5b1487223808fee2105071"
+    },
+    {
+      "initial_import_changes": [
+        {
+          "old": "./pilot-execution-control.mjs",
+          "new": "./control.mjs"
+        }
+      ],
+      "original": "pilot-execution-guardian.mjs",
+      "fork": "guardian.mjs",
+      "original_sha256": "e34b8bf3b5260636ef205a1f6ccff634a08c8a3ec495a4aa3b8dae97da1f8bd8"
+    }
+  ],
+  "original_frozen48_modified": false,
+  "authority": "NONE",
+  "final_textual_patches": "Bound outside source epoch in the frozen engineering receipt; source file does not hash itself.",
+  "declared_deltas": [
+    "Immediate-closed actual APIs and exact fictional phase permits",
+    "Full100-to29 proof wrapper and mandatory45 roster binding; repaired unavailable checks retained",
+    "Extended closed fixture config and owned captured bootstrap",
+    "Complete named closure enforcement; prior-phase accounting and bounded numeric resource journal",
+    "Fake counter binding check; actual tokenizer/runtime service remains closed",
+    "Original69 case-index producer and six-file bounded stored reader",
+    "Automatic actual final-bootstrap checkpoint issuance remains unimplemented"
+  ]
+}

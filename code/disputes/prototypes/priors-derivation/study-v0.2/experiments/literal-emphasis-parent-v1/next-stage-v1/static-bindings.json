@@ -1,0 +1,19 @@
+{
+  "schema": "exact69-static-current874-reference-bindings-v1",
+  "status": "REFERENCES_ONLY_NOT_OPENED_BY_PREPARATION_OR_AUTHORIZATION",
+  "run": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+  "current_source_sha256": "874c6b505ae5fc09fd3d92d46c64cd5474abf90fe574537c5e101b4fcaac6afa",
+  "development": {"path":"audits/592ddf76b713d8ad4a13/development.json","sha256":"a815edbd6f3a176d12159d032b77a7d979c57dcec0d012b209ac0cf3582e5559","bytes":912507},
+  "fresh": {"path":"audits/592ddf76b713d8ad4a13/fresh_representation.json","sha256":"b7f2a7d36149a64aa63a127fcc22989dc3b1f1eaf7701bf74c06701558917e18","bytes":452683},
+  "manifest": {"path":"processing/874c6b505ae5fc09/calibration-1000-cea0eeae0bf69647/extraction-manifest.json","sha256":"676e548d62e358dc7b3b61f4be987861631d0e32f7707c9e9f0af0f096737921","bytes":5178351},
+  "locked_scope_reference": {"path":"qa/v15-current874-component-preparation-20261016/locked-current-packets-and-scope-proof.json","sha256":"7c638a4919320c40269d9c8a95871bfe716451e7f7de2c530debb0866df54319","bytes":677383},
+  "accepted_preparation": {"path":"qa/literal-emphasis-parent-v1-root-preparation-acceptance-2c8afe.json","sha256":"deaafc17b1838431fcef6fec8ffe1de92c33d60d486a55acd6f44e9fc93c40cc","bytes":2352},
+  "shared_reservation": {"path":"qa/v15-current874-component-preparation-20261016/shared-resource-reservation.json","sha256":"f5c31e176263e76a8988af483c1283b3853e14291e3cc5f9b5232418421b7d51","bytes":546},
+  "capacity_helper": {"path":"qa/v15-current874-component-preparation-20261016/historical-component-inventory-v1/historical154-metadata-gzip-recovery-v1/run-capacity-helper-v3.mjs","sha256":"2a7b5a7c21ce70666d71508892d55fc932da3968e98dc4da5fe598d668580b6e","bytes":7103},
+  "capacity_policy": {"path":"qa/v15-current874-component-preparation-20261016/historical-component-inventory-v1/historical154-metadata-gzip-recovery-v1/run-capacity-policy-v3.json","sha256":"0768b25042d2454c030d08ae8a390baa7bc075a73cbf20234aa5caabfdc22cdc","bytes":2285},
+  "capacity_freeze": {"path":"qa/v15-current874-component-preparation-20261016/historical-component-inventory-v1/historical154-metadata-gzip-recovery-v1/capacity-helper-freeze-v2.json","sha256":"02aa1d01cc1abd7b77d508606da5bea03177214f3bc5abcde21a98db31787007","bytes":3603},
+  "mandatory45": "Must be supplied in the separately ROOT-approved phase configuration with an exact immutable binding; no guessed IDs or actual metadata draw during preparation.",
+  "actual_root_execution_sha256": null,
+  "ordered69_freeze_sha256": null,
+  "actual_execution_enabled": false
+}

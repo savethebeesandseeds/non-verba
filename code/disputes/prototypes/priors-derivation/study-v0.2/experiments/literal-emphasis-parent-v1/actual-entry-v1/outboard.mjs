@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Pure outboard manifests. Hashes account for source scopes, never reading.
+import {digest,sha} from '../finite-codec.mjs';
+import {immutableCopy} from '../immutable-state.mjs';
+const fail=code=>{throw Object.assign(Error(code),{code});};
+export function requiredDocumentKinds(policies){if(!Array.isArray(policies)||policies.length!==2||new Set(policies.map(p=>p.policy_sha256)).size!==2)fail('ACTUAL_INDEX_TWO_POLICIES');return ['raw_full','normalized_full','native_parent_dictionary','omitted_fields',...policies.flatMap(p=>['focal','parent'].map(form=>'candidate_'+p.policy_sha256+'_'+form)),'preparation_scope_manifest'];}
+export function makeCaseIndex({cases,ordered69,source_epoch_ref,phase_config_ref,protected_guard_ref,ordered69_ref,current_source_sha256,tokenizer_policies}){
+  if(!Array.isArray(cases)||cases.length!==69||ordered69?.ordered?.length!==69||new Set(cases.map(c=>c.record.audit_id)).size!==69)fail('ACTUAL_INDEX_ORIGINAL69');const kinds=requiredDocumentKinds(tokenizer_policies);
+  const rows=cases.map(({case_ref,record},original_index)=>{const original=ordered69.ordered[original_index];if(record.audit_id!==original.audit_id||record.original_index!==original_index||digest(record.original_source_refs)!==digest(original))fail('ACTUAL_INDEX_CASE_ORDER_SCOPE');return{audit_id:original.audit_id,contract_id:original.contract_id,original_index,case_ref,descriptor_sha256:record.descriptor?digest(record.descriptor):null,original_source_refs_sha256:digest(record.original_source_refs),status:record.status,documents:kinds.map(kind=>{const text=record.documents?.[kind];return typeof text==='string'?{kind,sha256:sha(text),bytes:Buffer.byteLength(text),utf16:text.length,status:'AVAILABLE',missing_code:null}:{kind,sha256:null,bytes:0,utf16:0,status:'MISSING',missing_code:'REQUIRED_CASE_SCOPE_UNAVAILABLE'};})};});return immutableCopy({schema:'stored-pilot-case-index-v1',source_epoch_ref,phase_config_ref,protected_guard_ref,ordered69_ref,current_source_sha256,rows});
+}
+export function makeReadPlan({case_index_ref,source_epoch_ref,phase_config_ref,protected_guard_ref,ordered69_ref,reviewer_id,own_audit_ids,tokenizer_policies,visible_tool_evidence_ref=null}){
+  if(typeof reviewer_id!=='string'||!reviewer_id||!Array.isArray(own_audit_ids)||!own_audit_ids.length||new Set(own_audit_ids).size!==own_audit_ids.length)fail('ACTUAL_READ_PLAN_OWN_SCOPE');requiredDocumentKinds(tokenizer_policies);return immutableCopy({schema:'stored-pilot-read-plan-v1',case_index_ref,source_epoch_ref,phase_config_ref,protected_guard_ref,ordered69_ref,reviewer_id,own_audit_ids,tokenizer_policies,visible_tool_evidence_ref,authority:'NONE'});
+}

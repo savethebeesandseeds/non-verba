@@ -1,0 +1,119 @@
+{
+  "schema": "literal-emphasis-prospective-actual-entry-api-proposal-v1",
+  "status": "PROPOSAL_ONLY_NOT_IMPLEMENTED_NOT_VALID_EXECUTION_CONFIG",
+  "authority": "NONE",
+  "actual_execution_enabled": false,
+  "frozen_reference": {
+    "snapshot": "/tmp/nonverba-unified-source/563eabbe73b4491c92847fc0d562cb83/code",
+    "project_file_count": 48,
+    "source_set_sha256": "6f8457987f78722b3eed4cb81d73f37cd41d0566680778c247fa62dbf068403a",
+    "control_epoch_sha256": "7d96fc02f5d866804400e20146f7e098ed047b167842937f57d7d5ce60f979ab",
+    "static_reference_registry": {
+      "path": "next-stage-v1/static-bindings.json",
+      "sha256": "1a550b35af3942f55b5dda7766881a40c50c690327b8b6ff3112f38831a4b371",
+      "bytes": 2596,
+      "contents_are_references_not_authorization": true
+    },
+    "ROOT_component_acceptance": {
+      "path": "qa/literal-emphasis-parent-v1-root-components-preparation-acceptance-20261016.json",
+      "sha256": "f8a9b3a06fc984172a4d0c23ae294e26ecf6b2deed7ccfdfbb00213b11cbc703",
+      "bytes": 9980,
+      "actual_access_authorized": false
+    },
+    "coherent_integration_receipt": {
+      "path": "qa/literal-emphasis-parent-v1-coherent-integration-563eab/engineering-receipt.json",
+      "sha256": "79ca0fc188dc09974d6cc94fb8be590159b060fcde13364dbbfb41951f3979d4",
+      "bytes": 9093,
+      "independent_integration_acceptance": null
+    }
+  },
+  "proposed_interfaces_not_exports": [
+    {
+      "name": "inspectActualPhaseConfiguration(configRef, sourceFreezeRef)",
+      "role": "PURE_CLOSED_SCHEMA_AND_NAMED_IDENTITY_VALIDATION",
+      "returns": "READY_CONFIGURATION_NOT_ADMISSION_OR_HELD",
+      "data_access": "NAMED_CODE_AND_CONFIG_ONLY; NO_PACKET_CACHE_RAW_TOKENIZER"
+    },
+    {
+      "name": "superviseActualPrototypePhase(configRef, executionManifestRef)",
+      "role": "NEW_CLOSED_BUILTINS_BOOTSTRAP_GUARDIAN_ENTRY_STILL_COMPILE_TIME_DISABLED_IN_SOURCE_ONLY_STEP",
+      "returns": "PHASE_RESULT_AND_OWNERSHIP_RESOURCE_OUTPUT_PROOF_REFS",
+      "self_sealed_JSON_is_authorization": false
+    },
+    {
+      "name": "deriveActualDevelopmentMetadata(ownedInit)",
+      "role": "METADATA_PHASE_PRIVATE_EXACT_PACKET_AND_CURRENT_CACHE_PROJECTION",
+      "required_order": ["VERIFY_MANIFEST_AND_CURRENT874_PROOF", "VERIFY_ENTIRE_FRESH100_AND_COMPLETE29_CIDS", "VERIFY_DEVELOPMENT200_AND_ROSTER45", "DENY_PROTECTED_BEFORE_CACHE", "AUTHENTICATE_RECORD_RECEIPT_LINEAGE_NATIVE_AND_GEOMETRY", "DERIVE_PREDECLARED_NUMERIC_FEATURES", "FREEZE_ORDERED69_OR_HOLD"],
+      "output_text_or_semantics": false
+    },
+    {
+      "name": "prepareActualFrozen69(ownedInit, metadataProjectionRef, ordered69Ref)",
+      "role": "SOURCE_PHASE_WITH_NO_SELECTION_OR_REFILL_FUNCTION",
+      "requires": "SEPARATE_ROOT_ADMISSION_AND_EXACT69_FROZEN_ORDER_BEFORE_BYTES",
+      "per_record": "FRESH_DENY_THEN_EXACT_CACHE_NATIVE_RAW_NORMALIZED_TYPED_FOCAL_BINDINGS; ACCEPTED_BRIDGE; TWO_PINNED_COUNTERS_X_TWO_FORMS; LOSSLESS_CASE_OR_EXPLICIT_WHOLE_FAILURE"
+    },
+    {
+      "name": "openStoredPilotReader(approvedReadPlanRef, caseIndexRef, caseArtifactRef)",
+      "role": "NEW_IMMUTABLE_CASE_READER; OUTBOARD_CID_GUARD_BEFORE_GZIP",
+      "methods": ["plan() -> metadata only", "page({kind,cursor}) -> one bounded literal page", "validateOwnJournal(journalRef) -> mechanical scope accounting, never reading attestation"],
+      "manual_read_authorization_separate": true
+    }
+  ],
+  "new_actual_config_schema_fields_proposed": {
+    "schema": "NEW_REVIEWED_ACTUAL_PROTOTYPE_SCHEMA_REQUIRED_NOT_FIXTURE_V1",
+    "phase": ["METADATA_SELECTION_ONLY", "PREPARE_SELECTED69"],
+    "data_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+    "output_prefix": null,
+    "source_epoch_ref": null,
+    "runtime_and_named_closure": "NEW_COMPLETE_EXACT_FILE_REFS; FROZEN48_PLUS_ALL_NEW_FORKS_HELPERS_STATIC_GRAPH_AND_CONFIGURED_SERVICES",
+    "bindings": "EXACT_STATIC_DEVELOPMENT_FRESH_MANIFEST_REFS_FROM_FROZEN_REGISTRY",
+    "fresh_expectation": {"rows":100,"unique_contracts":29,"complete_projection_ref":null},
+    "development_expectation": {"rows":200,"ordered_outcome_ids_ref":null,"proposed_guardian_derivation":"ONCE_FROM_EXACT_PACKET_AFTER_FRESH_GUARD_BEFORE_CACHE_WORKER_INIT; PERSIST_AND_FREEZE_ALL200_IDS"},
+    "mandatory45_roster_ref": {"path":"qa/literal-emphasis-parent-v1-actual-admission-inputs-20261016/mandatory45-roster.json","sha256":"f508ea3f851a2eba051099a6661aff80b3dc80aeabc359a7256422a059bb57f0","bytes":2556,"contents_opened_this_preparation":false},
+    "metadata_projection_ref": null,
+    "ordered69_freeze_ref": null,
+    "prior_phase_resource_checkpoint_ref": null,
+    "tokenizer_artifact_and_policy_manifest_ref": {"path":"qa/literal-emphasis-parent-v1-actual-admission-inputs-20261016/existing-tokenizer-artifact-bindings.json","sha256":"3ee2c19a1595a6937411199653b5212172cd04c24d44a9ab6d65ff8a7fd7ed1a","bytes":8018,"metadata_only_not_runtime_counter_proof":true},
+    "exact_existing_capacity_helper_policy_reservation_refs": "FROZEN_STATIC_REGISTRY; NO_FIXTURE_POLICY_OR_NEW_RESERVATION",
+    "allowed_outputs": "EXACT_PATH_KIND_CASE_SCOPE_TABLE_AND_COMBINED_RESOURCE_LEDGER",
+    "limits": "UNCHANGED_EXECUTION_LIMITS_PLUS_CONSERVATIVE_CUMULATIVE_PHASE_COST_ACCOUNTING",
+    "ROOT_phase_approval_and_exact_invocation_ref": null,
+    "null_fields_mean_unavailable_not_automatic_defaults": true
+  },
+  "metadata200_outcomes": ["ELIGIBLE_EXACT_TYPED_FOCAL", "AUTHENTICATED_UNAVAILABLE_ANCHOR", "PROTECTED_FRESH_DENIED_BEFORE_CACHE", "METADATA_BINDING_OR_RESOURCE_FAILED", "NOT_PROCESSED_AFTER_HOLD"],
+  "selection": {
+    "policy": "PROTOTYPE_PROSPECTIVE_TYPED_FOCAL_45_PLUS24_V2",
+    "seed": "nonverba-literal-emphasis-parent-v1-20261016-predeclared",
+    "quotas_in_order": [45,12,6,6],
+    "rank_tuple": ["EXISTING_FIXED_SEED", "CONTRACT_ID", "EXACT_FOCAL_ID", "AUDIT_ID"],
+    "no_refill_or_outcome_selection": true,
+    "protected_missing_or_unavailable_mandatory_holds": true,
+    "parent_anchor_not_study_unit": true
+  },
+  "minimal_successor_source_change_boundary": {
+    "folder": "NEW_SEPARATELY_AUTHORIZED_ISOLATED_ACTUAL_ENTRY_IMPLEMENTATION_FOLDER",
+    "frozen48_modifications": false,
+    "forks_needed": ["closed admission and IO root routing", "metadata/raw loader imports", "meter actual pinned service branch", "typed adapter new identity/admission imports", "driver and builtins worker actual schema", "guardian and protocol control actual data/output roots", "complete new source identity", "stored-case reader"],
+    "keep_accepted_code_unchanged": ["finite codec and omitted-fields semantics", "nine-tag tracer", "one-import collector/normalizer fork", "measured window planner", "pinned-tokenizer service"],
+    "every_copy_original_hash_and_minimal_patch_required": true,
+    "no_monkey_patch_or_synthetic_ID_relabel_of_actual_data": true,
+    "new_source_only_implementation_actual_constant": false
+  },
+  "missing_authoritative_bindings": [
+    {"id":"M1","required":"ROOT-bound exact mandatory45 ID/CID roster and actual own-reading/journal provenance projection","available_static_ref":true,"reference":{"path":"qa/literal-emphasis-parent-v1-actual-admission-inputs-20261016/mandatory45-roster.json","sha256":"f508ea3f851a2eba051099a6661aff80b3dc80aeabc359a7256422a059bb57f0","bytes":2556},"contents_opened_this_preparation":false,"future_required":"VERIFY_EXACT_PROVENANCE_AND_DEVELOPMENT_MEMBERSHIP_WITHOUT_ROSTER_SORTING","must_not_use":"CURRENT45_FRESH_OVERLAP_CHECK_AS_ROSTER"},
+    {"id":"M2","required":"Complete fresh100→29 CID projection bytes/hash/list and independently checked completeness","available":false,"may_be_created":"ONLY_LATER_SEPARATELY_ADMITTED_PRIVATE_METADATA_PHASE"},
+    {"id":"M3","required":"Actual development200 outcome roster, current proof-derived parameters and private metadata projection","available":false,"known_input_refs":"FROZEN_STATIC_REGISTRY_ONLY_NOT_OPENED_HERE"},
+    {"id":"M4","required":"Ordered actual69 freeze with exact source/cache/focal/basis identities and all shortfalls","available":false,"depends_on":"M1_M2_M3_AND_PURE_FIXED_SELECTION"},
+    {"id":"M5","required":"Exact existing12 tokenizer/model artifact files and expected policies/file sets","available_static_ref":true,"reference":{"path":"qa/literal-emphasis-parent-v1-actual-admission-inputs-20261016/existing-tokenizer-artifact-bindings.json","sha256":"3ee2c19a1595a6937411199653b5212172cd04c24d44a9ab6d65ff8a7fd7ed1a","bytes":8018},"contents_opened_this_preparation":false,"runtime_counter_execution_proof":false,"future_required":"REHASH_FILES_AND_COMPARE_ACTUALLY_OPENED_COUNTER_POLICY_AND_FILE_SET_BEFORE_ANY_SOURCE_TOKENIZATION"},
+    {"id":"M6","required":"Explicitly approved exact dynamic tokenizer-runtime code boundary/manifest","available":false,"existing_claim":"CONFIGURED_SERVICE_PLUS_STATIC_PARSER_GRAPH; NOT_GENERAL_DYNAMIC_RUNTIME_CLOSURE"},
+    {"id":"M7","required":"New actual-entry source-only revision/fork ledger/freeze, each phase config/ref and exact separate ROOT approval/invocation","available":false},
+    {"id":"M8","required":"Fresh actual wholeRUN capacity and owned first/periodic/terminal resource evidence, including cumulative PhaseA→B checkpoint","available":false,"must_not_reuse":"TMP_VIRTUAL_CAPACITY_OR_OLD_CAPACITY_OBSERVATION_AS_CURRENT"},
+    {"id":"M9","required":"Stored-case reader implementation/read plan/index/current guard bindings and separate manual-reading approval","available":false},
+    {"id":"M10","required":"Independent coherent563eab integration acceptance and later actual-entry peer acceptance","available":false,"current_status":"INDEPENDENT_INTEGRATION_REVIEW_IN_PROGRESS"}
+  ],
+  "ten_hold_labels_preserved": ["0045","0047","0055","0085","0086","0092","0094","0147","0149","0174"],
+  "labels_are_not_fabricated_actual_audit_ids": true,
+  "later_ledger_findings_preserved_without_rewriting_past_freezes": true,
+  "source_quality_or_issue_writer_or_inference_authority": false,
+  "targets_unchanged": {"contracts":15000,"study_units":30000}
+}

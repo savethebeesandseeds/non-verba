@@ -1,0 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Pure proposal constructors. They do not create a ROOT decision or do IO.
+import {FIXED_RUN,INPUTS,ROSTER,CAPACITY,LIMITS,validateConfiguration,validateEpoch,reference} from './builtin-gate.mjs';
+import {immutableCopy} from '../../immutable-state.mjs';
+export function prospectiveConfiguration({pilot_prefix,source_epoch_ref,preparation_ledger_ref}){return immutableCopy(validateConfiguration({schema:'metadata-execution-phaseA-config-v1',phase:'METADATA_SELECTION_ONLY',data_root:FIXED_RUN,pilot_prefix,output_prefix:pilot_prefix+'execution/',source_epoch_ref,preparation_ledger_ref,bindings:INPUTS,roster_ref:ROSTER,capacity:CAPACITY,limits:LIMITS,prior_cost:{active_elapsed_ms:0,admitted_output_bytes:0},denominators:{fresh:100,protected_contracts:29,development:200,mandatory:45,selected:69},stream_ids:[],authority:'NONE'}));}
+export function prospectiveExternalManifest({configuration_ref,source_epoch_ref,epoch,config}){reference(configuration_ref,{max:262144});reference(source_epoch_ref,{max:1048576});validateEpoch(epoch);validateConfiguration(config);return immutableCopy({schema:'metadata-execution-external-manifest-v1',configuration_ref,source_epoch_ref,bootstrap_entry:epoch.entries.bootstrap,runtime:epoch.runtime,phase:'METADATA_SELECTION_ONLY',output_scope:config.output_prefix,authority:'NONE'});}

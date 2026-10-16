@@ -6,8 +6,8 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { renderStandalone } from '../build-standalone.mjs';
-import { filterHeroes, flattenMilestones, summarize, validateProject } from '../model.js';
+import { renderStandalone } from '../tools/build-standalone.mjs';
+import { filterHeroes, flattenMilestones, summarize, validateProject } from '../src/model.js';
 
 if (process.platform !== 'linux' || process.env.NONVERBA_CONTAINER !== '1') throw new Error('Run dashboard browser checks inside non-verba-dev.');
 const require = createRequire(import.meta.url);
@@ -93,7 +93,21 @@ async function selectHero(page, hero) {
   assert.equal(await page.locator('#detail-toolbar').isVisible(), false);
   assert.equal(await page.locator('#search').inputValue(), '');
   assert.equal(await page.locator('#status-filter').inputValue(), 'all');
-  await recordedRollupLabel(page.locator(`#hero-${hero.id} .hero-heading > .status-badge`), hero.goals.flatMap((goal) => goal.milestones));
+  const navHeroIds = await page.evaluate(() => window.NonVerbaDashboardRecord.heroes.map((entry) => entry.id));
+  assert.deepEqual(await page.locator('#hero-nav .nav-button:not([data-hero-id="all"])').evaluateAll((buttons) => buttons.map((button) => button.dataset.heroId)), navHeroIds);
+  assert.equal(await page.locator('#hero-nav [data-hero-id="all"] .nav-status-dot').count(), 0);
+  for (const id of navHeroIds) {
+    const dot = page.locator(`#hero-nav [data-hero-id="${id}"] .nav-status-dot`);
+    assert.equal(await dot.count(), 1);
+    assert.equal(await dot.isVisible(), true);
+    assert.equal(await dot.getAttribute('role'), 'img');
+    assert.ok((await dot.getAttribute('title')).includes(await dot.getAttribute('aria-label')));
+  }
+  const heroBadge = page.locator(`#hero-${hero.id} .hero-heading > .status-badge`);
+  const selectedDot = page.locator(`#hero-nav [data-hero-id="${hero.id}"] .nav-status-dot`);
+  assert.equal(await selectedDot.getAttribute('aria-label'), await heroBadge.getAttribute('aria-label'));
+  assert.equal(await selectedDot.evaluate((element) => getComputedStyle(element).backgroundColor), await heroBadge.evaluate((element) => getComputedStyle(element).color), 'The Hero navigation dot should paint the same state color as its summary.');
+  await recordedRollupLabel(heroBadge, hero.goals.flatMap((goal) => goal.milestones));
   await progressMatches(page.locator(`#hero-${hero.id} .hero-progress`), summarize([hero]).done, summarize([hero]).total);
   for (const goal of hero.goals) {
     const tile = page.locator(`.goal-tile[data-goal-id="${goal.id}"]`);
@@ -467,7 +481,7 @@ try {
     const metrics = await grid.evaluate((element) => ({ height: element.clientHeight, contentHeight: element.scrollHeight, maxHeight: Number.parseFloat(getComputedStyle(element).maxHeight), overflow: getComputedStyle(element).overflowY }));
     assert.equal(metrics.overflow, 'auto');
     assert.ok(Number.isFinite(metrics.maxHeight) && metrics.height <= metrics.maxHeight + 1 && metrics.height >= 550 && metrics.height <= 650, 'The taller desktop Goal list should remain bounded around 600 pixels at this viewport.');
-    assert.ok(metrics.contentHeight > metrics.height + 1, 'Ten Goals should require independent list scrolling.');
+    assert.ok(metrics.contentHeight > metrics.height + 1, 'The Goal choices should require independent list scrolling.');
     for (const original of scrollHero.goals) {
       const tile = page.locator(`.goal-tile[data-goal-id="${original.id}"]`), title = tile.locator('.goal-tile-title');
       assert.equal(await title.textContent(), original.title);
@@ -477,7 +491,7 @@ try {
     }
     const documentBeforeWheel = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
     await grid.hover();
-    await page.mouse.wheel(0, 1000);
+    await page.mouse.wheel(0, metrics.contentHeight - metrics.height + 100);
     await page.waitForFunction((element) => element.scrollTop > 1 && element.scrollTop >= element.scrollHeight - element.clientHeight - 1, originalGrid);
     const documentAfterWheel = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
     assert.ok(Math.abs(documentAfterWheel.x - documentBeforeWheel.x) <= 1 && Math.abs(documentAfterWheel.y - documentBeforeWheel.y) <= 1, 'Wheel browsing should scroll only the Goal list.');
