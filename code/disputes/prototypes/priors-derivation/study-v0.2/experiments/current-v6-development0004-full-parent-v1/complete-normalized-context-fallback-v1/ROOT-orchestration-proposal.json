@@ -1,0 +1,96 @@
+{
+  "schema": "ROOT-complete-normalized-context-orchestration-proposal-v1",
+  "status": "SOURCE_ONLY_PREPARED_NOT_EXECUTED_NOT_ADMITTED",
+  "authority": "NONE",
+  "orchestrator": {
+    "file": "ROOT-orchestrate.mjs",
+    "sha256": "58ce11a732999f2be5c238b026cd9106630d195b70363b8df070132b43e40ddc",
+    "bytes": 8098,
+    "delivery": "INLINE STDIN TO PINNED NODE; DO NOT COPY WRAPPER OR CONFIG INTO CONTAINER",
+    "additional_source_allowance_including_new_dirs": 8192,
+    "new_container_source_files": 0,
+    "new_container_directories": 0,
+    "full8192_charge_inside_existing_engineering_output": 131072,
+    "old_case_copy_cap_unchanged": 65536
+  },
+  "activation": {
+    "host_driver_sha256": "d82439c6ffecfb5d121a0e0e291840cd99b12b3f723004af2c14548cf4cee46a",
+    "host_driver_bytes": 18922,
+    "prospective_activated_driver_sha256": "893bdc0ecf76bf56eeea03f4c79f355b6d0fbfd43e59061fce9f4b8c3374d55b",
+    "prospective_activated_driver_bytes": 18921,
+    "compact_admission_max_bytes": 4055,
+    "clock_max_bytes": 85,
+    "clock_origin_decimal_digit_bound": 20,
+    "setup_payload_bytes_max": 24894,
+    "future_Q_directory_st_size": 4096,
+    "engineering_already_copied_including_directory": 36034,
+    "copy_cap": 65536,
+    "source_only_no_files_written": true,
+    "cumulative_copy_bytes_max": 65024,
+    "remaining_copy_headroom": 512
+  },
+  "ROOT_input_preparation": [
+    "Read frozen host admission-template.json and recipe.json; verify their pins. No cache/raw/native/model access is needed to construct these metadata inputs.",
+    "ROOT separately authorizes this exact script/one-case invocation. Set admission.status to ADMITTED_FIXED_ONE_COMPLETE_NORMALIZED_DOCUMENT_DIAGNOSTIC and self_ref to activated SHA893bdc0ecf76bf56eeea03f4c79f355b6d0fbfd43e59061fce9f4b8c3374d55b/18921. Keep fixedPINS/LIMITS/CARRY/CAPS/core refs unchanged.",
+    "Construct compact cfg={admission,recipe_b64}. Set a.clock_ref.path to fixedQA/clock.json. SHA/bytes are filled only by the verified ROOT script from its fresh pre-copy origin; no oldclock reused. cfg decoded UTF8 bytes<=8192; compute exact CFG_SHA256 and CFG_BASE64 before invocation.",
+    "Verify the8098-byte orchestrator SHA outsideNode, then stream only its source onstdin. No wrapper/config file or new directory is created. Recipe/admission/clock/activateddriver are written once inside fresh caseQA with exclusive/fsync writes."
+  ],
+  "exact_command": "docker exec -i --workdir /tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code non-verba-dev bash ./dev.sh exec node --input-type=module - CFG_BASE64 CFG_SHA256 < ROOT-orchestrate.mjs",
+  "command_scope": "ROOT invokes only after separate source review+actual admission. Node v22.23.3/linux/x64 and wrapper execArgv exact--input-type=module are checked. Child argv exact--max-old-space-size=512 --disable-proto=throw.",
+  "watchdog": {
+    "origin": "Monotonic origin before configuration decode, all source/recipe reads, exclusive setup/copy and childspawn; ROOT outer native observation must include invokingNode startup outsideJS-body origin.",
+    "active_cap_ms": 60000,
+    "stop_at_ms": 57000,
+    "join_deadline_ms": 59000,
+    "final_accounting_reserve_ms": 1000,
+    "sample_interval_ms": 100,
+    "max_self_plus_child_HWM_bytes": 2147483648,
+    "continuous_RSS_guarantee": false,
+    "capture_cap_combined_bytes": 65536,
+    "child_parent_IO": "No IPC. Child close joins stdout/stderr; birth-checked SIGTERM then SIGKILL, unknown/reused/unjoined remains HELD; no termination guarantee.",
+    "script_own_prebody_startup": "Charged by ROOT external invocation/engineering accounting; script does not claim to observe its own prebody startup or own process exit."
+  },
+  "proofs": {
+    "private_child_captures": [
+      "stdout.private.log",
+      "stderr.private.log"
+    ],
+    "observation": "ROOT-observation.json",
+    "fields": "Native code/signal, childPID/birth/close/absence, captures/discarded/fullness, sampledself+childHWM,pre-recordelapsed,setuprefs,all boundedQA outputhash refs, copyledger and false reading/inference/quality flags.",
+    "final_verdict": "Observation labels child completeness pending ROOT final readback. Script rehashes observation and inventory, takes fresh terminal sample and enforces60s/2GiB/output bounds. ROOT separately observes wrapper exit/code/absence and retains bounded wrapper stdout/stderr. A nonzero script/child exit,unknown,capture truncation,overrun or missing proof is HELD.",
+    "error_capture": "Pre-setup/global failures emit only sanitized metadata to ROOT-owned wrapper capture. No child source/log content is forwarded. ROOT retains every outcome and marks actual case unexecuted/partial as appropriate."
+  },
+  "copy_and_output": {
+    "case_total_max": 65024,
+    "case_headroom": 512,
+    "additional_orchestration_source_charge": 8192,
+    "additional_charge_is_inside_existing_engineering_output_not_plus_it": true,
+    "combined_existing_engineering_output_charge": 131072,
+    "existing_global_new_output_reservation": 8388608,
+    "no_old_carry_or_cap_reset": true,
+    "no_refunds": true,
+    "no_extra_source_or_config_file_copies": true
+  },
+  "immutable_inputs": {
+    "inactive_driver": {
+      "path": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/run-one-case.mjs",
+      "sha256": "d82439c6ffecfb5d121a0e0e291840cd99b12b3f723004af2c14548cf4cee46a",
+      "bytes": 18922
+    },
+    "recipe": {
+      "host": "recipe.json",
+      "sha256": "d62adf7543cb1b285da43308f54888d0e0dab4763d3920bfb6a48e719b81d53b",
+      "bytes": 1833
+    },
+    "admission_template": {
+      "host": "admission-template.json",
+      "sha256": "b98c8a5bbce12201289586397ad75009661ddbd27c00b01321e7c8c67c4e1a33",
+      "bytes": 4601
+    }
+  },
+  "measured_source_only_CFG_JSON_bytes": 6528,
+  "CFG_JSON_byte_cap": 8192,
+  "runtime_prechild_copy_measurement": "Wrapper recomputes actual driver+recipe+freshclock+compactadmission+newQdir+36034 prior source bytes and rejects above65536 before childspawn.",
+  "no_actual_mutation_or_wrapper_execution": true,
+  "no_tests_containers_snapshots_or_package_installs": true
+}

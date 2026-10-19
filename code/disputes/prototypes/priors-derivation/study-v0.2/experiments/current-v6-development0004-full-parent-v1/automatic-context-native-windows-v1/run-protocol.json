@@ -1,0 +1,54 @@
+{
+  "schema": "automatic-context-native-one-case-run-protocol-v1",
+  "status": "PROSPECTIVE_NOT_EXECUTED",
+  "authority": "NONE",
+  "qa": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1",
+  "CLI": "node --max-old-space-size=512 --disable-proto=throw QA/run-one-case.mjs QA/admission.json ADMISSION_SHA256 ADMISSION_BYTES",
+  "activation": "ROOT may create one exact reviewed runtime copy replacing only ROOT_ACTIVATED=false with true (23965→23964B), pin new SHA and supply separate admission; host remains false. This template is not execution authority.",
+  "setup": "ROOT clock origin is recorded before all copy/setup and Node startup. Copy only driver+model-pins/admission/clock into the fresh QA namespace; reuse exact a2 core and declaration paths. All setup and captures charged. No old0055 operation lock or output is removed.",
+  "guard": "Existing current82 metadata validators and full100/29 fresh CID proof before current0055 cache, then raw/native checks; no new selector or global registry recomputation.",
+  "counter": "Both pinned model services in fixed L6,L12 order. Full12 artifact hashes verified by pinned loader; both opened policy/file-set/repository/revision checked. No ONNX session/inference/pooling.",
+  "bounds": {
+    "planning_calls": 900,
+    "planning_calls_per_model": 450,
+    "recount_calls": 2048,
+    "recount_calls_per_model": 1024,
+    "elapsed_ms": 60000,
+    "qa_bytes": 8388608,
+    "source_copy_bytes": 131072,
+    "metadata_bytes": 65536,
+    "plan_bytes": 2097152,
+    "named_and_decoded_input_bytes": 33554432,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 2147483648,
+    "model_file_hash_bytes_reserved": 224711752
+  },
+  "engineering": {
+    "active_ms": 30000,
+    "output_bytes": 1048576
+  },
+  "original_carry": {
+    "planning": 38799,
+    "recount": 128,
+    "elapsed_ms": 385387.035676,
+    "output_bytes": 5850768
+  },
+  "original_caps": {
+    "planning": 40000,
+    "recount": 20000,
+    "active_elapsed_ms": 600000,
+    "output_bytes": 67108864
+  },
+  "output_charge": "QA size including dirs/captures + full131072 source-copy charge + fixed1MiB engineering evidence charge <=8MiB. ROOT outside-Q reviews/prep/control copies must fit the fixed1MiB; terminal overrun HELD. No exclusions/refunds/reset.",
+  "resource_proof": "ROOT external60s watchdog includes setup/startup/finalization, 25ms sampled RSS and bounded captures; no quantitative continuous RSS guarantee. Driver adds per-read/per-counter boundary checks. Unknown cost/terminal failure stays HELD and must be carried conservatively by ROOT.",
+  "expected_outputs": [
+    "operation-lock",
+    "model-0-windows.json",
+    "model-0-recount.json",
+    "model-1-windows.json",
+    "model-1-recount.json",
+    "result.json or held.json"
+  ],
+  "output_meaning": "Plans and exact dictionary/native/source inversions plus per-node coverage and fresh final-window recounts only. Any failed node/counter retains HELD, no prefix acceptance, no case substitution. All ten materiality holds remain.",
+  "reader": "No source display/manual reading in this diagnostic; future review separately admitted."
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "representation-replay-reviewer-assignments-v1",
+  "authority": "TASK_OWNER_ASSIGNMENT",
+  "human": false,
+  "aliases": [
+    {
+      "canonical": "root",
+      "alias": "root"
+    },
+    {
+      "canonical": "root",
+      "alias": "/root"
+    },
+    {
+      "canonical": "evaluation_engineer",
+      "alias": "evaluation_engineer"
+    },
+    {
+      "canonical": "evaluation_engineer",
+      "alias": "/root/evaluation_engineer"
+    },
+    {
+      "canonical": "v13_review_documentation",
+      "alias": "v13_review_documentation"
+    },
+    {
+      "canonical": "v13_review_documentation",
+      "alias": "/root/v13_review_documentation"
+    },
+    {
+      "canonical": "reader0170_current194",
+      "alias": "reader0170_current194"
+    },
+    {
+      "canonical": "reader0170_current194",
+      "alias": "/root/reader0170_current194"
+    }
+  ],
+  "assignments": [
+    {
+      "audit_id": "development-0019",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "evaluation_engineer"
+      ]
+    },
+    {
+      "audit_id": "development-0030",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "evaluation_engineer"
+      ]
+    },
+    {
+      "audit_id": "development-0041",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "evaluation_engineer"
+      ]
+    },
+    {
+      "audit_id": "development-0119",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "v13_review_documentation"
+      ]
+    },
+    {
+      "audit_id": "development-0133",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "v13_review_documentation"
+      ]
+    },
+    {
+      "audit_id": "development-0141",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "v13_review_documentation"
+      ]
+    }
+  ]
+}

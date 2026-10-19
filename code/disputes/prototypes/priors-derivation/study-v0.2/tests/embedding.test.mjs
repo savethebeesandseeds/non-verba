@@ -5,10 +5,10 @@ import { mkdtemp, readFile, writeFile, readdir, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { PINNED_MODEL, embeddingWindows, nativeEmbeddingWindows, prepareEmbeddingInput, createPinnedTokenCounter, planWindowBatches, normalizeFloat32, embeddingCacheKey, createBatchEmbedder } from '../lib/embedding.mjs';
+import { PINNED_MODEL, embeddingWindows, nativeEmbeddingWindows, prepareEmbeddingInput, createPinnedTokenCounter, planWindowBatches, normalizeFloat32, embeddingCacheKey, createBatchEmbedder, embeddingWindowPolicy, NATIVE_WINDOW_LIMITS, NATIVE_WINDOW_PLANNER_POLICY } from '../lib/embedding.mjs';
 import {traceNativeDecoration,bindNativeDecoration} from '../lib/source-decoration.mjs';
 import {NATIVE_COLLECTOR_POLICY} from '../lib/sections.mjs';
-import {createNativeSourceContext,createNativeRepresentation,modelInputIdentity,NAVIGATION_SCOPE} from '../lib/representation.mjs';
+import {createNativeSourceContext,createNativeRepresentation,nativeRepresentationWindow,modelInputIdentity,NAVIGATION_SCOPE} from '../lib/representation.mjs';
 
 const wordTokens = text => (text.match(/\S+/gu) || []).length + 2;
 function mockRuntime() {
@@ -26,6 +26,24 @@ function nativeFixture(raw,{dropZeroWidth=false}={}) {
   const unit={id:'synthetic-unit',parent_section_id:parent.id,contract_id:parent.contract_id,cohort:parent.cohort,start:0,end:normalizedText.length,text:normalizedText,sha256:sha(normalizedText),source_navigation:{nearest_anchor:null,within_unit:[],scope:NAVIGATION_SCOPE,governing_hierarchy_verified:false},native_source_decorations_ref:{envelope_sha256:envelope.sha256,raw_sha256:envelope.raw.sha256,normalized_sha256:envelope.normalized.sha256,tracer_source_sha256:envelope.tracer_source_sha256,collector_source_sha256:envelope.collector_source_sha256,policy:envelope.policy,collector_policy:NATIVE_COLLECTOR_POLICY,start:0,end:normalizedText.length,mapping_status:envelope.mapping_status,input_eligibility:envelope.input_eligibility,projection_required:true}};
   const context=createNativeSourceContext({raw,normalizedText,envelope,expectedTracerSourceSHA256:'a'.repeat(64),expectedCollectorSourceSHA256:'b'.repeat(64)});
   unit.native_input=createNativeRepresentation(unit,{context,parent});return {unit,raw,trace,envelope,normalizedText,parent,context};
+}
+
+// These tiny synthetic counters declare exact range costs, not tokenizer evidence.
+function rangeCounter(f,cost) {
+  const offsets=[0];for(const point of f.normalizedText)offsets.push(offsets.at(-1)+point.length);
+  const counts=new Map();for(let left=0;left<offsets.length-1;left++)for(let right=left+1;right<offsets.length;right++){
+    const start=offsets[left],end=offsets[right],encoded=nativeRepresentationWindow(f.unit.native_input,{start,end}).text,tokens=cost(f.normalizedText.slice(start,end));
+    if(counts.has(encoded))assert.equal(counts.get(encoded),tokens,'Fixture costs must agree for identical encoded inputs');counts.set(encoded,tokens);
+  }
+  const calls=[];return Object.assign(input=>{assert.ok(counts.has(input),'Only complete unchanged native range encodings may reach this counter');calls.push(input);return counts.get(input);},{calls});
+}
+function assertExactPartition(f,windows) {
+  let cursor=0;for(const window of windows){assert.equal(window.source_utf16_start,cursor);cursor=window.source_utf16_end;
+    const encoded=nativeRepresentationWindow(f.unit.native_input,{start:window.source_utf16_start,end:window.source_utf16_end});for(const[key,value]of Object.entries(encoded))assert.deepEqual(window[key],value);
+    assert.ok(window.tokens<=256);assert.ok(window.source_utf16_end>window.source_utf16_start);
+  }
+  assert.equal(cursor,f.normalizedText.length);assert.equal(windows.map(w=>f.normalizedText.slice(w.source_utf16_start,w.source_utf16_end)).join(''),f.normalizedText);
+  assert.equal(windows.reduce((n,w)=>n+w.weight,0),Array.from(f.normalizedText).length);
 }
 
 test('measured complete-word windows cover every word and weight new words once', () => {
@@ -101,8 +119,91 @@ test('native CJK fallback uses codepoint-safe source windows and repeats complet
 
 test('native metadata too large for one source word fails retained without an inference call',async()=>{
   const f=nativeFixture('<p><u style="text-decoration:'+'unknown '.repeat(100)+'">safe</u></p>'),runtime=mockRuntime();runtime.tokenCount=text=>Array.from(text).length+2;
-  assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,runtime.tokenCount,{maxTokens:256}),/complete source word plus native annotation/);
-  const embedder=await createBatchEmbedder({dimensions:2},{runtime});await assert.rejects(embedder.embedUnits([f.unit]),/complete source word plus native annotation/);assert.equal(runtime.calls.length,0);await embedder.dispose();
+  const retained=error=>error.code==='NATIVE_WINDOW_TOKEN_OVERFLOW'&&error.reason==='EXHAUSTIVE_MEASURED_NO_PARTITION'&&error.retained_failure===true&&error.partial_stream_accepted===false;
+  assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,runtime.tokenCount,{maxTokens:256}),retained);
+  const embedder=await createBatchEmbedder({dimensions:2},{runtime});await assert.rejects(embedder.embedUnits([f.unit]),retained);assert.equal(runtime.calls.length,0);await embedder.dispose();
+});
+
+test('native v6 splits a 296-token Latin word without changing native encoding or counting overlap twice',()=>{
+  const f=nativeFixture('<u>HEADING</u>'),counter=rangeCounter(f,literal=>literal===f.normalizedText?296:16+Array.from(literal).length*16),windows=nativeEmbeddingWindows(f.unit.native_input,counter);
+  assert.ok(windows.length>1);assertExactPartition(f,windows);assert.ok(windows.every(w=>w.weight_unit==='new_source_codepoints'));assert.ok(windows.every(w=>w.text.includes('"tag":"u"')));
+  const work=windows[0].native_planner_work;assert.equal(work.maximum_measured_tokens,296);assert.ok(work.over_limit_probes>0);assert.equal(work.tokenizer_calls,counter.calls.length);assert.ok(work.tokenizer_calls>windows.length);assert.equal(work.final_recounts,windows.length);
+});
+
+test('native v6 distinguishes measured atom overflow, encoding bounds and bounded search exhaustion',()=>{
+  const atom=nativeFixture('<u>Q</u>'),count=rangeCounter(atom,()=>296);
+  assert.throws(()=>nativeEmbeddingWindows(atom.unit.native_input,count),error=>error.code==='NATIVE_WINDOW_TOKEN_OVERFLOW'&&error.reason==='EXHAUSTIVE_MEASURED_NO_PARTITION'&&error.work.maximum_measured_tokens===296&&error.work.tokenizer_calls===count.calls.length);
+  let calls=0;assert.throws(()=>nativeEmbeddingWindows(atom.unit.native_input,()=>{calls++;return 1;},{limits:{maxEncodedCharacters:1}}),error=>error.code==='NATIVE_WINDOW_ENCODING_BOUND'&&error.reason==='UNMEASURED_ENCODING_BOUND'&&error.work.encoding_bound_probes>0&&error.work.tokenizer_calls===0);assert.equal(calls,0);
+  const f=nativeFixture('<u>ABCD</u>');for(const[key,reason]of [['maxEncodeProbes','ENCODE_PROBES'],['maxTokenizerCalls','TOKENIZER_CALLS']]){
+    const counter=rangeCounter(f,()=>296);assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,counter,{limits:{[key]:2}}),error=>error.code==='NATIVE_WINDOW_SEARCH_BOUND'&&error.reason===reason&&error.work[key==='maxEncodeProbes'?'encode_probes':'tokenizer_calls']===2&&error.retained_failure&&error.partial_stream_accepted===false);
+  }
+  assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,()=>1,{limits:{maxSourceCharacters:3}}),error=>error.code==='NATIVE_WINDOW_SEARCH_BOUND'&&error.reason==='SOURCE_CHARACTERS'&&error.work.tokenizer_calls===0);
+  assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,()=>1,{limits:{maxTokenizerCalls:NATIVE_WINDOW_LIMITS.maxTokenizerCalls+1}}),/maxTokenizerCalls/);assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,()=>1,{limits:{unknown:1}}),/Unknown native planner limit/);
+});
+
+test('native v6 can recover from a whole-input projection bound using smaller full-native ranges',()=>{
+  const f=nativeFixture('<u>'+'x'.repeat(25000)+'</u>');assert.throws(()=>nativeRepresentationWindow(f.unit.native_input),error=>error.code==='NATIVE_DECORATION_PROJECTION_BOUND');
+  let calls=0;const windows=nativeEmbeddingWindows(f.unit.native_input,()=>{calls++;return 1;});assert.ok(windows.length>1);assertExactPartition(f,windows);
+  assert.ok(windows.every(w=>w.text.includes('"tag":"u"')));assert.ok(windows[0].native_planner_work.encoding_bound_probes>0);assert.equal(windows[0].native_planner_work.tokenizer_calls,calls);
+});
+
+test('native v6 bounded DAG finds nonmonotone prefixes and backtracks past a greedy dead suffix',()=>{
+  for(const[text,cost,expected]of [
+    ['ABCD',literal=>literal==='ABC'?250:literal==='D'?1:296,['ABC','D']],
+    ['ABCDE',literal=>literal==='ABCD'?250:literal==='AB'?200:literal==='CDE'?250:296,['AB','CDE']]
+  ]){
+    const f=nativeFixture('<u>'+text+'</u>'),counter=rangeCounter(f,cost),windows=nativeEmbeddingWindows(f.unit.native_input,counter);assertExactPartition(f,windows);
+    assert.deepEqual(windows.map(w=>text.slice(w.source_utf16_start,w.source_utf16_end)),expected);assert.ok(windows.every(w=>w.segmentation==='native_all_language_exhaustive_codepoint_partition_v1'));assert.ok(windows[0].native_planner_work.search_edges>0);assert.equal(windows[0].native_planner_work.tokenizer_calls,counter.calls.length);
+  }
+  const f=nativeFixture('<u>ABCD</u>'),counter=rangeCounter(f,literal=>literal==='ABC'?250:literal==='D'?1:296);assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,counter,{limits:{maxWindows:1}}),error=>error.code==='NATIVE_WINDOW_SEARCH_BOUND'&&error.reason==='WINDOW_COUNT'&&error.work.tokenizer_calls===counter.calls.length);
+  const dead=nativeFixture('<u>ABCDE</u>'),spent=rangeCounter(dead,literal=>['A','AB'].includes(literal)?1:296);assert.throws(()=>nativeEmbeddingWindows(dead.unit.native_input,spent),error=>error.code==='NATIVE_WINDOW_TOKEN_OVERFLOW'&&error.work.fast_windows_completed===1&&error.work.final_recounts===1&&error.work.search_edges>0&&error.work.tokenizer_calls===spent.calls.length&&error.partial_stream_accepted===false);
+});
+
+test('native v6 Unicode partition retains intermediate and terminal zero-event ownership',()=>{
+  const f=nativeFixture('<u>😀</u><u>\u200B</u><b>A</b><u>\u200B</u>',{dropZeroWidth:true}),counter=rangeCounter(f,literal=>Array.from(literal).length===1?1:296),windows=nativeEmbeddingWindows(f.unit.native_input,counter);
+  assertExactPartition(f,windows);assert.deepEqual(windows.map(w=>[w.source_utf16_start,w.source_utf16_end]),[[0,2],[2,3]]);assert.equal(windows[0].source_ranges[0].include_end_zero_width,false);assert.equal(windows[1].source_ranges[0].include_end_zero_width,true);
+  assert.equal(windows.reduce((n,w)=>n+(w.text.match(/"tag":"u"/gu)??[]).length,0),(nativeRepresentationWindow(f.unit.native_input).text.match(/"tag":"u"/gu)??[]).length);
+});
+
+test('native v6 retains failed counter work and unchanged successful word/CJK fast serialization and costs',()=>{
+  const f=nativeFixture('<u>A</u>');assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,()=>{throw Object.assign(new Error('synthetic'),{code:'SYNTHETIC_COUNTER'});}),error=>error.code==='NATIVE_WINDOW_TOKENIZER_FAILURE'&&error.cause_code==='SYNTHETIC_COUNTER'&&error.work.tokenizer_calls===1);
+  assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,()=>0),error=>error.code==='NATIVE_WINDOW_TOKENIZER_FAILURE'&&error.reason==='INVALID_COUNT'&&error.work.tokenizer_calls===1);
+  let wordCalls=0;const plain=nativeFixture('<p>one two three four five six seven eight nine ten</p>'),text=plain.normalizedText,windows=nativeEmbeddingWindows(plain.unit.native_input,value=>{wordCalls++;return wordTokens(value);},{maxTokens:8,overlapWords:2});
+  const expected=[[0,6,0,text.indexOf('seven'),6],[4,10,text.indexOf('five'),text.length,4]].map(([start,end,left,right,weight])=>({...nativeRepresentationWindow(plain.unit.native_input,{start:left,end:right}),tokens:8,word_start:start,word_end:end,source_utf16_start:left,source_utf16_end:right,weight,weight_unit:'new_source_words',segmentation:'native_complete_words_before_encoding'}));assert.deepEqual(windows,expected);
+  assert.equal(wordCalls,9,'The unaffected word fast path keeps its prior probe/final-count cost');assert.ok(windows.every(w=>w.native_planner_work===undefined));
+  const cjk=nativeFixture('<u>甲乙丙丁𠀀</u>'),counter=rangeCounter(cjk,literal=>Array.from(literal).length*80),characterWindows=nativeEmbeddingWindows(cjk.unit.native_input,counter,{overlapWords:1});
+  assert.deepEqual(characterWindows,[[0,3,0,3,3],[2,5,2,6,2]].map(([start,end,left,right,weight])=>({...nativeRepresentationWindow(cjk.unit.native_input,{start:left,end:right}),tokens:240,source_character_start:start,source_character_end:end,source_utf16_start:left,source_utf16_end:right,weight,weight_unit:'new_source_codepoints',segmentation:'native_cjk_codepoint_boundaries_before_encoding'})));
+  assert.equal(counter.calls.length,7,'The unaffected CJK fast path keeps its prior probe/final-count cost');assert.ok(characterWindows.every(w=>w.native_planner_work===undefined));
+  const policy=embeddingWindowPolicy({max_tokens:256,overlap_words:16});assert.equal(policy.version,'complete-source-ranges-native-window-encoding-v6');assert.equal(policy.native_window_planner,'FULL_NATIVE_WORD_FAST_PATH_THEN_BOUNDED_ALL_LANGUAGE_CODEPOINT_PARTITION_V6');assert.equal(policy.native_window_planner,NATIVE_WINDOW_PLANNER_POLICY);assert.equal(policy.native_repaired_fallback_overlap,0);assert.deepEqual(policy.native_planner_limits,NATIVE_WINDOW_LIMITS);
+  assert.equal(prepareEmbeddingInput(plain.unit,wordTokens,{maxTokens:8,overlapWords:2}).policy.native_window_planner,NATIVE_WINDOW_PLANNER_POLICY);
+});
+
+// Authored range costs reproduce equal/receding overlap ends without a tokenizer.
+// Capacity four repeats the previous end (zero new weight); two recedes behind it.
+function nonextendingNativeFixture(kind,secondCapacity=4){
+  if(kind==='WORD')return {f:nativeFixture('<u>wa wb wc wd we wf wg wh</u>'),cost:literal=>{const words=literal.trim().split(/\s+/u);return words[0]==='wa'?(words.length<=5?8:9):words[0]==='wb'?(words.length<=secondCapacity?8:9):8;}};
+  const literal='甲乙丙丁戊己庚辛';return {f:nativeFixture('<u>'+literal+'</u>'),cost:value=>{const points=Array.from(value),start=literal.indexOf(points[0]);return start===0?(points.length<=5?8:9):start===1?(points.length<=secondCapacity?8:9):8;}};
+}
+function checkProgressRepair(kind,secondCapacity){
+  const {f,cost}=nonextendingNativeFixture(kind,secondCapacity),counter=rangeCounter(f,cost),windows=nativeEmbeddingWindows(f.unit.native_input,counter,{maxTokens:8,overlapWords:16});
+  assertExactPartition(f,windows);let previousEnd=0;for(const w of windows){assert.ok(w.source_utf16_end>previousEnd&&w.weight>0&&w.tokens<=8);previousEnd=w.source_utf16_end;}
+  const work=windows[0].native_planner_work;assert.ok(work.fast_windows_completed>=1);assert.ok(work.final_recounts>windows.length,'Discarded fast-path final counts remain charged');assert.equal(work.tokenizer_calls,counter.calls.length);assert.ok(work.over_limit_probes>0);
+  assert.ok(windows.every(w=>w.segmentation===(kind==='WORD'?'native_all_language_nonoverlapping_codepoint_boundaries_v1':'native_all_language_exhaustive_codepoint_partition_v1')));assert.equal(work.search_edges>0,kind==='CJK');
+}
+
+test('native v6 discards repeated and receding WORD overlap ends before whole-source bounded fallback',()=>{
+  for(const capacity of [4,2])checkProgressRepair('WORD',capacity);
+});
+
+test('native v6 discards repeated and receding CJK overlap ends before the bounded exhaustive partition',()=>{
+  for(const capacity of [4,2])checkProgressRepair('CJK',capacity);
+});
+
+test('native v6 progress repairs retain discarded work and whole-stream failures under unchanged probe/call caps',()=>{
+  for(const kind of ['WORD','CJK'])for(const[key,reason]of [['maxEncodeProbes','ENCODE_PROBES'],['maxTokenizerCalls','TOKENIZER_CALLS']]){
+    const {f,cost}=nonextendingNativeFixture(kind),counter=rangeCounter(f,cost);
+    assert.throws(()=>nativeEmbeddingWindows(f.unit.native_input,counter,{maxTokens:8,overlapWords:16,limits:{[key]:12}}),error=>error.code==='NATIVE_WINDOW_SEARCH_BOUND'&&error.reason===reason&&error.retained_failure===true&&error.partial_stream_accepted===false&&error.work.fast_windows_completed>=1&&error.work.final_recounts>=1&&error.work.tokenizer_calls===counter.calls.length&&error.work[key==='maxEncodeProbes'?'encode_probes':'tokenizer_calls']===12);
+  }
 });
 
 test('zero-output native origins at intermediate and terminal boundaries each have an explicit owner',()=>{
@@ -137,6 +238,17 @@ test('production pinned-tokenizer readiness and inference use identical syntheti
   const embedder=await createBatchEmbedder({dimensions:2,max_tokens:128,overlap_words:2},{runtime});
   try{const result=await embedder.embedUnits([f.unit]);assert.deepEqual(result.inputs[0].windows,prepared.input.windows);assert.equal(result.inputs[0].input_sha256,prepared.input.input_sha256);assert.equal(new Set(calls).size,new Set(prepared.windows.map(window=>window.text)).size);assert.deepEqual(new Set(calls),new Set(prepared.windows.map(window=>window.text)));}finally{await embedder.dispose();}
   await assert.rejects(createPinnedTokenCounter({max_tokens:257}),/max_tokens/);await assert.rejects(createPinnedTokenCounter({revision:'f'.repeat(40)}),/exact existing MiniLM/);
+});
+
+test('production pinned-tokenizer readiness repairs a synthetic 296-token Latin compound without inference',async()=>{
+  const pinned=await createPinnedTokenCounter();assert.equal(pinned.policy_sha256,'728bb65a00c45e8b6a4e1cdb1e5f8a69d5946234deb8bef089b61261dc8f541d');assert.equal(pinned.policy.onnx_session_created,false);assert.equal(pinned.policy.model_inference,false);assert.equal(pinned.model.downloads_attempted,0);
+  // One whitespace-delimited source word; its explicit hyphens are tokenizer boundaries.
+  const f=nativeFixture('<u>'+'alpha-'.repeat(129)+'alpha!</u>');assert.equal(f.normalizedText.length,780);assert.equal((f.normalizedText.match(/\S+/gu)??[]).length,1);
+  let calls=0;const count=text=>{assert.ok(calls<96,'Synthetic integration counter work is bounded');calls++;return pinned.tokenCount(text);};assert.equal(count(nativeRepresentationWindow(f.unit.native_input).text),296);
+  const before=calls,windows=nativeEmbeddingWindows(f.unit.native_input,count,{limits:{maxEncodeProbes:64,maxTokenizerCalls:64,maxWindows:8}}),plannerCalls=calls-before;assertExactPartition(f,windows);
+  assert.deepEqual(windows.map(w=>[w.source_utf16_start,w.source_utf16_end,w.tokens]),[[0,660,256],[660,780,76]]);assert.ok(windows.every(w=>w.segmentation==='native_all_language_nonoverlapping_codepoint_boundaries_v1'));
+  const work=windows[0].native_planner_work;assert.equal(work.tokenizer_calls,plannerCalls);assert.equal(work.maximum_measured_tokens,296);assert.ok(work.over_limit_probes>0);assert.equal(work.final_recounts,2);assert.ok(work.tokenizer_calls<=64);
+  for(const window of windows)assert.equal(count(window.text),window.tokens);assert.equal(calls,1+plannerCalls+windows.length);
 });
 
 test('cross-unit batching aggregates weighted windows and returns original ordered Float32 units', async () => {

@@ -1,0 +1,153 @@
+{
+  "schema": "complete-normalized-context-fallback-proposal-v1",
+  "status": "SOURCE_ONLY_PREPARATION_ACTUAL_CLOSED",
+  "authority": "NONE",
+  "audit_id": "development-0055",
+  "candidate": "ONE_COMPLETE_NORMALIZED_DOCUMENT_RANGE_0_25329",
+  "recipe": {
+    "file": "recipe.json",
+    "sha256": "d62adf7543cb1b285da43308f54888d0e0dab4763d3920bfb6a48e719b81d53b",
+    "bytes": 1833
+  },
+  "unchanged_core": {
+    "native": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/native-nodes-dictionary.mjs",
+      "sha256": "f3a62ff9869112b256745669911ee213b9dddc534e3fe4381bc78be479c2cb2b",
+      "bytes": 25990
+    },
+    "dictionary": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/window-dictionary.mjs",
+      "sha256": "172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0",
+      "bytes": 7687
+    },
+    "cluster": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/empty-native-dictionary.mjs",
+      "sha256": "c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e",
+      "bytes": 2247
+    },
+    "declaration": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/declared-context-set-v1/context-set.mjs",
+      "sha256": "19bf6c9e6855d89cea5fd7941d2881f64fdfb1e4883371806528f82117b17cc0",
+      "bytes": 7248
+    }
+  },
+  "carry_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1/ROOT-CLOSED-and-cumulative-carry.json",
+    "sha256": "c18a3536c3867239cf9a71550ff090a49ff4d74e866bafa55ee869203696bf44",
+    "bytes": 2235
+  },
+  "carry": {
+    "planning": 39061,
+    "recount": 158,
+    "elapsed_ms": 475387.035676,
+    "output_bytes": 14239376
+  },
+  "original_caps": {
+    "planning": 40000,
+    "recount": 20000,
+    "active_elapsed_ms": 600000,
+    "output_bytes": 67108864
+  },
+  "remaining_at_start": {
+    "planning": 939,
+    "recount": 19842,
+    "elapsed_ms": 124612.964324,
+    "output_bytes": 52869488
+  },
+  "new_reservation": {
+    "planning": 939,
+    "planning_per_model": [
+      469,
+      470
+    ],
+    "fresh_recounts": 2048,
+    "fresh_recounts_per_model": 1024,
+    "engineering_ms": 30000,
+    "actual_ms_including_setup_and_terminal": 60000,
+    "outputs_including_copies_controls_configs_captures_receipts": 8388608,
+    "new_engineering_copy_cap_including_dirs": 65536,
+    "engineering_output_charge_inside_8MiB": 131072,
+    "source_copy_charge_inside_8MiB": 65536,
+    "model_file_hash_reserved_bytes": 224711752
+  },
+  "engineering": {
+    "copied_sources": {
+      "scope": "ONLY_THREE_NAMED_SOURCE_CONTROL_FILES",
+      "refs": [
+        {
+          "path": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/complete-context.mjs",
+          "sha256": "19bcaad1b6ffb78fbdfcaefcaa47b7e686cc1ad24d2717ceb0065e6f682164da",
+          "bytes": 6490
+        },
+        {
+          "path": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/run-one-case.mjs",
+          "sha256": "d82439c6ffecfb5d121a0e0e291840cd99b12b3f723004af2c14548cf4cee46a",
+          "bytes": 18922
+        },
+        {
+          "path": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/controls.test.mjs",
+          "sha256": "fb778bf309f9726af31c1495f6e2560de8f1f5216cfb81cf39e04a2390a7ff0c",
+          "bytes": 6526
+        }
+      ],
+      "directory_st_size": 4096,
+      "copied_bytes_including_directory": 36034,
+      "cap": 65536
+    },
+    "TAP": {
+      "path": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/tests.tap",
+      "sha256": "df31f0a674d2275451c9055938dc0802882c697b6566cfbfd26195bd025282cf",
+      "bytes": 1409
+    },
+    "known_control_execution_ms": 84.97452,
+    "no_dependency_or_checkout_copy": true
+  },
+  "input_custody": "Unchanged existing current82 epoch23/current body-qualification/equivalence/scope validators; full100/29 CID guard before the one cache. Exact cache/gzip/native/raw refs and authentic focal remain joined. Normalized literal comes from authenticated cache and matches full normalized scope hash/characters. No global registry recomputation or selector rerun.",
+  "planned_nodes": "Existing context-set validates original focal plus one whole-document attachment. Existing planned_node_ids=['complete_normalized_document'] plans only the attachment. No fake unit, local UNCLOSED subset, focal replacement or extra source prefix.",
+  "models": [
+    {
+      "repository": "Xenova/all-MiniLM-L6-v2",
+      "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+      "policy_sha256": "728bb65a00c45e8b6a4e1cdb1e5f8a69d5946234deb8bef089b61261dc8f541d",
+      "file_set_sha256": "bc15c895e656dfab584cd0e6b2e0e5f5877532fdc5c0195861ba8218d0ccf3b9"
+    },
+    {
+      "repository": "sentence-transformers/all-MiniLM-L12-v2",
+      "revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+      "policy_sha256": "e05a9bd1e27021b8857015953480d3653acd794e3c5d0cd5dba8f35a75618bf1",
+      "file_set_sha256": "d6aa9727a115f71b62888648644e6da8deab4fad8efd9047afe6f8923f5415b3"
+    }
+  ],
+  "prospective_execution": {
+    "QA": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-complete-normalized-context-fallback-20261019-v1",
+    "CLI": "node --max-old-space-size=512 --disable-proto=throw QA/run-one-case.mjs QA/admission.json SHA BYTES",
+    "ROOT_ACTIVATED": false,
+    "activation": "Separate ROOT-reviewed false→true runtime-copy patch and exact source/admission SHA required. Host remains inactive.",
+    "adapter_reused_from": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/complete-context.mjs",
+    "minimal_copies": "Only activated driver+recipe+compact admission+clock into new QA; tested adapter and all existing core/model/guard helpers reused. Source-free engineering copy+dirs36034B. If ROOT applies65536 cumulatively to engineering+future setup, future setup must be<=29502B; activated driver18921+recipe1833+one4096dir leaves4652B for compact admission+clock. No additional source copies permitted.",
+    "resource_proof": "ROOT owns pre-copy monotonic clock, external60s process bound including final accounting, sampled RSS/bounded captures/terminal absence. Driver checks per-read/per-counter boundaries and charges all thrown calls. No continuous RSS or complete transitive IO claim.",
+    "expected_outputs": [
+      "operation-lock",
+      "model-0-whole-node.json",
+      "model-0-fresh-recount.json",
+      "model-1-whole-node.json",
+      "model-1-fresh-recount.json",
+      "result.json or held.json"
+    ],
+    "result": "Complete range source/native inverse and independent<=256 token recounts only, or retained HELD without accepted prefix. Unknown costs/overruns retained, no refund or cap reset."
+  },
+  "claims": {
+    "original_HTML_render_resource_style_completeness": false,
+    "per_input_condition_binding_verified": false,
+    "semantic_completeness_verified": false,
+    "model_inference": false,
+    "pooling": false,
+    "new_actual_readings": 0,
+    "actual_payloads_or_models_opened_during_preparation": 0,
+    "quality_gate_pass": false,
+    "holds_cleared": 0,
+    "expired_A_B_phases_reused": false,
+    "A_permanent_lock_changed": false,
+    "coder_meanings_accessed": false
+  }
+}

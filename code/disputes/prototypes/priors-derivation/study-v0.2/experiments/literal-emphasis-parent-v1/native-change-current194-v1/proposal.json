@@ -1,0 +1,388 @@
+{
+  "schema": "current194-native-change-machine-preparation-proposal-v1",
+  "status": "PROPOSED_ROOT_REVIEW_REQUIRED",
+  "execution_authority": "MACHINE_ONLY_NO_ACTUAL_REVIEW_OR_RESOLUTION",
+  "prototype": true,
+  "run": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+  "qa_path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-change-current194-machine-preparation-20261018-v1",
+  "source_snapshot": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code",
+  "source_sha256": "194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22",
+  "audit_id": "coding-0099",
+  "contract_id": "contract-129f8dcc32ad546ab6b6",
+  "worker_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-change-current194-machine-preparation-20261018-v1/prepare.mjs",
+    "sha256": "80aad44a9e29f6944d7a86db76547169ba10c06f8acb385f3dd6283e9ddffed7",
+    "bytes": 28497
+  },
+  "input_refs": {
+    "epoch": {
+      "path": "qa/current-method-freeze-20261018/source-epoch.json",
+      "sha256": "3729deec1e922ab716440ba075b444a49e74d81bdd688778b837429a4b7190cd",
+      "bytes": 6380
+    },
+    "fresh_guard": {
+      "path": "qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "boundary_roster": {
+      "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/result.json",
+      "sha256": "8a313225751e2d52274f79c793822e6dec2c8b62d8ecf6ea4fb695749b5340c8",
+      "bytes": 6936
+    },
+    "manifest": {
+      "path": "processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+      "bytes": 5179014
+    },
+    "issue": {
+      "path": "source-issues/observed/issue-64f380e2905f0af04ea743dc80e980fde64aaf6fd857f0ab2929c2560938c1e2.json",
+      "sha256": "b5371c00eac40f7c94df961af1229b423c663a324086a1e4955a8c008619acac",
+      "bytes": 10626
+    },
+    "second_model_manifest": {
+      "path": "comparison-model.json",
+      "sha256": "a53b0d7e1bb1e1ba69606861b6b55f2584eea929f162bd850a831367c680cd04",
+      "bytes": 2595
+    },
+    "raw": {
+      "path": "raw/contract-129f8dcc32ad546ab6b6.html",
+      "sha256": "213c97b997ab19cfb03daf609db80338ab2be471a5570d825cd5e06e78cb0cea",
+      "bytes": 1243514
+    },
+    "cache": {
+      "path": "extraction-cache/194e51d54ddb39cb/contract-129f8dcc32ad546ab6b6.json.gz",
+      "sha256": "cc83237ac08f42ba9f04d4f6b83cf6122757c4d648e74e90bd1e4d3a70a13de7",
+      "bytes": 717790
+    },
+    "native": {
+      "path": "native-decorations/194e51d54ddb39cb/contract-129f8dcc32ad546ab6b6.json.gz",
+      "sha256": "280dbb15a0b5e48220a43a65aeac3f7c3f0fd956e8a5aa4d95131c81a6985eb9",
+      "bytes": 1826535
+    },
+    "normalized": {
+      "path": "normalized/194e51d54ddb39cb/contract-129f8dcc32ad546ab6b6.txt",
+      "sha256": "ff185baf26bb6517990d683258a1dfab1ded2063b59c02fb88bbe7e0edc92062"
+    }
+  },
+  "code_bindings": [
+    {
+      "path": "source-issues.mjs",
+      "sha256": "4d793126a6c2ba23fe906ace1b3c22f9b2d253056867a4c06e82a078b5e8bff4",
+      "bytes": 63758
+    },
+    {
+      "path": "representation-issues.mjs",
+      "sha256": "b59db67b6274f67d89899effae58b082a0cba28dc48ba27007e1d639ea2316de",
+      "bytes": 14063
+    },
+    {
+      "path": "representation-replay.mjs",
+      "sha256": "c71f1357e8717f15694da2d8e33ec1edeac2f88df14859c7709d353f7c23fb5b",
+      "bytes": 40604
+    },
+    {
+      "path": "source-decoration.mjs",
+      "sha256": "a857d39a2da390175a1f817b4d2704ed1adbacff84ba6a27fefff7aee70f77fd",
+      "bytes": 56630
+    },
+    {
+      "path": "native-decoration-store.mjs",
+      "sha256": "fa63dffb20973086e456072a5749680aeb99f9f96e32da0bf92fc3f35358f86b",
+      "bytes": 7519
+    },
+    {
+      "path": "sections.mjs",
+      "sha256": "06375de4af1cccb3f56778db459760d1cdffe14eed6b5842565167c629f90f2a",
+      "bytes": 137636
+    },
+    {
+      "path": "representation.mjs",
+      "sha256": "b35d8fd3c118d2da489eefd71796d9936596c73997172c5706112ef6ffb39ee6",
+      "bytes": 14161
+    },
+    {
+      "path": "embedding.mjs",
+      "sha256": "d9629fd6df2e5250ad2e4efcab57dbc8f35c0bb559b4479aee25d586527d5340",
+      "bytes": 39043
+    },
+    {
+      "path": "analysis.mjs",
+      "sha256": "0c72a9f5541aa49e7de3e2b76d576addb262332710492bd71fe97b7b7b87aa77",
+      "bytes": 20837
+    },
+    {
+      "path": "sensitivity.mjs",
+      "sha256": "9ff0a597df0ddffb8c5d3e77b6430e17816ece658cf1eb104471d59b081b5a07",
+      "bytes": 67378
+    },
+    {
+      "path": "store.mjs",
+      "sha256": "2a1ecd6da273cff3be44202958cb46e3e1b0c754bed485b54347adee4e49eee3",
+      "bytes": 24187
+    },
+    {
+      "path": "../../lib/common.mjs",
+      "sha256": "b9a9f91448ec88fe6676bd07aaa4a77f14d03844244a3670d4cb27a41ca7545d",
+      "bytes": 2387
+    }
+  ],
+  "limits": {
+    "elapsed_ms": 300000,
+    "node_heap_mb": 1024,
+    "sampled_rss_bytes": 2147483648,
+    "qa_bytes": 16777216,
+    "metadata_reserve_bytes": 65536,
+    "source_copy_bytes": 65536,
+    "read_output_bytes": 1048576,
+    "api_invocations": 1,
+    "plans": 8,
+    "max_tokenizer_callbacks_per_plan": 20000,
+    "max_tokenizer_callbacks_reserved": 160000
+  },
+  "existing_template": {
+    "path": "qa/native6-machine-only-ca205d8c-runner.mjs",
+    "sha256": "f83e27c8c2f04fd15ef89dc0f79ed820be862496bb4284fd2ef237776e3af4e4",
+    "bytes": 10402,
+    "executed_unchanged": false
+  },
+  "api": {
+    "module": "lib/source-issues.mjs",
+    "function": "prepareNativeChangeReplayEvidence",
+    "invocations": 1,
+    "parameters": {
+      "issuePath": "source-issues/observed/issue-64f380e2905f0af04ea743dc80e980fde64aaf6fd857f0ab2929c2560938c1e2.json",
+      "issueSHA": "b5371c00eac40f7c94df961af1229b423c663a324086a1e4955a8c008619acac",
+      "extraction_manifest": {
+        "path": "processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+        "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+        "bytes": 5179014
+      },
+      "parent": {
+        "id": "contract-129f8dcc32ad546ab6b6:section:215519-514935:335af34a7c33",
+        "start": 215519,
+        "end": 514935,
+        "sha256": "335af34a7c333e7e7d452680f57be92f60ba892c35c5c85b2289df540659d279"
+      },
+      "raw": {
+        "path": "raw/contract-129f8dcc32ad546ab6b6.html",
+        "sha256": "213c97b997ab19cfb03daf609db80338ab2be471a5570d825cd5e06e78cb0cea",
+        "bytes": 1243514
+      },
+      "second_model_manifest": {
+        "path": "comparison-model.json",
+        "sha256": "a53b0d7e1bb1e1ba69606861b6b55f2584eea929f162bd850a831367c680cd04",
+        "bytes": 2595
+      }
+    },
+    "sampled_parent_scope": "REFERENCE_ONLY",
+    "new_actual_reading_inferred": false,
+    "review_or_resolution_calls": 0
+  },
+  "preflight": {
+    "exact_root_admission_and_clock_required": true,
+    "fresh_qa_only": true,
+    "exact_current_frozen_code_epoch_runtime_required": true,
+    "network_not_required": true,
+    "complete_fresh100_29_guard_and_all_six_issue_metadata_preflight_before_any_raw_cache_native_payload": true,
+    "six_issue_directory_membership_hashes_and_cids_must_match_fixed_roster": true,
+    "all_six_cids_must_be_excluded_from_protected29": true,
+    "api_binding_observed_issues_must_equal_fixed_six_refs": true
+  },
+  "counter_accounting": {
+    "separate_from_two_case_experimental_phase": true,
+    "reservation_basis": "Eight existing native V5 plans, each bounded to20000 tokenizer callbacks and20000 encode probes, including final recounts.",
+    "callback_reservation_before_api": 160000,
+    "actual_callback_measurement_available": false,
+    "unused_counter_reservations_refunded": false,
+    "followup_resolution_or_registry_revalidation_not_admitted": true,
+    "later_api_calls_require_separate_reservations": true
+  },
+  "resource_accounting": {
+    "external_timeout_max_ms": 300000,
+    "outer_timeout_must_not_exceed_remaining_source_clock": true,
+    "node_arguments": [
+      "--max-old-space-size=1024",
+      "--disable-proto=throw"
+    ],
+    "memory_checkpoints_only": true,
+    "continuous_rss_guarantee": false,
+    "qa_logical_files_and_directory_entries_included": true,
+    "qa_writes_exclusive": true,
+    "metadata_and_directory_growth_reserve_bytes": 65536,
+    "all_partial_artifacts_preserved_on_hold": true,
+    "hard_total_input_read_bound_claimed": false,
+    "total_named_or_decoded_input_bytes_measured": false,
+    "existing_per_artifact_validations": {
+      "raw_max_bytes": 4194304,
+      "cache_max_bytes": 67108864,
+      "native_compressed_max_bytes": 67108864,
+      "native_decoded_max_bytes": 268435456,
+      "fixed_current_cache_encoded_bytes": 717790,
+      "fixed_current_cache_decoded_bytes": 6484840,
+      "fixed_current_native_encoded_bytes": 1826535,
+      "fixed_current_native_decoded_bytes": 22531128
+    },
+    "model_asset_cost": "Existing API hashes complete pinned baseline and second-model file sets, including ONNX weights, then initializes local tokenizers only. The second ONNX file alone is133126567 bytes. No ONNX session or inference is requested.",
+    "additional_named_reads": "Existing issue and native registry authentication also opens original source/evidence/cache artifacts. This proposal makes no hard aggregate input-read claim."
+  },
+  "outputs": {
+    "binding": "binding.json",
+    "mechanical": "mechanical-verification.json",
+    "input_readiness": "input-readiness.json",
+    "reservation": "api-call-reservation.json",
+    "read_outputs": [
+      "read-output-adjusted-libo-rate-floor.json",
+      "read-output-libor-quoted-rate-floor.json",
+      "read-output-instruction-context.json"
+    ],
+    "read_output_schema": "native-change-actual-read-output-v1",
+    "occurrence_raw_normalized_and_full_native_projection": true,
+    "instruction_raw_only": true,
+    "fresh_current_normalized_ranges_derived_by_api": true,
+    "package": "package.json",
+    "held": "held.json",
+    "console_metadata_only": true,
+    "native_window_qualification": "native-window-qualification.json",
+    "console_max_utf8_bytes": 4096,
+    "console_detail": "Only status, package/mechanical/readiness path-SHA-byte refs, aggregate counts, resource totals and flags. No read-output ranges/projection metadata."
+  },
+  "root_admission": {
+    "schema": "ROOT_NATIVE_CHANGE_CURRENT194_MACHINE_PREPARATION_ADMISSION_V1",
+    "status": "ADMITTED_NATIVE0099_MACHINE_ONLY",
+    "arguments": [
+      "ABSOLUTE_QA/admission.json",
+      "EXACT_ADMISSION_SHA256",
+      "EXACT_ADMISSION_BYTES"
+    ],
+    "required_fields": [
+      "schema",
+      "status",
+      "source_snapshot",
+      "source_sha256",
+      "input_refs",
+      "limits",
+      "api_invocations",
+      "tokenizer_callbacks_reserved",
+      "separate_from_two_case_experimental_phase",
+      "actual_reading",
+      "actual_review_created",
+      "resolution_called",
+      "model_inference",
+      "network_access",
+      "quality_gate_pass",
+      "authority",
+      "external_timeout_ms",
+      "self_ref",
+      "proposal_ref",
+      "clock_ref",
+      "observed_issue_roster"
+    ],
+    "self_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-change-current194-machine-preparation-20261018-v1/prepare.mjs",
+      "sha256": "80aad44a9e29f6944d7a86db76547169ba10c06f8acb385f3dd6283e9ddffed7",
+      "bytes": 28497
+    },
+    "proposal_ref_path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-change-current194-machine-preparation-20261018-v1/proposal.json",
+    "clock_ref_path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-change-current194-machine-preparation-20261018-v1/clock.json",
+    "clock_schema": "native-change-current194-machine-clock-v1",
+    "clock_required_field": "origin_ns",
+    "root_and_peer_review_before_actual_execution": true
+  },
+  "scope": {
+    "actual_preparation_executed": false,
+    "actual_reading": false,
+    "actual_review_created": false,
+    "resolution_called": false,
+    "model_inference": false,
+    "fitting": false,
+    "fresh_opened": false,
+    "source_quality_gate_pass": false,
+    "governing_parent_fully_read": false,
+    "whole_original_document_read": false,
+    "effectiveness_conditions_verified": false,
+    "clean_operative_version_derived": false,
+    "first_priors_decided": false,
+    "human": false,
+    "authority": "NONE"
+  },
+  "authority": "NONE",
+  "observed_issue_roster": [
+    {
+      "issue": {
+        "path": "source-issues/observed/issue-64f380e2905f0af04ea743dc80e980fde64aaf6fd857f0ab2929c2560938c1e2.json",
+        "sha256": "b5371c00eac40f7c94df961af1229b423c663a324086a1e4955a8c008619acac",
+        "bytes": 10626
+      },
+      "contract_id": "contract-129f8dcc32ad546ab6b6",
+      "audit_id": "coding-0099",
+      "classification": "MATERIAL_NATIVE_CHANGE_MARKUP"
+    },
+    {
+      "issue": {
+        "path": "source-issues/observed/issue-67532c9d78500cf20cd6892e9f8d289af92ded6f97631957e0b33c5a30def7dc.json",
+        "sha256": "a8597893af300fc0c5eb0deff1eb14453d08b2411da60bd1682daac56ced997d",
+        "bytes": 1584
+      },
+      "contract_id": "contract-c77a5e4c4a467c2e8ff2",
+      "audit_id": "coding-0133",
+      "classification": "MATERIAL_BOUNDARY"
+    },
+    {
+      "issue": {
+        "path": "source-issues/observed/issue-a40585b2897a9f6e5eb93e0fef26b92623d87319ea793b77b0ec8b3a4eb396e9.json",
+        "sha256": "d9c0bc7c54695cd66a2bbfab21a1680b52579ce7004ffb71805e4b4694627526",
+        "bytes": 3093
+      },
+      "contract_id": "contract-cc26fc55f8a1f7ad9def",
+      "audit_id": "development-0013",
+      "classification": "MATERIAL_BOUNDARY"
+    },
+    {
+      "issue": {
+        "path": "source-issues/observed/issue-a8d129f17bd43aff0b60b211ebf4fad0e27f7dd5762ce2ee1182d178de79cd8d.json",
+        "sha256": "adcf9920850767cecb4fb43b603d8e5a097cbb37d3f436efc5d5f6468dd6f8d7",
+        "bytes": 2071
+      },
+      "contract_id": "contract-f1ada4c1a04d7c8d92d8",
+      "audit_id": "technical-attachment-reference-list-0096",
+      "classification": "MATERIAL_BOUNDARY"
+    },
+    {
+      "issue": {
+        "path": "source-issues/observed/issue-e07ac0b1bd20983f262ec846734b848aa202c501489abacc9bd5b93b830da7bc.json",
+        "sha256": "894cf357950d7c16ae2f4e3740ed436b8f94e50f03f2959cfc51d907ddbd102e",
+        "bytes": 2514
+      },
+      "contract_id": "contract-c07dc12c0ca8cbffea62",
+      "audit_id": "coding-0010",
+      "classification": "MATERIAL_BOUNDARY"
+    },
+    {
+      "issue": {
+        "path": "source-issues/observed/issue-e88a40a6b9f6372054cd4aadae6176ab102736dfd973b656d4efe4834b8d7006.json",
+        "sha256": "5cf17676957e3f5fc852443cfea7e0e7321592fb64c7397f185e5a7d042aae39",
+        "bytes": 1695
+      },
+      "contract_id": "contract-45ac30084126ee880e85",
+      "audit_id": "development-0129",
+      "classification": "MATERIAL_BOUNDARY"
+    }
+  ],
+  "strict_native_window_qualification": {
+    "frozen_v5_modified": false,
+    "extra_counter_calls": 0,
+    "checks": [
+      "one contiguous source part and exact representation/source-range/hash bounds",
+      "strictly advancing window starts and ends with no gap and complete terminal coverage",
+      "positive exact unique word/codepoint weights, consistent units and complete weight sum",
+      "source Unicode codepoint boundaries and stored word/codepoint index bounds",
+      "stored token counts between1and256"
+    ],
+    "failure_status": "HELD_PRESERVED_NO_REVIEW_OR_RESOLUTION",
+    "unqualified_machine_artifacts_preserved": true,
+    "three_unread_outputs_produced_only_after_qualification_pass": true,
+    "independent_actual_reading_still_required": true,
+    "quality_or_semantic_adequacy_claimed": false
+  }
+}

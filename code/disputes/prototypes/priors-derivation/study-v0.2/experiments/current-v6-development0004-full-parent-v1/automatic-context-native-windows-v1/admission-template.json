@@ -1,0 +1,113 @@
+{
+  "schema": "ROOT_AUTOMATIC_0055_NATIVE_DICTIONARY_ADMISSION_V1",
+  "status": "TEMPLATE_NOT_ADMITTED",
+  "requires_separate_ROOT_activation_and_exact_admission": true,
+  "audit_id": "development-0055",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "input_refs": {
+    "selection": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/development-0055-selection.json",
+      "sha256": "d56df7a20b8316036b5e2441a7844ae2f46b941a650a8b22f2ca708c23c01747",
+      "bytes": 14070
+    },
+    "selector_result": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/result.json",
+      "sha256": "1589a889131470b435323f3d31b5991594b6dd80e29e36998b08303283a14867",
+      "bytes": 17517
+    },
+    "epoch": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "carry": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-context-search-v3-0055-single-task-20261018-v2/ROOT-CLOSED-and-cumulative-carry.json",
+      "sha256": "9991da852ddf2aa2952d50cea01cbf3dc8f7b618371ca06f1a9b392b2db85d9d",
+      "bytes": 1845
+    },
+    "guard_module": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/run-ten-held.mjs",
+      "sha256": "aca5f21caa74c1e3fcc5fcc92c680fe8acae50807fb0d627606fbf892a0142ac",
+      "bytes": 21991
+    }
+  },
+  "limits": {
+    "planning_calls": 900,
+    "planning_calls_per_model": 450,
+    "recount_calls": 2048,
+    "recount_calls_per_model": 1024,
+    "elapsed_ms": 60000,
+    "qa_bytes": 8388608,
+    "source_copy_bytes": 131072,
+    "metadata_bytes": 65536,
+    "plan_bytes": 2097152,
+    "named_and_decoded_input_bytes": 33554432,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 2147483648,
+    "model_file_hash_bytes_reserved": 224711752
+  },
+  "carry": {
+    "planning": 38799,
+    "recount": 128,
+    "elapsed_ms": 385387.035676,
+    "output_bytes": 5850768
+  },
+  "original_caps": {
+    "planning": 40000,
+    "recount": 20000,
+    "active_elapsed_ms": 600000,
+    "output_bytes": 67108864
+  },
+  "engineering_charge": {
+    "active_ms": 30000,
+    "output_bytes": 1048576
+  },
+  "source_copy_charge": 131072,
+  "runtime_refs": {
+    "api": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/automatic-windows.mjs",
+      "sha256": "35aebc03c7748e2a84968cdca2cd683a614db7cfc319deffe4f3bbc14e0a4709",
+      "bytes": 12293
+    },
+    "native": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/native-nodes-dictionary.mjs",
+      "sha256": "f3a62ff9869112b256745669911ee213b9dddc534e3fe4381bc78be479c2cb2b",
+      "bytes": 25990
+    },
+    "dictionary": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/window-dictionary.mjs",
+      "sha256": "172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0",
+      "bytes": 7687
+    },
+    "cluster": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/empty-native-dictionary.mjs",
+      "sha256": "c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e",
+      "bytes": 2247
+    },
+    "declaration": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/declared-context-set-v1/context-set.mjs",
+      "sha256": "19bf6c9e6855d89cea5fd7941d2881f64fdfb1e4883371806528f82117b17cc0",
+      "bytes": 7248
+    },
+    "self": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1/run-one-case.mjs",
+      "sha256": "ROOT_MUST_PIN_SEPARATELY_REVIEWED_ACTIVATED_COPY",
+      "bytes": 23964
+    },
+    "model_pins": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1/model-pins.json",
+      "sha256": "11caecf0f546036b901d929571a9b13ce7d46646d6c7750c57f0ea1ee317d5aa",
+      "bytes": 12564
+    }
+  },
+  "clock_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1/clock.json",
+    "sha256": "ROOT_MUST_SEAL_CLOCK_BEFORE_COPY_SETUP",
+    "bytes": null
+  },
+  "model_inference": false,
+  "source_text_display": false,
+  "quality_gate_pass": false,
+  "manual_witness_catalog_input": false,
+  "authority": "NONE"
+}

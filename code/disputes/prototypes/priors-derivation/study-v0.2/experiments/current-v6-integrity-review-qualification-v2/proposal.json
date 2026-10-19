@@ -1,0 +1,283 @@
+{
+  "schema": "current-v6-integrity-source-only-proposal-v2",
+  "name": "Current V6 Integrity Review Qualification V2 — PROTOTYPE",
+  "ROOT_ACTIVATED": false,
+  "execution_status": "INACTIVE_ROOT_REVIEW_REQUIRED",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "source_snapshot": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "QA_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-integrity-review-qualification-20261018-v2",
+  "input_refs": {
+    "old_acceptance": {
+      "path": "qa/current194-integrity-review-qualification-20261018-v1/ROOT-acceptance.json",
+      "sha256": "550f5ff0da7a141e8a8f92bab0e81e470c5f950be3ee44c17c3033387d0bffa8",
+      "bytes": 1154
+    },
+    "old_worker": {
+      "path": "qa/current194-integrity-review-qualification-20261018-v1/qualify.mjs",
+      "sha256": "19319dbd7e154e4d48605bd84e1b637d580ecedd65b2fb0d2cf3a98811f465dc",
+      "bytes": 21736
+    },
+    "old_review": {
+      "path": "qa/current194-integrity-review-qualification-20261018-v1/review.json",
+      "sha256": "e344d653c00ec746650422bf8227e41401e541f6c93bcdb22a813cfa86f2a9cc",
+      "bytes": 534013
+    },
+    "old_qualification": {
+      "path": "qa/current194-integrity-review-qualification-20261018-v1/qualification.json",
+      "sha256": "4b11051b2221cfa4cd1df30311da650bb1545e3e0821bd0c7626a34fa4853904",
+      "bytes": 290959
+    },
+    "old_result": {
+      "path": "qa/current194-integrity-review-qualification-20261018-v1/result.json",
+      "sha256": "0eec32e1ad82169ab24deddbfc610dd24d1df3926207420af6f3028f2924b305",
+      "bytes": 2191
+    },
+    "prior_direct_root_qualification": {
+      "path": "qa/v13-source-only-qualification-20261015T085303215Z-v6/source-integrity-qualification.json",
+      "sha256": "43a7b53901cb1ccbb9cfd2e6dee09c65895a18365ace2d17dbf9af14fddb0f52",
+      "bytes": 471360
+    },
+    "epoch": {
+      "path": "qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "old_manifest": {
+      "path": "processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+      "bytes": 5179014
+    },
+    "manifest": {
+      "path": "processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "7726139476a239ded60b75a25ec033d51569f53556020739ae28c86835ad7b13",
+      "bytes": 5179014
+    },
+    "comparison": {
+      "path": "qa/current-v6-extraction-equivalence-20261018-v1/comparison/result.json",
+      "sha256": "2365f9f9604b2e63fe03c336675038cf7c9682104ec1d63ae71ddeb6c99b1a61",
+      "bytes": 4357
+    },
+    "comparison_ledger": {
+      "path": "qa/current-v6-extraction-equivalence-20261018-v1/comparison/contract-metadata.json",
+      "sha256": "4e6ba350232386d9130ac998e5621b80a96383dce4be683beca02383f74fd383",
+      "bytes": 615121
+    },
+    "comparison_attestation": {
+      "path": "qa/current-v6-extraction-equivalence-20261018-v1/ROOT-native-zero-attestation.json",
+      "sha256": "6ab57dfafc1c768a826f970d977e3ad977c7a2905d92595e595acb2fe0319acd",
+      "bytes": 473
+    },
+    "regeneration": {
+      "path": "qa/current-v6-audit-regeneration-20261018-v1/regeneration/result.json",
+      "sha256": "61df8313ab9d8301d11aa0239711665b4e5f7ccb6a418909288d16a5db96d919",
+      "bytes": 2072
+    },
+    "old_audit": {
+      "path": "audits/6117a6f51bac9ea11b66/manifest.json",
+      "sha256": "76ae272fbd0cdb99abbe6022c900613424c50d883db60881b5c5ae1e2fb4a195",
+      "bytes": 9638
+    },
+    "audit": {
+      "path": "audits/049d0f4fe07080f7e7f0/manifest.json",
+      "sha256": "41b7c4ae088f7043b8de7384447fc859928064699e05365e13d028e4abf97062",
+      "bytes": 9638
+    },
+    "old_packet": {
+      "path": "audits/6117a6f51bac9ea11b66/source_integrity.json",
+      "sha256": "3095d5f63d1ca8d94205306391de8868264ee7b5e2960eaa9ebfadf245f455f5",
+      "bytes": 197501
+    },
+    "packet": {
+      "path": "audits/049d0f4fe07080f7e7f0/source_integrity.json",
+      "sha256": "6acd12c97b9aab7598bb20870227488f990e85168f3f7c35dc4bdf7796933d72",
+      "bytes": 197501
+    },
+    "fresh_guard": {
+      "path": "qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "quality": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/quality.mjs",
+      "sha256": "4617dfb1f5ab9b20ef0e2d67cb454505ca542dda41b609b8c74db6e91312645b",
+      "bytes": 19394
+    },
+    "old_quality": {
+      "path": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code/disputes/prototypes/priors-derivation/study-v0.2/lib/quality.mjs",
+      "sha256": "4617dfb1f5ab9b20ef0e2d67cb454505ca542dda41b609b8c74db6e91312645b",
+      "bytes": 19394
+    },
+    "audit_module": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/audit.mjs",
+      "sha256": "923f4e3daaf6991335c55edaa30284d26ce5db22c3e4175b77f235567b1d33e4",
+      "bytes": 19910
+    },
+    "old_audit_module": {
+      "path": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code/disputes/prototypes/priors-derivation/study-v0.2/lib/audit.mjs",
+      "sha256": "923f4e3daaf6991335c55edaa30284d26ce5db22c3e4175b77f235567b1d33e4",
+      "bytes": 19910
+    },
+    "held_v1": {
+      "path": "qa/current-v6-integrity-review-qualification-20261018-v1/held.json",
+      "sha256": "0446ac1ff98448a212b3520759b13f997892226381e2b2e6caa932a93d1b1da2",
+      "bytes": 672
+    },
+    "native_observation_v1": {
+      "path": "qa/current-v6-integrity-review-qualification-20261018-v1/ROOT-native-process-observation.json",
+      "sha256": "706cbe99470c50c4fb5836ce916c2df10217bd4f5bb5538f20941221417a4f47",
+      "bytes": 1105
+    },
+    "admission_v1": {
+      "path": "qa/current-v6-integrity-review-qualification-20261018-v1/admission.json",
+      "sha256": "a271d3ff43c9a7952b12d5fb37cb8325ba210c10e9f9d8289a43a1f9f8bb88d8",
+      "bytes": 8987
+    }
+  },
+  "direct_original_root_refs": [
+    {
+      "path": "audits/5a983c1be1ab87156e93/integrity-root-v7/batch-001-0001-0003.json",
+      "sha256": "e3c3b23afc97f4f470271bc406878a5613b7123f0c7a5874674f8f522178a236",
+      "bytes": 5930
+    },
+    {
+      "path": "audits/5a983c1be1ab87156e93/integrity-root-v7/batch-002-0004-0011.json",
+      "sha256": "82246ffe036ffb84d590291aeda5aa1506021e4272b8c5b549861b73a93eabb2",
+      "bytes": 13889
+    },
+    {
+      "path": "audits/5a983c1be1ab87156e93/integrity-root-v7/batch-003-0012.stopped.json",
+      "sha256": "3cef550aa4715a2d6cfeed51ef0b9f4af97554998f146b8cd47708792043a356",
+      "bytes": 2728
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/batch-002-0013-0016.json",
+      "sha256": "0963128b534096644e99b5fa6b8c6c37e756e622bc43f22831611778daf0adb5",
+      "bytes": 7660
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/batch-003-0017-0022-0024.json",
+      "sha256": "d088ceb5f3d8a3305a7c0097517f7d4f2eab50222d5405d6faa77011c82ac0f9",
+      "bytes": 11956
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/batch-004-0023-0025-0028.json",
+      "sha256": "75df32a003f2cf23d9104b0023d08b51ef5a50a9e937b555162f99cae7619741",
+      "bytes": 9054
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/batch-005-0029-0037-0040.json",
+      "sha256": "1740fd743603fcf288b70c93f1e23e94105dfa01fc6b20c374c98cb1ddcb8fa6",
+      "bytes": 16867
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/batch-006-0038-0039-0041-0048.json",
+      "sha256": "6fff7fe4e3cce5e5dd07e10e8625fb4d6bbdbf6cbac7dcae3183610811c537d4",
+      "bytes": 17044
+    },
+    {
+      "path": "audits/70e88bd1446833a28e46/integrity-root-v8/batch-007-0049-0057.json",
+      "sha256": "2274260250fc901ef2811c69f91c57a3d186fa9c8a247384947258a584e24baf",
+      "bytes": 15359
+    }
+  ],
+  "limits": {
+    "elapsed_ms": 120000,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 1073741824,
+    "input_bytes": 33554432,
+    "qa_bytes": 4194304,
+    "source_copy_bytes": 65536,
+    "source_directory_reserve_bytes": 8192,
+    "terminal_reserve_bytes": 65536,
+    "console_bytes": 16384,
+    "tokenizer_callbacks": 0,
+    "model_inferences": 0
+  },
+  "assessment": {
+    "api": "assessSupportingReview",
+    "purpose": "source_integrity",
+    "target": 57,
+    "new_source_readings": 0,
+    "full_gate_called": false,
+    "development_200_assessed": false,
+    "tokenizer_callbacks": 0,
+    "model_inferences": 0
+  },
+  "preservation": {
+    "prior_accepted_current194_review_immutable": true,
+    "all_57_prior_judgments_cloned_and_deep_verified": true,
+    "all_prior_top_fields_preserved_except_current_packet_and_source": true,
+    "historical_current194_proofs_preserved": true,
+    "original_readers_exposure_outcomes_reasons_ranges_preserved": true,
+    "direct_original_metadata_preserved_including_partial_and_stopped_batch_statuses": true,
+    "historical_origin_flag_differences_preserved": 57,
+    "origin_flags_and_later_qualified_flags_kept_separately": true,
+    "new_current_v6_qualification_field_only": true,
+    "body_unavailability_preserved": true,
+    "no_pixels_or_OCR": true,
+    "packet_AUDIT_NOT_RUN_unchanged": true,
+    "historical_origin_flag_shapes_preserved": {
+      "absent_to_false": 12,
+      "true_to_false": 45
+    }
+  },
+  "checks": [
+    "Exact prior ROOT acceptance, checker, review, qualification and result pins.",
+    "Exact complete 994 comparison, four-field cache mask, both manifests, ledger and actual native-zero attestation.",
+    "Same ordered 23 source files except the declared embedding transition; equal parameters, runtime and accounting; actual current file hashes.",
+    "Audit source transition and every one of the 57 old/new integrity packet rows deeply equal after source and exactly four declared lineage mappings.",
+    "Nine pinned direct original review documents; direct pointers, authored judgment digests and complete original raw/anchor ranges; original metadata and later qualified flags both retained.",
+    "Unchanged old/current quality.mjs and audit.mjs bytes; call only assessSupportingReview for source_integrity target 57.",
+    "Saved review readback and every prior supporting judgment deep equality after removing the newly added V6 proof only.",
+    "V1 exact HELD/native/admission pins and recorded charges remain historical; V2 requires all 57 flag differences, partitioned into 12 absent-to-false and 45 true-to-false. Both original presence/value and qualified presence/value remain unchanged."
+  ],
+  "execution": {
+    "root_source_review_required": true,
+    "activation_requires_reviewed_constant_change_and_exact_ROOT_admission": true,
+    "CLI_guarded_by_exact_entrypoint": true,
+    "node_flags": [
+      "--max-old-space-size=512",
+      "--disable-proto=throw"
+    ],
+    "namespace_must_be_fresh": true,
+    "initial_files": [
+      "admission.json",
+      "clock.json",
+      "proposal.json",
+      "qualify.mjs"
+    ],
+    "source_copy_counts_worker_proposal_and_directory_entry_bytes": true,
+    "helper_explicit_input_reads_capped": true,
+    "module_autoload_and_OS_block_IO_metered": false,
+    "self_RSS_checkpoints_only": true,
+    "continuous_resource_guarantee": false,
+    "outer_native_exit_zero_required_before_ROOT_acceptance": true
+  },
+  "authority": "NONE",
+  "quality_gate_pass": false,
+  "materiality_holds_cleared": 0,
+  "registry_resolutions_written": 0,
+  "source_payloads_opened": false,
+  "fresh_payloads_opened": false,
+  "predecessor_held_attempt": {
+    "status": "HELD_PRESERVED_NEVER_A_PASS",
+    "helper_input_bytes": 13568463,
+    "helper_elapsed_ms": 135.861,
+    "native_elapsed_ms": 151.462354,
+    "source_copy_charge_with_8192_directory_reserve_bytes": 57031,
+    "diagnostic_reference_reads_bytes": 636744,
+    "diagnostic_tools": [
+      "b1b07a",
+      "220604"
+    ],
+    "incorrect_diagnostic_JSON_reserialization_estimate_not_physical_reads": 612737,
+    "actual_origin_flag_difference_count": 57,
+    "expected_flag_shapes": {
+      "absent_to_false": 12,
+      "true_to_false": 45
+    },
+    "all_original_limits_observations_and_charges_retained": true,
+    "v1_not_overwritten_or_relabelled": true,
+    "new_namespace_separate_source_copy_accounting": true
+  }
+}

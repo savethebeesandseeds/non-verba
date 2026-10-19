@@ -1,0 +1,145 @@
+{
+  "schema": "b162-smaller-fixed-slices-inactive-proposal-v1",
+  "active": false,
+  "reviewer_id": "open_coding_clean_b",
+  "owner_namespace": "open-coding-b",
+  "baseline": {
+    "root": "b162-prospective-completion-ROOT-preparation-20261019-v1/runtime-source",
+    "modules": [
+      {
+        "name": "pager.mjs",
+        "sha256": "eb3841b7eedd97caee6c33aadfa00a97adf052626075ca94d4837d1eb7db2e4d",
+        "bytes": 25514
+      },
+      {
+        "name": "policy.mjs",
+        "sha256": "c90f08ca15718b6198464a4a7263bd897f57e37c52af56686dc95492d91b590e",
+        "bytes": 17053
+      },
+      {
+        "name": "cached-guard.mjs",
+        "sha256": "9d7ab5a0c17c9ec4de2d660edbf2a9295712fa83d29d5b57e1071954a06cbf49",
+        "bytes": 2217
+      }
+    ]
+  },
+  "scope": "finite case162 only; source-only engineering; no runtime D/admission/API/source read",
+  "future_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/coding/open-coding-b/current-v6/smaller-fixed-slices-0162-v1/run-v1",
+  "future_preparation": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/b162-smaller-fixed-slices-ROOT-preparation-20261019-v1",
+  "clock": {
+    "origin_ns": "32744618170562",
+    "deadline_ns": "38144618170562"
+  },
+  "wall_deadline": "2026-10-19T02:55:32.344Z",
+  "new_clock": false,
+  "clock_reset": false,
+  "cumulative_limits": {
+    "visible": 25680633,
+    "capture": 1928078787,
+    "artifact": 203083073
+  },
+  "phase_limits_rule": "EXACT cumulative_limits minus actual ROOT-issued carry; each positive and <=16MiB/1GiB/128MiB; total limits unchanged",
+  "closed_floor": {
+    "visible": 9135728,
+    "capture": 907855810,
+    "artifact": 71180375,
+    "source_copy": 2257522
+  },
+  "next_source_floor": 2749042,
+  "carry_costs": {
+    "engineering_source": 262144,
+    "ROOT_metadata_source": 131072,
+    "actual_setup_source": 98304,
+    "engineering_capture_reserved": 1048576,
+    "engineering_visible_reserved": 131072,
+    "engineering_artifact_reserved": 262144,
+    "nonrefundable": true,
+    "ROOT_actual_carry_pending": true
+  },
+  "new_parent_cap": 2500,
+  "raw_cap": 7000,
+  "page_utf16": 6000,
+  "whole_tool_utf16": 9000,
+  "response_bytes": 2097152,
+  "old_scope": [
+    0,
+    108000
+  ],
+  "old_ACKs": 128,
+  "closed_root_count": 3,
+  "closed_admission_close_proofs": 6,
+  "anchor_immutable_refs": 280,
+  "anchor_counts": {
+    "manifests": 18,
+    "emissions": 128,
+    "ACKs": 128,
+    "proofs": 6
+  },
+  "anchor_schema": "root-own-b162-three-phase-continuous-parent-anchor-v1",
+  "capsule_schema": "root-b162-smaller-fixed-slices-cached-page-capsule-v1",
+  "carry_schema": "root-open-coding-b162-smaller-fixed-slices-cumulative-carry-v1",
+  "schema_fields": {
+    "anchor": [
+      "closed_phase_roots",
+      "closed_phase_proof_refs",
+      "original_clock",
+      "active_clock",
+      "parent_range",
+      "actual_pages",
+      "complete_parent_requests",
+      "immutable_refs"
+    ],
+    "carry": [
+      "original_clock",
+      "active_clock",
+      "cumulative_limits",
+      "carry",
+      "phase_close_ref",
+      "old_scope_anchor_ref"
+    ]
+  },
+  "edits": [
+    "three pager substitutions: imports, typed closed-close dispatch, fixed parent2500",
+    "eight policy substitutions: roots/scope/PREP/capsule/nextRange/proof tail",
+    "cached-guard unchanged",
+    "exact canonical numeric two-field shared active clock, key order independent",
+    "typed third historical admission validates original total limits, first two validate original phase limits",
+    "fixed cumulative caps minus spent carry; no new allocation or old compliance restoration",
+    "three exact closed roots and six fixed proof refs; 280 metadata-only refs/counts",
+    "latestclose binds9new128total and failed fac019108000..113000/no emission/permanentlock"
+  ],
+  "unchanged": [
+    "partitioned B reader/producer",
+    "all23 live source/Fresh29/registry/packet before prepare and completion",
+    "canonical response/presentation/view inverse on prepare and completion",
+    "exact-page cached delivery and separate actual complete-outer ACK",
+    "raw7000 and scoped raw/context/resources obligations",
+    "historical161 and JSON237 unqualified",
+    "permanent old lock preservation"
+  ],
+  "failure": {
+    "native_chunk": "fac019",
+    "native_exit": 1,
+    "error": "RESPONSE_BOUND",
+    "interval": [
+      108000,
+      113000
+    ],
+    "source_emitted": false,
+    "retry": false,
+    "preserved": true
+  },
+  "controls": {
+    "fictional_only": true,
+    "watchdog_ms": 30000,
+    "heap_mib": 512,
+    "sampled_rss_bytes": 1073741824,
+    "output_bytes": 1048576,
+    "real_clock_qualification_by_ROOT": true
+  },
+  "engineering_ceiling": 262144,
+  "source_copy_metric": "ALL host writes/staged copies/config/docs/wrappers/directories; full reservation retained; stream I/O separately charged",
+  "actual_source_access": false,
+  "authority": "NONE"
+}
+

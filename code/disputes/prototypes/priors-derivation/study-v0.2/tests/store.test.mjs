@@ -7,8 +7,9 @@ import {syncBuiltinESMExports} from 'node:module';
 import {dirname,join} from 'node:path';
 import {gzipSync,gunzipSync} from 'node:zlib';
 import {digest,sha256} from '../../lib/common.mjs';
-import {STUDY_BASE,appendLedger,directoryBytes,readJSON,readLedger,readRows,studyPath,validateStudyRoot,writeJSON,writeRows,writeExtractionCache,MAX_EXTRACTION_CACHE_ENCODED_BYTES,MAX_EXTRACTION_CACHE_DECODED_BYTES} from '../lib/store.mjs';
+import {STUDY_BASE,appendLedger,directoryBytes,readJSON,readLedger,readRows,studyPath,validateStudyRoot,hashFile,writeJSON,writeRows,writeExtractionCache,MAX_EXTRACTION_CACHE_ENCODED_BYTES,MAX_EXTRACTION_CACHE_DECODED_BYTES,validateExtractionAccountingPolicy,extractionAccountingProvenance,EXTRACTION_ACCOUNTING_POLICY_REF} from '../lib/store.mjs';
 import {atomicJSON} from '../lib/workflow.mjs';
+import {ORIGINAL_CAPACITY_POLICY} from '../experiments/literal-emphasis-parent-v1/actual-entry-v1/metadata-execution-v1/builtin-capacity.mjs';
 
 async function fixture(t){const root=join(STUDY_BASE,`test-store-${randomUUID()}`);validateStudyRoot(root);await mkdir(root,{recursive:true});t.after(()=>rm(root,{recursive:true,force:true}));return root;}
 async function collect(iterator){const rows=[];for await(const row of iterator)rows.push(row);return rows;}
@@ -202,4 +203,51 @@ test('committed JSON and Parquet destinations cannot impersonate removable trans
   await assert.rejects(writeRows(root,name,[{id:'synthetic'}],{schema:{id:'VARCHAR'}}),/reserved transfer filename/);
   await assert.rejects(readFile(join(root,name)),{code:'ENOENT'});
   assert.equal(await directoryBytes(root),0);
+});
+
+// Entirely virtual exact-policy paths. Never materialize these names in the RUN.
+function accountingFixture(t){
+  const policy=structuredClone(ORIGINAL_CAPACITY_POLICY),root=policy.study_root,nodes=new Map(),calls=[],hooks={};let ino=900000;
+  const dirs=path=>{if(nodes.has(path))return;if(path!=='/')dirs(dirname(path));nodes.set(path,{kind:'DIRECTORY',mode:16877,size:4096,dev:2096,ino:ino++});};dirs(root);
+  for(const e of policy.exceptions){const path=join(root,e.path),target=join(root,e.target.path);dirs(dirname(path));dirs(dirname(target));nodes.set(path,{kind:'SYMLINK',mode:e.mode,size:e.bytes,dev:2096,ino:ino++,literal:e.literal_target});nodes.set(target,{kind:e.target.type,mode:e.target.mode,size:e.target.bytes,dev:e.target.dev,ino:e.target.ino});}
+  const targetDirectory=join(root,policy.exceptions[0].target.path);nodes.set(join(targetDirectory,'synthetic-child'),{kind:'FILE',mode:33152,size:7,dev:2096,ino:ino++});nodes.set(join(root,'synthetic-retained'),{kind:'FILE',mode:33152,size:17,dev:2096,ino:ino++});
+  const baseline=[...nodes].map(([p,n])=>[p,{...n}]);const reset=()=>{nodes.clear();for(const[p,n]of baseline)nodes.set(p,{...n});calls.length=0;for(const k of Object.keys(hooks))delete hooks[k];};
+  const absent=()=>{throw Object.assign(Error('SYNTHETIC_ENOENT'),{code:'ENOENT'});},info=n=>({...n,isFile:()=>n.kind==='FILE',isDirectory:()=>n.kind==='DIRECTORY',isSymbolicLink:()=>n.kind==='SYMLINK'});
+  t.mock.method(fsPromises,'lstat',async path=>{calls.push(['lstat',path]);hooks.lstat?.(path);const n=nodes.get(path);return n?info({...n}):absent();});
+  t.mock.method(fsPromises,'readdir',async path=>{calls.push(['readdir',path]);if(nodes.get(path)?.kind!=='DIRECTORY')throw Error('SYNTHETIC_NO_LINK_TRAVERSAL');const entries=[...nodes].filter(([p])=>p!==path&&dirname(p)===path).sort(([a],[b])=>a.localeCompare(b)).map(([p,n])=>({name:p.slice(path.length+1),...info({...n})}));hooks.readdir?.(path);return entries;});
+  t.mock.method(fsPromises,'readlink',async path=>{calls.push(['readlink',path]);const n=nodes.get(path);if(n?.kind!=='SYMLINK')throw Error('SYNTHETIC_NOT_A_LINK');const literal=n.literal;hooks.readlink?.(path);return literal;});
+  for(const method of ['stat','readFile'])t.mock.method(fsPromises,method,async()=>{throw Error('SYNTHETIC_PAYLOAD_READ_FORBIDDEN');});
+  syncBuiltinESMExports();t.after(()=>{t.mock.restoreAll();syncBuiltinESMExports();});return{policy,root,nodes,calls,hooks,reset,dirs,targetDirectory};
+}
+
+test('exact accounting policy counts two link entries once, never follows them and leaves payload guards strict',async t=>{
+  const f=accountingFixture(t);await assert.rejects(directoryBytes(f.root),/Linked study artifact refused/);f.reset();
+  assert.equal(await directoryBytes(f.root,{accountingPolicy:f.policy}),812);assert.equal(f.calls.filter(([op])=>op==='readlink').length,2);
+  assert.equal(f.calls.filter(([op,p])=>op==='readdir'&&p===f.targetDirectory).length,1,'Target directory is visited only at its own ordinary entry');
+  for(const e of f.policy.exceptions){const path=join(f.root,e.path);assert.equal(f.calls.some(([op,p])=>op==='readdir'&&p===path),false);await assert.rejects(studyPath(f.root,e.path),/Linked study path refused/);await assert.rejects(hashFile(path),/Linked study path refused/);await assert.rejects(readJSON(f.root,e.path),/Linked study path refused|Only explicit extraction caches/);}
+  assert.equal(await directoryBytes(dirname(join(f.root,f.policy.exceptions[0].path)),{accountingPolicy:f.policy}),795);
+  f.dirs(join(f.root,'synthetic-subtree'));f.nodes.set(join(f.root,'synthetic-subtree/file'),{kind:'FILE',mode:33152,size:13,dev:2096,ino:999999});assert.equal(await directoryBytes(join(f.root,'synthetic-subtree'),{accountingPolicy:f.policy}),13);
+});
+
+test('accounting policy is exact pinned data, detached from caller changes and distinct from strict provenance',async t=>{
+  const f=accountingFixture(t),retained=validateExtractionAccountingPolicy(f.policy),p=extractionAccountingProvenance(f.policy),strict=extractionAccountingProvenance();
+  assert.notEqual(retained,f.policy);assert.ok(Object.isFrozen(retained.exceptions[0].target));assert.deepEqual(p.policy_ref,EXTRACTION_ACCOUNTING_POLICY_REF);assert.equal(p.policy_canonical_sha256,'ebbf39cd63071aa1be9ce7c1108ca2423055ef568b5d6eb6b488f6e29b6e13db');assert.equal(p.directory_entry_bytes_counted,false);assert.equal(p.link_targets_traversed,false);assert.equal(strict.policy_ref,null);assert.notEqual(p.method,strict.method);
+  for(const mutate of[p=>p.exceptions.pop(),p=>p.exceptions[0].literal_target+='x',p=>p.exceptions[1].target.ino++,p=>p.accounting='FOLLOW_LINKS',p=>p.extra=true]){const changed=structuredClone(f.policy);mutate(changed);await assert.rejects(directoryBytes(f.root,{accountingPolicy:changed}),/Exact original fixture accounting policy required/);}
+  await assert.rejects(directoryBytes('/tmp',{accountingPolicy:f.policy}),/policy root differs/);assert.equal(f.calls.length,0);
+  let getters=0;const hostile=structuredClone(f.policy);Object.defineProperty(hostile,'schema',{enumerable:true,get(){getters++;throw Error('SYNTHETIC_GETTER');}});await assert.rejects(directoryBytes(f.root,{accountingPolicy:hostile}),/policy data differs/);assert.equal(getters,0);assert.throws(()=>validateExtractionAccountingPolicy(null),/Exact original/);
+  let changed=false;f.hooks.lstat=()=>{if(!changed){changed=true;f.policy.exceptions[0].literal_target='MUTATED_AFTER_VALIDATION';}};assert.equal(await directoryBytes(f.root,{accountingPolicy:f.policy}),812);assert.equal(retained.exceptions[0].literal_target,ORIGINAL_CAPACITY_POLICY.exceptions[0].literal_target);
+});
+
+test('accounting refuses missing, altered, additional and concurrently changed fixture entries or targets',async t=>{
+  const f=accountingFixture(t),link=join(f.root,f.policy.exceptions[0].path),target=join(f.root,f.policy.exceptions[1].target.path);
+  const changes=[()=>f.nodes.delete(link),()=>f.nodes.get(link).literal+='x',()=>f.nodes.get(link).mode--,()=>f.nodes.get(link).size++,()=>f.nodes.get(link).kind='FILE',()=>f.nodes.delete(target),()=>f.nodes.get(target).mode--,()=>f.nodes.get(target).size++,()=>f.nodes.get(target).dev++,()=>f.nodes.get(target).ino++,()=>f.nodes.get(target).kind='SYMLINK',()=>f.nodes.set(join(f.root,'unknown-link'),{...f.nodes.get(link)}),()=>{f.hooks.readlink=p=>{if(p===link)f.nodes.get(p).ino++;};},()=>{f.hooks.readdir=p=>{if(p===dirname(link))f.nodes.get(link).kind='FILE';};},()=>{f.hooks.readdir=p=>{if(p===f.root)f.nodes.set(join(f.root,'synthetic-retained'),{...f.nodes.get(link)});};}];
+  for(const change of changes){f.reset();change();await assert.rejects(directoryBytes(f.root,{accountingPolicy:f.policy}));}
+});
+
+test('writeRows carries exact policy into its quota scan and enforces caller total bytes before database work',async t=>{
+  const f=accountingFixture(t);let opened=0,written=0,closed=0;
+  const rows=async function*(){yield{id:'synthetic'};throw Error('SYNTHETIC_STOP_BEFORE_DATABASE');};
+  t.mock.method(fsPromises,'mkdir',async path=>f.dirs(path));t.mock.method(fsPromises,'open',async()=>{opened++;return{writeFile:async()=>{written++;},sync:async()=>{},close:async()=>{closed++;}};});syncBuiltinESMExports();
+  await assert.rejects(writeRows(f.root,'synthetic-quota.parquet',rows(),{schema:{id:'VARCHAR'},totalBytes:812}),/Linked study artifact refused/);assert.equal(opened,0);f.reset();
+  await assert.rejects(writeRows(f.root,'synthetic-quota.parquet',rows(),{schema:{id:'VARCHAR'},totalBytes:812,accountingPolicy:f.policy}),/budget exceeded/);assert.equal(opened,1);assert.equal(written,0);assert.equal(closed,1);assert.equal(f.calls.filter(([op])=>op==='readlink').length,2);
 });

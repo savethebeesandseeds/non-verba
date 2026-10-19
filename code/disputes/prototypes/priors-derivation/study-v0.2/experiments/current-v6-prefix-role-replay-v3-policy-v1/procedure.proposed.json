@@ -1,0 +1,123 @@
+{
+  "schema": "inactive-v6-six-prefix-replay-procedure-proposal-v1",
+  "status": "INACTIVE_SOURCE_ONLY_PENDING_EXACT_REBUILT_MANIFEST_AND_ROOT_REVIEW",
+  "authority": "NONE",
+  "human": false,
+  "source_epoch": {
+    "sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+    "snapshot_code": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+    "epoch_ref": {
+      "path": "qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    }
+  },
+  "expected_extraction_manifest": {
+    "path": "processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+    "sha256": null,
+    "bytes": null
+  },
+  "proposed_source_files": [
+    {
+      "path": "assignments.proposed.json",
+      "sha256": "79bd7a30be3912614efaacf83c77128d3e1d8697cfc66002df79f291dd0b4a06",
+      "bytes": 2073
+    },
+    {
+      "path": "policy.proposed.json",
+      "sha256": "4d8134e7d686235049f3c0efbebb9f82bd353222e54899a13b0ae100d2a07d4a",
+      "bytes": 7356
+    },
+    {
+      "path": "prepare-six.mjs",
+      "sha256": "050117a8095e91f23c79431b06250606cfa528c8b01970fc6769b2ad71cd8dbb",
+      "bytes": 16086
+    }
+  ],
+  "canonical_reviewer": "reader_v6_current82",
+  "canonical_reviewer_agent": "/root/v6_prefix_reader",
+  "fixed_planned_order": [
+    "development-0041",
+    "development-0030",
+    "development-0141",
+    "development-0119",
+    "development-0133",
+    "development-0019"
+  ],
+  "pending_bindings": [
+    "ROOT must provide the actual canonical rebuilt manifest path/SHA/bytes. No manifest hash or byte count is inferred.",
+    "ROOT must review and pin the new policy, then replace the worker policy and manifest null pins. The assignment ref is bound to the authored complete six-case source from the first proposal.",
+    "ROOT must confirm the existing replay module bytes at the proposed V6 snapshot path. Its transitive snapshot, not the unchanged module hash alone, must match the new source identity.",
+    "The V6 cache-equivalence reference is deliberately null and its status NOT_ESTABLISHED_FOR_V6. Any later equivalence claim requires evidence for V6 rather than the old 874-to-194 result.",
+    "Keep ROOT_ACTIVATED false until ROOT has approved the complete exact bindings and preparation scope. Installing a policy, invoking the API, copying files into the container and starting any clock are separate future actions."
+  ],
+  "preparation_controls": {
+    "status": "PLANNED_NOT_ADMITTED",
+    "output_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-prefix-role-six-preparations-20261018-v1",
+    "existing_api": "prepareRepresentationReplay",
+    "mode": "NEW_CURRENT_NATIVE_ACTUAL_READING_REQUIRED",
+    "one_serial_child_per_case": true,
+    "child_timeout_ms": 60000,
+    "node_heap_mib": 512,
+    "node_flags": [
+      "--max-old-space-size=512",
+      "--disable-proto=throw"
+    ],
+    "sanitized_environment_keys": [
+      "LD_PRELOAD",
+      "LD_AUDIT",
+      "NODE_OPTIONS",
+      "NODE_PATH",
+      "BASH_ENV",
+      "ENV"
+    ],
+    "rss_checkpoint_limit_bytes": 1073741824,
+    "new_artifact_limit_bytes": 33554432,
+    "directory_st_size_included": true,
+    "symlinks_rejected": true,
+    "per_case_outcomes_and_partials_preserved": true,
+    "stdout": "Only audit IDs, status, numeric counts/bytes, and exact path/SHA/byte refs. No source strings or source-content objects.",
+    "sizing": "Machine-internal exact existing complete header plus each prepared page; report aggregate UTF8 bytes and maximum response characters only. Do not invoke the emitter while sizing.",
+    "response_character_limit": 7500,
+    "page_character_limit": 7000
+  },
+  "reading_phase": {
+    "status": "NOT_ADMITTED_NOT_STARTED",
+    "prerequisites": [
+      "Canonical new-epoch manifest and required current packets exist.",
+      "ROOT accepts exact preparation refs and aggregate actual sizes.",
+      "ROOT separately admits the fresh phase, resource ledger and exclusive forward-delivery procedure."
+    ],
+    "proposed_aggregate_clock_ms": 3600000,
+    "proposed_visible_utf8_bytes": 1048576,
+    "proposed_capture_bytes": 4194304,
+    "proposed_new_artifact_bytes": 33554432,
+    "clock_must_not_start_during_preparation": true,
+    "all_six_require_fresh_case_specific_actual_review": true,
+    "actual_api": "emitRepresentationReplayPage",
+    "no_historical_or_194_reading_transfer": true,
+    "root_verification_and_resolution_only_after_supported_actual_judgment": true
+  },
+  "guard": {
+    "ref": {
+      "path": "qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "protected_rows": 100,
+    "protected_contracts": 29,
+    "complete_six_entry_representation_registry_membership_and_hash_check_before_api": true,
+    "all_six_contract_ids_excluded_before_historical_evidence_following": true,
+    "unrelated_native_source_registry_not_opened": true
+  },
+  "preservation": "Preserve all old policies, preparations, observations, closures, failed/stopped attempts and charges. Original adverse issue/packet/review chains remain authoritative and immutable; old 194 resolution for 0041 does not qualify V6. Native0099 is outside this prefix dispatch. No broader gate, whole-source, tokenization, model or human claim is made.",
+  "performed": {
+    "source_authoring_only": true,
+    "policy_installed": false,
+    "container_copy": false,
+    "api_called": false,
+    "source_output_displayed": false,
+    "project_runtime_executed": false,
+    "clock_started": false
+  }
+}

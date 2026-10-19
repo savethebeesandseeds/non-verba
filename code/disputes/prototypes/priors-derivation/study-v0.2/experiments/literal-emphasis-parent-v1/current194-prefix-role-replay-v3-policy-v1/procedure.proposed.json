@@ -1,0 +1,190 @@
+{
+  "schema": "current194-prefix-role-existing-v3-procedure-proposal-v1",
+  "status": "PROPOSED_ROOT_REVIEW_REQUIRED_NO_PAYLOAD_PREPARATION_EXECUTED",
+  "run": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+  "module": {
+    "path": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code/disputes/prototypes/priors-derivation/study-v0.2/lib/representation-replay.mjs",
+    "sha256": "c71f1357e8717f15694da2d8e33ec1edeac2f88df14859c7709d353f7c23fb5b",
+    "bytes": 40604
+  },
+  "owner_assignment_ref": {
+    "path": "representation-issues/replay-assignments/194-0041-reader0170-v1.json",
+    "sha256": "97dc3b4da59992c9e437163ffd71c081fe61cce88c406ce07d2b1297747929a6",
+    "bytes": 718
+  },
+  "policy_ref": {
+    "path": "representation-issues/replay-policies/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22.json",
+    "sha256": "a23c55559aa2ec0003f77118bbd05e356656973ae0aeba85a5ac0c91d1420d19",
+    "bytes": 7237
+  },
+  "activation": {
+    "copy_assignments_to_exact_run_reference_first": true,
+    "copy_policy_to_exact_run_reference_after_assignment_pin": true,
+    "preserve_existing_files_if_any": true,
+    "require_root_review_before_activation": true,
+    "admitted_current_preparation_cases": [
+      "development-0041"
+    ],
+    "actual_page_reading_requires_following_root_admission": true
+  },
+  "fixed_case": {
+    "audit_id": "development-0041",
+    "contract_id": "contract-bc6f859598604fe63ce9",
+    "issue": {
+      "path": "representation-issues/observed/issue-ad4c6ec96454fcf3a4119c2253d9774bc063f51934104fa2fe4c271bc5686dce.json",
+      "sha256": "648a95bcf4e815b3e4fa55d06b19c344cbe80429b018c59cd2be8368e885a4bb",
+      "bytes": 1697
+    },
+    "focal": {
+      "start": 1641,
+      "end": 2826,
+      "sha256": "6e5191462741980d8c9a087d345e3de1777bd0fb1b299c72b1c5af0265442dc8"
+    },
+    "parent": {
+      "start": 0,
+      "end": 2826,
+      "sha256": "1d238348095a008046ed3bedbd98499839597618817525c7e631eb36952fd21d"
+    },
+    "reviewer_id": "reader0170_current194",
+    "original_reader_id": "evaluation_engineer"
+  },
+  "fresh_guard": {
+    "path": "qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+    "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+    "bytes": 12856
+  },
+  "required_preflight": {
+    "exact_fresh100_29_membership_and_case_exclusion": true,
+    "exact_B3_module_epoch_and_source194_manifest": true,
+    "fixed_source_native_range_reference_only_no_automatic_selector_used": true,
+    "complete_registry_historical_authentication_must_not_be_bypassed": true
+  },
+  "prepare": {
+    "function": "prepareRepresentationReplay",
+    "parameters": [
+      "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+      {
+        "issue": {
+          "path": "representation-issues/observed/issue-ad4c6ec96454fcf3a4119c2253d9774bc063f51934104fa2fe4c271bc5686dce.json",
+          "sha256": "648a95bcf4e815b3e4fa55d06b19c344cbe80429b018c59cd2be8368e885a4bb",
+          "bytes": 1697
+        },
+        "extraction_manifest": {
+          "path": "processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+          "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+          "bytes": 5179014
+        },
+        "policy": {
+          "path": "representation-issues/replay-policies/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22.json",
+          "sha256": "a23c55559aa2ec0003f77118bbd05e356656973ae0aeba85a5ac0c91d1420d19",
+          "bytes": 7237
+        },
+        "native_disposition": "NEW_CURRENT_NATIVE_ACTUAL_READING_REQUIRED"
+      }
+    ],
+    "side_effects": "Existing API exclusively commits current payload/display/pages/preparation under its content-derived representation-issues/replay-preparations namespace.",
+    "actual_contract_raw_native_cache_payload_reading": "NOT_EXECUTED_BY_THIS_PROPOSAL; requires ROOT admitted preparation",
+    "tokenizer_access": false,
+    "model_inference": false
+  },
+  "required_fresh_display": {
+    "focal": "Exact fixed focal normalized source plus full current native projection.",
+    "inputs": [
+      "Baseline exact selected unit as one contiguous native source span.",
+      "Fixed parent-context span containing that unit with at most 60 complete neighboring words, derived by authoritative preparation."
+    ],
+    "native": "Full view.project() ALL_NATIVE_STYLE_SOURCE_METADATA for every deduplicated required focal/model span, with correct terminal zero-event ownership.",
+    "raw": "Union of whole trace raw origins and literal native/DOM/style tag scopes, expanded 120 UTF16 each side, exactly as existing V3 requiredRawContexts computes.",
+    "projection_bounds": {
+      "maxRuns": 10000,
+      "maxCharacters": 1000000,
+      "maxOrigins": 65536
+    },
+    "whole_parent_native_projection_claimed": false,
+    "whole_parent_body_adequacy_upgrade": false,
+    "new_current_neighbor_endpoints_known_from_metadata": false,
+    "historical0ac7_page_count": 3,
+    "historical_page_count_is_not_current_count": true,
+    "current_page_count": null
+  },
+  "emit": {
+    "function": "emitRepresentationReplayPage",
+    "parameters": [
+      "RUN",
+      "NEW_CURRENT_PREPARATION_REF",
+      "ZERO_BASED_CURRENT_PAGE",
+      "reader0170_current194"
+    ],
+    "all_current_pages_required_fresh": true,
+    "return_fields_requiring_actual_tool_display": [
+      "response"
+    ],
+    "retained_emission_alone_establishes_reading": false
+  },
+  "actual_review": {
+    "schema": "partial-representation-independent-actual-review-v1",
+    "status": "AUTHORED_ACTUAL_PREFIX_ROLE_REPLAY_REVIEW",
+    "scope": "PREFIX_ROLE_INJECTION_ONLY",
+    "reviewer_id": "reader0170_current194",
+    "requirements": [
+      "Exact new preparation ref and source194.",
+      "One ordered real tool-response read declaration per current page, including exact emission ref.",
+      "Separate judgment per affected current input, reason and uncertainty at least 40 characters each.",
+      "Complete required current native/raw components and exact expected raw-exposure union.",
+      "No whole current native-envelope, whole-parent adequacy, context sufficiency, token readiness or quality claim."
+    ]
+  },
+  "verify": {
+    "function": "verifyRepresentationReplay",
+    "parameters": [
+      "RUN",
+      {
+        "preparation": "NEW_CURRENT_PREPARATION_REF",
+        "actual_review": "NEW_AUTHORED_ACTUAL_REVIEW_REF"
+      },
+      {
+        "extraction_source_sha256": "194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22"
+      }
+    ],
+    "only_after_actual_page_review": true
+  },
+  "resolve": {
+    "function": "recordRepresentationReplayResolution",
+    "parameters": [
+      "RUN",
+      {
+        "preparation": "NEW_CURRENT_PREPARATION_REF",
+        "actual_review": "NEW_AUTHORED_ACTUAL_REVIEW_REF"
+      }
+    ],
+    "only_after_root_acceptance_of_actual_review": true,
+    "scope": "One exact-source prefix/role issue; all other gates and historical adverse records unchanged."
+  },
+  "proposed_external_resources": {
+    "managed_container_only": true,
+    "reused_snapshot": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code",
+    "new_full_snapshot_copies": 0,
+    "node_flags": [
+      "--max-old-space-size=512",
+      "--disable-proto=throw"
+    ],
+    "preparation_external_timeout_ms": 60000,
+    "sampled_rss_bytes": 1073741824,
+    "rss_checkpoints_are_not_continuous_guarantee": true,
+    "bookkeeping_scope": "qa/current194-prefix-role-0041-v3-20261018-v1",
+    "new_preparation_emission_bookkeeping_artifact_reservation_bytes": 8388608,
+    "reader_visible_utf8_cap_bytes": 131072,
+    "reader_retained_plus_tool_capture_cap_bytes": 524288,
+    "reader_source_clock_ms": 600000,
+    "per_page_characters": 7000,
+    "complete_response_characters": 7500,
+    "existing_per_artifact_input_cap_bytes": 134217728,
+    "total_named_read_cap_claimed": false,
+    "machine_registry_scope": "Existing representationIssueRegistry authenticates all six original registered reviews, displays, projections and page emissions; this is finite machine-only custody work, not fresh reading or qualification.",
+    "source_payloads_opened_by_this_proposal": 0,
+    "real_counter_calls": 0,
+    "model_inference": false,
+    "source_quality_gate_pass": false
+  },
+  "authority": "NONE"
+}

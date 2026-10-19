@@ -1,0 +1,168 @@
+{
+  "schema": "automatic-context-native-windows-one-case-proposal-v1",
+  "name": "Automatic Context Native Windows — PROTOTYPE / UNADOPTED",
+  "status": "SOURCE_ONLY_PREPARATION_WITH_INACTIVE_ONE_CASE_DRIVER; SEPARATE_ROOT_ACTIVATION_AND_ADMISSION_REQUIRED",
+  "authority": "NONE",
+  "audit_id": "development-0055",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "snapshot_code": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "input_refs": {
+    "selection": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/development-0055-selection.json",
+      "sha256": "d56df7a20b8316036b5e2441a7844ae2f46b941a650a8b22f2ca708c23c01747",
+      "bytes": 14070
+    },
+    "selector_result": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/result.json",
+      "sha256": "1589a889131470b435323f3d31b5991594b6dd80e29e36998b08303283a14867",
+      "bytes": 17517
+    },
+    "epoch": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "carry": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-context-search-v3-0055-single-task-20261018-v2/ROOT-CLOSED-and-cumulative-carry.json",
+      "sha256": "9991da852ddf2aa2952d50cea01cbf3dc8f7b618371ca06f1a9b392b2db85d9d",
+      "bytes": 1845
+    },
+    "current_body_qualification": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development-scope-qualification-20261018-v1/development-body-qualification.json",
+      "sha256": "0aa99a615536dfffaf6d18614ecb95a1925a16610b1db7eb880359ca13993aa1",
+      "bytes": 3816051
+    },
+    "fresh_guard": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "equivalence": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-extraction-equivalence-20261018-v1/comparison/result.json",
+      "sha256": "2365f9f9604b2e63fe03c336675038cf7c9682104ec1d63ae71ddeb6c99b1a61",
+      "bytes": 4357
+    },
+    "equivalence_native_zero": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-extraction-equivalence-20261018-v1/ROOT-native-zero-attestation.json",
+      "sha256": "6ab57dfafc1c768a826f970d977e3ad977c7a2905d92595e595acb2fe0319acd",
+      "bytes": 473
+    }
+  },
+  "geometry": {
+    "focal": {
+      "start": 13926,
+      "end": 15707,
+      "sha256": "e6181476eb34837ae161468db3066af1359f24a27e0d91c2faf58378ed9dc6a0"
+    },
+    "attachments": [
+      [
+        12999,
+        14882
+      ],
+      [
+        952,
+        1221
+      ],
+      [
+        14882,
+        15672
+      ],
+      [
+        15672,
+        19006
+      ],
+      [
+        9025,
+        12999
+      ],
+      [
+        1831,
+        2989
+      ]
+    ],
+    "attachment_characters": 11408,
+    "nodes_including_focal": 7,
+    "normalized_utf16_length": 25329,
+    "normalized_sha256": "2626a8d05aac59e504a72e78b46572a5c50c3c7c31c4453c465c7864ba95f0cd"
+  },
+  "carry_supplied_by_ROOT": {
+    "planning": 38799,
+    "recount": 128,
+    "elapsed_ms": 385387.035676,
+    "output_bytes": 5850768
+  },
+  "original_caps": {
+    "planning": 40000,
+    "recount": 20000,
+    "active_elapsed_ms": 600000,
+    "output_bytes": 67108864
+  },
+  "remaining_before_new_work": {
+    "planning": 1201,
+    "recount": 19872,
+    "active_elapsed_ms": 214612.964324,
+    "output_bytes": 61258096
+  },
+  "prospective_reservation": {
+    "planning_calls_total_both_models": 900,
+    "planning_calls_per_model": 450,
+    "independent_recounts_total_both_models": 2048,
+    "active_elapsed_ms_including_all_setup_and_final_accounting": 60000,
+    "new_outputs_including_source_config_captures_receipts_bytes": 8388608,
+    "input_bytes_per_case": 33554432,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 2147483648,
+    "source_copy_bytes": 131072,
+    "metadata_bytes": 65536,
+    "engineering_active_ms_charged_in_addition_to_actual": 30000,
+    "engineering_output_bytes_inside_8MiB": 1048576,
+    "source_copy_charge_inside_8MiB": 131072,
+    "model_file_hash_bytes_reserved": 224711752
+  },
+  "actual_sequence": [
+    "ROOT separately activates only the reviewed inactive driver in its new QA runtime copy, freezes its exact SHA/import closure and issues admission. Host ROOT_ACTIVATED remains false. External clock precedes copy/setup; ROOT owns60s watchdog, RSS/capture bounds and terminal accounting.",
+    "Before the single case/cache/native/raw load: authenticate exact current epoch, existing fresh complete guard/CID exclusion and current scope/equivalence metadata using the existing selector trial custody adapter. No global registry recomputation, new selector run or other case.",
+    "Reuse only exact qualified current0055 cache/raw/normalized/native refs; authenticate their bytes, method pins and full envelope through existing loaders/view. No source text/tool display; no witnesses or fake production unit/parent.",
+    "Hash/load exact frozen selection; focal first then all six attachments in original order. Create separate existing context-set declarations with annotation_ref equal to the selection artifact. Retain overlap and repeated terminal events.",
+    "Use existing createPinnedTokenCounter service for the two existing pinned models only, with both actually opened policies/file sets checked against existing frozen expectations. This preparation does not open that service.",
+    "For each counter, prepareAutomaticNativeWindows with maxTokens256, unchanged native-node planner/overlap policy, global450 planning-call gate. Encode each source window through complete original native serialization then reversible empty-dictionary syntax; never truncate serialized annotations or source.",
+    "verifyAutomaticNativeWindows independently re-encodes every final window and checks complete per-node source coverage, dictionary inverse, original-native object identity, codepoint boundaries and end-zero ownership.",
+    "Fresh recountAutomaticNativeWindows callback for every complete final dictionary window, including special tokens, exact planned count and <=256. Shared outer meter caps all new recounts at2048 and all new planning at900; all attempts/failures charged to original pool.",
+    "Retain plans, original/inverse hashes, coverage and fresh recount receipts per model plus HELD/failure/no-prefix statuses. Machine-only metadata summary; no vectors/inference/pooling/quality clearance.",
+    "ROOT terminal readback carries previous+new active time/output/calls, all source copies/captures and failed work; no old phase rerun, retry, cap reset, refunds or other-case substitution."
+  ],
+  "missing_before_execution": [
+    "ROOT's separately pinned activated runtime driver copy and exact admission/clock; host actual entry remains false.",
+    "ROOT terminal resource/output/counter readback carries the fixed30s/1MiB engineering charges, all previous work and all new setup/capture/output; no refund/reset.",
+    "Actual source/counter custody and real final-window measurements remain unexecuted; synthetic counters do not establish these."
+  ],
+  "limits_and_claims": {
+    "formal_source82_default_encoder_changed": false,
+    "selector_recomputed": false,
+    "manual_witness_catalog_used": false,
+    "old0055_phases_retried": false,
+    "source_authenticity_claimed": false,
+    "source_or_caption_text_read": false,
+    "actual_tokenizer_or_model_called": false,
+    "context_adequacy_verified": false,
+    "semantic_completeness_verified": false,
+    "quality_gate_pass": false,
+    "materiality_holds_cleared": 0,
+    "other_nine_cases_unchanged": true
+  },
+  "preparation_read_scope": "Exact14070B selection geometry artifact and exact6798B epoch metadata only; technical source files and fictional controls. Current raw/normalized/cache/native payloads, fresh contents, coder meanings, models and tokenizers remain unopened. Exact1845B latest carry metadata was independently hash-checked/read in e0fca9 and matches the driver wire guard. Authored named-service metadata supplies model pins; actual model artifacts remain unopened.",
+  "driver": {
+    "file": "run-one-case.mjs",
+    "sha256": "29731798b76b9ec04efa345d8c83ec5ad9a635a5d647fcc2cd62387e86234ff2",
+    "bytes": 23965,
+    "ROOT_ACTIVATED": false,
+    "qa_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1",
+    "model_pin_table": {
+      "file": "model-pins.json",
+      "sha256": "11caecf0f546036b901d929571a9b13ce7d46646d6c7750c57f0ea1ee317d5aa",
+      "bytes": 12564
+    },
+    "reused_core": "Exact a2 imported runtime refs; current native-node verifier/planner copied unchanged; no formalV6 adoption",
+    "known_input_scope": "32MiB combined named-and-decoded helper/case read guard is conservatively stricter than a32MiB case-only allowance. Model-file hash reservation is separate; service/transitive internal IO is not completely metered."
+  }
+}

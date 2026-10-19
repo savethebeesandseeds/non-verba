@@ -4,7 +4,7 @@ import {dirname,relative,resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {sha256,digest,readJSON,requireContainer} from '../../lib/common.mjs';
-import {STUDY_BASE,assertUnlinked,writeRows,readRows,readLedger,hashFile,studyPath,validateStudyRoot,directoryBytes,readJSON as readStudyJSON,writeExtractionCache} from './store.mjs';
+import {STUDY_BASE,assertUnlinked,writeRows,readRows,readLedger,hashFile,studyPath,validateStudyRoot,directoryBytes,readJSON as readStudyJSON,writeExtractionCache,validateExtractionAccountingPolicy,extractionAccountingProvenance} from './store.mjs';
 import {readAcquired,verifyStudy} from './acquisition.mjs';
 import {extractSections,selectUnits,NATIVE_COLLECTOR_POLICY} from './sections.mjs';
 import {storeNativeDecoration,loadNativeDecoration} from './native-decoration-store.mjs';
@@ -42,7 +42,7 @@ async function stageIdentity(recipe){
 }
 export {stageIdentity as extractionSourceIdentity};
 
-async function stableShard(runDir,path,rows){
+async function stableShard(runDir,path,rows,{accountingPolicy,totalBytes}={}){
   const records_sha256=digest(rows),sidecar=`${path}.manifest.json`;
   try{
     const old=await readJSON(await studyPath(runDir,sidecar));const actual=await hashFile(await studyPath(runDir,path));
@@ -50,7 +50,7 @@ async function stableShard(runDir,path,rows){
   }catch(error){if(error.code!=='ENOENT')throw error;}
   let artifact;
   try{const actual=await hashFile(await studyPath(runDir,path));const retained=[];for await(const row of readRows(runDir,path))retained.push(row);if(digest(retained)!==records_sha256)throw new Error('Orphan committed shard differs from retry rows');artifact={path,rows:retained.length,...actual,schema,execution_attested:false};}
-  catch(error){if(error.code!=='ENOENT')throw error;artifact=await writeRows(runDir,path,rows,{schema});}
+  catch(error){if(error.code!=='ENOENT')throw error;artifact=await writeRows(runDir,path,rows,{schema,accountingPolicy,totalBytes});}
   const manifest={...artifact,records_sha256};await atomicJSON(await studyPath(runDir,sidecar,{missing:true}),manifest);return manifest;
 }
 
@@ -101,10 +101,11 @@ async function normalizedArtifact(runDir,name,text,budget){
   return hashFile(path);
 }
 
-export async function extractStudy(runDir,{limit=1000,calibrationOnly=true,log=console.log}={}){
+export async function extractStudy(runDir,{limit=1000,calibrationOnly=true,log=console.log,accountingPolicy}={}){
   requireContainer();if(!Number.isSafeInteger(limit)||limit<1||limit>10_000||typeof calibrationOnly!=='boolean')throw new Error('Invalid explicit extraction scope');
+  accountingPolicy=validateExtractionAccountingPolicy(accountingPolicy);const storage_accounting=extractionAccountingProvenance(accountingPolicy);
   const {recipe,study}=await verifyStudy(runDir);if(study.status!=='READY')throw new Error('Extraction requires frozen ready cohort membership');
-  const source=await stageIdentity(recipe),eligible=[],budget={used:await directoryBytes(validateStudyRoot(runDir)),limit:recipe.limits.totalBytes};storageBudget(budget,0);
+  const source=await stageIdentity(recipe),eligible=[],budget={used:await directoryBytes(validateStudyRoot(runDir),{accountingPolicy}),limit:recipe.limits.totalBytes};storageBudget(budget,0);
   for await(const row of readRows(runDir,study.selection.path))if(discovery.has(row.cohort)&&(!calibrationOnly||row.calibration)&&eligible.length<limit)eligible.push(row);
   const wanted=new Set(eligible.map(row=>row.id)),available=new Map();
   for await(const record of readAcquired(runDir,{cohorts:recipe.cohorts.filter(cohort=>discovery.has(cohort.id)).map(cohort=>cohort.id),calibrationOnly,contractIds:[...wanted]}))available.set(record.id,record);
@@ -113,7 +114,7 @@ export async function extractStudy(runDir,{limit=1000,calibrationOnly=true,log=c
   const input_sha256=digest(inputSnapshot),scope=`${calibrationOnly?'calibration':'discovery'}-${limit}`,prefix=`processing/${source.sha256.slice(0,16)}/${scope}-${input_sha256.slice(0,16)}`;
   const manifestName=`${prefix}/extraction-manifest.json`,finalPath=await studyPath(runDir,manifestName,{missing:true});
   const units=[],parents=[],exclusions=[],contracts=[],cache=[];let count=0,rejected=0,shardNumber=0;const shards={units:[],sections:[],exclusions:[]};
-  const flush=async()=>{if(!units.length&&!parents.length&&!exclusions.length)return;const tag=String(shardNumber++).padStart(5,'0');for(const [kind,rows] of [['units',units],['sections',parents],['exclusions',exclusions]])if(rows.length)shards[kind].push(await stableShard(runDir,`${prefix}/${kind}-${tag}.parquet`,rows.splice(0)));budget.used=await directoryBytes(validateStudyRoot(runDir));storageBudget(budget,0);};
+  const flush=async()=>{if(!units.length&&!parents.length&&!exclusions.length)return;const tag=String(shardNumber++).padStart(5,'0');for(const [kind,rows] of [['units',units],['sections',parents],['exclusions',exclusions]])if(rows.length)shards[kind].push(await stableShard(runDir,`${prefix}/${kind}-${tag}.parquet`,rows.splice(0),{accountingPolicy,totalBytes:recipe.limits.totalBytes}));budget.used=await directoryBytes(validateStudyRoot(runDir),{accountingPolicy});storageBudget(budget,0);};
   for(const member of eligible){
     const record=available.get(member.id);if(!record)continue;count++;
     const {result,receipt}=await cachedExtraction(runDir,record,recipe,source,budget);cache.push(receipt);
@@ -131,7 +132,7 @@ export async function extractStudy(runDir,{limit=1000,calibrationOnly=true,log=c
   await flush();
   const terminalFailures=inputSnapshot.missing.filter(row=>row.acquisition_status==='TERMINAL_DOWNLOAD_FAILURE').length,pending=inputSnapshot.missing.length-terminalFailures;
   const terminalSelectionStatus={declared_prefix:eligible.length,raw_committed:available.size,raw_processed:count,terminal_download_failures:terminalFailures,pending_or_unattempted:pending};
-  const manifest={schema_version:2,status:'EXTRACTION_RESEARCH_ONLY',scope,source,input_snapshot:inputSnapshot,input_sha256,requested_contracts:limit,eligible_prefix_contracts:eligible.length,input_complete:inputSnapshot.missing.length===0,raw_coverage_complete:inputSnapshot.missing.length===0,selected_prefix_terminal_complete:pending===0&&count===available.size,terminal_selection_status:terminalSelectionStatus,missing_contracts:inputSnapshot.missing,contracts:count,accepted:count-rejected,rejected,selected_units:contracts.reduce((n,row)=>n+(row.selected_units??0),0),sections:contracts.reduce((n,row)=>n+(row.sections??0),0),excluded_units:contracts.reduce((n,row)=>n+(row.excluded_units??0),0),selection_authority:'PROVISIONAL_PER_CONTRACT_ONLY_GLOBAL_ADMISSION_SEPARATE',contract_records:contracts,shards,cache,authority:'NONE',adopted_catalog:false};
+  const manifest={schema_version:2,status:'EXTRACTION_RESEARCH_ONLY',scope,source,storage_accounting,input_snapshot:inputSnapshot,input_sha256,requested_contracts:limit,eligible_prefix_contracts:eligible.length,input_complete:inputSnapshot.missing.length===0,raw_coverage_complete:inputSnapshot.missing.length===0,selected_prefix_terminal_complete:pending===0&&count===available.size,terminal_selection_status:terminalSelectionStatus,missing_contracts:inputSnapshot.missing,contracts:count,accepted:count-rejected,rejected,selected_units:contracts.reduce((n,row)=>n+(row.selected_units??0),0),sections:contracts.reduce((n,row)=>n+(row.sections??0),0),excluded_units:contracts.reduce((n,row)=>n+(row.excluded_units??0),0),selection_authority:'PROVISIONAL_PER_CONTRACT_ONLY_GLOBAL_ADMISSION_SEPARATE',contract_records:contracts,shards,cache,authority:'NONE',adopted_catalog:false};
   await atomicJSON(finalPath,manifest,{budget});return {...manifest,manifest_path:manifestName};
 }
 

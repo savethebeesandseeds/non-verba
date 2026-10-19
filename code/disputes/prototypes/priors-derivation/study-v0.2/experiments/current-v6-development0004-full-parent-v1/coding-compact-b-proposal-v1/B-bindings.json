@@ -1,0 +1,96 @@
+{
+  "schema": "B-compact-prospective-bindings-v1",
+  "status": "INACTIVE_SOURCE_ONLY",
+  "reviewer_id": "open_coding_clean_b",
+  "owner_namespace": "open-coding-b",
+  "case_id": "coding-0162",
+  "qualified_current_parent_cases": 0,
+  "historical_final_cases": 161,
+  "semantic_current_final_cases": 0,
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "packet_ref": {
+    "path": "audits/049d0f4fe07080f7e7f0/coding.json",
+    "sha256": "51143feeddcc5f35be66a62748642adb1af7442ffea7134e640816f68f2943e2",
+    "bytes": 1643742
+  },
+  "closed_checkpoint_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/coding/open-coding-b/current-v6/successor-v2/B-v2-final-partial-checkpoint-v1.json",
+    "sha256": "97dd7bb0aea1f19f946a5a8a9ce26d5dd8704020bf8bcf20cb2de498fb0e68f3",
+    "bytes": 2545
+  },
+  "retained": [
+    {
+      "request_id": "r000001",
+      "response_ref": {
+        "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/coding/open-coding-b/current-v6/run-v2/requests/r000001/response.json",
+        "sha256": "35e07bf4364a31001ca2fff03521732c85935ef5425b59eafe41bd154e3635aa",
+        "bytes": 582067
+      },
+      "parent_interval": [
+        0,
+        8000
+      ],
+      "previous_json_acknowledged": 77,
+      "previous_json_pages": 77
+    },
+    {
+      "request_id": "r000002",
+      "response_ref": {
+        "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/coding/open-coding-b/current-v6/successor-v2/requests/r000002/response.json",
+        "sha256": "7d12be89773ba91e67801a3d0d729a24679cbd4056a5405fc08faedffb90acc7",
+        "bytes": 1454153
+      },
+      "parent_interval": [
+        8000,
+        28000
+      ],
+      "previous_json_acknowledged": 160,
+      "previous_json_pages": 193
+    }
+  ],
+  "reading_rule": "Retained responses require fresh complete compact reading and separate observed ACKs; previous JSON ACKs and charges remain immutable and are not substituted for new compact whole-wrapper coverage.",
+  "future_parent_route": {
+    "reader_path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/coding/open-coding-b/current-v6/run-v2/audit-reader-subdivided.mjs",
+    "reader_sha256": "8a69da8b944184c0b1be436e152c10291450940858a5cdfb4d1a7ab6f0b67b49",
+    "reader_bytes": 14573,
+    "start_offset": 28000,
+    "max_limit": 20000,
+    "native_decorations": "all",
+    "show_proposed_heading": false
+  },
+  "caps": {
+    "response_bytes": 2097152,
+    "total_presentation_bytes": 4194304,
+    "total_review_bytes": 1048576,
+    "nodes": 100000,
+    "depth": 64,
+    "page_utf16": 6000,
+    "engineering_source_bytes": 131072,
+    "fictional_control_ms": 30000,
+    "fictional_control_output_bytes": 1048576
+  },
+  "known_carry_floors_before_new_compact_engineering": {
+    "visible_bytes": 6772004,
+    "capture_bytes": 28234164,
+    "artifact_bytes": 24468260,
+    "source_copy_bytes": 455282,
+    "prior_elapsed_floor_ms": 10800000,
+    "closed_v2_observed_elapsed_ms": 3239649,
+    "closed_v2_original_phase_ms": 5400000,
+    "closed_projection_reserved_ms": 30000
+  },
+  "carry_caveat": "Known floors are not complete global OS IO measurement. ROOT must add all new engineering copies, dirs, wrappers, capture and any prospective phase reservation; no prior refund/reset is authorized.",
+  "required_guards": {
+    "before_prepare_and_complete": "Full method, current source epoch, registry contents and rosters, full Fresh100/29 unique CIDs, all fixed500 packet membership.",
+    "cached_emit_and_ack": "Strict admitted CID/epoch/guard capsule and unchanged permit plus exact manifest/view/presentation/page refs, all hashes verified; no full packet reload.",
+    "actual_delivery": "One complete untruncated <=9000UTF16 outer tool response, real native0/chunk, exact prepared bytes/hash, actual whole-page reading, then separate ACK."
+  },
+  "pending_before_activation": [
+    "Quiet aggregate presenter exact pins and tests",
+    "Quiet cached-action implementation and pure controls",
+    "ROOT case binding/guard capsule and exact carry schema",
+    "Independent source review and exact ROOT admission with prospective clocks/caps"
+  ],
+  "activation_authorized": false,
+  "actual_payload_access_during_preparation": false
+}

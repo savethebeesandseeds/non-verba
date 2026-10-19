@@ -6,18 +6,18 @@ param(
     [Parameter(Mandatory=$true)][ValidatePattern('^[a-f0-9]{64}$')][string]$ExpectedHostSha256
 )
 $whole=[System.Diagnostics.Stopwatch]::StartNew()
-$failedCarryMs=20000
+$failedCarryMs=50000
 $ErrorActionPreference='Stop'
 $dockerId='fcb9461f2ccc1d76871ee40713fcc93752b72e51a454890188cf9b1f052d7d4e'
-$work='/tmp/nonverba-unified-source/ba01e42fff904ee1b35cbf4065350ce9/code'
+$work='/tmp/nonverba-unified-source/4ddbd48a9d1e4187b455a1bfcf878b3f/code'
 $run='/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000'
-$stage=$run+'/qa/literal-emphasis-parent-v1-metadata-execution-staging-amendment-v5'
+$stage=$run+'/qa/literal-emphasis-parent-v1-metadata-execution-staging-amendment-v7'
 $node='/opt/nonverba-tools/node/bin/node'
 $script=$stage+'/ROOT-issue-readback.mjs'
-$nodeSHA='05669bba40f5d77d31ca7c207be69be576b4f718e643196e6e1e36f806b64f24'
-$nodeBytes='20442'
+$nodeSHA='e337d563796c7f5595abad880393519c95cf506e4767f489135463ff84931b8f'
+$nodeBytes='22509'
 $entry=$work+'/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/actual-entry-v1/metadata-execution-v1/bootstrap.mjs'
-$decision=$run+'/qa/literal-emphasis-actualA-metadata-engineering-20261016-capacityretry-v6/admission/ROOT-decision.json'
+$decision=$run+'/qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/admission/ROOT-decision.json'
 function Safe-SingleCode([string]$Text,[long]$ObservedBytes,[bool]$Complete) {
     if($Complete -and $ObservedBytes -le 101 -and [System.Text.RegularExpressions.Regex]::IsMatch($Text,'\A[A-Z0-9_]{1,100}\n?\z')){return $Text.Replace("`n",'')}
     return $null

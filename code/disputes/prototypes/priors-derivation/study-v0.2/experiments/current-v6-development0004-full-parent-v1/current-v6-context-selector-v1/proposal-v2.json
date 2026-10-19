@@ -1,0 +1,144 @@
+{
+  "schema": "current-v6-context-selector-ten-held-proposal-v2",
+  "name": "Current V6 Automatic Context Selector — PROTOTYPE / UNADOPTED",
+  "status": "SOURCE_ONLY_V2_NESTED_METADATA_BINDING_REPAIR_NO_ACTUAL_ADMISSION",
+  "ROOT_ACTIVATED": false,
+  "authority": "NONE",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "prior_source_sha256": "194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22",
+  "source_snapshot": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "QA_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2",
+  "input_refs": {
+    "epoch": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "manifest": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "7726139476a239ded60b75a25ec033d51569f53556020739ae28c86835ad7b13",
+      "bytes": 5179014
+    },
+    "locked": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/v15-current874-component-preparation-20261016/locked-current-packets-and-scope-proof.json",
+      "sha256": "7c638a4919320c40269d9c8a95871bfe716451e7f7de2c530debb0866df54319",
+      "bytes": 677383
+    },
+    "adverse": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/v15-current874-independent-all45-metadata-20261016-asr-v3/aggregate-index.json",
+      "sha256": "e35a321d8739c00f99d7a3e740546a39f0256660a021fc4ccdaea14b1396d6ed",
+      "bytes": 423534
+    },
+    "body_only": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development-scope-qualification-20261018-v1/development-body-qualification.json",
+      "sha256": "0aa99a615536dfffaf6d18614ecb95a1925a16610b1db7eb880359ca13993aa1",
+      "bytes": 3816051
+    },
+    "fresh_guard": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "selector": {
+      "path": "/tmp/nonverba-automatic-context-selector-v1-20261018-a3/selector.mjs",
+      "sha256": "682553360f2668797b08309ded8a14242a549c6e71765aa4217b14007a860b53",
+      "bytes": 14877
+    },
+    "controls": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/automatic-context-selector-v1-source-free-controls-20261018-v1/result.json",
+      "sha256": "b75abfa7098dab5cd757f67c6675d2eb6e9248740cea3c57664863d22352da42",
+      "bytes": 3179
+    },
+    "equivalence": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-extraction-equivalence-20261018-v1/comparison/result.json",
+      "sha256": "2365f9f9604b2e63fe03c336675038cf7c9682104ec1d63ae71ddeb6c99b1a61",
+      "bytes": 4357
+    },
+    "equivalence_native_zero": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-extraction-equivalence-20261018-v1/ROOT-native-zero-attestation.json",
+      "sha256": "6ab57dfafc1c768a826f970d977e3ad977c7a2905d92595e595acb2fe0319acd",
+      "bytes": 473
+    },
+    "scope_result": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development-scope-qualification-20261018-v1/result.json",
+      "sha256": "65db39319e4dfd0789b3ab579fc9b3ef88a4cae270ee265d13664cd7e5182f05",
+      "bytes": 3425
+    },
+    "scope_acceptance": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development-scope-qualification-20261018-v1/ROOT-acceptance.json",
+      "sha256": "636e487e07e3ea80a2802f4b28c9a4cc66c81609e0991ed2429f5afca5a926fe",
+      "bytes": 4251
+    }
+  },
+  "audit_ids": [
+    "development-0045",
+    "development-0047",
+    "development-0055",
+    "development-0085",
+    "development-0086",
+    "development-0092",
+    "development-0094",
+    "development-0147",
+    "development-0149",
+    "development-0174"
+  ],
+  "limits": {
+    "named_and_decoded_input_bytes": 67108864,
+    "qa_bytes": 8388608,
+    "elapsed_ms": 60000,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 1073741824,
+    "source_copy_bytes": 65536,
+    "metadata_bytes": 65536,
+    "case_artifact_bytes": 262144,
+    "cases": 10
+  },
+  "unchanged": [
+    "selector68255336 and14sourcefree controls",
+    "fixed10IDs and original adverse findings",
+    "full normalized source plus exact focal/existing navigation/governor adapter",
+    "manual witnesses are not inputs",
+    "selector defaults and algorithm",
+    "formal encoder/recipe/pooling/selection/quality gates",
+    "raw/native payloads stay unopened; zero tokenizer/model calls"
+  ],
+  "changed": [
+    "scope_result.counts.new_actual_readings===0 replaces the incorrect top-level guard; missing/nonzero nested count remains HELD",
+    "QA namespace suffix-v2 only; all other runner semantics and PINS/IDS/LIMITS unchanged"
+  ],
+  "binding_limits": "Existing994 accepted comparison reused by its exact result+native-zero pins. No comparison ledger scan, registry recomputation, new reading, source-quality or V6 window qualification.",
+  "admission": {
+    "schema": "ROOT_AUTOMATIC_CONTEXT_TEN_HELD_SELECTOR_ADMISSION_V1",
+    "status": "ADMITTED_TEN_FIXED_HELD_CASES_SELECTOR_ONLY",
+    "requires_ROOT_review_and_separate_exact_admission": true,
+    "node_flags": [
+      "--max-old-space-size=512",
+      "--disable-proto=throw"
+    ],
+    "CLI": "node [fixed flags] QA/run-ten-held.mjs QA/admission.json SHA BYTES",
+    "clock_schema": "automatic-context-selector-ten-held-clock-v1",
+    "clock_path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/clock.json",
+    "self_ref": "Exact exclusive v2 runtime copy under /opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/run-ten-held.mjs; ROOT separately pins SHA/bytes.",
+    "input_refs": "Must equal exported PINS exactly; source_sha256 and snapshot_code must equal current82 and fixed source snapshot.",
+    "external_bound": "ROOT applies the unchanged60s process bound; checkpoint-only1GiBRSS is not a continuous guarantee.",
+    "all_display_reading_counter_model_network_gate_flags": false,
+    "requires_new_ROOT_admission": true,
+    "prior_charges": "ROOT carries v1 actual attempt and engineering charges explicitly, without resetting budgets."
+  },
+  "outcome": "Machine-only exact ranges/hashes/reference issues for10original cases. HELD and preparation failures retained; no substitution, no issue clearance, no adequacy or outside-parent completeness claim.",
+  "preparation_read_scope": "Two exact small pinned scope result/ROOT acceptance documents rehashed and field locations projected (7676B); no cache/source/native/Fresh100/body-receipt payloads opened.",
+  "v1_preserved": {
+    "original_runner_sha256": "3c7818bcc9fcddf3a470493635ec70fc760236edb41d31575e8327fe4ae18dfb",
+    "native_exit_code": 77,
+    "tool_chunk": "edcc42",
+    "held_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v1/held.json",
+      "sha256": "2adbfa4803cc775c7f391c403b6257bbd3f5a4c572d561ff4ee72191d3eda720",
+      "bytes": 341
+    },
+    "phase": "BEFORE_ANY_CASE_CACHE",
+    "cases_completed": 0,
+    "all_clocks_runtime_and_charges_retained": true,
+    "no_v1_retry_or_reset": true
+  }
+}

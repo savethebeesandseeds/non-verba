@@ -1,0 +1,274 @@
+{
+  "schema": "current-v6-fixed-audit-regeneration-proposal-v1",
+  "status": "INACTIVE_ROOT_REVIEW_AND_ACTUAL_INPUTS_REQUIRED",
+  "prototype": true,
+  "execution_authority": "NONE",
+  "worker_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-audit-regeneration-20261018-v1/run.mjs",
+    "sha256": "2fa70c985c57897816a33765394cf080a02db50af280d00b1bd4e4cecdd349b2",
+    "bytes": 24735
+  },
+  "run": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+  "qa_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-audit-regeneration-20261018-v1",
+  "source_snapshot": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "old_source_sha256": "194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "source_epoch_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+    "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+    "bytes": 6798
+  },
+  "old_extraction_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+    "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+    "bytes": 5179014
+  },
+  "old_audit_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/audits/6117a6f51bac9ea11b66/manifest.json",
+    "sha256": "76ae272fbd0cdb99abbe6022c900613424c50d883db60881b5c5ae1e2fb4a195",
+    "bytes": 9638
+  },
+  "old_audit_source_sha256": "6117a6f51bac9ea11b6677c71d2926c4cd008cb09157f587d66b48b47a74c002",
+  "protocol_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/audit-protocols/repair-v13/protocol-v2-corrected-exposure.json",
+    "sha256": "a26b31fc9243af7cdfb3a186dd16a53779d98995ad3432da153ae5455a7473d5",
+    "bytes": 21262
+  },
+  "fresh_guard_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+    "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+    "bytes": 12856
+  },
+  "audit_module_ref": {
+    "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/audit.mjs",
+    "sha256": "923f4e3daaf6991335c55edaa30284d26ce5db22c3e4175b77f235567b1d33e4",
+    "bytes": 19910
+  },
+  "new_extraction_ref": null,
+  "expected_new_extraction_path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+  "calibration_result_ref": null,
+  "root_observed_calibration_native_exit_code": null,
+  "comparison_result_ref": null,
+  "comparison_attestation_ref": null,
+  "expected_audit_source_sha256": null,
+  "existing_source_template": {
+    "path": "experiments/literal-emphasis-parent-v1/audit-regeneration-v1/run.mjs",
+    "sha256": "bef181fcd30c240e7b2e5d4f02c3173e2e28864a856462c70033f7d5e098f61c",
+    "bytes": 21953
+  },
+  "fixed_counts": {
+    "development": 200,
+    "fresh_representation": 100,
+    "coding": 500,
+    "negative": 200,
+    "source_integrity": 57
+  },
+  "fixed_prefix": {
+    "eligible": 1000,
+    "contracts": 994,
+    "accepted": 937,
+    "rejected": 57,
+    "missing": 6,
+    "input_sha256": "cea0eeae0bf69647ee7af9d8f86d31e22bb45a4863dd4b975044e2dc1ed9b640",
+    "same_ordered_cache_available_eligible_missing_membership": true
+  },
+  "unchanged_api": {
+    "function": "buildAuditPackets",
+    "module_ref": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/audit.mjs",
+      "sha256": "923f4e3daaf6991335c55edaa30284d26ce5db22c3e4175b77f235567b1d33e4",
+      "bytes": 19910
+    },
+    "parameters": {
+      "run": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+      "extraction": "ROOT_BOUND_ACTUAL_NEW_EXTRACTION_WITH_MANIFEST_PATH",
+      "seed": "nonverba-priors-study-20261013-v2:audit-v1",
+      "counts": {
+        "development": 200,
+        "fresh_representation": 100,
+        "coding": 500,
+        "negative": 200
+      },
+      "protocolPath": "audit-protocols/repair-v13/protocol-v2-corrected-exposure.json"
+    },
+    "no_new_builder_or_sampler": true,
+    "no_refill": true
+  },
+  "lineage_adapter": {
+    "derived_from_exact_prior_packet_rows": true,
+    "allowed_changed_row_fields": [
+      "lineage.cache_path",
+      "lineage.cache_sha256",
+      "lineage.normalized_path",
+      "parent.normalized_path"
+    ],
+    "all_changes_joined_to_old_and_new_manifest_contract_records": true,
+    "all_other_row_fields_and_non_source_headers_deep_equal": true,
+    "all_prior_and_new_packet_statuses": "AUDIT_NOT_RUN",
+    "all_row_reviews": {
+      "status": "NOT_RUN",
+      "response": null
+    },
+    "prior_packet_refs": "Read only the five exact path/SHA/byte refs authenticated from the pinned prior audit manifest."
+  },
+  "prerequisites": {
+    "successful_new_calibration_root_result_and_external_native_zero": true,
+    "new_manifest_ref_must_be_filled_only_after_actual_completion": true,
+    "exact_994_cache_equality_and_root_native_zero_attestation": true,
+    "single_embedding_source_change_only": true,
+    "cache_mask": [
+      "/source/files/8/sha256",
+      "/source/sha256",
+      "/native_source_decorations/artifact/path",
+      "/native_source_decorations/sha256"
+    ],
+    "approved_accounting_equal_both_epochs": true,
+    "all23_frozen_source_files_and_separate_audit_module_rehashed": true,
+    "unchanged_runtime_recipe_parameters_protocol": true
+  },
+  "freshness": {
+    "same100_unique_parent_rows": true,
+    "same29_contracts": true,
+    "exact_audit_id_and_contract_id_pairs_equal_protected_guard": true,
+    "protocol_excluded_contracts": 458,
+    "fresh_exposure_overlap": 0,
+    "fresh_source_text_displayed": false,
+    "new_human_or_agent_actual_source_reading": false,
+    "closed_fresh_packet_refilled": false
+  },
+  "limits": {
+    "phase_ms": 600000,
+    "heap_bytes": 1073741824,
+    "rss_bytes": 3221225472,
+    "namespace_bytes": 16777216,
+    "QA_bytes": 16777216,
+    "combined_new_writes_bytes": 33554432
+  },
+  "node_arguments": [
+    "--max-old-space-size=1024",
+    "--disable-proto=throw",
+    "--experimental-vm-modules"
+  ],
+  "resource_semantics": {
+    "memory_and_deadline_checks": "Sampled boundaries plus100ms timer; synchronous builder work may delay samples.",
+    "continuous_resource_guarantee": false,
+    "hard_total_named_input_read_bound_claimed": false,
+    "builder_named_inputs": "Existing builder authenticates selected-unit shards, full calibration caches, raw/normalized hashes and exposure records; no model/counter.",
+    "failures_preserve_all_partials": true,
+    "qa_child_created_exclusively": "regeneration",
+    "namespace_must_not_already_exist": true
+  },
+  "output_growth_forecast": {
+    "prior_actual_six_file_namespace_bytes": 3969110,
+    "planning_namespace_estimate_bytes": 3969110,
+    "planning_double_commit_estimate_bytes": 7938220,
+    "estimate_condition": "Exact new header and numeric widths remain unknown until actual manifest metadata is available; no exact future byte/hash claim is made now.",
+    "exact_future_namespace_bytes_computed_before_builder": true,
+    "exact_source_and_all_packet_hashes_predicted_before_builder": true,
+    "prospective_namespace_charge": "Twice the complete exact predicted six-file namespace, plus existing/new QA files and32768bytes terminal reserve.",
+    "max_namespace_bytes": 16777216,
+    "max_qa_bytes": 16777216,
+    "max_combined_prospective_writes_bytes": 33554432,
+    "actual_current_resource_attestation": false
+  },
+  "source_copy_reservation": {
+    "files": [
+      "run.mjs",
+      "proposal.json"
+    ],
+    "final_logical_bytes_cap": 65536,
+    "directory_entry_reserve_bytes": 8192,
+    "transient_copy_bytes_cap": 131072,
+    "full_snapshot_or_dependency_target_copies": 0,
+    "runtime_copies_performed_by_author": 0
+  },
+  "documented_existing_dependency_link": {
+    "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/node_modules",
+    "literal_target": "/opt/nonverba-tools/priors-derivation-0.1/node_modules",
+    "procedure": "Invoke-Prototype.ps1",
+    "root_verification_tool": "62c7b9",
+    "new_installs_or_downloads": 0
+  },
+  "future_policy": {
+    "schema": "current-v6-audit-regeneration-policy-v1",
+    "status": "INACTIVE_NOT_ADMITTED",
+    "RUN": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+    "QA_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-audit-regeneration-20261018-v1",
+    "clock_ref": null,
+    "runtime_node_ref": null,
+    "source_epoch_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "audit_module_ref": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/audit.mjs",
+      "sha256": "923f4e3daaf6991335c55edaa30284d26ce5db22c3e4175b77f235567b1d33e4",
+      "bytes": 19910
+    },
+    "old_extraction_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+      "bytes": 5179014
+    },
+    "new_extraction_ref": null,
+    "old_audit_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/audits/6117a6f51bac9ea11b66/manifest.json",
+      "sha256": "76ae272fbd0cdb99abbe6022c900613424c50d883db60881b5c5ae1e2fb4a195",
+      "bytes": 9638
+    },
+    "protocol_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/audit-protocols/repair-v13/protocol-v2-corrected-exposure.json",
+      "sha256": "a26b31fc9243af7cdfb3a186dd16a53779d98995ad3432da153ae5455a7473d5",
+      "bytes": 21262
+    },
+    "fresh_guard_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "calibration_result_ref": null,
+    "root_observed_calibration_native_exit_code": null,
+    "comparison_result_ref": null,
+    "comparison_attestation_ref": null,
+    "expected_audit_source_sha256": null,
+    "limits": {
+      "phase_ms": 600000,
+      "heap_bytes": 1073741824,
+      "rss_bytes": 3221225472,
+      "namespace_bytes": 16777216,
+      "QA_bytes": 16777216,
+      "combined_new_writes_bytes": 33554432
+    }
+  },
+  "future_policy_activation": {
+    "required_status": "ADMITTED_CURRENT_V6_FIXED_AUDIT_REGENERATION",
+    "clock_schema": "current-v6-audit-regeneration-clock-v1",
+    "root_review_required": true,
+    "no_policy_or_clock_created": true,
+    "no_execution_authority_from_this_proposal": true
+  },
+  "preserved_holds_and_scope": {
+    "current194_not_mutated": true,
+    "prior_readings_not_converted_to_current_readings": true,
+    "body_native_navigation_or_model_judgments_transferred": false,
+    "materiality_holds_cleared": 0,
+    "source_quality_gate_pass": false,
+    "fresh_reading_qualified": false,
+    "resource_pass_for_prior194_restored": false,
+    "Q25_pass_restored": false,
+    "model_or_counter_calls": 0,
+    "first_priors_decided": false
+  },
+  "author_work": {
+    "source_only": true,
+    "corpus_payload_opened": false,
+    "data_or_api_execution": false,
+    "syntax_or_tests_run": false,
+    "container_or_runtime_launched": false,
+    "extraction_interfered_with": false,
+    "peer_agents_spawned": 0,
+    "runtime_source_copy_or_new_epoch_created": false
+  },
+  "authority": "NONE"
+}

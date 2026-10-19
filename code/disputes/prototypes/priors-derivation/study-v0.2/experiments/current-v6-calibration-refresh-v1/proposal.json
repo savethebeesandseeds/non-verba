@@ -1,0 +1,220 @@
+{
+  "schema": "current-v6-calibration-refresh-runner-proposal-v1",
+  "status": "INACTIVE_ROOT_REVIEW_REQUIRED",
+  "prototype": true,
+  "execution_authority": "NONE",
+  "worker_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/calibration-runner-v2.mjs",
+    "sha256": "bb3c7c8e51d028653c4beacb9fd18cdfc439c8d8291a39cdf4d2535170a318cd",
+    "bytes": 24906
+  },
+  "run_dir": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+  "qa_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1",
+  "snapshot_code": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "source_epoch_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+    "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+    "bytes": 6798
+  },
+  "historical_inputs": {
+    "runner": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-method-freeze-20261018/calibration-runner-v1.mjs",
+      "sha256": "4e4cb7aa4b951e6cbdc0763c472b051b730904ccd090e1dee831c8c6d9a8a570",
+      "bytes": 18306
+    },
+    "runner_result": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-method-freeze-20261018/runner-result.json",
+      "sha256": "ff61b9ea70223bad4010589a32244aff31b0f051ee6ccd1e30de3feb33b135e9",
+      "bytes": 4830,
+      "status": "HELD_PRESERVED_PARTIALS",
+      "held_code": "RUNNER_RSS_UNKNOWN",
+      "child_native_exit": 0
+    },
+    "previous_source_epoch": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-method-freeze-20261018/source-epoch.json",
+      "sha256": "3729deec1e922ab716440ba075b444a49e74d81bdd688778b837429a4b7190cd",
+      "bytes": 6380
+    },
+    "previous_manifest": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+      "bytes": 5179014
+    }
+  },
+  "accounting_policy_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/v15-current874-component-preparation-20261016/historical-component-inventory-v1/historical154-metadata-gzip-recovery-v1/run-capacity-policy-v3.json",
+    "sha256": "0768b25042d2454c030d08ae8a390baa7bc075a73cbf20234aa5caabfdc22cdc",
+    "bytes": 2285
+  },
+  "capacity_helper_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/v15-current874-component-preparation-20261016/historical-component-inventory-v1/historical154-metadata-gzip-recovery-v1/run-capacity-helper-v3.mjs",
+    "sha256": "2a7b5a7c21ce70666d71508892d55fc932da3968e98dc4da5fe598d668580b6e",
+    "bytes": 7103
+  },
+  "limits": {
+    "elapsed_ms": 1200000,
+    "sampled_rss_bytes": 6442450944,
+    "whole_run_bytes": 25769803776,
+    "new_growth_bytes": 805306368,
+    "qa_bytes": 8388608,
+    "log_bytes": 2097152,
+    "node_heap_mb": 4096,
+    "sample_interval_ms": 2000
+  },
+  "operation": {
+    "function": "extractStudy",
+    "parameters": {
+      "limit": 1000,
+      "calibrationOnly": true,
+      "accountingPolicy": "EXACT_EXISTING_APPROVED_POLICY",
+      "log": "FIXED_AGGREGATE_PROGRESS_ONLY"
+    },
+    "input_sha256": "cea0eeae0bf69647ee7af9d8f86d31e22bb45a4863dd4b975044e2dc1ed9b640",
+    "contracts": 994,
+    "accepted": 937,
+    "rejected": 57,
+    "missing": 6,
+    "source_transition": "Exactly embedding.mjs changes among the ordered23 files; parameters/runtime/recipe unchanged.",
+    "metadata_preflight": "Before raw access, unchanged selection and download ledger must give the exact prior ordered1000eligible IDs and994available IDs/raw hashes; result input snapshot and cache IDs must match again.",
+    "extra_pipeline_stages": [],
+    "raw_downloads_reused": true,
+    "new_native_normalized_namespaces_follow_existing_workflow": true,
+    "estimated_new_final_artifact_bytes": 453574456,
+    "estimate_is_not_actual_resource_attestation": true
+  },
+  "rss_repair": {
+    "process_birth_identity": "pid plus start_ticks",
+    "observations": [
+      "LIVE_RSS_OBSERVED",
+      "CONFIRMED_ABSENT",
+      "CONFIRMED_REPLACED_BIRTH",
+      "CONFIRMED_TERMINAL",
+      "UNKNOWN_LIVE_RSS"
+    ],
+    "missing_vmrss_implies_zero": false,
+    "only_confirmed_retired_birth_may_count_zero": true,
+    "attempts_per_sample": 4,
+    "delay_between_attempts_ms": 25,
+    "clock_reset": false,
+    "unknown_live_after_bound": "HELD_RUNNER_RSS_UNKNOWN",
+    "journal": "Existing runner-samples.ndjson retains completed/failed samples and every RSS birth reobservation.",
+    "single_inflight_sample": true,
+    "all_resource_caps_unchanged": true,
+    "continuous_resource_guarantee": false,
+    "known_birth_group_signaling_and_absence_checks_retained": true
+  },
+  "root_admission": {
+    "schema": "ROOT_FORMAL_V6_CALIBRATION_REBUILD_ADMISSION_V1",
+    "status": "ADMITTED_FIXED_CALIBRATION_1000_EXTRACTION_ONLY",
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/admission-calibration.json",
+    "required_fields": [
+      "schema",
+      "status",
+      "run_dir",
+      "snapshot_code",
+      "source_sha256",
+      "source_epoch_ref",
+      "previous_source_epoch_ref",
+      "previous_manifest_ref",
+      "accounting_policy_ref",
+      "recipe_ref",
+      "self_entry_ref",
+      "limits",
+      "required_closure_refs",
+      "reading_0047_closed",
+      "model_access",
+      "tokenizer_access",
+      "network_access",
+      "quality_gate_pass",
+      "authority",
+      "baseline"
+    ],
+    "baseline": "Fresh exact approved whole-run capacity, monotonic timestamp and boot ID, not older than60seconds.",
+    "required_closure_refs_count": 2,
+    "root_review_before_any_execution": true,
+    "external_native_invocation_required": true,
+    "admission_not_created": true
+  },
+  "verification": {
+    "runner_executed": false,
+    "source_free_controls_run_by_author": false,
+    "syntax_run_by_author": false,
+    "root_source_review_pending": true,
+    "planned_source_free_cases": [
+      "valid live RSS",
+      "already absent birth",
+      "replaced PID birth",
+      "Z/X terminal birth",
+      "missing status followed by confirmed exit",
+      "missing VmRSS followed by live valid RSS",
+      "four unresolved live missing-RSS observations must HOLD",
+      "non-RSS cap failure must not be retried",
+      "all failed observations retained",
+      "overlapping sample callers share one in-flight sample"
+    ],
+    "controls_groups_authored": 10,
+    "controls_scope": "Reads only the exact pinned worker source; evaluates only observeRSS and sampleOwnedTree snippets with synthetic stat/fs/sample/delay bindings. No main/child, /proc or corpus evaluation; ROOT executes separately.",
+    "root_will_run_parent_and_emitted_child_syntax_only_checks": true
+  },
+  "preserved_accounting": {
+    "two_case_experimental_carry": {
+      "planning": 21510,
+      "recount": 36,
+      "elapsed_ms": 243010.534467,
+      "output_bytes": 685074
+    },
+    "native0099_separate_callback_reservation_spent": 160000,
+    "refund": false,
+    "calibration_tokenizer_calls": 0,
+    "prior_194_resource_hold_unchanged": true
+  },
+  "scope": {
+    "corpus_payload_access_by_author": false,
+    "new_epoch_created_by_author": false,
+    "runtime_copy_created_by_author": false,
+    "extraction_executed": false,
+    "acquisition": false,
+    "tokenizer_access": false,
+    "model_inference": false,
+    "source_reading": false,
+    "review_or_resolution": false,
+    "quality_gate_pass": false,
+    "first_priors_decided": false,
+    "authority": "NONE"
+  },
+  "authority": "NONE",
+  "source_free_controls_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/rss-controls.mjs",
+    "sha256": "c569850b79b439d9621795e4578cd162efba189cac96e5179f1ff15d3383a50e",
+    "bytes": 6235
+  },
+  "documented_existing_dependency_link": {
+    "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/node_modules",
+    "literal_target": "/opt/nonverba-tools/priors-derivation-0.1/node_modules",
+    "procedure": "Invoke-Prototype.ps1",
+    "root_verification_tool": "62c7b9",
+    "already_created_by_root": true,
+    "created_by_author": false,
+    "installs": 0,
+    "downloads": 0,
+    "dependency_targets_traversed_or_counted_as_copied_source": false,
+    "scope": "Existing documented source-snapshot dependency link only; no new accounting-policy exception."
+  },
+  "source_copy_reservation": {
+    "scope": "Only these three authored prototype files into the already existing QA directory.",
+    "files": [
+      "calibration-runner-v2.mjs",
+      "rss-controls.mjs",
+      "proposal.json"
+    ],
+    "final_logical_bytes_cap": 65536,
+    "directory_entry_reserve_bytes": 8192,
+    "transient_copy_bytes_cap": 131072,
+    "full_source_snapshots_copied": 0,
+    "dependency_targets_copied": 0,
+    "raw_normalized_native_cache_payload_copies": 0,
+    "copies_performed_by_author": 0,
+    "included_in_existing_qa_and_whole_run_caps": true
+  }
+}

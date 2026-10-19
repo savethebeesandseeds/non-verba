@@ -1,0 +1,43 @@
+{
+  "schema": "b162-prospective-corrected-controls-proposal-v2",
+  "active": false,
+  "controller_sources_unchanged": [
+    {
+      "name": "cached-guard.mjs",
+      "bytes": 2217,
+      "sha256": "9d7ab5a0c17c9ec4de2d660edbf2a9295712fa83d29d5b57e1071954a06cbf49"
+    },
+    {
+      "name": "pager.mjs",
+      "bytes": 25514,
+      "sha256": "eb3841b7eedd97caee6c33aadfa00a97adf052626075ca94d4837d1eb7db2e4d"
+    },
+    {
+      "name": "policy.mjs",
+      "bytes": 17053,
+      "sha256": "c90f08ca15718b6198464a4a7263bd897f57e37c52af56686dc95492d91b590e"
+    }
+  ],
+  "prior_control_ref": {
+    "name": "controls.mjs",
+    "bytes": 11858,
+    "sha256": "43e8a1a2f18c9aa499c1c726aba2a04523024fa2de33cd087130184c931d5e8a"
+  },
+  "new_control": {
+    "name": "controls-v2.mjs",
+    "sha256": "f31bc1ae152146e7df9fad219b1b565a1f23681a06237a4f63b397c24c5d94ee",
+    "bytes": 11854
+  },
+  "exact_edit": {
+    "old": "reject('mixed cached epoch before read',()=>{let reads=0;",
+    "new": "ok('mixed cached epoch before read',()=>{let reads=0;",
+    "occurrences": 1
+  },
+  "cause": "Outer reject() expected a second exception after inner assert.throws had already verified rejection. Corrected wrapper is ok(); controller/guard behavior unchanged.",
+  "prior_native_failure_preserved": true,
+  "no_actual_state_body_API_or_clock_access": true,
+  "engineering_ceiling": 262144,
+  "full_allocation_retained": true,
+  "additional_copied_source_control_ceiling": 24576,
+  "authority": "NONE"
+}

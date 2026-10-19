@@ -1,0 +1,273 @@
+{
+  "schema": "ROOT_DECLARED_NATIVE_CONTEXT_FOUR_TASK_V2_CONTINUATION_PROPOSAL_V1",
+  "prototype": true,
+  "status": "DRAFT_ROOT_REVIEW_REQUIRED_NOT_ADMITTED",
+  "execution_authorized": false,
+  "authority": "NONE",
+  "run": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000",
+  "proposed_output_root": "qa/native-context-set-v2-four-task-continuation-20261018-v1",
+  "source_sha256": "194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22",
+  "snapshot_code": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code",
+  "exact_driver_source_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-context-set-v2-four-task-continuation-20261018-v1/four-task-runner.mjs",
+    "sha256": "ffb6d0965d98f452bc7ea11249df7dbcd54baebd72ccbd40f49482f0d1263029",
+    "bytes": 33701
+  },
+  "activation_requirements": [
+    "ROOT must review the bound fixed four-task driver and issue a separate actual admission with the specified schema/status and execution_authorized true.",
+    "Driver must reuse the existing actual-runner.mjs custody, resource, ledger and retained-failure mechanisms with the fixed task subset below.",
+    "The exact closed carry and original caps must be revalidated before any source payload or tokenizer access.",
+    "ROOT must create the exact clock ref and apply an external 350,000 ms execution timeout, retaining the remaining original active-time allowance for final accounting.",
+    "No original attempt, prior runtime copy, source-free attempt, result, admission or closed reading record is replaced."
+  ],
+  "input_refs": {
+    "source_epoch": {
+      "path": "qa/current-method-freeze-20261018/source-epoch.json",
+      "sha256": "3729deec1e922ab716440ba075b444a49e74d81bdd688778b837429a4b7190cd",
+      "bytes": 6380
+    },
+    "extraction_manifest": {
+      "path": "processing/194e51d54ddb39cb/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "8f1fc4f801192e24ffb065e83abb8fee4140f8c01b6a6a74a38f99fde5fb53b0",
+      "bytes": 5179014
+    },
+    "exact_994_equivalence": {
+      "path": "qa/old874-new194-cache-equivalence-v1/comparison/result.json",
+      "sha256": "f958fb7adc899d0d0344a3c4e7f3d0fd3b362e8738a1b22366d24df1f560492a",
+      "bytes": 3306
+    },
+    "equivalence_native_attestation": {
+      "path": "qa/old874-new194-cache-equivalence-v1/ROOT-native-exit-attestation.json",
+      "sha256": "d2ce5487675b855f5b57def7cee665c00aa0e38e0976d65736a459c84a759052",
+      "bytes": 462
+    },
+    "locked_scope": {
+      "path": "qa/v15-current874-component-preparation-20261016/locked-current-packets-and-scope-proof.json",
+      "sha256": "7c638a4919320c40269d9c8a95871bfe716451e7f7de2c530debb0866df54319",
+      "bytes": 677383
+    },
+    "fresh100_guard": {
+      "path": "qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "protected_case_policy": {
+      "path": "qa/literal-emphasis-parent-v1-matched-context-windows-v3/ROOT-window-policy.json",
+      "sha256": "2c04a243fef237838b4f106e46de2fcc16358015965231487d8e582530383cf8",
+      "bytes": 39302
+    },
+    "closed_cumulative_carry": {
+      "path": "qa/current194-0055-manual-v2-input-review-20261018-v1/READING-CLOSED-and-phase-carry.json",
+      "sha256": "496ab7e4dc9cb9f41ebcba4eccfcce00391c15d05cadeb8714647ed2c43aec3c",
+      "bytes": 1617
+    },
+    "successful_prior_30_node_result": {
+      "path": "qa/native-context-set-v2-manual-candidate-20261018-v1/result.json",
+      "sha256": "b3e984a5c9d97225b762c238e61944e131da9167ccd52c752014abb535212aa9",
+      "bytes": 7848
+    },
+    "subset_native_module": {
+      "path": "/tmp/nonverba-native-context-set-v2-subset-20261018-a1/native-nodes.mjs",
+      "sha256": "91208bd8e3f03f8a53a91eece2598026b947eb9f59200b7b3f2942e61344ffed",
+      "bytes": 25570
+    },
+    "declarations_module": {
+      "path": "/tmp/nonverba-unified-source/56eea515cb6d472c90152f36e27693ab/code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/declared-context-set-v1/context-set.mjs",
+      "sha256": "19bf6c9e6855d89cea5fd7941d2881f64fdfb1e4883371806528f82117b17cc0",
+      "bytes": 7248
+    },
+    "source_free_copy": {
+      "path": "qa/native-context-set-v2-subset-source-free-controls-20261018-v1/source-copy.json",
+      "sha256": "e0342cde1c45d3a4a766b8cf749281a13136067bd09204d6039bf55f0f608b7f",
+      "bytes": 1759
+    },
+    "source_free_controls": {
+      "path": "qa/native-context-set-v2-subset-source-free-controls-20261018-v1/attempt-001.result.json",
+      "sha256": "5f9e96bcaeb87465f8ba52a75e1acd2680bf3140e09827742b66ab2c48b017a0",
+      "bytes": 2092
+    }
+  },
+  "source_free_controls": {
+    "attempts": 1,
+    "tests": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "native_exit_code": 0,
+    "native_tool_chunk": "c88cef",
+    "real_counter_calls": 0
+  },
+  "carry": {
+    "planning": 21510,
+    "recount": 36,
+    "elapsed_ms": 243010.534467,
+    "output_bytes": 685074
+  },
+  "original_caps": {
+    "planning": 40000,
+    "recount": 20000,
+    "active_elapsed_ms": 600000,
+    "output_bytes": 67108864
+  },
+  "remaining_original_allowance": {
+    "planning": 18490,
+    "recount": 19964,
+    "active_elapsed_ms": 356989.465533,
+    "output_bytes": 66423790
+  },
+  "proposed_continuation_limits": {
+    "planning_calls": 18432,
+    "independent_final_recount_calls": 18432,
+    "active_elapsed_ms_including_final_accounting": 356989.465533,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 2147483648,
+    "input_bytes_per_case": 33554432,
+    "output_bytes_per_task": 2097152,
+    "new_output_root_bytes": 16777216,
+    "receipt_bytes": 6291456,
+    "metadata_bytes": 65536,
+    "all_outputs_captures_and_metadata_must_fit_original_cumulative_output_cap": true,
+    "sampled_resource_checks_are_not_continuous_guarantees": true,
+    "unused_or_unobserved_reservations_refunded": false,
+    "source_free_work_does_not_reset_original_carry_or_caps": true
+  },
+  "fixed_case_order": [
+    {
+      "audit_id": "development-0055",
+      "contract_id": "contract-5e4763782d47aca7d67c",
+      "case_id": "6e3d8019d7f2717814c95f9eeef2b2e6bb7e4d3e41ec753d72f3e518736972c2",
+      "original_metadata_ref": {
+        "path": "qa/consulting0055-original-replay-20261018/actual-reading.json",
+        "sha256": "bd58ec54d8bb1d2a8a89622632c3dbbabf02fd612b191d933cbd7aeba75cb53a",
+        "bytes": 8869
+      }
+    },
+    {
+      "audit_id": "development-0047",
+      "contract_id": "contract-c11bca9418c0ce310898",
+      "case_id": "2c91b95ff2d1024bd9afdb1d25e0d6deebb7e75639002a8daf0ff14a6d7cd568",
+      "original_metadata_ref": {
+        "path": "qa/settlement0047-original-replay-20261018/agent-reading-declaration.json",
+        "sha256": "5517ae95c0c299ac4068df1a2869e11e70af495eb3878346eba01e7caba7fe3d",
+        "bytes": 24381
+      }
+    }
+  ],
+  "fixed_tasks": [
+    {
+      "audit_id": "development-0055",
+      "task": "AVAILABLE_NORMALIZED_DOCUMENT_V2",
+      "planned_node_ids": [
+        "available_normalized_document"
+      ],
+      "maximum_encode_probes": 8192,
+      "maximum_tokenizer_calls": 8192
+    },
+    {
+      "audit_id": "development-0055",
+      "task": "FROZEN_PRODUCTION_FOCAL_REFERENCE_V5",
+      "maximum_encode_probes": 1024,
+      "maximum_tokenizer_calls": 1024
+    },
+    {
+      "audit_id": "development-0047",
+      "task": "AVAILABLE_NORMALIZED_DOCUMENT_V2",
+      "planned_node_ids": [
+        "available_normalized_document"
+      ],
+      "maximum_encode_probes": 8192,
+      "maximum_tokenizer_calls": 8192
+    },
+    {
+      "audit_id": "development-0047",
+      "task": "FROZEN_PRODUCTION_FOCAL_REFERENCE_V5",
+      "maximum_encode_probes": 1024,
+      "maximum_tokenizer_calls": 1024
+    }
+  ],
+  "planning_contract": {
+    "declared_set_per_case": "Fully validate the exact real FOCAL and one AVAILABLE_NORMALIZED_DOCUMENT attachment with source-epoch provenance.",
+    "explicit_subset_policy": "EXPERIMENTAL_DECLARED_NATIVE_NODES_V2_EXPLICIT_SUBSET_UNADOPTED",
+    "planned_subset_per_case": [
+      "available_normalized_document"
+    ],
+    "unplanned_focal_must_not_be_replanned_by_v2": true,
+    "manual_witness_nodes_planned": 0,
+    "duplicate_prior_30_node_planning": false,
+    "available_document_nodes": 2,
+    "separate_frozen_production_reference_tasks": 2,
+    "total_planning_tasks": 4,
+    "maximum_additional_planning_calls": 18432,
+    "maximum_cumulative_planning_calls": 39942,
+    "maximum_additional_recounts": 18432,
+    "maximum_cumulative_recounts": 18468,
+    "recount_bound_reason": "Every retained final window consumed at least one planning final-count call, so four task-local planning caps also upper-bound one independent recount per retained final window.",
+    "formal_embedding_module_changed": false,
+    "production_reference_uses_original_nativeEmbeddingWindows": true,
+    "production_reference_default_20000_limits_must_be_lowered_explicitly": true,
+    "production_nonadvancing_or_nonpositive_weight_output_is_held": true,
+    "complete_tasks_require_strict_progress_terminal_coverage_and_exact_native_window_readback": true,
+    "independent_recounts_required_for_all_retained_successful_task_windows": true,
+    "typed_whole_task_failures_retained_without_partial_plan_acceptance": true,
+    "production_focal_differential_against_prior_30_claimed": false,
+    "original_32_node_attempt_status": "HELD_UNCHANGED_NOT_RESTORED",
+    "runtime_feasibility_within_remaining_time": "UNKNOWN_MUST_BE_MEASURED_OR_HELD"
+  },
+  "execution_scope_if_later_admitted": {
+    "managed_container": "non-verba-dev",
+    "node_flags": [
+      "--max-old-space-size=512",
+      "--disable-proto=throw"
+    ],
+    "tokenizer_access": true,
+    "source_text_output": false,
+    "encoded_input_output": false,
+    "actual_source_reading_claimed": false,
+    "manual_witness_catalog_input": false,
+    "newly_exposed_cases": 0,
+    "fresh100_access": false,
+    "network_access": false,
+    "model_inference": false,
+    "onnx_session_created": false,
+    "pooling": false,
+    "available_normalized_document_means_complete_contract": false,
+    "missing_exhibits_resolved": false,
+    "semantic_adequacy_verified": false,
+    "governing_completeness_verified": false,
+    "source_quality_gate_pass": false,
+    "materiality_holds_cleared": 0,
+    "first_priors_decided": false
+  },
+  "runtime_limits": {
+    "elapsed_ms": 600000,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 2147483648,
+    "input_bytes_per_case": 33554432,
+    "output_bytes_per_case": 16777216,
+    "node_output_bytes": 2097152,
+    "new_output_bytes": 16777216,
+    "phase_output_bytes": 67108864,
+    "planning_calls": 40000,
+    "recount_calls": 20000,
+    "new_planning_calls": 18432,
+    "new_recount_calls": 18432,
+    "available_encode_probes": 8192,
+    "available_tokenizer_calls": 8192,
+    "production_encode_probes": 1024,
+    "production_tokenizer_calls": 1024,
+    "receipt_bytes": 6291456,
+    "metadata_bytes": 65536
+  },
+  "actual_admission_schema_after_root_review": "ROOT_DECLARED_NATIVE_CONTEXT_FOUR_TASK_V2_CONTINUATION_ADMISSION_V1",
+  "actual_admission_status_after_root_review": "ADMITTED_FOUR_EXPOSED_TOKENIZER_ONLY_TASKS",
+  "clock_ref": null,
+  "clock_requirements": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/native-context-set-v2-four-task-continuation-20261018-v1/clock.json",
+    "schema": "native-context-set-v2-four-task-continuation-clock-v1",
+    "origin_ns": "ROOT must create a fresh monotonic origin only for the admitted continuation; prior carry remains charged.",
+    "same_clock_as_0041_prefix_role_reader": false,
+    "external_timeout_ms_must_not_exceed_remaining_original_allowance": 356989.465533,
+    "proposed_external_timeout_ms": 350000,
+    "external_final_accounting_reservation_ms": 6989.465533
+  }
+}

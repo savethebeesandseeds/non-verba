@@ -1,0 +1,85 @@
+{
+  "schema": "b162-prospective-completion-source-only-proposal-v1",
+  "active": false,
+  "reviewer_id": "open_coding_clean_b",
+  "owner_namespace": "open-coding-b",
+  "finite_case": 162,
+  "next_case": null,
+  "pins": {
+    "pager.mjs": {
+      "sha256": "eb3841b7eedd97caee6c33aadfa00a97adf052626075ca94d4837d1eb7db2e4d",
+      "bytes": 25514
+    },
+    "policy.mjs": {
+      "sha256": "c90f08ca15718b6198464a4a7263bd897f57e37c52af56686dc95492d91b590e",
+      "bytes": 17053
+    },
+    "cached-guard.mjs": {
+      "sha256": "9d7ab5a0c17c9ec4de2d660edbf2a9295712fa83d29d5b57e1071954a06cbf49",
+      "bytes": 2217
+    },
+    "controls.mjs": {
+      "sha256": "43e8a1a2f18c9aa499c1c726aba2a04523024fa2de33cd087130184c931d5e8a",
+      "bytes": 11858
+    }
+  },
+  "baseline_immutable": true,
+  "new_actual_directory_created": false,
+  "actual_reading_clock_created": false,
+  "admission_created": false,
+  "future_root": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/coding/open-coding-b/current-v6/prospective-completion-0162-v1/run-v1",
+  "future_PREP": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/b162-prospective-completion-ROOT-preparation-20261019-v1",
+  "closed_parent_scope": [
+    0,
+    103000
+  ],
+  "closed_actual_compact_ACKs": 119,
+  "missing_parent_scope": [
+    103000,
+    141481
+  ],
+  "raw_and_resources_incomplete": true,
+  "new_phase_limits": {
+    "visible": 16777216,
+    "capture": 1073741824,
+    "artifact": 134217728
+  },
+  "total_limits": "exact carry plus phase_limits; enforce both independently",
+  "closed_limits_and_clock": "validated separately, never new-total <= closed-total; original26682805011421..32082805011421 proof retained",
+  "prospective_clock": "two decimal-string fields, distinct from original closed clock, positive duration <=90min; ROOT qualifies actual fresh clock before admission, independent of closed nominal deadline",
+  "copy_floor": 98304,
+  "engineering_ceiling": 262144,
+  "retained_source_floor": 1766002,
+  "prospective_source_floor": 2257522,
+  "engineering_tally": "all host files, staged copies, controls/config/docs/wrappers/directories/receipts counted below262144; full allocation retained; stream capture separate",
+  "scope_changes": [
+    "new own fixed root/PREP, prospective schemas, old end103000 and119ACKs",
+    "two explicit closed roots and exact4admission/close pins",
+    "259unique metadata-only anchor refs with per-root7/62/62+10/57/57 counts",
+    "validate both closed admission limits/clocks and both closed dispositions",
+    "new clock and phase versus cumulative pool checks; no carry reset/refund or restored old compliance claim"
+  ],
+  "unchanged": [
+    "native parent5000/raw7000",
+    "6000page/9000whole output and actual complete outer proof gates",
+    "cached exact page permit delivery",
+    "full23live source/method/epoch,Fresh29/all500 exclusion,registry and source bindings before prepare+complete",
+    "original response/presentation inverse and required raw/resource declaration gates",
+    "finite162/null, own semantic material only"
+  ],
+  "controls": "pure fictional fixtures only, external30s/Node512/RSS1GiB in existing managed Debian; no invoke/corpus/tokenizer/model/actual clock qualification",
+  "ROOT_metadata_to_issue_later": {
+    "anchor_schema": "root-own-b162-two-phase-continuous-parent-anchor-v1",
+    "anchor_fields": [
+      "closed_phase_roots:[COMPACT,OLD]",
+      "closed_phase_proof_refs:4 exact refs",
+      "immutable_refs:259",
+      "parent_range:[0,103000]",
+      "actual_pages:119",
+      "complete_parent_requests:17"
+    ],
+    "capsule_schema": "root-b162-prospective-completion-cached-page-capsule-v1",
+    "carry_schema": "root-open-coding-b162-prospective-completion-cumulative-carry-v1"
+  },
+  "authority": "NONE"
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "current-v6-context-selector-two-line-runner-repair-v2",
+  "v1_runner": {
+    "sha256": "3c7818bcc9fcddf3a470493635ec70fc760236edb41d31575e8327fe4ae18dfb",
+    "bytes": 21983
+  },
+  "v2_runner": {
+    "name": "run-ten-held-v2.mjs",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\current-v6-development0004-full-parent-v1\\current-v6-context-selector-v1\\run-ten-held-v2.mjs",
+    "sha256": "aca5f21caa74c1e3fcc5fcc92c680fe8acae50807fb0d627606fbf892a0142ac",
+    "bytes": 21991
+  },
+  "changes": [
+    {
+      "line": 4,
+      "old": "const R='/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000',Q=R+'/qa/current-v6-context-selector-ten-held-20261019-v1',B='/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code';",
+      "new": "const R='/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000',Q=R+'/qa/current-v6-context-selector-ten-held-20261019-v2',B='/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code';"
+    },
+    {
+      "line": 28,
+      "old": " check(scope_result.source_sha256===METHOD&&same(absolute(scope_result.body_receipt),PINS.body_only)&&scope_result.counts?.body===200&&scope_result.counts?.adverse_findings_retained===10&&scope_result.new_actual_readings===0&&scope_result.current200_supporting_review_assembled===false&&scope_result.materiality_holds_cleared===0&&scope_result.source_quality_gate_pass===false,'SELECTOR_TRIAL_CURRENT_SCOPE_RESULT');",
+      "new": " check(scope_result.source_sha256===METHOD&&same(absolute(scope_result.body_receipt),PINS.body_only)&&scope_result.counts?.body===200&&scope_result.counts?.adverse_findings_retained===10&&scope_result.counts?.new_actual_readings===0&&scope_result.current200_supporting_review_assembled===false&&scope_result.materiality_holds_cleared===0&&scope_result.source_quality_gate_pass===false,'SELECTOR_TRIAL_CURRENT_SCOPE_RESULT');"
+    }
+  ],
+  "exactly_two_changed_lines": true,
+  "mechanical_direct_text_verification_tool": "905add",
+  "source_inputs_PINS_IDS_LIMITS_selector_adapter_and_all_other_code_unchanged": true,
+  "nested_count_must_equal_zero": true,
+  "ROOT_acceptance_top_level_count_guard_unchanged": true,
+  "QA_v1_preserved": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v1",
+  "QA_v2": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2",
+  "prior_held": {
+    "original_runner_sha256": "3c7818bcc9fcddf3a470493635ec70fc760236edb41d31575e8327fe4ae18dfb",
+    "native_exit_code": 77,
+    "tool_chunk": "edcc42",
+    "held_ref": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v1/held.json",
+      "sha256": "2adbfa4803cc775c7f391c403b6257bbd3f5a4c572d561ff4ee72191d3eda720",
+      "bytes": 341
+    },
+    "phase": "BEFORE_ANY_CASE_CACHE",
+    "cases_completed": 0,
+    "all_clocks_runtime_and_charges_retained": true,
+    "no_v1_retry_or_reset": true
+  },
+  "actual_v2_execution": false,
+  "authority": "NONE"
+}

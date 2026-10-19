@@ -1,0 +1,109 @@
+{
+  "schema": "ROOT_COMPLETE_NORMALIZED_CONTEXT_0055_ADMISSION_V1",
+  "status": "TEMPLATE_NOT_ADMITTED",
+  "input_refs": {
+    "carry": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1/ROOT-CLOSED-and-cumulative-carry.json",
+      "sha256": "c18a3536c3867239cf9a71550ff090a49ff4d74e866bafa55ee869203696bf44",
+      "bytes": 2235
+    },
+    "epoch": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "metadata_guard": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-context-selector-ten-held-20261019-v2/run-ten-held.mjs",
+      "sha256": "aca5f21caa74c1e3fcc5fcc92c680fe8acae50807fb0d627606fbf892a0142ac",
+      "bytes": 21991
+    },
+    "prior_helpers": {
+      "path": "/tmp/nonverba-automatic-context-native-windows-driver-controls-20261019-a1/run-one-case.mjs",
+      "sha256": "29731798b76b9ec04efa345d8c83ec5ad9a635a5d647fcc2cd62387e86234ff2",
+      "bytes": 23965
+    },
+    "model_pins": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-automatic-native-dictionary-windows-20261019-v1/model-pins.json",
+      "sha256": "11caecf0f546036b901d929571a9b13ce7d46646d6c7750c57f0ea1ee317d5aa",
+      "bytes": 12564
+    },
+    "recipe": {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-complete-normalized-context-fallback-20261019-v1/recipe.json",
+      "sha256": "d62adf7543cb1b285da43308f54888d0e0dab4763d3920bfb6a48e719b81d53b",
+      "bytes": 1833
+    }
+  },
+  "limits": {
+    "planning": 939,
+    "planning_per_model": [
+      469,
+      470
+    ],
+    "recount": 2048,
+    "recount_per_model": 1024,
+    "engineering_ms": 30000,
+    "actual_ms": 60000,
+    "new_output_bytes": 8388608,
+    "engineering_output_charge": 131072,
+    "source_copy_bytes_including_dirs": 65536,
+    "case_and_helper_bytes": 33554432,
+    "model_file_hash_bytes": 224711752,
+    "heap_mb": 512,
+    "sampled_rss_bytes": 2147483648,
+    "plan_bytes": 2097152
+  },
+  "carry": {
+    "planning": 39061,
+    "recount": 158,
+    "elapsed_ms": 475387.035676,
+    "output_bytes": 14239376
+  },
+  "original_caps": {
+    "planning": 40000,
+    "recount": 20000,
+    "active_elapsed_ms": 600000,
+    "output_bytes": 67108864
+  },
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "self_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-complete-normalized-context-fallback-20261019-v1/run-one-case.mjs",
+    "sha256": "ROOT_MUST_BIND_ACTIVATED_DRIVER_SHA256",
+    "bytes": 18921
+  },
+  "adapter_ref": {
+    "path": "/tmp/nonverba-complete-normalized-context-fallback-controls-20261019-a1/complete-context.mjs",
+    "sha256": "19bcaad1b6ffb78fbdfcaefcaa47b7e686cc1ad24d2717ceb0065e6f682164da",
+    "bytes": 6490
+  },
+  "reused_core_refs": [
+    {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/native-nodes-dictionary.mjs",
+      "sha256": "f3a62ff9869112b256745669911ee213b9dddc534e3fe4381bc78be479c2cb2b",
+      "bytes": 25990
+    },
+    {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/window-dictionary.mjs",
+      "sha256": "172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0",
+      "bytes": 7687
+    },
+    {
+      "path": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2/empty-native-dictionary.mjs",
+      "sha256": "c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e",
+      "bytes": 2247
+    },
+    {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/declared-context-set-v1/context-set.mjs",
+      "sha256": "19bf6c9e6855d89cea5fd7941d2881f64fdfb1e4883371806528f82117b17cc0",
+      "bytes": 7248
+    }
+  ],
+  "clock_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-0055-complete-normalized-context-fallback-20261019-v1/clock.json",
+    "sha256": "ROOT_MUST_BIND_PRECOPY_CLOCK_SHA256",
+    "bytes": null
+  },
+  "model_inference": false,
+  "source_text_display": false,
+  "quality_gate_pass": false,
+  "authority": "NONE"
+}

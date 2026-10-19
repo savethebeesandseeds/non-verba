@@ -35,6 +35,7 @@ async function fixture(t,{pending=false,allDiscoveryCalibration=false}={}){
 test('exact-stage reuse returns manifest_path and retains every provisional exclusion with real parents',async t=>{
   const {root}=await fixture(t,{allDiscoveryCalibration:true});const options={limit:3,calibrationOnly:false,log:()=>{}};
   const first=await extractStudy(root,options),again=await extractStudy(root,options);assert.deepEqual(again,first);assert.ok(first.manifest_path.endsWith('/extraction-manifest.json'));
+  assert.equal(first.storage_accounting.method,'STRICT_UNLINKED_FILE_ENTRY_BYTES_V1');assert.equal(first.storage_accounting.policy_ref,null);assert.equal(first.storage_accounting.link_targets_traversed,false);
   assert.equal(first.contracts,3);assert.equal(first.selection_authority,'PROVISIONAL_PER_CONTRACT_ONLY_GLOBAL_ADMISSION_SEPARATE');assert.ok(first.selected_units>1,'Global budget belongs to admission, not per-contract extraction');
   assert.equal(globalThis.workflowFixtureExecuted,undefined);
   const admitted=await collect(readUnits(root,first)),excluded=[];for(const shard of first.shards.exclusions)for await(const row of readRows(root,shard.path))excluded.push(JSON.parse(row.payload));

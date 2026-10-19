@@ -1,0 +1,14 @@
+{
+  "schema": "development0004-full-parent-availability-proposal-v1",
+  "name": "Priors Derivation Lab: complete-parent availability — PROTOTYPE",
+  "status": "PROSPECTIVE_SINGLE_CASE_RECIPE_AMENDMENT_UNADOPTED",
+  "ROOT_ACTIVATED": false,
+  "authority": "NONE",
+  "target": {"audit_id": "development-0004", "contract_id": "contract-327cc1e738fcb8a98106", "parent": [54521, 63634], "unit": [57284, 59026]},
+  "predeclared_witness": {"literal": "waived or consented to by the Holder", "previously_read_raw_scope": [109180, 112850], "must_be_unique_in_parent": true, "must_be_absent_from_baseline_and_sixty_word_context": true, "must_be_present_in_native_encoded_parent": true},
+  "limits": {"elapsed_ms": 300000, "node_heap_mb": 768, "sampled_RSS_bytes": 1073741824, "explicit_read_bytes": 33554432, "decoded_bytes": 67108864, "QA_bytes": 8388608, "source_copy_bytes": 131072, "encoded_bytes": 4194304},
+  "amendment": "One prospective opt-in complete authenticated stored-parent availability arm for the already exposed case. The existing 60-word comparison recipe, baseline representation, native encoder, tokenizer and pooling remain unchanged. This trial does not replace or retroactively relabel the formal comparison recipe or any prior run.",
+  "acceptance": "The authenticated complete parent remains contiguous, the baseline and its native encoding remain exactly equal, and the previously observed omitted qualifier is inside the resulting native encoded input. A projection, binding, witness or resource failure holds the whole trial without a plain-text fallback.",
+  "claims_excluded": ["actual new whole-parent source reading", "complete legal provision or governing hierarchy", "outside-parent dependencies", "tokenized model windows", "model inference", "semantic adequacy", "source-quality gate pass", "clearance of inherited context holds", "first-prior adoption"],
+  "execution": {"managed_existing_container_only": true, "new_source_text_displays": 0, "tokenizer_calls": 0, "model_inferences": 0, "single_attempt": true, "retain_failures_and_partial_artifacts": true}
+}

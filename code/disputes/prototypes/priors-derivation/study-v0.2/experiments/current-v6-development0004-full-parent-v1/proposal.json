@@ -1,0 +1,105 @@
+{
+  "schema": "development0004-full-stored-parent-prospective-availability-trial-v1",
+  "ROOT_ACTIVATED": false,
+  "status": "INACTIVE_SOURCE_FREE_CONTROLS_ONLY_ROOT_ACTUAL_ADMISSION_REQUIRED",
+  "amendment": "One prospective availability arm beyond the existing at-most60 neighboring-word comparison; the existing default remains unchanged.",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "frozen_source_root": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "original_module": {
+    "path": "disputes/prototypes/priors-derivation/study-v0.2/lib/representation.mjs",
+    "sha256": "b35d8fd3c118d2da489eefd71796d9936596c73997172c5706112ef6ffb39ee6",
+    "bytes": 14161
+  },
+  "changes": [
+    "Freeze two dependency import URLs to S6",
+    "Add named opt-in with exact audit/contract/parent/focal restriction",
+    "Permit complete original parent only in that branch and label descriptor with distinct prospective policy and explicit unknowns",
+    "Default omitted contextScope preserves original descriptor and sixty-word guard; nativeRepresentationWindow/modelInputIdentity unchanged"
+  ],
+  "api": {
+    "module": "representation.mjs",
+    "same_instance_required": [
+      "createNativeSourceContext",
+      "createNativeRepresentation",
+      "nativeRepresentationWindow"
+    ],
+    "option": {
+      "contextScope": "DEVELOPMENT0004_FULL_AUTHENTICATED_STORED_PARENT_V1",
+      "trialAuditId": "development-0004"
+    },
+    "bodyRange": "omitted selects exact authenticated parent; supplied range must equal it"
+  },
+  "target": {
+    "audit_id": "development-0004",
+    "contract_id": "contract-327cc1e738fcb8a98106",
+    "parent": {
+      "start": 54521,
+      "end": 63634,
+      "UTF16": 9113
+    },
+    "focal": {
+      "start": 57284,
+      "end": 59026,
+      "UTF16": 1742,
+      "local_start": 2763,
+      "local_end": 4505
+    }
+  },
+  "limits": {
+    "actual_cases": 1,
+    "source_inputs": "Only existing current-five development-0004 bundle metadata and its exactly pinned cache/envelope",
+    "elapsed_ms": 60000,
+    "node_heap_MiB": 256,
+    "sampled_RSS_bytes": 536870912,
+    "explicit_read_bytes": 67108864,
+    "decoded_source_bytes": 67108864,
+    "artifact_bytes": 8388608,
+    "source_copy_bytes": 65536,
+    "stdout_bytes": 16384,
+    "model_calls": 0,
+    "tokenizer_callbacks": 0,
+    "new_case_codings": 0,
+    "full_parent_source_emissions": 0
+  },
+  "ROOT_admission": [
+    "After fixed-five strict closure, pin this module/proposal/control receipt and the existing case bundle metadata; preserve all original files/holds",
+    "ROOT writes a separate bounded availability admission, runtime namespace and monotonic start/deadline before source-bearing work; no hidden source loader in this module",
+    "Use current_cache/raw/entire_normalized/persisted_native_reference/current_tracer_collector/parent/focal refs from exactly authenticated existing development-0004 bundle; bind current epoch tracer/collector pins",
+    "Import all three context/constructor/window APIs from one copied module URL. Hydrate exact existing native envelope/cache; no extraction or selector rerun",
+    "Construct baseline and prospective representation; native encode exact full parent with unchanged S6 encoder. Projection or resource refusal remains HOLD, no plain/finite9/truncation fallback",
+    "Only predeclared already-exposed raw109180..112850 witness and normalized presence/find metadata; emit coordinates/hashes/booleans only. No full-parent actual-reading claim"
+  ],
+  "acceptance": [
+    "Exact parent54521..63634 and focal57284..59026/local2763..4505 unchanged",
+    "Exact old default descriptor/input/native bytes remain unchanged on synthetic controls",
+    "Already-exposed exception literal has authenticated normalized presence inside parent and inside the native encoded source payload, with source offsets/hash; a metadata-only occurrence is insufficient",
+    "Native whole-parent projection succeeds within original native bounds or trial remains held; retain actual failures and charges",
+    "Result is availability evidence only, requiring independent replay/materiality review before any adopted recipe or expansion"
+  ],
+  "controls": {
+    "source_free": true,
+    "synthetic_contract_content_only": true,
+    "synthetic_target_IDs_and_ranges": true,
+    "original_default_comparison": true,
+    "native_encoder_real": true,
+    "actual_contract_sources_read": 0,
+    "actual_API_calls": 0
+  },
+  "preserved": {
+    "default_neighbor_word_maximum": 60,
+    "navigation_metadata_only": true,
+    "computed_style_verified": false,
+    "effectiveness_verified": false,
+    "semantic_sufficiency_verified": false,
+    "outside_parent_context_verified": false,
+    "outside_parent_development0001_and0055": "UNRESOLVED",
+    "all_prior_materiality_holds": true,
+    "quality_gate_pass": false,
+    "current200_complete": false,
+    "fresh100_or29_opened": false,
+    "old69_entry_activated": false,
+    "finite9_adopted": false,
+    "pipeline_or_model_or_tokenizer_change": false,
+    "authority": "NONE"
+  }
+}

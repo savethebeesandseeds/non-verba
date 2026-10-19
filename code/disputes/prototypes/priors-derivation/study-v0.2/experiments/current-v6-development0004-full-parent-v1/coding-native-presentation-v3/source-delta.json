@@ -1,0 +1,44 @@
+{
+  "schema": "native-presentation-v3-explicit-response-validator-fork-v1",
+  "baseline_sha256": "573017bcb07ccd08cca0e833150e835d4403373dc0ff872c003730ca53c41251",
+  "baseline_bytes": 20122,
+  "ordered_exact_replacements": [
+    {
+      "old": "export const POLICY='COMPLETE_NATIVE_LITERAL_PRESENTATION_MACHINE_VERIFIED_STRUCTURE_V1_UNADOPTED';",
+      "new": "export const POLICY='OBSERVED_NATIVE_LITERAL_SLICE_MACHINE_STRUCTURE_V3_UNADOPTED';"
+    },
+    {
+      "old": "root.range.offset===0&&root.range.end===root.text.length&&root.range.total_characters===root.text.length&&root.range.complete_source_in_this_slice===true&&root.range.next_offset===null,'PRESENTATION_COMPLETE_STORED_PARENT_REQUIRED'",
+      "new": "root.range.end>root.range.offset&&root.range.end-root.range.offset===root.text.length&&root.range.end<=root.range.total_characters&&root.range.absolute_normalized_start>=root.range.offset&&root.range.complete_source_in_this_slice===(root.range.offset===0&&root.range.end===root.range.total_characters)&&root.range.next_offset===(root.range.end<root.range.total_characters?root.range.end:null),'PRESENTATION_EXACT_REPORTED_PARENT_SLICE_REQUIRED'"
+    },
+    {
+      "old": "n.range.include_end_zero_width===true,'PRESENTATION_NATIVE_RANGE'",
+      "new": "n.range.include_end_zero_width===(root.range.end===root.range.total_characters),'PRESENTATION_NATIVE_RANGE'"
+    },
+    {
+      "old": "scope:'COMPLETE_STORED_PARENT_AND_LITERAL_VALUES_OF_EXACT_ALL_NATIVE_PROJECTION_ONLY'",
+      "new": "scope:'OBSERVED_STORED_PARENT_SLICE_AND_LITERAL_VALUES_OF_EXACT_ALL_NATIVE_PROJECTION_ONLY'"
+    },
+    {
+      "old": "claim:'complete native-literal presentation plus machine-verified structure'",
+      "new": "claim:'observed-slice native-literal presentation plus machine-verified structure'"
+    },
+    {
+      "old": "complete_parent:{text:root.text,normalized_range:[native.range.start,native.range.end],sha256:H(root.text)}",
+      "new": "observed_parent_slice:{text:root.text,normalized_range:[native.range.start,native.range.end],parent_relative_range:[root.range.offset,root.range.end],reported_total_parent_characters:root.range.total_characters,reported_complete_parent:root.range.complete_source_in_this_slice,include_parent_terminal_zero_width:native.range.include_end_zero_width,sha256:H(root.text)}"
+    },
+    {
+      "old": "status:'EXACT_RESPONSE_AND_COMPLETE_LITERAL_RELATIONSHIP_VIEW'",
+      "new": "status:'EXACT_RESPONSE_AND_OBSERVED_SLICE_LITERAL_RELATIONSHIP_VIEW'"
+    }
+  ],
+  "unchanged": [
+    "lossless pack/unpack",
+    "all-native projection policy",
+    "unknown field rejection",
+    "literal and relationship coverage",
+    "all original serialized bytes"
+  ],
+  "actual_source_inputs": 0,
+  "authority": "NONE"
+}

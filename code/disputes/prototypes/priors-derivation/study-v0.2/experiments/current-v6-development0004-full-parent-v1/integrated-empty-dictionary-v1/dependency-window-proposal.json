@@ -1,0 +1,96 @@
+{
+  "schema": "development0004-fixed-dependency-window-proposal-v1",
+  "ROOT_ACTIVATED": false,
+  "status": "INACTIVE_ROOT_REVIEW_AND_SEPARATE_ADMISSION_REQUIRED",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "limits": {
+    "elapsed_ms": 300000,
+    "node_heap_MiB": 768,
+    "RSS_bytes": 1073741824,
+    "explicit_read_bytes": 67108864,
+    "model_hash_read_bytes": 268435456,
+    "decoded_bytes": 67108864,
+    "QA_bytes": 8388608,
+    "setup_bytes": 131072,
+    "stdout_bytes": 16384,
+    "planner_encode_probes": 0,
+    "planner_tokenizer_calls": 0,
+    "windows": 1,
+    "independent_recounts": 1,
+    "window_inverse_verifications": 1,
+    "dependency_window_measurements": 1
+  },
+  "scope": "One fixed continuous literal dependency hull [56665,57291), measured and independently recounted once. No search, replanning, stream modification, model inference, source display or aggregation.",
+  "parent_range": [
+    54521,
+    63634
+  ],
+  "focal_range": [
+    57284,
+    59026
+  ],
+  "qualifier_span": [
+    56665,
+    56701
+  ],
+  "first_selected_word_span": [
+    57284,
+    57291
+  ],
+  "primary_question": "Does exactly the predeclared continuous qualifier-to-whole-first-word hull fit within256 tokens? Passing establishes literal availability only; full covenant semantics remain unverified.",
+  "planner": {
+    "calls": 0,
+    "encode_probes": 0,
+    "search": false
+  },
+  "counter": {
+    "policy_sha256": "728bb65a00c45e8b6a4e1cdb1e5f8a69d5946234deb8bef089b61261dc8f541d",
+    "existing_model": "Xenova/all-MiniLM-L6-v2",
+    "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+    "six_asset_hash_reservation": 91102175,
+    "provisioning_reservation": 2575,
+    "internal_runtime_OS_IO_not_metered": true
+  },
+  "codec": {
+    "policy": "NATIVE_EMPTY_DICTIONARY_SELF_CONTAINED_WINDOW_V1_UNADOPTED",
+    "only_consecutive_empty_native_groups": true,
+    "source_ranges_hashes": "UNCHANGED_ORIGINAL_NATIVE_SERIALIZATION_BEFORE_DICTIONARY",
+    "whole_window_sha256": "ACTUAL_DICTIONARY_MODEL_INPUT",
+    "all_original_fields_and_source_reconstructed_exactly": true,
+    "max_empty_cluster_UTF16": 4096,
+    "max_empty_groups_per_cluster": 64
+  },
+  "verification": {
+    "fixed_window_inverse": true,
+    "source_exact": true,
+    "primary_actual_counter_calls": 1,
+    "independent_recounts": 1,
+    "weight_assigned": false,
+    "stream_modified": false
+  },
+  "runtime_namespace": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development0004-fixed-dependency-window-20261018-v1",
+  "runtime_files": [
+    "admission.json",
+    "representation.mjs",
+    "window-dictionary.mjs",
+    "empty-native-dictionary.mjs",
+    "tokenization-planner.mjs",
+    "dependency-window-proposal.json",
+    "dependency-window-run.mjs"
+  ],
+  "preservation": {
+    "previous_held_tokenizer_phase_permanent": true,
+    "previous_case0004_callbacks_retained": 2390,
+    "previous_case0004_model_hash_reservations": 364419000,
+    "old0055_pool_unchanged": true,
+    "quality_gate_pass": false,
+    "full_parent_actual_reading": false,
+    "materiality_holds_cleared": 0,
+    "model_inference": false,
+    "source_prints": 0,
+    "authority": "NONE"
+  },
+  "external_watchdog_ms": 300000,
+  "external_RSS_cap_bytes": 1073741824,
+  "setup_included_in_external_elapsed": true
+}

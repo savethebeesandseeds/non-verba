@@ -1,0 +1,32 @@
+{
+  "schema": "fixed0055-automatic-context-source-reader-proposal-v1",
+  "status": "PROTOTYPE_SOURCE_ONLY_NOT_ADMITTED",
+  "reviewer": "/root/actual_source_reader",
+  "case": {"audit_id": "development-0055", "contract_id": "contract-5e4763782d47aca7d67c"},
+  "purpose": "Read the repaired candidate's exact input texts and own complete original HTML before a separate context judgment. No prior names, meanings, model inference or adoption.",
+  "entry": "reader.mjs start|next|ack|complete EXACT_ROOT_ADMISSION_PATH SHA256 BYTES [OBSERVED_ACK_JSON]",
+  "activation": "ROOT must independently review and author the exact hash-pinned admission; no admission is authored by this preparation. CLI is default-deny without that admission. A trusted literal invocation and sanitized pre-Node environment are required; this is a controlled namespace, not an OS sandbox.",
+  "reading_order": [
+    "Authenticate helper source pins, exact metadata result/acceptance, current82 epoch and one0055 current-body row; recheck complete Fresh100 ID-only metadata guard with29 distinct CIDs excluding0055 before any original or plan IO.",
+    "Privately authenticate both pinned model plans and compare all15 ordered .text values byte for byte. Identical texts permit one15-window reading scope plus exact-text byte qualification for the second model. Any difference requires separate15+15 reading scopes; model/semantic equivalence is never claimed.",
+    "Read own full original HTML [0,47662), then each exact model input text including its dictionary definitions and literals. Do not read the119k coordinate JSON as a substitute and do not attribute ROOT's older nine-page reading to this reader.",
+    "Emit one forward page per native command, read it, then issue a separate authored ACK with the actual observed tool/chunk IDs and full response measurements. File creation/emission/hash equality alone never means reading.",
+    "Only after every page is ACKed may a mechanical coverage receipt be created. A separate authored context judgment may discuss actual actors, rules, conditions, exceptions and references, retaining ambiguity and adverse evidence. Formal/default holds and model binding remain unresolved pending a separate adoption/rereview gate."
+  ],
+  "caps": {"phase_ms":1200000,"operation_ms":60000,"named_input_bytes":33554432,"combined_visible_and_capture_bytes":262144,"artifact_bytes":16777216,"source_copy_bytes":65536,"node_heap_bytes":536870912,"sampled_self_RSS_bytes":1073741824,"source_page_UTF16":8500,"prepared_stdout_UTF16":8800,"complete_forwarded_tool_response_UTF16":9000},
+  "accounting": "The new reading phase is explicitly separate from the CLOSED tokenizer pool. Carry39061 planning/158 recount/475387.035676ms/14239376B is retained, never reset or reopened. Input is conservatively precharged6MiB on start and256KiB per later operation, no refunds; all actual helper reads must also fit that operation reservation. Every planned emitted byte is charged twice for visible/capture plus2048 wrapper bytes/page and16384 status bytes. Source copies and own state tree are included in16MiB. Limits are checkpoint sampling, not continuous OS containment; ROOT must bound each native invocation60s and independently control tool forwarding/capture.",
+  "source_reuse": [
+    "current-v6-native-actual-reading-v1/paged-reader.mjs: strict forward emission then distinct observed reading ACK; no actual data reused.",
+    "literal-emphasis-parent-v1/source-only-adverse-comparison-v1/page-reader.mjs: surrogate-safe bounded text pagination and prepublication byte charging; no old activation, clock or reading claims reused.",
+    "coding-successor-proposal-v1/successor-pager.mjs validateObservedPage: complete whole-tool response <=9000 and explicit nontruncation/exact-forward declaration; no coder loader/packet/meaning imported.",
+    "automatic-context-native-windows-v1/run-one-case.mjs and automatic-windows.mjs: fixed metadata/source joins and exact .windows[].text field path only; no driver/tokenizer/cache/native module imported or executed."
+  ],
+  "input_permissions": "Only pinned result/acceptance/selection/epoch/body qualification/Fresh guard metadata, pinned model0/1 plans and the one0055 raw ref derived from its admitted qualification row. No other cases, actual Fresh packet payload, caches, native envelope, coder meanings, model/package artifacts or network.",
+  "failure_policy": "Any failed/partial operation, changed refs, overrun, missing tool evidence, truncation or skipped ACK is HELD; retain all files, charges and partial coverage. No re-emission, overwrite, retry, clock reset or false coverage. ROOT may later decide a new disclosed phase; this helper cannot.",
+  "authority": "NONE",
+  "actual_source_payload_read_or_displayed_during_preparation": false,
+  "context_adequacy_judgment": null,
+  "model_semantic_binding_claimed": false,
+  "source_quality_gate_pass": false,
+  "materiality_holds_cleared": 0
+}

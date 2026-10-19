@@ -1,0 +1,55 @@
+{
+  "schema": "prospective-integrated-empty-native-dictionary-v1",
+  "name": "Complete-parent empty-event dictionary — PROTOTYPE",
+  "status": "SOURCE_FREE_COMPONENT_CONTROLS_PASSED_ACTUAL_RECOUNT_PENDING",
+  "authority": "NONE",
+  "scope": "Exact development-0004 authenticated stored parent and focal unit only",
+  "target": {
+    "audit_id": "development-0004",
+    "contract_id": "contract-327cc1e738fcb8a98106",
+    "parent": [54521, 63634],
+    "unit": [57284, 59026]
+  },
+  "opt_in": {
+    "contextScope": "DEVELOPMENT0004_FULL_AUTHENTICATED_STORED_PARENT_V1",
+    "trialAuditId": "development-0004",
+    "windowEncodingScope": "DEVELOPMENT0004_EMPTY_NATIVE_DICTIONARY_FULL_PARENT_V1"
+  },
+  "representation_policy": "ONE_AUTHENTICATED_STORED_PARENT_EMPTY_NATIVE_DICTIONARY_TRIAL_V1",
+  "window_input_policy": "NATIVE_EMPTY_DICTIONARY_SELF_CONTAINED_WINDOW_V1_UNADOPTED",
+  "cluster_policy": "NATIVE_EMPTY_DICT_V1_UNADOPTED",
+  "default_behavior": "Descriptor, representation digest, modelInputIdentity and native window bytes remain unchanged when windowEncodingScope is absent",
+  "change": "Replace each maximal sequence of at least two consecutive empty native source-payload groups with a self-contained ordered lossless dictionary; retain singleton empty groups, nonempty native groups, joint wrappers, literal source and other metadata exactly",
+  "inverse": {
+    "API": "decodeNativeDictionaryWindow(candidate)",
+    "guarantee": "JSON.stringify(decoded) equals JSON.stringify(original nativeRepresentationWindow) byte for byte",
+    "source_API": "reconstructDictionaryWindowSource(candidate)",
+    "original_window_hash": "candidate.empty_native_dictionary.original_window_sha256",
+    "original_text_hash": "candidate.empty_native_dictionary.original_text_sha256",
+    "encoded_text_hash": "candidate.sha256 and candidate.empty_native_dictionary.encoded_text_sha256",
+    "source_ranges_hashes": "Unchanged hashes of original native serialization before dictionary; decode and compare the pure original window",
+    "planner_extensions": "Strict inverse rejects fields appended by a planner; regenerate a pure window from the authenticated representation/range, compare text/hash/source_ranges to planner output, and invert that pure window"
+  },
+  "fail_closed_bounds": {
+    "serialized_window_UTF16": 1048576,
+    "parsed_wrapper_groups": 16384,
+    "maximal_empty_cluster_UTF16": 4096,
+    "maximal_empty_cluster_groups": 64,
+    "cluster_overflow": "Hold the complete window; no splitting, partial emission, omission or plain fallback",
+    "reserved_source_markers": "Reject source containing opening or closing native/joint wrapper names or the empty-dictionary opening marker, including partial spellings matched by reserved prefixes",
+    "range_and_zero_output_ownership": "Unchanged original encoder and source-range validation; half-open intermediate ranges and selected-part terminal-end ownership"
+  },
+  "source_pins": [
+    {"path":"representation.mjs","sha256":"4d10820be0b232a3940458f30262f8f9de1d9b5fe052705fa9667605b9de9e4c","bytes":17517},
+    {"path":"window-dictionary.mjs","sha256":"172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0","bytes":7687},
+    {"path":"empty-native-dictionary.mjs","sha256":"c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e","bytes":2247},
+    {"path":"controls.test.mjs","sha256":"46c08913ed81e31c3cd3af187120af7e88b9a4c158bcabc514af04da87a86275","bytes":13176}
+  ],
+  "not_established": [
+    "Actual integrated source-window token counts or a complete window stream",
+    "Equivalent model understanding of dictionary references",
+    "Outside-parent dependencies, complete legal meaning or source quality",
+    "Any candidate-prior adoption or source-quality gate clearance"
+  ],
+  "preserved": "Existing default encoder, main library, frozen and held attempts, current source-quality holds, Fresh100 unread state and separate independent coding meanings"
+}

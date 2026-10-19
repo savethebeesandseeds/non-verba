@@ -1,0 +1,92 @@
+{
+  "schema": "current-v6-context-selector-binding-delta-v1",
+  "original_runner": {
+    "name": "run-ten-held.mjs",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\literal-emphasis-parent-v1\\automatic-context-selector-v1\\run-ten-held.mjs",
+    "sha256": "283b678d602359bc258e8ad6adb4471d2bd117d1bfc2f6a6f71f5703755fdfb7",
+    "bytes": 16344
+  },
+  "new_runner": {
+    "name": "run-ten-held.mjs",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\current-v6-development0004-full-parent-v1\\current-v6-context-selector-v1\\run-ten-held.mjs",
+    "sha256": "3c7818bcc9fcddf3a470493635ec70fc760236edb41d31575e8327fe4ae18dfb",
+    "bytes": 21983
+  },
+  "exact_patch": {
+    "name": "run-ten-held.194-to82.patch.md",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\current-v6-development0004-full-parent-v1\\current-v6-context-selector-v1\\run-ten-held.194-to82.patch.md",
+    "sha256": "8c01b0bc05acb469865b4f57cb34cf961dff7a14c49c2709175326b885fa0d0c",
+    "bytes": 37936
+  },
+  "original_selector_and_test": [
+    {
+      "name": "selector.mjs",
+      "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\literal-emphasis-parent-v1\\automatic-context-selector-v1\\selector.mjs",
+      "sha256": "682553360f2668797b08309ded8a14242a549c6e71765aa4217b14007a860b53",
+      "bytes": 14877
+    },
+    {
+      "name": "selector.test.mjs",
+      "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\literal-emphasis-parent-v1\\automatic-context-selector-v1\\selector.test.mjs",
+      "sha256": "85c4fe5db48fb01cb00f5fa3acb0ee2d1cc5aa4988d320e1655064040c6e1c4b",
+      "bytes": 10569
+    }
+  ],
+  "fixed_source_snapshot": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "source82": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "source194": "194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22",
+  "changed_bindings": [
+    "source82 METHOD and source snapshot/epoch/current manifest/QA namespace",
+    "current82 body receipt replaces old194 body receipt; unchanged historical rows retain direct scope fields",
+    "four small accepted equivalence/scope/native-zero metadata pins and pure identity checks",
+    "per-row current82 proof joins original scope geometry/raw/normalized to current exact cache hash/path"
+  ],
+  "preserved": [
+    "selector68255336 and14sourcefree controls",
+    "fixed10IDs and original adverse findings",
+    "full normalized source plus exact focal/existing navigation/governor adapter",
+    "manual witnesses are not inputs",
+    "selector defaults and algorithm",
+    "formal encoder/recipe/pooling/selection/quality gates",
+    "raw/native payloads stay unopened; zero tokenizer/model calls"
+  ],
+  "explicit_metadata_preparation_reads": [
+    {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-extraction-equivalence-20261018-v1/comparison/result.json",
+      "sha256": "2365f9f9604b2e63fe03c336675038cf7c9682104ec1d63ae71ddeb6c99b1a61",
+      "bytes": 4357
+    },
+    {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-extraction-equivalence-20261018-v1/ROOT-native-zero-attestation.json",
+      "sha256": "6ab57dfafc1c768a826f970d977e3ad977c7a2905d92595e595acb2fe0319acd",
+      "bytes": 473
+    },
+    {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development-scope-qualification-20261018-v1/result.json",
+      "sha256": "65db39319e4dfd0789b3ab579fc9b3ef88a4cae270ee265d13664cd7e5182f05",
+      "bytes": 3425
+    },
+    {
+      "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development-scope-qualification-20261018-v1/ROOT-acceptance.json",
+      "sha256": "636e487e07e3ea80a2802f4b28c9a4cc66c81609e0991ed2429f5afca5a926fe",
+      "bytes": 4251
+    }
+  ],
+  "preparation_metadata_tool_chunk": "f39066",
+  "manifest_path_named_stat_tool": "5c82c5",
+  "manifest_path_confirmed": "processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+  "nonexistent_alternate_not_bound": "manifests/processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+  "new_actual_reading": false,
+  "current_82_body_receipt_not_opened_during_preparation": true,
+  "source_cases_cache_native_packets_not_opened": true,
+  "authority": "NONE",
+  "patch_generation_history": [
+    {
+      "attempt_path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\current-v6-development0004-full-parent-v1\\current-v6-context-selector-v1\\run-ten-held.194-to82.attempt1.patch.md",
+      "sha256": "b79180be2c6c473175b0ca7441b1a9c77f04ca2e94f5adbe5786f3b1012631be",
+      "bytes": 26671,
+      "failed_mechanical_tool": "eee981",
+      "reason": "First patch described the generated source before apply_patch added one final LF. Runtime source was unchanged; exact patch now includes that final LF."
+    }
+  ]
+}

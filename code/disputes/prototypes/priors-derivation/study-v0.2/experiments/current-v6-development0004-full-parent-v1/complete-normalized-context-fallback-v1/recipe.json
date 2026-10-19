@@ -1,0 +1,41 @@
+{
+  "schema": "complete-normalized-context-fallback-recipe-v1",
+  "name": "Complete Normalized-Document Context — PROTOTYPE / UNADOPTED",
+  "candidate_kind": "ONE_COMPLETE_NORMALIZED_DOCUMENT_RANGE",
+  "audit_id": "development-0055",
+  "contract_id": "contract-5e4763782d47aca7d67c",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "epoch_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+    "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+    "bytes": 6798
+  },
+  "normalized_sha256": "2626a8d05aac59e504a72e78b46572a5c50c3c7c31c4453c465c7864ba95f0cd",
+  "normalized_utf16_length": 25329,
+  "complete_range": {
+    "start": 0,
+    "end": 25329,
+    "sha256": "2626a8d05aac59e504a72e78b46572a5c50c3c7c31c4453c465c7864ba95f0cd"
+  },
+  "original_focal": {
+    "start": 13926,
+    "end": 15707,
+    "sha256": "e6181476eb34837ae161468db3066af1359f24a27e0d91c2faf58378ed9dc6a0"
+  },
+  "planned_node_ids": [
+    "complete_normalized_document"
+  ],
+  "original_focal_validated_not_replaced_or_planned": true,
+  "UNCLOSED_local_subset_tokenized": false,
+  "encoder": "UNCHANGED native-context-set-v2 dictionary fork ac050057 / a2 f3a62ff9",
+  "codec": "UNCHANGED lossless empty dictionary window172591f4 and cluster c16f82b3",
+  "scope": "ALL_LITERAL_CHARACTERS_IN_ONE_AUTHENTICATED_COMPLETE_NORMALIZED_DOCUMENT_RANGE; NOT_ORIGINAL_HTML_RESOURCES_RENDER_STYLE_COMPLETENESS",
+  "semantic_completeness_verified": false,
+  "original_HTML_render_resource_style_completeness": false,
+  "per_input_condition_binding_verified": false,
+  "pooling_performed": false,
+  "model_inference": false,
+  "quality_gate_pass": false,
+  "adopted": false,
+  "authority": "NONE"
+}

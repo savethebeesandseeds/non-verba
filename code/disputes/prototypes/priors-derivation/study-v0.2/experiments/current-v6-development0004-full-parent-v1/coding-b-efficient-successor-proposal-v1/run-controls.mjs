@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Container-only external supervisor of fictional controls; no study inputs.
+import fs from 'node:fs';import crypto from 'node:crypto';import {spawn} from 'node:child_process';import {performance} from 'node:perf_hooks';import {fileURLToPath} from 'node:url';import path from 'node:path';
+const root=path.dirname(fileURLToPath(import.meta.url)),expected='/tmp/nonverba-coding-b-efficient-successor-controls-20261019-a1';if(root!==expected||process.platform!=='linux')throw Error('SOURCE_FREE_STAGE_ONLY');
+const started=performance.now(),H=b=>crypto.createHash('sha256').update(b).digest('hex'),names=['pager.mjs','policy.mjs','cached-guard.mjs','controls.test.mjs','run-controls.mjs'];
+const refs=names.map(name=>{const p=root+'/'+name,b=fs.readFileSync(p);return {path:p,bytes:b.length,sha256:H(b)};});
+const child=spawn(process.execPath,['--max-old-space-size=512','--disable-proto=throw',root+'/controls.test.mjs'],{cwd:root,env:{PATH:'/opt/nonverba-tools/node/bin:/usr/bin:/bin',HOME:'/root',NONVERBA_CONTAINER:'1'},stdio:['ignore','pipe','pipe']});
+let out=Buffer.alloc(0),err=Buffer.alloc(0),held=null,closed=false,birth=null,peak=process.memoryUsage().rss;
+function processState(){const stat=fs.readFileSync('/proc/'+child.pid+'/stat','utf8'),fields=stat.slice(stat.lastIndexOf(')')+2).trim().split(/\s+/u),status=fs.readFileSync('/proc/'+child.pid+'/status','utf8'),m=/^VmHWM:\s+(\d+) kB$/mu.exec(status);if(!m)throw Error('UNKNOWN_RSS');return {birth:fields[19],rss:Number(m[1])*1024};}
+function stop(reason){held??=reason;if(closed)return;try{const s=processState();if(birth!==null&&s.birth===birth)child.kill('SIGKILL');else held='UNVERIFIED_CHILD_IDENTITY';}catch(e){if(!['ENOENT','ESRCH'].includes(e.code))held='UNKNOWN_CHILD_STATE';}}
+try{birth=processState().birth;}catch(e){held='INITIAL_CHILD_IDENTITY';}
+for(const [which,stream]of[['out',child.stdout],['err',child.stderr]])stream.on('data',b=>{if(out.length+err.length+b.length>131072){stop('CAPTURE');return;}if(which==='out')out=Buffer.concat([out,b]);else err=Buffer.concat([err,b]);});
+function sample(){if(!closed){try{const s=processState();if(s.birth!==birth)stop('CHILD_IDENTITY_CHANGED');const rss=process.memoryUsage().rss+s.rss;peak=Math.max(peak,rss);if(rss>1073741824)stop('RSS');}catch(e){if(!['ENOENT','ESRCH'].includes(e.code))stop('UNKNOWN_CHILD_STATE');}}if(performance.now()-started>30000)stop('TIME');}
+const timer=setInterval(sample,25),deadline=setTimeout(()=>stop('TIME'),29500);sample();
+const result=await new Promise(resolve=>{child.once('error',e=>{held??='SPAWN';resolve({code:null,signal:null,error:e.code});});child.once('close',(code,signal)=>{closed=true;resolve({code,signal});});});clearInterval(timer);clearTimeout(deadline);sample();
+const elapsed=performance.now()-started;if(elapsed>30000)held??='TIME';let controls=null;try{controls=JSON.parse(out.toString('utf8'));if(controls.status!=='PASS'||controls.passed!==controls.total)held??='CONTROL_RESULT';}catch{held??='CONTROL_JSON';}
+fs.writeFileSync(root+'/controls.stdout.json',out,{flag:'wx'});fs.writeFileSync(root+'/controls.stderr.log',err,{flag:'wx'});
+const receipt={schema:'b162-efficient-source-free-controls-receipt-v1',runtime:process.version,source_refs:refs,limits:{external_ms:30000,heap_mib:512,sampled_aggregate_rss_bytes:1073741824,capture_bytes:131072},elapsed_ms:elapsed,sampled_peak_aggregate_rss_bytes:peak,continuous_rss_claim:false,...result,child_joined:closed,held,passed:controls?.passed??0,total:controls?.total??null,actual_source_reads:0,actual_API_invocations:0,model_calls:0,tokenizer_calls:0,authority:'NONE'};
+const body=JSON.stringify(receipt)+'\n';fs.writeFileSync(root+'/control-receipt.json',body,{flag:'wx'});process.stdout.write(JSON.stringify({receipt,receipt_ref:{path:root+'/control-receipt.json',sha256:H(body),bytes:Buffer.byteLength(body)}})+'\n');process.exitCode=result.code===0&&!held&&closed?0:2;

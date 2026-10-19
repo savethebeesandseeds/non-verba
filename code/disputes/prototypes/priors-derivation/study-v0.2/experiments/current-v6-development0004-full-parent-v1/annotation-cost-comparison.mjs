@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// PROTOTYPE. Eight fixed metadata-component counts, never replacement inputs.
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {encodeEmptyNativeCluster,decodeEmptyNativeCluster} from './empty-native-dictionary.mjs';
+const R='/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000';
+const Q=R+'/qa/current-v6-development0004-lossless-empty-cost-20261018-v1';
+const AV=R+'/qa/current-v6-development0004-full-parent-availability-20261018-v1';
+const LIB='/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib';
+const MODEL='/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9';
+export const LIMITS=Object.freeze({elapsed_ms:60000,node_heap_MiB:512,RSS_bytes:805306368,explicit_bytes:1048576,model_hash_reservation_bytes:91104750,component_tokenizer_calls:8,component_UTF16:4096,QA_bytes:1048576,setup_bytes:32768});
+const POSITIONS=[63295,62437,61510,62619,62675,62706,62738,62745];
+const H=b=>createHash('sha256').update(b).digest('hex'),ok=(v,c)=>{if(!v)throw Object.assign(Error(c),{code:c});};
+let calls=0,readBytes=0;const started=process.hrtime.bigint();
+function guard(){ok(Number(process.hrtime.bigint()-started)/1e6<=LIMITS.elapsed_ms,'COST_TIME');ok(process.memoryUsage().rss<=LIMITS.RSS_bytes,'COST_RSS');}
+function read(p,sha,size){guard();const s=fs.lstatSync(p);ok(s.isFile()&&!s.isSymbolicLink()&&s.nlink===1&&s.size===size&&readBytes+size<=LIMITS.explicit_bytes,'COST_READ');const b=fs.readFileSync(p,{flag:fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW});readBytes+=b.length;ok(b.length===size&&H(b)===sha,'COST_PIN');return b;}
+function put(name,v){const b=Buffer.from(JSON.stringify(v,null,2)+'\n');let n=8192;for(const x of fs.readdirSync(Q))n+=fs.lstatSync(Q+'/'+x).size;ok(n+b.length+16384<=LIMITS.QA_bytes,'COST_QA');fs.writeFileSync(Q+'/'+name,b,{flag:'wx',mode:0o600});return{path:Q+'/'+name,sha256:H(b),bytes:b.length};}
+async function main(){
+  ok(process.platform==='linux'&&process.env.NONVERBA_CONTAINER==='1'&&process.argv.length===3&&process.argv[2]==='--run-fixed-lossless-comparison','COST_OPT_IN');
+  ok(JSON.stringify(process.execArgv)===JSON.stringify(['--max-old-space-size=512','--disable-proto=throw'])&&['LD_PRELOAD','LD_AUDIT','NODE_OPTIONS','NODE_PATH','NODE_COMPILE_CACHE','BASH_ENV','ENV'].every(k=>!process.env[k]),'COST_ENV');
+  ok(fileURLToPath(import.meta.url)===Q+'/annotation-cost-comparison.mjs'&&fs.readdirSync(Q).sort().join()===['admission.json','annotation-cost-comparison.mjs','empty-native-dictionary.mjs'].join(),'COST_NAMESPACE');
+  const admission=JSON.parse(fs.readFileSync(Q+'/admission.json','utf8'));ok(admission.scope==='EIGHT_FIXED_LOSSLESS_EMPTY_COMPONENT_COMPARISONS'&&JSON.stringify(admission.limits)===JSON.stringify(LIMITS),'COST_ADMISSION');
+  ok(8192+fs.readdirSync(Q).reduce((n,name)=>n+fs.lstatSync(Q+'/'+name).size,0)<=LIMITS.setup_bytes,'COST_SETUP');
+  read(Q+'/annotation-cost-comparison.mjs',admission.worker_ref.sha256,admission.worker_ref.bytes);ok(admission.codec_ref.path===Q+'/empty-native-dictionary.mjs','COST_CODEC_PATH');read(admission.codec_ref.path,admission.codec_ref.sha256,admission.codec_ref.bytes);fs.writeFileSync(Q+'/operation-lock','PERMANENT_SINGLE_COMPONENT_DIAGNOSTIC\n',{flag:'wx',mode:0o600});
+  globalThis.fetch=()=>{throw Object.assign(Error('COST_NO_NETWORK'),{code:'COST_NO_NETWORK'});};
+  const artifact=JSON.parse(read(AV+'/full-parent-encoded.json','55dd2cdf23c9eef2f8332e0cc149fe3a9d6ed3bccd42aed77b85ab6334173880',34695));
+  const encoded=artifact.encoded.text,source=artifact.representation.text;
+  ok(!source.includes('\n[NATIVE_SOURCE_MARKS_UNVERIFIED ')&&!source.includes('\n[/NATIVE_SOURCE_MARKS_UNVERIFIED]')&&!encoded.includes('\n[JOINT_NORMALIZATION_UNVERIFIED '),'COST_PARSER_SCOPE');
+  const headers=[...encoded.matchAll(/\n\[NATIVE_SOURCE_MARKS_UNVERIFIED [^\n]*\]\n/gu)],close='\n[/NATIVE_SOURCE_MARKS_UNVERIFIED]\n',parts=[],clusters=new Map();let cursor=0,n=0;
+  ok(headers.length===68,'COST_GROUP_COUNT');
+  for(const m of headers){ok(m.index>=cursor,'COST_NESTED');const plain=encoded.slice(cursor,m.index);parts.push(plain);n+=plain.length;const end=encoded.indexOf(close,m.index+m[0].length);ok(end>=0,'COST_CLOSE');const payload=encoded.slice(m.index+m[0].length,end);if(!payload.length){const position=n+54521,c=clusters.get(position)??{position,components:[],encoded_ranges:[]};c.components.push(encoded.slice(m.index,end+close.length));c.encoded_ranges.push([m.index,end+close.length]);clusters.set(position,c);}parts.push(payload);n+=payload.length;cursor=end+close.length;}
+  parts.push(encoded.slice(cursor));ok(parts.join('')===source,'COST_SOURCE_ROUNDTRIP');
+  const baseline=JSON.parse(read(R+'/qa/current-v6-development0004-annotation-cost-20261018-v1/result.json','d5b334961d2307a9e2aab632705c9700d1c99813c1b02fabf3b1a7e9027421b0',4808));ok(baseline.status==='COMPLETE_COMPONENT_MEASUREMENT_ONLY'&&baseline.rows.length===8,'COST_BASELINE');
+  read(LIB+'/embedding.mjs','51caa5f501b2211702f91c121090f35017f5e2299ea0fb1720341a400b0de0be',39109);
+  for(const [name,size]of [['config.json',650],['tokenizer.json',711661],['tokenizer_config.json',366],['special_tokens_map.json',125],['onnx/model.onnx',90387606],['README.md',1767],['provisioning.json',2575]]){const s=fs.lstatSync(MODEL+'/'+name);ok(s.isFile()&&!s.isSymbolicLink()&&s.size===size,'COST_MODEL_RESERVATION');}
+  const {createPinnedTokenCounter}=await import(pathToFileURL(LIB+'/embedding.mjs').href),counter=await createPinnedTokenCounter();guard();
+  ok(counter.policy_sha256==='728bb65a00c45e8b6a4e1cdb1e5f8a69d5946234deb8bef089b61261dc8f541d'&&counter.policy.onnx_session_created===false&&counter.policy.model_inference===false,'COST_COUNTER');
+  const rows=POSITIONS.map(position=>{guard();const c=clusters.get(position);ok(c&&c.components.length>0,'COST_FIXED_CLUSTER');ok(c.encoded_ranges.every((r,i)=>i===0||c.encoded_ranges[i-1][1]===r[0]),'COST_CLUSTER_CONTIGUITY');const original=c.components.join(''),baselineRow=baseline.rows.find(r=>r.normalized_position===position);ok(baselineRow?.component_sha256===H(original),'COST_BASELINE_COMPONENT');const component=encodeEmptyNativeCluster(original);ok(decodeEmptyNativeCluster(component)===original,'COST_LOSSLESS_ROUNDTRIP');ok(component.length<=LIMITS.component_UTF16&&calls<LIMITS.component_tokenizer_calls,'COST_COUNT_BOUND');calls++;const tokens=counter.tokenCount(component);guard();ok(Number.isSafeInteger(tokens)&&tokens>0,'COST_COUNT');return{normalized_position:position,empty_annotations:c.components.length,encoded_ranges:c.encoded_ranges,component_UTF16:component.length,component_sha256:H(component),original_component_sha256:H(original),roundtrip_exact:true,original_UTF16:original.length,original_tokens_including_specials:baselineRow.component_tokens_including_specials,token_difference:tokens-baselineRow.component_tokens_including_specials,component_tokens_including_specials:tokens,exceeds_entire_256_token_budget:tokens>256};});
+  const result={schema:'development0004-lossless-empty-annotation-cost-comparison-v1',status:'COMPLETE_LOSSLESS_COMPONENT_COST_COMPARISON',scope:'Lossless dictionary encodings of exactly eight empty-annotation components only; not valid source windows, embedding inputs, a planner retry or proof that every enclosing source window is infeasible.',rows,tokenizer_calls:calls,model_hash_read_reservation_bytes:LIMITS.model_hash_reservation_bytes,explicit_read_bytes:readBytes,elapsed_ms:Number(process.hrtime.bigint()-started)/1e6,source_reconstruction_exact:true,runtime_internal_IO_not_metered:true,model_inference:false,source_text_displayed:false,source_quality_gate_pass:false,old_planner_budget_reset:false,complete_window_stream_accepted:false,authority:'NONE'};
+  const resultRef=put('result.json',result);console.log(JSON.stringify({status:result.status,result_ref:resultRef,rows:rows.map(({normalized_position,empty_annotations,component_UTF16,component_tokens_including_specials,exceeds_entire_256_token_budget})=>({normalized_position,empty_annotations,component_UTF16,component_tokens_including_specials,exceeds_entire_256_token_budget})),tokenizer_calls:calls,quality_gate_pass:false}));
+}
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))main().catch(e=>{let held=null;try{held=put('held.json',{status:'HELD',code:/^[A-Z0-9_]+$/.test(e.code??'')?e.code:'COST_FAILURE',calls,readBytes,quality_gate_pass:false,authority:'NONE'});}catch{}console.error(JSON.stringify({status:'HELD',code:e.code??'COST_FAILURE',held_ref:held,calls,quality_gate_pass:false}));process.exitCode=77;});

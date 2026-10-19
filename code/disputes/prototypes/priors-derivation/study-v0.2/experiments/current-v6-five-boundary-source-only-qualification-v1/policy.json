@@ -1,0 +1,335 @@
+{
+  "schema": "current-v6-five-boundary-source-only-policy-v1",
+  "status": "ROOT_REVIEWED_SOURCE_ONLY_EXECUTION",
+  "prototype": true,
+  "ROOT_ACTIVATED": true,
+  "execution_authority": "FIVE_ORDINARY_BOUNDARY_SOURCE_ONLY_WITH_SEPARATE_EXACT_ADMISSION",
+  "worker_ref": {
+    "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-five-boundary-source-only-qualification-20261018-v1/qualify.mjs",
+    "sha256": "d9fcce0e7a56434e10194b66bbf522a3f41ad3e277a0352c7b99ebd5eb304153",
+    "bytes": 26622
+  },
+  "source_snapshot": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "input_refs": {
+    "epoch": {
+      "path": "qa/current-v6-calibration-refresh-20261018-v1/source-epoch.json",
+      "sha256": "1b33359ad35f7e14a1326d7de7748001f204e309bf6f54ddbec2a43178aadc16",
+      "bytes": 6798
+    },
+    "manifest": {
+      "path": "processing/82a3dab1396336ed/calibration-1000-cea0eeae0bf69647/extraction-manifest.json",
+      "sha256": "7726139476a239ded60b75a25ec033d51569f53556020739ae28c86835ad7b13",
+      "bytes": 5179014
+    },
+    "comparison": {
+      "path": "qa/current-v6-extraction-equivalence-20261018-v1/comparison/result.json",
+      "sha256": "2365f9f9604b2e63fe03c336675038cf7c9682104ec1d63ae71ddeb6c99b1a61",
+      "bytes": 4357
+    },
+    "comparison_attestation": {
+      "path": "qa/current-v6-extraction-equivalence-20261018-v1/ROOT-native-zero-attestation.json",
+      "sha256": "6ab57dfafc1c768a826f970d977e3ad977c7a2905d92595e595acb2fe0319acd",
+      "bytes": 473
+    },
+    "fresh_guard": {
+      "path": "qa/literal-emphasis-actualA-metadata-engineering-20261017-bound80-v8/execution/complete-fresh-guard.json",
+      "sha256": "0a578b37ff01716daf9c4d68b8d446b5e79e2ffc36b22f55dd38e5f4428f2996",
+      "bytes": 12856
+    },
+    "old_result": {
+      "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/result.json",
+      "sha256": "8a313225751e2d52274f79c793822e6dec2c8b62d8ecf6ea4fb695749b5340c8",
+      "bytes": 6936
+    },
+    "old_worker": {
+      "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/qualify.mjs",
+      "sha256": "1e23c525befb803913b00d5f4daadd2b5ff042aaa6d8755af05355806052289c",
+      "bytes": 7479
+    },
+    "source_issues_module": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/source-issues.mjs",
+      "sha256": "4d793126a6c2ba23fe906ace1b3c22f9b2d253056867a4c06e82a078b5e8bff4",
+      "bytes": 63758
+    }
+  },
+  "roster": [
+    {
+      "issue_id": "67532c9d78500cf20cd6892e9f8d289af92ded6f97631957e0b33c5a30def7dc",
+      "contract_id": "contract-c77a5e4c4a467c2e8ff2",
+      "audit_id": "coding-0133",
+      "issue": {
+        "path": "source-issues/observed/issue-67532c9d78500cf20cd6892e9f8d289af92ded6f97631957e0b33c5a30def7dc.json",
+        "sha256": "a8597893af300fc0c5eb0deff1eb14453d08b2411da60bd1682daac56ced997d",
+        "bytes": 1584
+      },
+      "old_replay": {
+        "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/replay-issue-67532c9d78500cf20cd6892e9f8d289af92ded6f97631957e0b33c5a30def7dc.json",
+        "sha256": "e1c90e0c0001e0dc578bae23b64a283015f3d0b2a58260d7f64979e7fd579f52",
+        "bytes": 3974
+      },
+      "old_resolution": {
+        "path": "source-issues/resolutions/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22/issue-67532c9d78500cf20cd6892e9f8d289af92ded6f97631957e0b33c5a30def7dc.json",
+        "sha256": "8daec548849accde6a0c15b87ee47a1a1dd622a2bd05308fe5073d1878bd65c8",
+        "bytes": 5077
+      },
+      "direct_actual_root": {
+        "path": "source-issues/replays/fab5530e8af2c39c/root-c133-compound-vesting-tables-v10.json",
+        "sha256": "80d449c21788358c34bf65061fae4b4217b9c4bd5c7b3c14ff783eedfb007c63",
+        "bytes": 3585
+      }
+    },
+    {
+      "issue_id": "a40585b2897a9f6e5eb93e0fef26b92623d87319ea793b77b0ec8b3a4eb396e9",
+      "contract_id": "contract-cc26fc55f8a1f7ad9def",
+      "audit_id": "development-0013",
+      "issue": {
+        "path": "source-issues/observed/issue-a40585b2897a9f6e5eb93e0fef26b92623d87319ea793b77b0ec8b3a4eb396e9.json",
+        "sha256": "d9c0bc7c54695cd66a2bbfab21a1680b52579ce7004ffb71805e4b4694627526",
+        "bytes": 3093
+      },
+      "old_replay": {
+        "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/replay-issue-a40585b2897a9f6e5eb93e0fef26b92623d87319ea793b77b0ec8b3a4eb396e9.json",
+        "sha256": "8f76f8be7b3bf29d4690469662d12e4368ae09ea2edcc89e03f65e4a1d91e0ec",
+        "bytes": 4486
+      },
+      "old_resolution": {
+        "path": "source-issues/resolutions/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22/issue-a40585b2897a9f6e5eb93e0fef26b92623d87319ea793b77b0ec8b3a4eb396e9.json",
+        "sha256": "aa67ce33cc1078e160d648770458c6afd4817b1ef20d5e10cac3eff6864756c1",
+        "bytes": 5293
+      },
+      "direct_actual_root": {
+        "path": "source-issues/replays/author-c13-license-v10.json",
+        "sha256": "8c0e2f51102f6de6ebf1554f7c91bfc4209550da80f81b4d34c1af806c6a033a",
+        "bytes": 5340
+      }
+    },
+    {
+      "issue_id": "a8d129f17bd43aff0b60b211ebf4fad0e27f7dd5762ce2ee1182d178de79cd8d",
+      "contract_id": "contract-f1ada4c1a04d7c8d92d8",
+      "audit_id": "technical-attachment-reference-list-0096",
+      "issue": {
+        "path": "source-issues/observed/issue-a8d129f17bd43aff0b60b211ebf4fad0e27f7dd5762ce2ee1182d178de79cd8d.json",
+        "sha256": "adcf9920850767cecb4fb43b603d8e5a097cbb37d3f436efc5d5f6468dd6f8d7",
+        "bytes": 2071
+      },
+      "old_replay": {
+        "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/replay-issue-a8d129f17bd43aff0b60b211ebf4fad0e27f7dd5762ce2ee1182d178de79cd8d.json",
+        "sha256": "711162a2075921b32363849bda74924e2c4208cf378547ccf6d67905c6427397",
+        "bytes": 3825
+      },
+      "old_resolution": {
+        "path": "source-issues/resolutions/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22/issue-a8d129f17bd43aff0b60b211ebf4fad0e27f7dd5762ce2ee1182d178de79cd8d.json",
+        "sha256": "3cfa1e87330e3eb7d602a77017ac41255d9a9964d1e36361000704a37a17fff7",
+        "bytes": 4775
+      },
+      "direct_actual_root": {
+        "path": "source-issues/replays/bf4edd04ec842a5c/root-attachment-reference-list-v12.json",
+        "sha256": "4d1bc1d8926d87d86bd7e2e42818257f5182bd4ab65c1d7fc9a2e39e2945b852",
+        "bytes": 3272
+      }
+    },
+    {
+      "issue_id": "e07ac0b1bd20983f262ec846734b848aa202c501489abacc9bd5b93b830da7bc",
+      "contract_id": "contract-c07dc12c0ca8cbffea62",
+      "audit_id": "coding-0010",
+      "issue": {
+        "path": "source-issues/observed/issue-e07ac0b1bd20983f262ec846734b848aa202c501489abacc9bd5b93b830da7bc.json",
+        "sha256": "894cf357950d7c16ae2f4e3740ed436b8f94e50f03f2959cfc51d907ddbd102e",
+        "bytes": 2514
+      },
+      "old_replay": {
+        "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/replay-issue-e07ac0b1bd20983f262ec846734b848aa202c501489abacc9bd5b93b830da7bc.json",
+        "sha256": "61cb0ea495d909fbd441a7879dcdf600ac682ec8e8a9a1c79dfbfe73b41dfc2f",
+        "bytes": 3789
+      },
+      "old_resolution": {
+        "path": "source-issues/resolutions/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22/issue-e07ac0b1bd20983f262ec846734b848aa202c501489abacc9bd5b93b830da7bc.json",
+        "sha256": "d61105cc69b73a270a661c557bceb961da8385ac1046d602cb4d62cd5b11a9ec",
+        "bytes": 4209
+      },
+      "direct_actual_root": {
+        "path": "source-issues/replays/fab5530e8af2c39c/root-c07-construction-v10.json",
+        "sha256": "7641f5461eedce288c3f0efa03d8374811cd112a771671b608658fd66080f52d",
+        "bytes": 2736
+      }
+    },
+    {
+      "issue_id": "e88a40a6b9f6372054cd4aadae6176ab102736dfd973b656d4efe4834b8d7006",
+      "contract_id": "contract-45ac30084126ee880e85",
+      "audit_id": "development-0129",
+      "issue": {
+        "path": "source-issues/observed/issue-e88a40a6b9f6372054cd4aadae6176ab102736dfd973b656d4efe4834b8d7006.json",
+        "sha256": "5cf17676957e3f5fc852443cfea7e0e7321592fb64c7397f185e5a7d042aae39",
+        "bytes": 1695
+      },
+      "old_replay": {
+        "path": "qa/current194-five-boundary-source-only-qualification-20261018-v1/replay-issue-e88a40a6b9f6372054cd4aadae6176ab102736dfd973b656d4efe4834b8d7006.json",
+        "sha256": "99c6f96da357a918e70130998905e9f14a7ac177f5cc076cdfd7f665ff819a50",
+        "bytes": 3838
+      },
+      "old_resolution": {
+        "path": "source-issues/resolutions/194e51d54ddb39cb1ab67981af463c542531f2da0eebf98039aa47f130464f22/issue-e88a40a6b9f6372054cd4aadae6176ab102736dfd973b656d4efe4834b8d7006.json",
+        "sha256": "986c4dcedab7fe5a953a8fb2552196401856c647830537cf0a35b25a17ad070b",
+        "bytes": 4590
+      },
+      "direct_actual_root": {
+        "path": "source-issues/replays/fab5530e8af2c39c/root-c129-confidentiality-v10.json",
+        "sha256": "9d70a4f38a003861131d5dcbefa1264abcbad960a22ee0d8f8a0d5cdc4e620d2",
+        "bytes": 3110
+      }
+    }
+  ],
+  "native_metadata_only": {
+    "issue": {
+      "path": "source-issues/observed/issue-64f380e2905f0af04ea743dc80e980fde64aaf6fd857f0ab2929c2560938c1e2.json",
+      "sha256": "b5371c00eac40f7c94df961af1229b423c663a324086a1e4955a8c008619acac",
+      "bytes": 10626
+    },
+    "contract_id": "contract-129f8dcc32ad546ab6b6",
+    "audit_id": "coding-0099",
+    "classification": "MATERIAL_NATIVE_CHANGE_MARKUP"
+  },
+  "limits": {
+    "elapsed_ms": 120000,
+    "node_heap_mb": 512,
+    "sampled_rss_bytes": 1073741824,
+    "qa_bytes": 2097152,
+    "assigned_output_bytes": 4194304,
+    "artifact_bytes": 131072,
+    "metadata_reserve_bytes": 65536,
+    "api_transient_reserve_bytes": 262144,
+    "source_copy_bytes": 65536,
+    "api_invocations": 5,
+    "tokenizer_callbacks": 0,
+    "model_inferences": 0
+  },
+  "existing_procedure": {
+    "module": "S6/disputes/prototypes/priors-derivation/study-v0.2/lib/source-issues.mjs",
+    "function": "resolveObservedSourceIssue",
+    "parameters": [
+      "issuePath",
+      "issueSHA",
+      "replayPath",
+      "replaySHA"
+    ],
+    "invocations": 5,
+    "review_mode": "QUALIFIED_SOURCE_ONLY_PRIOR_ACTUAL_READING",
+    "origin_policy": "DIRECT_ORIGINAL_ACTUAL_REPLAY_ONLY",
+    "current194_replays": "PINNED_PROVENANCE_AND_TEMPLATE_ONLY_NEVER_ORIGIN",
+    "verification": "Existing verifiedReplay actualOnly origin recursion and exact parent/full normalized/raw/focal/read-range/literal-policy equality; no verifier replacement.",
+    "global_assertNoUnresolvedSourceIssues_forbidden": true,
+    "native0099_api_forbidden": true,
+    "native0099_status": "UNCHANGED_BY_THIS_FIVE_CASE_WORKER"
+  },
+  "scope": {
+    "parent_and_raw": "Only direct original complete parent and exact declared raw intervals qualify if the existing current verifier accepts.",
+    "original_unknowns": "Keep every direct original artifact unchanged and hash-bound; preserve prior reason/context declarations privately in the replay and in the existing API qualification.",
+    "raw_literal_policy": "Preserve exact original field, including absence; no normalization substitute.",
+    "heading_reviewed": false,
+    "navigation_reviewed": false,
+    "whole_cache_read": false,
+    "new_body_read": false,
+    "new_readings": 0,
+    "native_windows_qualified": false,
+    "fresh_reading_qualified": false,
+    "prefix_role_issues_cleared": false,
+    "ten_component_holds_cleared": false,
+    "quality_gate_pass": false
+  },
+  "protected_fresh_guard": "Authenticate the complete sealed 100-row/29-CID guard; check exact six registry names first, then authenticate only those six known metadata references, excluding each known CID before opening that issue metadata. Repeat before each five-only API call.",
+  "comparison_limit": "Completed 994 equality and native-zero attestation bind the new epoch but do not supply source readings or clear any issue by themselves.",
+  "resource_enforcement": {
+    "external_timeout_ms_maximum": 120000,
+    "node_arguments": [
+      "--max-old-space-size=512",
+      "--disable-proto=throw"
+    ],
+    "rss": "Self RSS and heap at checkpoints only; external timeout required. No continuous memory guarantee.",
+    "production_payload_opening": "Future admitted existing API only; not authorized by this inactive proposal.",
+    "total_physical_input_reads_hard_bound_claimed": false,
+    "named_read_cost": "Existing API repeatedly authenticates observed evidence, historical and current manifests, normalized files, raw files and caches for five ordinary CIDs. Named artifact hashing precedes some decoded-size checks; no hard total or hard hash-read input quota is claimed.",
+    "frozen_api_json_bounds": "16 MiB ordinary JSON, 128 KiB replay/evidence; extraction cache encoded and decoded each 64 MiB; raw acceptance 4 MiB after hashing. These are existing validation limits, not a new total-read meter.",
+    "qa_scope": "Fresh Q regular files and logical directory size, including control/source files.",
+    "assigned_output_scope": "Fresh Q plus exactly five new82 resolution files and their common source directory logical size; no other study outputs are included or modified.",
+    "resolution_maximum_each": 131072,
+    "api_partial_reserve": 262144,
+    "metadata_reserve": 65536,
+    "output_accounting": "Charge current actual assigned logical bytes plus prospective output and the full transient/metadata reserves before each API; verify each committed resolution after return. Preserve successful earlier resolutions and any partial attempt on HOLD.",
+    "preexisting_current82_targets": "All five must be absent; never overwrite or resume an existing target.",
+    "source_copy": "Only the worker and policy, combined at most 64 KiB. No new full snapshot. Root controls and admission also count toward Q.",
+    "dependency_link": {
+      "path": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/node_modules",
+      "target": "/opt/nonverba-tools/priors-derivation-0.1/node_modules",
+      "status": "ROOT_PREEXISTING_DOCUMENTED_LINK_NO_INSTALL_OR_COPY",
+      "target_bytes_charged_as_source_copy": false
+    },
+    "tokenizer_callbacks": 0,
+    "model_inference": false,
+    "network_access": false
+  },
+  "output_growth_forecast": {
+    "new_replays_maximum": 655360,
+    "new_resolutions_maximum": 655360,
+    "new_result_and_hold_maximum": 262144,
+    "source_copy_maximum": 65536,
+    "transient_reserve": 262144,
+    "metadata_reserve": 65536,
+    "named_bound_sum": 1966080,
+    "assigned_output_cap": 4194304,
+    "estimate_basis": "Conservative per-file maxima plus retained failures and control files; actual logical directory/file accounting decides admission, not this estimate."
+  },
+  "console_policy": "Only status, safe fixed codes, path/SHA/byte references, counts, resource observations and boolean flags. No reasons, source strings, caption/native/coder/body text or fresh descriptors.",
+  "activation": {
+    "worker_ROOT_ACTIVATED_must_be_true": true,
+    "policy_ROOT_ACTIVATED_must_be_true": true,
+    "policy_status": "ROOT_REVIEWED_SOURCE_ONLY_EXECUTION",
+    "worker_ref_must_be_rebound_after_activation": true,
+    "admission_schema": "ROOT_CURRENT_V6_FIVE_BOUNDARY_SOURCE_ONLY_ADMISSION_V1",
+    "admission_status": "ADMITTED_FIVE_ORDINARY_BOUNDARY_SOURCE_ONLY",
+    "admission_required_fields": [
+      "source_sha256",
+      "source_snapshot",
+      "input_refs",
+      "roster",
+      "native_metadata_only",
+      "limits",
+      "api",
+      "api_invocations",
+      "direct_original_actual_roots_only",
+      "native0099_api_forbidden",
+      "new_readings",
+      "tokenizer_callbacks",
+      "model_inference",
+      "quality_gate_pass",
+      "authority",
+      "external_timeout_ms",
+      "worker_ref",
+      "policy_ref",
+      "clock_ref"
+    ],
+    "clock_schema": "current-v6-five-boundary-source-only-clock-v1",
+    "clock_origin_ns": "ROOT monotonic origin for the same external 120-second phase, never reset between cases.",
+    "fresh_Q_names": [
+      "admission.json",
+      "clock.json",
+      "policy.json",
+      "qualify.mjs"
+    ],
+    "process_arguments": [
+      "ABSOLUTE_Q/admission.json",
+      "EXACT_ADMISSION_SHA256",
+      "EXACT_ADMISSION_BYTES"
+    ],
+    "no_execution_by_this_preparation": true
+  },
+  "prior_accounting_unchanged": {
+    "two_case_planning": 21510,
+    "two_case_recount": 36,
+    "two_case_elapsed_ms": 243010.534467,
+    "two_case_output_bytes": 685074,
+    "separate_native194_160000_reservation_spent": true,
+    "refund": false
+  },
+  "authority": "NONE"
+}

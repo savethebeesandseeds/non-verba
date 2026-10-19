@@ -1,0 +1,113 @@
+{
+  "schema": "development0004-full-parent-tokenization-proposal-v1",
+  "ROOT_ACTIVATED": false,
+  "status": "INACTIVE_ROOT_REVIEW_AND_SEPARATE_ADMISSION_REQUIRED",
+  "source_sha256": "82a3dab1396336edccf77f27a7800cccddff67ca928e919e824a663e1d563601",
+  "limits": {
+    "elapsed_ms": 300000,
+    "node_heap_MiB": 768,
+    "RSS_bytes": 1073741824,
+    "explicit_read_bytes": 67108864,
+    "model_hash_read_bytes": 268435456,
+    "decoded_bytes": 67108864,
+    "QA_bytes": 8388608,
+    "setup_bytes": 131072,
+    "stdout_bytes": 16384,
+    "planner_encode_probes": 2000,
+    "planner_tokenizer_calls": 2000,
+    "windows": 512,
+    "independent_recounts": 512
+  },
+  "scope": "One repaired development0004 authenticated full-parent input through exact frozen V6 nativeEmbeddingWindows and pinned MiniLM256 tokenizer only; no inference.",
+  "parent_range": [
+    54521,
+    63634
+  ],
+  "focal_range": [
+    57284,
+    59026
+  ],
+  "qualifier_span": [
+    56665,
+    56701
+  ],
+  "first_selected_word_span": [
+    57284,
+    57291
+  ],
+  "primary_question": "Does at least one accepted independently recounted window cover the full qualifier span and whole first selected source word?",
+  "secondary_question": "Does a window cover full qualifier plus selected start point?",
+  "planner": {
+    "original_source": "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/embedding.mjs",
+    "sha256": "51caa5f501b2211702f91c121090f35017f5e2299ea0fb1720341a400b0de0be",
+    "bytes": 39109,
+    "extracted_function_and_constants_verbatim": true,
+    "helper_integer_verbatim": true,
+    "only_binding_change": "nativeRepresentationWindow from ./representation.mjs; SAME exact URL imported by worker",
+    "max_tokens": 256,
+    "overlap_words": 16,
+    "encode_probes_actual_may_be_unknown_on_fast_path": true,
+    "encode_probes_full_reservation": 2000
+  },
+  "counter": {
+    "API": "Original frozenS6 createPinnedTokenCounter() with defaults, no loader rewrite",
+    "existing_model": "Xenova/all-MiniLM-L6-v2",
+    "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+    "policy_sha256": "728bb65a00c45e8b6a4e1cdb1e5f8a69d5946234deb8bef089b61261dc8f541d",
+    "six_asset_hash_read_reservation_bytes": 91102175,
+    "provisioning_reservation_bytes": 2575,
+    "local_only": true,
+    "downloads": 0,
+    "ONNX_session_requested": false,
+    "inference_requested": false,
+    "internal_runtime_OS_IO_fully_metered": false
+  },
+  "runtime_namespace": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/qa/current-v6-development0004-full-parent-tokenization-20261018-v1",
+  "runtime_files": [
+    "tokenization-run.mjs",
+    "tokenization-planner.mjs",
+    "representation.mjs",
+    "tokenization-proposal.json",
+    "admission.json"
+  ],
+  "ROOT_admission": {
+    "schema": "ROOT-development0004-full-parent-tokenization-admission-v1",
+    "fields": [
+      "limits",
+      "source_sha256",
+      "worker_ref",
+      "representation_ref",
+      "planner_ref",
+      "proposal_ref",
+      "model_inference:false",
+      "source_text_display:false",
+      "quality_gate_pass:false",
+      "authority:NONE"
+    ],
+    "activate_only_new_worker_boolean": true,
+    "original_trial_representation_pin": "5a118c05fa3efa7e742098a8fde4f057a4ff2a48fd6547aeb7fa97e062a25b67/16152",
+    "external_watchdog_ms": 300000,
+    "external_RSS_cap_bytes": 1073741824,
+    "sanitize_environment": true,
+    "Node_flags": [
+      "--max-old-space-size=768",
+      "--disable-proto=throw"
+    ],
+    "must_preserve_all_failures_and_permanent_lock": true
+  },
+  "preservation": {
+    "old0055_counter_pool_not_reused_or_reset": true,
+    "new_distinct_one_case_phase": true,
+    "full_parent_actual_reading_claimed": false,
+    "literal_copresence_only": true,
+    "semantic_condition_binding_verified": false,
+    "full_covenant_coverage_verified": false,
+    "quality_gate_pass": false,
+    "materiality_holds_cleared": 0,
+    "outside_parent_context_unresolved": true,
+    "fresh_reading": false,
+    "model_inference": false,
+    "source_prints": 0,
+    "authority": "NONE"
+  }
+}

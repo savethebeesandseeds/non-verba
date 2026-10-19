@@ -2,7 +2,7 @@
 // Bounded, immutable study artifacts. A local hash is not execution attestation.
 import { createHash, randomUUID } from 'node:crypto';
 import { constants, createReadStream } from 'node:fs';
-import { link, lstat, mkdir, open, readdir, readFile, stat, unlink } from 'node:fs/promises';
+import { link, lstat, mkdir, open, readdir, readFile, readlink, stat, unlink } from 'node:fs/promises';
 import { basename, dirname, relative, resolve } from 'node:path';
 import { gzip, gunzip } from 'node:zlib';
 import { promisify } from 'node:util';
@@ -27,6 +27,38 @@ const TRANSFER_UUID = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0
 const JSON_TRANSFER = new RegExp(`\\.${TRANSFER_UUID}\\.partial$`);
 const ROW_TRANSFER = new RegExp(`^rows-${TRANSFER_UUID}\\.(?:ndjson|parquet)$`);
 const RAW_TRANSFER = new RegExp(`-${TRANSFER_UUID}\\.partial$`);
+const ACCOUNTING_POLICY_ROOT = `${STUDY_BASE}/20261013-study-15000`;
+const ACCOUNTING_POLICY_CANONICAL_SHA256 = 'ebbf39cd63071aa1be9ce7c1108ca2423055ef568b5d6eb6b488f6e29b6e13db';
+export const EXTRACTION_ACCOUNTING_POLICY_REF = Object.freeze({path:'qa/v15-current874-component-preparation-20261016/historical-component-inventory-v1/historical154-metadata-gzip-recovery-v1/run-capacity-policy-v3.json',sha256:'0768b25042d2454c030d08ae8a390baa7bc075a73cbf20234aa5caabfdc22cdc',bytes:2285});
+
+// Only this pinned JSON value may relax accounting. It grants no payload read
+// authority; policy-file custody remains external. Detach it before any await.
+function accountingPolicyData(value) {
+  if (value === undefined) return null;
+  let nodes = 0;
+  const visit = (v, depth = 0) => {
+    if (++nodes > 256 || depth > 8) throw new Error('Exact fixture accounting policy exceeds its bound');
+    if (v === null || typeof v === 'boolean' || typeof v === 'number' && Number.isSafeInteger(v) || typeof v === 'string' && v.length <= 4096) return;
+    const array = Array.isArray(v);
+    if (!v || Object.getPrototypeOf(v) !== (array ? Array.prototype : Object.prototype)) throw new Error('Exact fixture accounting policy requires plain JSON');
+    const keys = Reflect.ownKeys(v);
+    if (keys.length > 16 || array && v.length > 2 || keys.some(k => typeof k !== 'string')) throw new Error('Exact fixture accounting policy shape differs');
+    if (array && (keys.length !== v.length + 1 || !keys.includes('length'))) throw new Error('Exact fixture accounting policy array differs');
+    for (const key of keys) { if (array && key === 'length') continue; const d = Object.getOwnPropertyDescriptor(v, key); if (!d.enumerable || !Object.hasOwn(d, 'value')) throw new Error('Exact fixture accounting policy data differs'); visit(d.value, depth + 1); }
+  };
+  visit(value);
+  if (digest(value) !== ACCOUNTING_POLICY_CANONICAL_SHA256) throw new Error('Exact original fixture accounting policy required');
+  const retained = JSON.parse(JSON.stringify(value));
+  const freeze = v => { if (v && typeof v === 'object') { for (const child of Object.values(v)) freeze(child); Object.freeze(v); } return v; };
+  return freeze(retained);
+}
+
+export const validateExtractionAccountingPolicy = value => value === undefined ? undefined : accountingPolicyData(value);
+
+export function extractionAccountingProvenance(accountingPolicy) {
+  const policy = accountingPolicyData(accountingPolicy);
+  return Object.freeze({method:policy?'ORIGINAL_STORE_FILE_BYTES_PLUS_TWO_EXACT_FIXTURE_LINK_BYTES_V1':'STRICT_UNLINKED_FILE_ENTRY_BYTES_V1',policy_ref:policy?EXTRACTION_ACCOUNTING_POLICY_REF:null,policy_canonical_sha256:policy?ACCOUNTING_POLICY_CANONICAL_SHA256:null,directory_entry_bytes_counted:false,link_entry_bytes_counted:!!policy,link_targets_traversed:false,unknown_nonregular:'REJECT'});
+}
 
 function isTransferArtifact(path) {
   const name = basename(path), parent = basename(dirname(path));
@@ -70,13 +102,25 @@ export async function hashFile(path) {
   return { sha256: hash.digest('hex'), bytes };
 }
 
-export async function directoryBytes(path) {
-  await assertUnlinked(path);
-  let bytes = 0;
-  for (const item of await readdir(path, { withFileTypes: true })) {
-    const child = resolve(path, item.name);
-    if (item.isSymbolicLink()) throw new Error(`Linked study artifact refused: ${child}`);
-    if (item.isDirectory()) bytes += await directoryBytes(child);
+export async function directoryBytes(path, { accountingPolicy } = {}) {
+  const policy = accountingPolicyData(accountingPolicy), root = resolve(path), observed = new Set();
+  if (policy && root !== ACCOUNTING_POLICY_ROOT && !root.startsWith(`${ACCOUNTING_POLICY_ROOT}/`)) throw new Error('Exact fixture accounting policy root differs');
+  const allowed = new Map(policy ? policy.exceptions.map(e => [resolve(policy.study_root, e.path), e]) : []);
+  const same = (a, b) => a.dev === b.dev && a.ino === b.ino && a.mode === b.mode && a.size === b.size;
+  const walk = async current => {
+  await assertUnlinked(current); let bytes = 0;
+  for (const item of await readdir(current, { withFileTypes: true })) {
+    const child = resolve(current, item.name), exception = allowed.get(child);
+    if (exception && !item.isSymbolicLink()) throw new Error('Expected accounting fixture link changed type');
+    if (item.isSymbolicLink()) {
+      if (!exception) throw new Error(`Linked study artifact refused: ${child}`);
+      const before = await lstat(child), literal = await readlink(child), after = await lstat(child);
+      if (!before.isSymbolicLink() || !after.isSymbolicLink() || !same(before, after) || before.mode !== exception.mode || before.size !== exception.bytes || literal !== exception.literal_target || sha256(literal) !== exception.link_text_sha256) throw new Error('Exact accounting fixture link changed');
+      const target = resolve(policy.study_root, exception.target.path); await assertUnlinked(dirname(target)); const info = await lstat(target);
+      if (info.isSymbolicLink() || !same({...exception.target, size:exception.target.bytes}, info) || (exception.target.type === 'FILE' ? !info.isFile() : !info.isDirectory())) throw new Error('Exact accounting fixture target changed');
+      bytes += before.size; observed.add(child); continue;
+    }
+    if (item.isDirectory()) bytes += await walk(child);
     else if (item.isFile()) {
       let info;
       try { info = await lstat(child); } catch (error) {
@@ -91,6 +135,10 @@ export async function directoryBytes(path) {
     }
     else throw new Error('Unsupported study artifact type');
   }
+  return bytes;
+  };
+  const bytes = await walk(root), expected = [...allowed.keys()].filter(p => p.startsWith(`${root}/`));
+  if (expected.length !== observed.size || expected.some(p => !observed.has(p))) throw new Error('Expected accounting fixture link missing');
   return bytes;
 }
 
@@ -190,16 +238,17 @@ function checkedSchema(schema) {
 }
 
 /** Write one exclusive bounded typed Parquet shard, retaining failed partials. */
-export async function writeRows(runDir, name, rows, { schema, maxRows = MAX_SHARD_ROWS, maxBytes = MAX_SHARD_BYTES, totalBytes = 24 * 1024 ** 3 } = {}) {
+export async function writeRows(runDir, name, rows, { schema, maxRows = MAX_SHARD_ROWS, maxBytes = MAX_SHARD_BYTES, totalBytes = 24 * 1024 ** 3, accountingPolicy } = {}) {
   if (!name.endsWith('.parquet')) throw new Error('Columnar shard requires a .parquet suffix');
-  if (!Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > MAX_SHARD_ROWS || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > MAX_SHARD_BYTES) throw new Error('Invalid bounded shard limits');
+  if (!Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > MAX_SHARD_ROWS || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > MAX_SHARD_BYTES || !Number.isSafeInteger(totalBytes) || totalBytes < 1) throw new Error('Invalid bounded shard limits');
+  accountingPolicy = validateExtractionAccountingPolicy(accountingPolicy);
   const destination = await studyPath(runDir, name, { missing: true });
   try { await lstat(destination); throw new Error('Existing study shard is immutable'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   await mkdir(dirname(destination), { recursive: true }); await assertUnlinked(dirname(destination));
   const temporary = await studyPath(runDir, `partials/rows-${randomUUID()}.ndjson`, { missing: true, transfer: true });
   await mkdir(dirname(temporary), { recursive: true });
   let count = 0; let inputBytes = 0; let inferred = schema ? checkedSchema(schema) : null;
-  const used = await directoryBytes(validateStudyRoot(runDir));
+  const used = await directoryBytes(validateStudyRoot(runDir), { accountingPolicy });
   const input = await open(temporary, 'wx', 0o600);
   try {
     for await (const row of rows) {
@@ -225,7 +274,7 @@ export async function writeRows(runDir, name, rows, { schema, maxRows = MAX_SHAR
     await db.connection.run(`COPY (SELECT * FROM ${source}) TO ${quote(output)} (FORMAT PARQUET, COMPRESSION ZSTD, ROW_GROUP_SIZE 2048)`);
   } finally { db.close(); }
   const details = await hashFile(output);
-  if (details.bytes > maxBytes || await directoryBytes(validateStudyRoot(runDir)) > totalBytes) throw new Error('Columnar artifact exceeds study storage budget');
+  if (details.bytes > maxBytes || await directoryBytes(validateStudyRoot(runDir), { accountingPolicy }) > totalBytes) throw new Error('Columnar artifact exceeds study storage budget');
   // A destination is never intentionally replaced; callers use one writer per shard.
   try { await lstat(destination); throw new Error('Existing study shard is immutable'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   await link(output, destination);

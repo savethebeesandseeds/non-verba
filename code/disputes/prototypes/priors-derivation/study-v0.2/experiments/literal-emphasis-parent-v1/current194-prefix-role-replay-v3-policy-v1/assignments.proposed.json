@@ -1,0 +1,32 @@
+{
+  "schema": "representation-replay-reviewer-assignments-v1",
+  "authority": "TASK_OWNER_ASSIGNMENT",
+  "human": false,
+  "aliases": [
+    {
+      "alias": "evaluation_engineer",
+      "canonical": "evaluation_engineer"
+    },
+    {
+      "alias": "/root/evaluation_engineer",
+      "canonical": "evaluation_engineer"
+    },
+    {
+      "alias": "reader0170_current194",
+      "canonical": "reader0170_current194"
+    },
+    {
+      "alias": "/root/reader0170_current194",
+      "canonical": "reader0170_current194"
+    }
+  ],
+  "assignments": [
+    {
+      "audit_id": "development-0041",
+      "reviewer_id": "reader0170_current194",
+      "original_reader_ids": [
+        "evaluation_engineer"
+      ]
+    }
+  ]
+}

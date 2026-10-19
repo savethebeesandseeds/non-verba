@@ -1,0 +1,260 @@
+{
+  "schema": "automatic-context-existing-two-counter-pins-v1",
+  "source_reference": {
+    "bytes": 19874,
+    "sha256": "aeba5ce60155b83bef3d87b6a5f9d4014919954ba4f38062d15e622040eac9d0",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\literal-emphasis-parent-v1\\actual-entry-v1\\runtime\\named-service-manifest.json"
+  },
+  "models": [
+    {
+      "repository": "Xenova/all-MiniLM-L6-v2",
+      "revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+      "directory": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9",
+      "manifest_ref": {
+        "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/provisioning.json",
+        "sha256": "cc5e8f627bb83114d6188d387605b3379f912fe56fd5b101bc85987f222ad52d",
+        "bytes": 2575
+      },
+      "artifact_refs": [
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/config.json",
+          "sha256": "7135149f7cffa1a573466c6e4d8423ed73b62fd2332c575bf738a0d033f70df7",
+          "bytes": 650
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/tokenizer.json",
+          "sha256": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0",
+          "bytes": 711661
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/tokenizer_config.json",
+          "sha256": "9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3",
+          "bytes": 366
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/special_tokens_map.json",
+          "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+          "bytes": 125
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/onnx/model.onnx",
+          "sha256": "759c3cd2b7fe7e93933ad23c4c9181b7396442a2ed746ec7c1d46192c469c46e",
+          "bytes": 90387606
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.1/models/Xenova/all-MiniLM-L6-v2/751bff37182d3f1213fa05d7196b954e230abad9/README.md",
+          "sha256": "63ea99bf681a2e9eda4f6a537d5ed8fda95d1677111656da37e9cfd080c3af02",
+          "bytes": 1767
+        }
+      ],
+      "verified_files": [
+        {
+          "path": "config.json",
+          "sha256": "7135149f7cffa1a573466c6e4d8423ed73b62fd2332c575bf738a0d033f70df7",
+          "bytes": 650
+        },
+        {
+          "path": "tokenizer.json",
+          "sha256": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0",
+          "bytes": 711661
+        },
+        {
+          "path": "tokenizer_config.json",
+          "sha256": "9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3",
+          "bytes": 366
+        },
+        {
+          "path": "special_tokens_map.json",
+          "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+          "bytes": 125
+        },
+        {
+          "path": "onnx/model.onnx",
+          "sha256": "759c3cd2b7fe7e93933ad23c4c9181b7396442a2ed746ec7c1d46192c469c46e",
+          "bytes": 90387606
+        },
+        {
+          "path": "README.md",
+          "sha256": "63ea99bf681a2e9eda4f6a537d5ed8fda95d1677111656da37e9cfd080c3af02",
+          "bytes": 1767
+        }
+      ],
+      "policy": {
+        "version": "PINNED_EXISTING_TOKENIZER_ONLY_NO_INFERENCE_V1",
+        "model_repository": "Xenova/all-MiniLM-L6-v2",
+        "model_revision": "751bff37182d3f1213fa05d7196b954e230abad9",
+        "verified_file_set_sha256": "bc15c895e656dfab584cd0e6b2e0e5f5877532fdc5c0195861ba8218d0ccf3b9",
+        "special_tokens": true,
+        "truncation": false,
+        "runtime": "@huggingface/transformers@3.8.1",
+        "downloads_attempted": 0,
+        "onnx_session_created": false,
+        "model_inference": false
+      },
+      "policy_sha256": "728bb65a00c45e8b6a4e1cdb1e5f8a69d5946234deb8bef089b61261dc8f541d",
+      "file_set_sha256": "bc15c895e656dfab584cd0e6b2e0e5f5877532fdc5c0195861ba8218d0ccf3b9"
+    },
+    {
+      "repository": "sentence-transformers/all-MiniLM-L12-v2",
+      "revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+      "directory": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be",
+      "manifest_ref": {
+        "path": "/opt/nonverba-build/priors-derivation/study-v0.2/20261013-study-15000/comparison-model.json",
+        "sha256": "a53b0d7e1bb1e1ba69606861b6b55f2584eea929f162bd850a831367c680cd04",
+        "bytes": 2595
+      },
+      "artifact_refs": [
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be/config.json",
+          "sha256": "bc451f333af67312ba0de5018ef1c9ba663cb18549443e568f0bd35262dc1c48",
+          "bytes": 615
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be/tokenizer.json",
+          "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+          "bytes": 466247
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be/tokenizer_config.json",
+          "sha256": "fba7637034542f691ef4b1ad735d664971e8d9723012a1973d4ee985742e8e72",
+          "bytes": 352
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be/special_tokens_map.json",
+          "sha256": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+          "bytes": 112
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be/onnx/model.onnx",
+          "sha256": "84c56795d395593cbee215e2d635a8f0ad3199ae99f99299c44cf1eaecff3ad4",
+          "bytes": 133126567
+        },
+        {
+          "path": "/opt/nonverba-tools/priors-derivation-0.2/models/sentence-transformers/all-MiniLM-L12-v2/a50ef00143b4d5391434df20ae11632588ac25be/README.md",
+          "sha256": "a9c5a266121350036e45a733802ac6a8567604be365de01e40aa4b43e5ee594d",
+          "bytes": 10514
+        }
+      ],
+      "verified_files": [
+        {
+          "path": "config.json",
+          "bytes": 615,
+          "sha256": "bc451f333af67312ba0de5018ef1c9ba663cb18549443e568f0bd35262dc1c48",
+          "upstream_blob_id": "997449989924d15c7b98619a97c899740c99854d",
+          "upstream_lfs_sha256": null
+        },
+        {
+          "path": "tokenizer.json",
+          "bytes": 466247,
+          "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037",
+          "upstream_blob_id": "cb202bfe2e3c98645018a6d12f182a434c9d3e02",
+          "upstream_lfs_sha256": null
+        },
+        {
+          "path": "tokenizer_config.json",
+          "bytes": 352,
+          "sha256": "fba7637034542f691ef4b1ad735d664971e8d9723012a1973d4ee985742e8e72",
+          "upstream_blob_id": "160e50cfb71e8ec988666144435831d7257cd3b8",
+          "upstream_lfs_sha256": null
+        },
+        {
+          "path": "special_tokens_map.json",
+          "bytes": 112,
+          "sha256": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+          "upstream_blob_id": "e7b0375001f109a6b8873d756ad4f7bbb15fbaa5",
+          "upstream_lfs_sha256": null
+        },
+        {
+          "path": "onnx/model.onnx",
+          "bytes": 133126567,
+          "sha256": "84c56795d395593cbee215e2d635a8f0ad3199ae99f99299c44cf1eaecff3ad4",
+          "upstream_blob_id": "8e09f5e3577b96ebdb90e128abcfe0b4ec71857e",
+          "upstream_lfs_sha256": "84c56795d395593cbee215e2d635a8f0ad3199ae99f99299c44cf1eaecff3ad4"
+        },
+        {
+          "path": "README.md",
+          "bytes": 10514,
+          "sha256": "a9c5a266121350036e45a733802ac6a8567604be365de01e40aa4b43e5ee594d",
+          "upstream_blob_id": "3584154ea565fdde01c15815e8864fa0313106a7",
+          "upstream_lfs_sha256": null
+        }
+      ],
+      "policy": {
+        "version": "PINNED_EXISTING_TOKENIZER_ONLY_NO_INFERENCE_V1",
+        "model_repository": "sentence-transformers/all-MiniLM-L12-v2",
+        "model_revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+        "verified_file_set_sha256": "d6aa9727a115f71b62888648644e6da8deab4fad8efd9047afe6f8923f5415b3",
+        "special_tokens": true,
+        "truncation": false,
+        "runtime": "@huggingface/transformers@3.8.1",
+        "downloads_attempted": 0,
+        "onnx_session_created": false,
+        "model_inference": false
+      },
+      "policy_sha256": "e05a9bd1e27021b8857015953480d3653acd794e3c5d0cd5dba8f35a75618bf1",
+      "file_set_sha256": "d6aa9727a115f71b62888648644e6da8deab4fad8efd9047afe6f8923f5415b3"
+    }
+  ],
+  "named_code_refs": [
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/@huggingface/transformers/package.json",
+      "sha256": "00c02ca357bf03c801f33c9a431c0169b99c1de1e14f2134cabc902cce53d4f3",
+      "bytes": 2694
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/@huggingface/transformers/dist/transformers.node.mjs",
+      "sha256": "ee3b84624fee88b9db4b85be1fbfde1e2637957ee92eaaaaa720edbca5448e6c",
+      "bytes": 1777746
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/onnxruntime-common/package.json",
+      "sha256": "5b762baf33234e76ea922ee7a13e80780035f2799b7608c4f3a58b41dbd69d48",
+      "bytes": 924
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/onnxruntime-common/dist/esm/index.js",
+      "sha256": "ad23f6d6ce2c99c449031f24a5181f259516c64a9a67428c98a8539b857729bd",
+      "bytes": 1036
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/onnxruntime-common/dist/cjs/index.js",
+      "sha256": "d7dd6cc9790e87299099fcd1b0ccb4969c01591d7eec0383a1c64dbea133dd1a",
+      "bytes": 1955
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/onnxruntime-node/package.json",
+      "sha256": "0956b483c9f285a2cbfff3cbb9b15540ed8e2b00523c2e39ed9d5aa0b10415ae",
+      "bytes": 1678
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/onnxruntime-node/dist/index.js",
+      "sha256": "019eb02133b94b1f7fdf2d89eb93b590ce1288d271f7b280647fb3978e6391fa",
+      "bytes": 1602
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/sharp/package.json",
+      "sha256": "e6be69319929151be3aa240bf1485f25a3477cb6d2286f92510b9fceb3cbef26",
+      "bytes": 7478
+    },
+    {
+      "path": "/opt/nonverba-tools/priors-derivation-0.1/node_modules/sharp/lib/index.js",
+      "sha256": "5e30578a16290fa0855c32fe3d544ce4f26c147de6bad69cffaf7bc416a2919a",
+      "bytes": 385
+    },
+    {
+      "path": "/tmp/nonverba-unified-source/f7cd9407508443b8a20ad70bc46349ab/code/disputes/prototypes/priors-derivation/study-v0.2/lib/embedding.mjs",
+      "sha256": "d85edf56c136e74edf035dedf9fc209e3759155f8fe18f333d8a5baa7720054e",
+      "bytes": 33576
+    },
+    {
+      "path": "/tmp/nonverba-unified-source/7a7685c30c4846d8be4c75773c381db3/code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/pinned-tokenizers.mjs",
+      "sha256": "a1245e5066de28d6a194a7363e81ebeb62860a89cc66dc0f34365d44de92fe88",
+      "bytes": 2883
+    }
+  ],
+  "expected_artifact_bytes": 224706582,
+  "named_runtime_scope": "EXACT_NAMED_INSTALLED_SERVICE_PLUS_EXPLICITLY_TRUSTED_UNENUMERATED_TRANSITIVE_NATIVE_COMPONENTS",
+  "full_dynamic_or_native_graph_complete": false,
+  "actual_counter_opened": false,
+  "authority": "NONE"
+}

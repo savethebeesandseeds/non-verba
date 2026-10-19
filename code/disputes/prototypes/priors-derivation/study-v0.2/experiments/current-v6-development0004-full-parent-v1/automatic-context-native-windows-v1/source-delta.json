@@ -1,0 +1,120 @@
+{
+  "schema": "automatic-context-native-windows-source-delta-v1",
+  "origin": {
+    "bytes": 25311,
+    "sha256": "adaa87258e92d269ef6d1c242d019ed971e81845e0795a62d4da8aa72f6ef516",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\literal-emphasis-parent-v1\\native-context-set-v2\\native-nodes.mjs"
+  },
+  "fork": {
+    "bytes": 25793,
+    "sha256": "ac050057fe8887fc4f63afa3b57a2f7e7653e4a5162770ed319e3885403cd95e",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\current-v6-development0004-full-parent-v1\\automatic-context-native-windows-v1\\native-nodes-dictionary.mjs"
+  },
+  "exact_ordered_substitutions": [
+    {
+      "from": "from '../declared-context-set-v1/context-set.mjs'",
+      "to": "from '../../literal-emphasis-parent-v1/declared-context-set-v1/context-set.mjs'",
+      "required_occurrences": 1
+    },
+    {
+      "from": "const H=v=>",
+      "to": "import {encodeNativeDictionaryWindow,DICTIONARY_WINDOW_POLICY} from '../integrated-empty-dictionary-v1/window-dictionary.mjs';\r\n\r\nconst H=v=>",
+      "required_occurrences": 1
+    },
+    {
+      "from": "name:'EXPERIMENTAL_DECLARED_NATIVE_NODES_V2_PROGRESS_GUARDED_UNADOPTED'",
+      "to": "name:'AUTOMATIC_CONTEXT_NATIVE_DICTIONARY_NODES_V1_UNADOPTED',window_codec_policy:DICTIONARY_WINDOW_POLICY,window_codec_source_sha256:'172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0',empty_cluster_codec_source_sha256:'c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e'",
+      "required_occurrences": 1
+    },
+    {
+      "from": "name:'EXPERIMENTAL_DECLARED_NATIVE_NODES_V2_EXPLICIT_SUBSET_UNADOPTED'",
+      "to": "name:'AUTOMATIC_CONTEXT_NATIVE_DICTIONARY_NODES_V1_SUBSET_UNADOPTED'",
+      "required_occurrences": 1
+    },
+    {
+      "from": "role=node.declared_role==='FOCAL'?'unit_body':'reviewer_declared_context_node';return {text:e.text",
+      "to": "role=node.declared_role==='FOCAL'?'unit_body':'reviewer_declared_context_node';const original={text:e.text",
+      "required_occurrences": 1
+    },
+    {
+      "from": "effectiveness_verified:false,sha256:H(e.text)};}",
+      "to": "effectiveness_verified:false,sha256:H(e.text)};return encodeNativeDictionaryWindow(original,{sourceText:node.text.slice(start,end)});}",
+      "required_occurrences": 1
+    }
+  ],
+  "patch_ref": {
+    "bytes": 10570,
+    "sha256": "6c1eb411603c38c0c0dc81e0750d567c414431869da0aedf702e112dad750b67",
+    "path": "C:\\Work\\Non-verba\\open-source\\code\\disputes\\prototypes\\priors-derivation\\study-v0.2\\experiments\\current-v6-development0004-full-parent-v1\\automatic-context-native-windows-v1\\native-nodes-v2-to-dictionary.patch.md"
+  },
+  "unchanged": [
+    "copiedV5 planner body and bounds",
+    "prepare/verifyDeclaredNativeNodes bodies and existing native view",
+    "default source82 encoder and production files",
+    "declared context API",
+    "both standalone dictionary codecs",
+    "selector algorithm and frozen outputs",
+    "old0055 phases/caps/carry"
+  ],
+  "new": [
+    "pure automatic binding adapter",
+    "source-free controls/docs/prospective proposal"
+  ],
+  "runtime_source_routing": {
+    "schema": "automatic-context-native-windows-source-only-copy-v1",
+    "dir": "/tmp/nonverba-automatic-context-native-windows-v1-controls-20261019-a2",
+    "refs": [
+      {
+        "name": "automatic-windows.mjs",
+        "host_sha256": "3346bbe1aa7bf68a109a546f85401e83dedd0d4ab6ded232b5da6f5c620c7ea7",
+        "host_bytes": 12203,
+        "runtime_sha256": "35aebc03c7748e2a84968cdca2cd683a614db7cfc319deffe4f3bbc14e0a4709",
+        "runtime_bytes": 12293
+      },
+      {
+        "name": "native-nodes-dictionary.mjs",
+        "host_sha256": "ac050057fe8887fc4f63afa3b57a2f7e7653e4a5162770ed319e3885403cd95e",
+        "host_bytes": 25793,
+        "runtime_sha256": "f3a62ff9869112b256745669911ee213b9dddc534e3fe4381bc78be479c2cb2b",
+        "runtime_bytes": 25990
+      },
+      {
+        "name": "controls.test.mjs",
+        "host_sha256": "3e6f5c4a669f841ce992fe2a5f7e509043c20c32b8437afeef1403743c2a5085",
+        "host_bytes": 12511,
+        "runtime_sha256": "e0a30c7be8142afec2ce12d9886f1bb2d859b175ca7f0f77b32ab5edf5b6f1ed",
+        "runtime_bytes": 12579
+      },
+      {
+        "name": "window-dictionary.mjs",
+        "host_sha256": "172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0",
+        "host_bytes": 7687,
+        "runtime_sha256": "172591f4d6f859527bcfdf99e437736701edb847d4ef0b899fa7a3ccd321a2a0",
+        "runtime_bytes": 7687
+      },
+      {
+        "name": "empty-native-dictionary.mjs",
+        "host_sha256": "c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e",
+        "host_bytes": 2247,
+        "runtime_sha256": "c16f82b341a3424bb10f9aa3a3521afa70dbc01c651b43645ff29e6d9399570e",
+        "runtime_bytes": 2247
+      }
+    ],
+    "source_free": true,
+    "dependency_pins": [
+      [
+        "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/lib/source-decoration.mjs",
+        "a857d39a2da390175a1f817b4d2704ed1adbacff84ba6a27fefff7aee70f77fd"
+      ],
+      [
+        "/tmp/nonverba-unified-source/4e609b88e04645d1892e9ee6724b28e1/code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/declared-context-set-v1/context-set.mjs",
+        "19bf6c9e6855d89cea5fd7941d2881f64fdfb1e4883371806528f82117b17cc0"
+      ],
+      [
+        "/tmp/nonverba-automatic-context-selector-v1-20261018-a3/selector.mjs",
+        "682553360f2668797b08309ded8a14242a549c6e71765aa4217b14007a860b53"
+      ]
+    ]
+  },
+  "authority": "NONE"
+}
