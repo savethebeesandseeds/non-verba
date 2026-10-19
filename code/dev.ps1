@@ -112,6 +112,73 @@ function Invoke-SourceSnapshot {
     $sourceRoots = @('LICENSES','docs','web','code/crates','code/android','code/container','code/tools','code/test','code/protocol','code/simulator','code/examples','code/requests','code/disputes','.github/workflows')
     $codeFiles = @('Cargo.toml','Cargo.lock','rust-toolchain.toml','package.json','package-lock.json','dev.ps1','dev.sh','setup.sh','.dockerignore','models/mobilefacenet/model-lock.json')
     $excludedDirectories = @('.git','.tools','.toolchain','.gradle','.kotlin','.cxx','node_modules','target','dist','artifacts','reviews','build','jniLibs')
+    # Exact reviewed local execution records; preserve them on disk, outside source snapshots.
+    # Keep these literal paths aligned with the marked section in the root .gitignore.
+    $excludedLocalExecutionFiles = @(
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/0055-operative-context-source-review-v2/engineering-charge.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/0055-operative-context-source-review-v2/handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/0055-operative-context-source-review-v2/precise-change-proof.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/0055-operative-context-source-review-v2/source-freeze.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-dependency-closure-v1/preparation.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-native-windows-v1/driver-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-native-windows-v1/engineering-ledger.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-native-windows-v1/handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-native-windows-v1/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-native-windows-v1/source-freeze.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/automatic-context-source-review0055-v1/preparation.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-a-batch-proposal-v1/source-only-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-efficient-successor-proposal-v1/charge-addendum.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-efficient-successor-proposal-v1/control-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-efficient-successor-proposal-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-efficient-successor-proposal-v2/control-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-efficient-successor-proposal-v2/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-native-presentation-v3-2m-v1/producer-proof.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-native-presentation-v3-2m-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-partitioned-native-presentation-v1/engineering-attempts.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-partitioned-native-presentation-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-prospective-completion-proposal-v1/engineering-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-smaller-fixed-slices-proposal-v1/engineering-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-b-smaller-fixed-slices-proposal-v1/writer-byte-note.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-batch-capsules-proposal-v1/controls-attempt1-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-batch-capsules-proposal-v1/controls-attempt1.tap'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-batch-capsules-proposal-v1/preparation-charge.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-batch-capsules-proposal-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-batch-capsules-proposal-v1/source-freeze.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-native-overlay-0106-v1/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-native-presentation-v1/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-native-presentation-v2/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-native-presentation-v3/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-native-presentation-v3/source-only-peer-review.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-successor-proposal-v1/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/complete-normalized-context-fallback-v1/controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/complete-normalized-context-fallback-v1/handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/complete-normalized-context-fallback-v1/source-freeze.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/current-v6-context-selector-v1/source-free-controls-result-v2.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/current-v6-context-selector-v1/source-free-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/current-v6-context-selector-v1/source-freeze-v2.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/current-v6-context-selector-v1/source-freeze.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/current-v6-context-selector-v1/wire-shape-inspection-v2.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/empty-native-dictionary-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/geometric-full-context-partitions-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/integrated-empty-dictionary-v1/integration-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v1/controls-attempt1-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v1/controls-attempt1.tap'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v1/preparation-charge.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v1/source-freeze.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v2/actual-entry-v1/control-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v2/actual-entry-v1/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v2/control-receipt.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v2/source-free-handoff.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/tokenization-controls-result.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/literal-emphasis-parent-v1/current194-prefix-role-replay-v3-policy-v1/new-epoch-rebinding.source-review.json'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/coding-batch-capsules-proposal-v1/controls-attempt1.stderr.log'
+        'code/disputes/prototypes/priors-derivation/study-v0.2/experiments/current-v6-development0004-full-parent-v1/reverse-native-tail-partition-v1/controls-attempt1.stderr.log'
+    )
+    $excludedLocalExecutionDirectories = @(
+        'code/disputes/prototypes/priors-derivation/study-v0.2/handoff/2026-10-19/_work'
+    )
     $extensions = @('.rs','.mjs','.js','.css','.html','.kt','.kts','.cpp','.h','.c','.toml','.lock','.json','.md','.sh','.ps1','.yml','.yaml','.txt','.svg','.png','.xml','.properties','.rnx')
     $files = [Collections.Generic.List[string]]::new()
     function Assert-SnapshotPath([string]$absolute) {
@@ -140,6 +207,12 @@ function Invoke-SourceSnapshot {
         $parent = Get-Item -LiteralPath $directory -Force
         if ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Linked source directory: $directory" }
         foreach ($item in Get-ChildItem -LiteralPath $directory -Force) {
+            $relativeItem = [IO.Path]::GetRelativePath($workspace,$item.FullName).Replace('\','/')
+            if (($item.PSIsContainer -and $excludedLocalExecutionDirectories -ccontains $relativeItem) -or
+                (-not $item.PSIsContainer -and $excludedLocalExecutionFiles -ccontains $relativeItem)) {
+                Assert-SnapshotPath $item.FullName
+                continue
+            }
             if ($item.PSIsContainer) {
                 $relativeDirectory = [IO.Path]::GetRelativePath($workspace,$item.FullName).Replace('\','/')
                 if ($item.Name -notin $excludedDirectories -and $relativeDirectory -cne 'code/android/app/src/main/assets') { Visit-SnapshotDirectory $item.FullName }
