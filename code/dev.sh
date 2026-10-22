@@ -6,7 +6,7 @@ cd "$code_root"
 action=${1:-health}
 shift || true
 if [[ $action == build ]]; then
-  exec bash tools/build-android.sh "$@"
+  exec bash tools/build/build-android.sh "$@"
 fi
 source container/env.sh
 case "$action" in
@@ -15,13 +15,13 @@ case "$action" in
     gradle --version; cmake --version; adb version
     ;;
   exec) exec "$@" ;;
-  native) exec bash tools/build-android-native.sh "$@" ;;
+  native) exec bash tools/build/build-android-native.sh "$@" ;;
   test)
     node --run test
     ;;
   serve)
-    node tools/build-web.mjs
-    NONVERBA_BIND=0.0.0.0 NONVERBA_PORT=4173 exec node tools/serve.mjs
+    node tools/build/build-web.mjs
+    NONVERBA_BIND=0.0.0.0 NONVERBA_PORT=4173 exec node tools/preview/serve.mjs
     ;;
   adb) exec adb "$@" ;;
   webview)

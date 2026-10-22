@@ -16,7 +16,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager
 import android.webkit.CookieManager
@@ -33,6 +32,9 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
+import org.nonverba.attestation.DeviceAttestationBridge
 import java.io.ByteArrayInputStream
 
 /** OS glue only: the shared Rust core owns protocol validation and provenance. */
@@ -43,9 +45,9 @@ class MainActivity : Activity() {
     private lateinit var nativeCameraSet: NativeCameraSet
     private lateinit var nativeAudio: NativeAudio
     private lateinit var nativeKeyEnrollment: NativeKeyEnrollment
-    private lateinit var nativeScreenAwake: NativeScreenAwake
     private lateinit var nativeGpsWarmup: NativeGpsWarmup
     private var nativeCameraPairing: NativeCameraPairing? = null
+    private var nativeAttestation: DeviceAttestationBridge? = null
     private var mediaRequest: PermissionRequest? = null
     private var locationRequest: LocationRequest? = null
     private var nativePermissionCallback: ((Boolean) -> Unit)? = null
@@ -84,7 +86,7 @@ class MainActivity : Activity() {
             .build()
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
-                NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(), listOf(
+                NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(pauseAttestation = false), listOf(
                     lifecycleAction("GPS page navigation") { if (::nativeGpsWarmup.isInitialized) nativeGpsWarmup.pageStarted() },
                     lifecycleAction("pairing page navigation") { nativeCameraPairing?.setForeground(false) },
                     lifecycleAction("location page navigation") { if (::nativeLocation.isInitialized) nativeLocation.pause() },
@@ -97,7 +99,6 @@ class MainActivity : Activity() {
 
             override fun onPageFinished(view: WebView, url: String?) {
                 if (::nativeGpsWarmup.isInitialized) nativeGpsWarmup.pageFinished()
-                if (::nativeScreenAwake.isInitialized && resumed) nativeScreenAwake.resume()
                 refreshCameraPairingAccess()
             }
 
@@ -260,43 +261,12 @@ class MainActivity : Activity() {
             hasForegroundAppDocument() && Uri.parse(webView.url ?: "").path == KEY_ENROLLMENT_DOCUMENT_PATH
         }
         webView.addJavascriptInterface(nativeKeyEnrollment, "NativeKeyEnrollment")
-        val awakePreferences = getSharedPreferences("foreground-screen-awake-lease-v1", MODE_PRIVATE)
-        val awakeHandler = Handler(Looper.getMainLooper())
-        nativeScreenAwake = NativeScreenAwake(
-            postToMain = { action -> runOnUiThread { action() } },
-            hasForegroundAppDocument = ::hasForegroundAppDocument,
-            applyWindowFlag = { enabled ->
-                if (enabled) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            },
-            clock = { NativeScreenAwake.Clock(System.currentTimeMillis(), SystemClock.elapsedRealtime(),
-                runCatching { Settings.Global.getInt(contentResolver, Settings.Global.BOOT_COUNT, -1) }.getOrDefault(-1)) },
-            loadLease = {
-                if (awakePreferences.contains("wall_ms")) NativeScreenAwake.Lease(
-                    awakePreferences.getLong("wall_ms", -1), awakePreferences.getLong("elapsed_ms", -1),
-                    awakePreferences.getInt("boot", -1)) else null
-            },
-            saveLease = { lease ->
-                awakePreferences.edit().apply {
-                    if (lease == null) clear()
-                    else putLong("wall_ms", lease.wallMs).putLong("elapsed_ms", lease.elapsedMs).putInt("boot", lease.boot)
-                }.apply()
-            },
-            schedule = { delay, action ->
-                val runnable = Runnable { action() }
-                awakeHandler.postDelayed(runnable, delay)
-                val cancel: () -> Unit = { awakeHandler.removeCallbacks(runnable) }
-                cancel
-            },
-            notifyState = { state ->
-                if (hasForegroundAppDocument()) {
-                    webView.evaluateJavascript(
-                        "window.dispatchEvent(new CustomEvent('nonverba:screen-awake',{detail:$state}));", null
-                    )
-                }
-            }
-        )
-        webView.addJavascriptInterface(nativeScreenAwake, "NativeScreenAwake")
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+            nativeAttestation = DeviceAttestationBridge(this, webView,
+                "$APP_ORIGIN$DEVICE_ATTESTATION_DOCUMENT_PATH",
+                { hasForegroundAppDocument() && Uri.parse(webView.url ?: "").path == DEVICE_ATTESTATION_DOCUMENT_PATH },
+                DeveloperAttestationProfile::allows)
+        }
         setContentView(webView)
         ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
             val safeArea = insets.getInsets(
@@ -343,7 +313,6 @@ class MainActivity : Activity() {
         val pauseAudio = runtimePermissionInFlight != NATIVE_AUDIO_PERMISSION
         NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(pauseLocation, pauseCamera, pauseAudio), listOf(
             lifecycleAction("pairing pause") { nativeCameraPairing?.setForeground(false) },
-            lifecycleAction("screen lease pause") { nativeScreenAwake.pause() },
             lifecycleAction("GPS warmup pause") { nativeGpsWarmup.pause() },
             lifecycleAction("enrollment pause") { nativeKeyEnrollment.pause() },
             lifecycleAction("location pause") { if (pauseLocation) nativeLocation.pause() },
@@ -372,20 +341,27 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         resumed = true
-        if (::nativeScreenAwake.isInitialized) nativeScreenAwake.resume()
+        if (BuildConfig.KEEP_SCREEN_AWAKE) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (::webView.isInitialized) {
             webView.settings.setGeolocationEnabled(true)
             webView.onResume()
             completePendingPermissions()
             refreshCameraPairingAccess()
             nativeGpsWarmup.resume()
+            nativeAttestation?.resume()
         }
     }
 
     override fun onStart() {
         super.onStart()
         visible = true
-        if (::webView.isInitialized) refreshCameraPairingAccess()
+        nativeAttestation?.start()
+        if (BuildConfig.KEEP_SCREEN_AWAKE) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (::webView.isInitialized) {
+            refreshCameraPairingAccess()
+        }
     }
 
     override fun onStop() {
@@ -393,13 +369,14 @@ class MainActivity : Activity() {
         resumed = false
         NativeLifecycleCleanup.lifecycle(revokeNativeAuthority(), listOf(
             lifecycleAction("pairing stop") { nativeCameraPairing?.setForeground(false) },
-            lifecycleAction("screen lease stop") { nativeScreenAwake.pause() },
+            lifecycleAction("screen awake stop") { window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) },
             lifecycleAction("GPS warmup stop") { nativeGpsWarmup.pause() },
             lifecycleAction("location stop") { nativeLocation.pause() },
             lifecycleAction("camera stop") { nativeCamera.pause() },
             lifecycleAction("camera-set stop") { nativeCameraSet.pause() },
             lifecycleAction("audio stop") { nativeAudio.pause() },
             lifecycleAction("enrollment stop") { nativeKeyEnrollment.pause() },
+            lifecycleAction("attestation stop") { nativeAttestation?.stop() },
             lifecycleAction("geolocation stop") { disableGeolocation() },
             lifecycleAction("permission cancellation") { cancelPendingPermissions() },
             lifecycleAction("web media stop") { stopSensitiveActivity() }
@@ -412,18 +389,19 @@ class MainActivity : Activity() {
         runtimePermissionInFlight = null
         val releases = listOf(
             lifecycleAction("pairing destruction") { nativeCameraPairing?.destroy() },
-            lifecycleAction("screen lease destruction") { nativeScreenAwake.destroy() },
+            lifecycleAction("screen awake destruction") { window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) },
             lifecycleAction("GPS warmup destruction") { nativeGpsWarmup.destroy() },
             lifecycleAction("location destruction") { nativeLocation.destroy() },
             lifecycleAction("camera destruction") { nativeCamera.destroy() },
             lifecycleAction("camera-set destruction") { nativeCameraSet.destroy() },
             lifecycleAction("audio destruction") { nativeAudio.destroy() },
             lifecycleAction("enrollment destruction") { nativeKeyEnrollment.destroy() },
+            lifecycleAction("attestation destruction") { nativeAttestation?.close() },
             lifecycleAction("geolocation destruction") { disableGeolocation() },
             lifecycleAction("permission destruction") { cancelPendingPermissions() },
             lifecycleAction("document picker destruction") { finishDocumentPicker(null) }
         ) + listOf("NativeVault", "NativeLocation", "NativeCamera", "NativeAudio", "NativeKeyEnrollment",
-            "NativeScreenAwake", "NativeGpsWarmup", "NativeCameraPairing").map { name ->
+            "NativeGpsWarmup", "NativeCameraPairing").map { name ->
                 lifecycleAction("$name removal") { webView.removeJavascriptInterface(name) }
             } + listOf(
             lifecycleAction("WebView load stop") { webView.stopLoading() },
@@ -436,12 +414,16 @@ class MainActivity : Activity() {
     private fun lifecycleAction(label: String, action: () -> Unit) = NativeLifecycleCleanup.Action(label, action)
 
     /** Clear cached signing authority before an OS release can block or throw. */
-    private fun revokeNativeAuthority(location: Boolean = true, camera: Boolean = true, audio: Boolean = true) = listOf(
+    private fun revokeNativeAuthority(location: Boolean = true, camera: Boolean = true, audio: Boolean = true,
+        pauseAttestation: Boolean = true) = listOf(
         lifecycleAction("location authority revocation") { if (location && ::nativeLocation.isInitialized) nativeLocation.revokeAuthority() },
         lifecycleAction("camera authority revocation") { if (camera && ::nativeCamera.isInitialized) nativeCamera.revokeAuthority() },
         lifecycleAction("camera-set authority revocation") { if (camera && ::nativeCameraSet.isInitialized) nativeCameraSet.revokeAuthority() },
         lifecycleAction("audio authority revocation") { if (audio && ::nativeAudio.isInitialized) nativeAudio.revokeAuthority() },
-        lifecycleAction("enrollment authority revocation") { if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.revokeAuthority() }
+        lifecycleAction("enrollment authority revocation") { if (::nativeKeyEnrollment.isInitialized) nativeKeyEnrollment.revokeAuthority() },
+        lifecycleAction("attestation authority revocation") {
+            if (pauseAttestation) nativeAttestation?.pause() else nativeAttestation?.documentChanged()
+        }
     )
 
     private fun reportLifecycleFailure(failure: NativeLifecycleCleanup.Failure) {
@@ -603,9 +585,10 @@ class MainActivity : Activity() {
         private const val NATIVE_AUDIO_PERMISSION = 106
         private const val AUDIO_DOCUMENT_PATH = "/assets/web/audio.html"
         private const val KEY_ENROLLMENT_DOCUMENT_PATH = "/assets/web/key-enrollment.html"
+        private const val DEVICE_ATTESTATION_DOCUMENT_PATH = "/assets/web/device-attestation.html"
         private const val CAMERA_SET_DOCUMENT_PATH = "/assets/web/camera-set.html"
         private val GPS_DOCUMENT_PATHS = setOf("/assets/web/index.html", "/assets/web/location.html", "/assets/web/live-location.html", CAMERA_SET_DOCUMENT_PATH)
-        private val APP_DOCUMENT_PATHS = setOf("/assets/web/index.html", AUDIO_DOCUMENT_PATH, "/assets/web/location.html", "/assets/web/live-location.html", KEY_ENROLLMENT_DOCUMENT_PATH, CAMERA_SET_DOCUMENT_PATH)
+        private val APP_DOCUMENT_PATHS = setOf("/assets/web/index.html", AUDIO_DOCUMENT_PATH, "/assets/web/location.html", "/assets/web/live-location.html", KEY_ENROLLMENT_DOCUMENT_PATH, DEVICE_ATTESTATION_DOCUMENT_PATH, CAMERA_SET_DOCUMENT_PATH)
         private val MEDIA_RUNTIME_PERMISSIONS = mapOf(
             PermissionRequest.RESOURCE_VIDEO_CAPTURE to Manifest.permission.CAMERA,
             PermissionRequest.RESOURCE_AUDIO_CAPTURE to Manifest.permission.RECORD_AUDIO

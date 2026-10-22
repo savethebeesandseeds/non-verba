@@ -5,6 +5,7 @@ pub mod contract;
 /// Compatibility name for integrations written before the terminology alignment.
 pub use contract as agreement;
 pub mod bundle;
+pub mod client_operation;
 pub mod crypto;
 mod cutover;
 pub mod encoding;

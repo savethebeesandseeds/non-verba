@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f2f1eb">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+  <title>Non-verba — Device attestation tool</title>
+  <link rel="stylesheet" href="../common/style.css"><link rel="stylesheet" href="../location/location.css">
+  <script type="module" src="./device-attestation-ui.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="../camera/index.html"><span class="brandmark" aria-hidden="true">n/v</span>non-verba<span class="edition">ATTESTATION TOOL</span></a><nav class="location-links" aria-label="Developer tools"><a href="../camera/index.html">Camera ↗</a><a href="./key-enrollment.html">Sensor signing keys ↗</a></nav></header>
+  <main>
+    <div class="intro location-intro"><div><p class="eyebrow">DEVELOPMENT TEST ONLY</p><h1>Inspect device<br>attestation<span>.</span></h1><p class="lede">Load a host-issued request, prove the separate test key and export its public evidence for independent verification.</p></div><span class="pill" id="attestation-platform">CHECKING TOOL</span></div>
+    <div class="notice" id="attestation-status" role="status" aria-live="polite">Checking the attestation tool. No key has been requested.</div>
+    <div class="two-column">
+      <section class="panel roomy" aria-labelledby="attestation-request-heading"><h2 id="attestation-request-heading">Load the original request.</h2>
+        <p class="muted">Keep the host-issued original independently. Loading a token performs no key generation, account request or sensor capture.</p>
+        <label for="attestation-request-token">Host-issued request token</label><input id="attestation-request-token" type="text" maxlength="200" spellcheck="false" autocomplete="off" autocapitalize="none" aria-describedby="attestation-token-note">
+        <p id="attestation-token-note" class="fineprint">Paste the complete NVAT1 token. The request lasts two minutes; the original times are never renewed here.</p>
+        <div class="button-row"><button id="attestation-load-request" class="primary">Load request</button><button id="attestation-save-request" class="secondary" disabled>Save request</button></div>
+        <details class="spaced"><summary>Loaded request</summary><pre id="attestation-request-record">No request loaded.</pre></details>
+      </section>
+      <section class="panel roomy" aria-labelledby="attestation-proof-heading"><h2 id="attestation-proof-heading">Prove the test key.</h2>
+        <p class="muted">The first proof for a test scope may create a separate Android Keystore key. Later proofs for that same scope reuse it. Existing keys are preserved.</p>
+        <div class="button-row"><button id="attestation-prove" class="primary" disabled>Prove test key</button><button id="attestation-cancel" class="secondary" disabled>Cancel</button></div>
+        <p class="tiny-label spaced">PUBLIC KEY SPKI SHA-256</p><p id="attestation-public-pin" class="mono">No proof collected.</p>
+        <p id="attestation-chain-count">Certificate chain: no proof collected.</p>
+        <button id="attestation-save-proof" class="secondary wide" disabled>Save proof</button>
+        <p class="fineprint">Hardware attestation is not verified on this page. A native key operation may finish after cancellation; cancellation revokes result delivery and preserves any generated key.</p>
+      </section>
+    </div>
+    <div class="trust-note spaced"><h4>Original enrollment and later possession are separate.</h4><p>Keep the first request and proof for this test scope. A later fresh signature does not change the certificate chain’s original generation challenge. Verify the exact exported evidence with independently retained originals, trust material and developer-package expectations. This test grants no account session, participant authority or sensor access, and establishes no current process state or live presence.</p></div>
+  </main><footer><span>non-verba / device attestation tool</span><span>PUBLIC EVIDENCE EXPORT · INDEPENDENT VERIFICATION REQUIRED</span></footer>
+</body>
+</html>

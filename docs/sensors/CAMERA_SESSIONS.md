@@ -158,20 +158,20 @@ Retain these composed-session regression requirements:
 Run inside the existing development container:
 
 ```sh
-node --test test/camera-peer-tests.mjs test/camera-session-tests.mjs test/camera-composed-session-tests.mjs test/camera-session-capture-tests.mjs test/camera-app-handoff-tests.mjs test/camera-session-ui-tests.mjs test/camera-session-preflight-tests.mjs test/agent-evidence-guard-tests.mjs test/camera-adapter-tests.mjs
+node --test test/unit/camera-peer-tests.mjs test/evidence/camera-session-tests.mjs test/evidence/camera-composed-session-tests.mjs test/unit/camera-session-capture-tests.mjs test/unit/camera-app-handoff-tests.mjs test/unit/camera-session-ui-tests.mjs test/unit/camera-session-preflight-tests.mjs test/evidence/agent-evidence-guard-tests.mjs test/unit/camera-adapter-tests.mjs
 ```
 
 Implementation is segmented into `camera-peer.js` (transport), `camera-session.js` (authenticated protocol), `camera-session-policy.js` (frozen agreement/context), `camera-session-capture.js` (manual shutter handoff), `camera-session-ui.js` (UI/lifecycle), `camera-session-preflight.js` (discarded permission warmup), shared `pairing-import.js` (bounded pre-challenge answer import), and minimal `app.js` hooks. Cryptography, sensor appraisal and receipt rules remain in the existing Rust/WASM APIs. `AgentRequester` and its durable ledger remain the requester authority; their optional current-context guard preserves older callers’ default behavior.
 
 `retained-evidence-ui.js` owns only retained lookup and its lifecycle guards. Run
-its Node checks with `node --test test/retained-evidence-storage-tests.mjs test/retained-evidence-ui-tests.mjs`.
+its Node checks with `node --test test/evidence/retained-evidence-storage-tests.mjs test/unit/retained-evidence-ui-tests.mjs`.
 After the normal build and optional [Debian browser dependencies](../development/CONTAINER_PLAN.md#browser-and-android-checks),
 run the real-browser check inside the container:
 
 ```sh
 NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright \
 PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers \
-node test/retained-evidence-browser-tests.mjs
+node test/browser/retained-evidence-browser-tests.mjs
 ```
 
 It owns and closes a loopback preview on port 4173 and an isolated browser

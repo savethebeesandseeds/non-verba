@@ -233,7 +233,7 @@ resource use and recovery objectives require operational design and validation;
 there is no deployed failover guarantee in this prototype.
 
 Evidence: [local retention](../code/requests/src/local.rs),
-[shared requester storage](../web/src/agent-evidence-storage.js),
+[shared requester storage](../web/shared/evidence/agent-evidence-storage.js),
 [live-location sessions](sensors/LIVE_LOCATION_SHARED.md) and
 [availability limits](requests/THREAT_MODEL.md).
 
@@ -285,7 +285,7 @@ for a complete security claim.
 
 Sources: [sensor boundaries](sensors/SECURITY.md),
 [shared-session behavior](sensors/LIVE_LOCATION_SHARED.md),
-[requester acceptance ledger](../web/src/agent-evidence-storage.js) and
+[requester acceptance ledger](../web/shared/evidence/agent-evidence-storage.js) and
 [signing-client/storage assumptions](requests/THREAT_MODEL.md#signing-client-and-update-trust).
 
 ## Design and verification checklist

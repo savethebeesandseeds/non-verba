@@ -4,9 +4,13 @@ param(
     [ValidateSet('Prepare','Up','Status','Setup','Shell','Exec','Build','Test','Serve','Adb','Native')]
     [string]$Action = 'Status',
     [switch]$Snapshot,
+    [switch]$DashboardSnapshot,
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$Command = @()
 )
 $ErrorActionPreference = 'Stop'
+if ($DashboardSnapshot -and (-not $Snapshot -or $Action -ne 'Exec')) {
+    throw '-DashboardSnapshot requires -Snapshot -Action Exec. No container operation was attempted.'
+}
 $catalog = Get-Content (Join-Path $PSScriptRoot 'container/config.json') -Raw | ConvertFrom-Json
 $config = $catalog
 $workspace = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -58,7 +62,7 @@ function Assert-Container($item, $expected = $config, [string]$expectedWorkspace
 }
 function Prepare-GpuImage {
     $config = $catalog.gpuImage
-    $inputs = @('.dockerignore','setup.sh','dev.sh','container/Dockerfile','container/env.sh','container/debian-packages.lock','container/cuda-packages.lock','tools/check-gpu.cpp')
+    $inputs = @('.dockerignore','setup.sh','dev.sh','container/Dockerfile','container/env.sh','container/debian-packages.lock','container/cuda-packages.lock','tools/provision/check-gpu.cpp')
     $hashes = ($inputs | ForEach-Object { (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot $_) -Algorithm SHA256).Hash }) -join ':'
     $inputHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($hashes))).ToLowerInvariant()
     $images = @(Invoke-Docker @('image','ls','--quiet',$config.image))
@@ -105,12 +109,20 @@ function Invoke-SourceSnapshot {
     }
     if (-not $existing.State.Running) { throw 'The preserved container is stopped. Start it with the original private-source/code/dev.ps1 Up; snapshot mode never starts containers.' }
 
+    # The private dashboard needs the sibling public evidence/artwork at their
+    # actual relative locations. This opt-in layout never expands normal public
+    # snapshots or includes any other private source namespace.
+    $snapshotBase = if ($DashboardSnapshot) { [IO.Path]::GetDirectoryName($workspace) } else { $workspace }
+    $publicPrefix = if ($DashboardSnapshot) { 'open-source/' } else { '' }
+    $privateDashboard = Join-Path $recordedWorkspace 'web/dashboard'
+    $snapshotMode = if ($DashboardSnapshot) { 'dashboard' } else { 'public' }
+
     # Explicit source namespaces only. Publication review remains a prerequisite;
     # this bridge adds exclusions and refuses linked files rather than sending a
     # whole checkout, Git history, local evidence, vaults or developer caches.
     $rootFiles = @('README.md','CONTRIBUTING.md','GOVERNANCE.md','SECURITY.md','AGENTS.md','LICENSE','.gitignore','.gitattributes','THIRD_PARTY_NOTICES.md')
     $sourceRoots = @('LICENSES','docs','web','code/crates','code/android','code/container','code/tools','code/test','code/protocol','code/simulator','code/examples','code/requests','code/disputes','.github/workflows')
-    $codeFiles = @('Cargo.toml','Cargo.lock','rust-toolchain.toml','package.json','package-lock.json','dev.ps1','dev.sh','setup.sh','.dockerignore','models/mobilefacenet/model-lock.json')
+    $codeFiles = @('README.md','Cargo.toml','Cargo.lock','rust-toolchain.toml','package.json','package-lock.json','dev.ps1','dev.sh','setup.sh','.dockerignore','models/mobilefacenet/model-lock.json')
     $excludedDirectories = @('.git','.tools','.toolchain','.gradle','.kotlin','.cxx','node_modules','target','dist','artifacts','reviews','build','jniLibs')
     # Exact reviewed local execution records; preserve them on disk, outside source snapshots.
     # Keep these literal paths aligned with the marked section in the root .gitignore.
@@ -179,13 +191,16 @@ function Invoke-SourceSnapshot {
     $excludedLocalExecutionDirectories = @(
         'code/disputes/prototypes/priors-derivation/study-v0.2/handoff/2026-10-19/_work'
     )
-    $extensions = @('.rs','.mjs','.js','.css','.html','.kt','.kts','.cpp','.h','.c','.toml','.lock','.json','.md','.sh','.ps1','.yml','.yaml','.txt','.svg','.png','.xml','.properties','.rnx')
+    $extensions = @('.rs','.mjs','.js','.css','.html','.kt','.kts','.cpp','.h','.c','.toml','.lock','.json','.md','.sh','.ps1','.yml','.yaml','.txt','.svg','.png','.webp','.xml','.properties','.rnx')
     $files = [Collections.Generic.List[string]]::new()
     function Assert-SnapshotPath([string]$absolute) {
-        $base = Get-Item -LiteralPath $workspace -Force
+        if (-not $absolute.StartsWith($snapshotBase + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Snapshot path escapes its source root: $absolute"
+        }
+        $base = Get-Item -LiteralPath $snapshotBase -Force
         if ($base.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Snapshot checkout root must not be linked.' }
-        $cursor = $workspace
-        foreach ($part in [IO.Path]::GetRelativePath($workspace,$absolute).Split([IO.Path]::DirectorySeparatorChar)) {
+        $cursor = $snapshotBase
+        foreach ($part in [IO.Path]::GetRelativePath($snapshotBase,$absolute).Split([IO.Path]::DirectorySeparatorChar)) {
             $cursor = Join-Path $cursor $part
             $component = Get-Item -LiteralPath $cursor -Force
             if ($component.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Linked snapshot path component: $cursor" }
@@ -193,9 +208,11 @@ function Invoke-SourceSnapshot {
     }
     function Add-SnapshotFile($item) {
         $absolute = [IO.Path]::GetFullPath($item.FullName)
-        if (-not $absolute.StartsWith($workspace + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+        $publicInput = $absolute.StartsWith($workspace + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+        $dashboardInput = $DashboardSnapshot -and $absolute.StartsWith($privateDashboard + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+        if ((-not $publicInput -and -not $dashboardInput) -or
             ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw "Snapshot input is outside the source tree or linked: $absolute" }
-        $relative = [IO.Path]::GetRelativePath($workspace,$absolute).Replace('\','/')
+        $relative = [IO.Path]::GetRelativePath($snapshotBase,$absolute).Replace('\','/')
         Assert-SnapshotPath $absolute
         if ($relative -match '[\r\n]' -or $relative.StartsWith('-') -or $item.Name -match '^(?:\.env(?:\.|$)|local\.properties$)' -or
             $item.Extension -match '^\.(?:keystore|jks|p12|pfx|key|pem)$') { throw "Private or unsafe snapshot input: $relative" }
@@ -215,7 +232,11 @@ function Invoke-SourceSnapshot {
             }
             if ($item.PSIsContainer) {
                 $relativeDirectory = [IO.Path]::GetRelativePath($workspace,$item.FullName).Replace('\','/')
-                if ($item.Name -notin $excludedDirectories -and $relativeDirectory -cne 'code/android/app/src/main/assets') { Visit-SnapshotDirectory $item.FullName }
+                # These two build directories contain authored helpers/tests.
+                # Keep generated build trees excluded everywhere else.
+                $authoredBuildDirectory = $relativeDirectory -cin @('code/tools/build','code/test/build')
+                if (($item.Name -notin $excludedDirectories -or $authoredBuildDirectory) -and
+                    $relativeDirectory -cne 'code/android/app/src/main/assets') { Visit-SnapshotDirectory $item.FullName }
             } elseif ($item.Name -notin @('local.properties') -and $item.Name -notmatch '^\.env(?:\.|$)') {
                 if ($item.Extension.ToLowerInvariant() -in $extensions -or $item.Name -in @('.dockerignore','.gitignore','Dockerfile')) { Add-SnapshotFile $item }
                 else { throw "Unreviewed file type in snapshot source namespace: $($item.FullName)" }
@@ -230,18 +251,26 @@ function Invoke-SourceSnapshot {
         $path = Join-Path $workspace $name
         if (Test-Path -LiteralPath $path -PathType Container) { Visit-SnapshotDirectory $path }
     }
-    foreach ($required in @('LICENSE','code/dev.sh','code/container/env.sh','code/Cargo.toml')) {
-        if ($files -notcontains $required) { throw "Snapshot source is incomplete: $required" }
+    if ($DashboardSnapshot) {
+        if (-not (Test-Path -LiteralPath $privateDashboard -PathType Container)) { throw 'The private dashboard source directory is missing.' }
+        Visit-SnapshotDirectory $privateDashboard
+        foreach ($required in @('manifest.json','scripts/refresh.sh','public/index.html')) {
+            if ($files -notcontains "private-source/web/dashboard/$required") { throw "Dashboard snapshot source is incomplete: $required" }
+        }
+    }
+    foreach ($required in @('LICENSE','code/dev.sh','code/container/env.sh','code/Cargo.toml',
+        'code/tools/build/build-web.mjs','code/tools/test/run-tests.mjs','code/test/build/android-build-process-tests.mjs')) {
+        if ($files -notcontains ($publicPrefix + $required)) { throw "Snapshot source is incomplete: $required" }
     }
     $files = @($files | Sort-Object -Unique)
     $before = @{}
     $sourceBytes = 0L
     foreach ($name in $files) {
-        $sourceBytes += (Get-Item -LiteralPath (Join-Path $workspace $name)).Length
+        $sourceBytes += (Get-Item -LiteralPath (Join-Path $snapshotBase $name)).Length
         if ($sourceBytes -gt 128MB) { throw 'Source snapshot exceeds the 128 MiB source-only limit. Review the inputs before copying.' }
     }
     foreach ($name in $files) {
-        $before[$name] = (Get-FileHash -LiteralPath (Join-Path $workspace $name) -Algorithm SHA256).Hash
+        $before[$name] = (Get-FileHash -LiteralPath (Join-Path $snapshotBase $name) -Algorithm SHA256).Hash
     }
     $token = [Guid]::NewGuid().ToString('N')
     $manifestPath = Join-Path ([IO.Path]::GetTempPath()) "nonverba-source-$token.txt"
@@ -252,7 +281,7 @@ function Invoke-SourceSnapshot {
         [IO.File]::WriteAllLines($manifestPath,$files,[Text.UTF8Encoding]::new($false))
         # Only explicit regular-file names enter -T; no directory recursion or
         # option-looking names are accepted by Add-SnapshotFile.
-        & tar -cf $archivePath -C $workspace -T $manifestPath
+        & tar -cf $archivePath -C $snapshotBase -T $manifestPath
         if ($LASTEXITCODE -ne 0) { throw 'Source snapshot archive failed; nothing was executed.' }
         # Independently inspect the archive, not just the inputs. A reparse race
         # or unexpected archiver entry must never reach container extraction.
@@ -269,21 +298,24 @@ function Invoke-SourceSnapshot {
             if ($archived.Count -ne $files.Count) { throw 'Snapshot archive file set is incomplete.' }
         } finally { $reader.Dispose(); $archiveStream.Dispose() }
         foreach ($name in $files) {
-            if ((Get-FileHash -LiteralPath (Join-Path $workspace $name) -Algorithm SHA256).Hash -cne $before[$name]) { throw "Source changed during snapshot creation: $name" }
+            if ((Get-FileHash -LiteralPath (Join-Path $snapshotBase $name) -Algorithm SHA256).Hash -cne $before[$name]) { throw "Source changed during snapshot creation: $name" }
         }
         $archiveHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
         $revision = (& git -c "safe.directory=$workspace" -C $workspace rev-parse HEAD 2>$null | Select-Object -First 1)
         if ($LASTEXITCODE -ne 0 -or $revision -notmatch '^[a-f0-9]{40}$') { throw 'Cannot identify snapshot base revision.' }
         $changes = @(& git -c "safe.directory=$workspace" -C $workspace status --porcelain --untracked-files=normal)
         if ($LASTEXITCODE -ne 0) { throw 'Cannot determine source worktree status.' }
-        $dirty = if ($changes.Count -gt 0) { '1' } else { '0' }
+        # The public base revision cannot describe the private dashboard bytes;
+        # the complete composite source remains identified by its archive hash.
+        $dirty = if ($DashboardSnapshot -or $changes.Count -gt 0) { '1' } else { '0' }
         Invoke-Docker @('cp',$archivePath,"$($existing.Id):$remoteArchive")
         $extract = @'
 set -euo pipefail
 snapshot_token=${1##*/}
 if [[ ! $snapshot_token =~ ^[0-9a-f]{32}$ ||
       $1 != "/tmp/nonverba-unified-source/$snapshot_token" ||
-      $2 != "/tmp/nonverba-source-$snapshot_token.tar" ]]; then
+      $2 != "/tmp/nonverba-source-$snapshot_token.tar" ||
+      ( $4 != public && $4 != dashboard ) ]]; then
   echo 'Unexpected snapshot transfer paths; extraction and cleanup refused.' >&2
   exit 2
 fi
@@ -299,19 +331,25 @@ test ! -e "$1"
 printf '%s  %s\n' "$3" "$2" | sha256sum --check --status
 mkdir "$1"
 tar --extract --file "$2" --directory "$1" --no-same-owner --no-same-permissions
-test -f "$1/code/dev.sh"
+if [[ $4 == dashboard ]]; then
+  test -f "$1/open-source/code/dev.sh"
+  test -f "$1/private-source/web/dashboard/scripts/refresh.sh"
+else
+  test -f "$1/code/dev.sh"
+fi
 printf '%s\n' "$3" > "$1/.snapshot-archive-sha256"
 '@
-        Invoke-Docker @('exec',$existing.Id,'bash','-c',$extract,'snapshot',$snapshotRoot,$remoteArchive,$archiveHash)
+        Invoke-Docker @('exec',$existing.Id,'bash','-c',$extract,'snapshot',$snapshotRoot,$remoteArchive,$archiveHash,$snapshotMode)
         Write-Output "Source snapshot: $snapshotRoot ($($files.Count) reviewed-namespace files, base $revision, dirty=$dirty). Outputs remain inside this snapshot; original sources and container configuration are preserved."
         $arguments = @('exec')
         if ($Action -eq 'Shell') { $arguments += '-it' }
-        $arguments += @('--workdir',"$snapshotRoot/code",'--env',"NONVERBA_SOURCE_REVISION=$revision",'--env',"NONVERBA_SOURCE_DIRTY=$dirty",'--env',"NONVERBA_SOURCE_SNAPSHOT_SHA256=$archiveHash",$existing.Id)
+        $snapshotCode = "$snapshotRoot/$($publicPrefix)code"
+        $arguments += @('--workdir',$snapshotCode,'--env',"NONVERBA_SOURCE_REVISION=$revision",'--env',"NONVERBA_SOURCE_DIRTY=$dirty",'--env',"NONVERBA_SOURCE_SNAPSHOT_SHA256=$archiveHash",$existing.Id)
         switch ($Action) {
-            'Setup' { Invoke-Docker ($arguments + @('bash',"$snapshotRoot/code/setup.sh")) }
-            'Shell' { Invoke-Docker ($arguments + @('bash','--rcfile',"$snapshotRoot/code/container/env.sh",'-i')) }
-            'Exec' { Invoke-Docker ($arguments + @('bash',"$snapshotRoot/code/dev.sh",'exec') + $Command) }
-            default { Invoke-Docker ($arguments + @('bash',"$snapshotRoot/code/dev.sh",$Action.ToLowerInvariant()) + $Command) }
+            'Setup' { Invoke-Docker ($arguments + @('bash',"$snapshotCode/setup.sh")) }
+            'Shell' { Invoke-Docker ($arguments + @('bash','--rcfile',"$snapshotCode/container/env.sh",'-i')) }
+            'Exec' { Invoke-Docker ($arguments + @('bash',"$snapshotCode/dev.sh",'exec') + $Command) }
+            default { Invoke-Docker ($arguments + @('bash',"$snapshotCode/dev.sh",$Action.ToLowerInvariant()) + $Command) }
         }
     } finally {
         foreach ($path in @($manifestPath,$archivePath)) {

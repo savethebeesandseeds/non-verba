@@ -2,8 +2,8 @@
 // Regenerate using the actual shipped WASM and browser policy presets, inside Debian.
 // The fixture crosses precisely the JSON.parse/stringify bridge used by the app.
 import {writeFile} from 'node:fs/promises';
-import {loadShippedCore} from '../../tools/image-requester-session.mjs';
-import {locationPolicy} from '../../../web/src/location-policy.js';
+import {loadShippedCore} from '../../tools/evidence/image-requester-session.mjs';
+import {locationPolicy} from '../../../web/shared/location/location-policy.js';
 const {core, wasmSha256, moduleSha256}=await loadShippedCore();
 const nowMs=1790424000000, requests=[];
 for (const profile of ['browser-or-native','native-required','native-gnss','raw-gnss']) {

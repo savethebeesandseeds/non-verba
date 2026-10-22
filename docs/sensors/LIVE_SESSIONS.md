@@ -81,16 +81,16 @@ clocks, and a local ledger is not a global replay service.
 
 - `code/crates/nonverba-core/src/live_session/`: typed protocol, COSE signing,
   immutable-policy validation and independent artifact verification.
-- `web/src/live-peer.js`: bounded data-only direct transport.
-- `web/src/live-session-storage.js`: requester identity, dual reservations,
+- `web/shared/location/live-peer.js`: bounded data-only direct transport.
+- `web/shared/evidence/live-session-storage.js`: requester identity, dual reservations,
   terminal evidence retention and local atomic acceptance.
-- `web/src/live-location-session.js`: consent, fresh-request sequencing, timing,
+- `web/shared/location/live-location-session.js`: consent, fresh-request sequencing, timing,
   cancellation and existing sensor collector orchestration.
-- `web/src/live-location-ui.js` and `live-location.html`: presentation/export.
+- `web/apps/non-verba-dev/src/location/live-location-ui.js` and `live-location.html`: presentation/export.
 
 Rust regressions cover correctly signed malicious receipts, role confusion,
 wrong pins, substitutions, malformed inputs, timing/expiry, demo downgrades and
-invalid operator signatures. `code/test/live-location-browser-tests.mjs` exercises
+invalid operator signatures. `code/test/browser/live-location-browser-tests.mjs` exercises
 two independent browser contexts, real WebRTC, real Rust/WASM signatures, dual
 ledger transactions, a local demo and UI layout. Browser coordinates in that
 test are explicitly synthetic; it is not physical GNSS or Android attestation

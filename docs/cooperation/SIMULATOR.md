@@ -18,7 +18,7 @@ Run builds and previews inside the [managed Debian environment](../development/C
 From the repository root, the [snapshot bridge](../development/CONTAINER_MIGRATION.md) uses:
 
 ```powershell
-./code/dev.ps1 -Snapshot -Action Exec -Command @('bash', '-c', 'node tools/build-wasm.mjs && NONVERBA_BIND=0.0.0.0 NONVERBA_UNION_PORT=4173 node tools/serve-simulator.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('bash', '-c', 'node tools/build/build-wasm.mjs && NONVERBA_BIND=0.0.0.0 NONVERBA_UNION_PORT=4173 node tools/preview/serve-simulator.mjs')
 ```
 
 Build and preview use the same fresh snapshot. Generated outputs remain inside
@@ -38,8 +38,8 @@ Ctrl+C.
 
 Inside Debian, `npm run build:wasm` and `npm run serve:simulator` invoke the same tools.
 Run the configuration and scenario tests with
-`node --test test/simulator-config.test.mjs test/simulator-model.test.mjs` and the
-browser integration with `node test/simulator-browser.mjs`, using an existing
+`node --test test/cooperation/simulator-config.test.mjs test/cooperation/simulator-model.test.mjs` and the
+browser integration with `node test/browser/simulator-browser.mjs`, using an existing
 Playwright installation as described in the README. No browser dependencies are
 downloaded by these checks.
 

@@ -34,7 +34,7 @@ A large location ready_to_finalize_request_ms places delay before native locatio
 
 Run inside the managed Debian container:
 
-    bash crates/nonverba-android/tests/run-native-session-guards.sh
+    bash android/tests/platform/run-native-session-guards.sh
 
 The new deterministic production-helper suite checks all sensor/stage boundaries, equality at the existing age limit, one millisecond over, future/invalid clocks, legacy errors, request-expiry precedence, preserved first failure across a simulated opaque JNI wrapper before/after signing, successful and unrelated-error paths, and bounded independent phase snapshots. The retained QA report is code/artifacts/qa/native-finalization-diagnostics-20260929.json.
 

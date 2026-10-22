@@ -4,7 +4,7 @@ Files:
 code/crates/nonverba-core/src/location_proof/position/rtklib-reference.json
 code/crates/nonverba-core/src/location_proof/position/rtklib-rollover-reference.json
 
-Generator: code/test/rtklib-oracle.c, authored for Non-verba.
+Generator: code/test/integration/rtklib-oracle.c, authored for Non-verba.
 Upstream oracle: unmodified RTKLIB by T. Takasu, commit
 71db0ffa0d9735697c6adfd06fdf766d0e5ce807.
 https://github.com/tomojitakasu/RTKLIB/tree/71db0ffa0d9735697c6adfd06fdf766d0e5ce807

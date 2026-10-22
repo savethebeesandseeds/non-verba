@@ -31,7 +31,7 @@ saved under ignored `code/artifacts/qa/homepage/`.
 The standalone union simulator was also validated on 26 September 2026. Its
 17 scenario tests and 15 configuration/currency tests pass alongside the existing
 56 protocol/WASM tests (88 total).
-`node test/simulator-browser.mjs` passes in headless Edge with the real WASM
+`node test/browser/simulator-browser.mjs` passes in headless Edge with the real WASM
 module. It exercises personal R snapshots, task isolation, vote decay/fallback,
 offer rejection, locked terms, extra-time settlement, faster work, JSON export,
 missing-WASM failure, server allowlisting and separate production/review CSP.
@@ -53,10 +53,10 @@ Commands below run from `code/`; paths reflect the current folder layout.
 | `cargo test --locked --workspace` | 15 native Rust tests passed; doc-tests passed |
 | `cargo fmt --all -- --check` | Passed |
 | `cargo clippy --locked --workspace --all-targets -- -D warnings` | Passed |
-| `node tools/build-wasm.mjs` | Built the real Rust/WASM module using the web target |
+| `node tools/build/build-wasm.mjs` | Built the real Rust/WASM module using the web target |
 | `node --check protocol/cooperation.mjs` | Passed |
-| `node --test --test-reporter=dot test/cooperation.test.mjs test/wasm.test.mjs` | 56 tests passed against compiled WASM, including the original 49 behavior tests |
-| `node test/browser-smoke.mjs` | Passed in Edge's page and module Worker; two real WASM fetches |
+| `node --test --test-reporter=dot test/cooperation/cooperation.test.mjs test/cooperation/wasm.test.mjs` | 56 tests passed against compiled WASM, including the original 49 behavior tests |
+| `node test/browser/browser-smoke.mjs` | Passed in Edge's page and module Worker; two real WASM fetches |
 | `node examples/cooperation.mjs` | Passed; fictional calculation below |
 
 The generated `code/pkg/nonverba_cooperation_bg.wasm` is 109,531 bytes. Native and web

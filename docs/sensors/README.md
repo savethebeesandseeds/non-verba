@@ -49,6 +49,12 @@ partial; these features do not establish sensor truth.
 
 Binary releases, device captures and earlier review journals are not included in this source import. Generated outputs remain ignored. See [sensor validation boundaries](VALIDATION.md) and [the current unification checks](../development/VALIDATION.md) for their distinct scope.
 
+The reusable [device-attestation tool](ATTESTATION_TOOL.md) separates platform
+proof collection and independent verification from account sign-in. Its first
+fixed profile preserves existing login keys and uses the shared verifier;
+sensor enrollment/selection retains its own media/location profiles and keys.
+Hardware acceptance and current sensor authenticity remain separate claims.
+
 ## Independent location workflow
 
 Open **Location proof** to request location alone, collect a short raw-GPS trace and export a standard COSE-signed record. **Try demo** uses actual location updates without an operator ID. Verification needs the original request and independently trusted location key ID. Browser records explicitly lack native mock detection; Android collects and signs within a native session using a separate Keystore key.
@@ -114,7 +120,7 @@ Each requester challenge creates an additional immutable Android identity, up to
 requester checks the certificate chain, original challenge and arrival, app signer,
 boot state, patches, pinned Google roots and current revocation data. A helper
 fetches trust data independently over HTTPS:
-`pwsh -File code/tools/fetch-attestation-trust.ps1`. The default enrollment page
+`pwsh -File code/tools/provision/fetch-attestation-trust.ps1`. The default enrollment page
 policy pins the development APK signer and must be reviewed for a deployment.
 See [native enrollment](NATIVE_KEY_ENROLLMENT.md) and
 [verification policy](KEY_ATTESTATION_VERIFIER.md).
@@ -148,8 +154,13 @@ The evidence application shares this repository with the cooperation, Assignment
 
 | Path | Purpose |
 | --- | --- |
-| `web/src` | Responsive requester/operator/verifier UI and platform adapters |
+| `web/apps/non-verba-dev/src` | Non-verba-dev requester/operator/verifier UI shared by browser and APK, grouped by capability |
+| `web/shared` | Reusable evidence, runtime and platform components |
+| `web/inspections` | Isolated map, registration and authentication/privacy inspections |
+| `web/apps/non-verba/src` | Non-verba participant UI shared by browser and APK; nonbinding workspace preview with no connected account/task journey |
+| `web/assets.json` | Authored evidence/inspection assets and stable flat output names |
 | `web/dist` | Generated browser assets, including the compiled Rust/WASM core |
+| `web/dist-android` | Generated developer Android entries and their dependency closure |
 | `code/crates/nonverba-core` | Rust challenges, ES256 identity, C2PA image/WAV sign/verify, acoustic DSP, watermark, and Rust tests |
 | `code/crates/nonverba-android` | Internal JNI entry points for native sensor validation, DSP and C2PA/COSE signing |
 | `code/android` | Kotlin platform adapters, C++ AAudio buffers and Gradle APK packaging |
@@ -160,7 +171,16 @@ The evidence application shares this repository with the cooperation, Assignment
 | `code/.tools` | Ignored local tooling and existing smoke-test material |
 | `docs` | Audio/location protocols, security boundaries, validation records, and the managed container procedure |
 
-On Android, **Keep screen awake** is an optional foreground development convenience on each workflow page. Enabling it starts a two-hour session retained across app restarts and updates on the same boot. Tap again to turn it off; expiry, reboot or clock inconsistency cancels it. It does not change Android lock settings or sensor timing/lifecycle rules.
+Both development APKs keep the display on automatically while their Activity is
+resumed when the shared `nonverba.keepScreenAwake` build property is enabled.
+There is no page toggle or timed lease. Backgrounding the app clears its window
+flag; manual locking remains available. This does not change Android lock
+settings or sensor authorization/lifecycle. See the
+[current build flag contract](../../code/android/README.md#development-screen-awake-build-flag).
+
+The [web architecture guide](../../web/README.md) distinguishes these applications
+and their build boundaries. Browser entry URLs remain flat in `web/dist/`;
+source organization does not change the existing page URLs.
 
 ## Build
 

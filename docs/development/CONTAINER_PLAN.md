@@ -4,6 +4,10 @@ Project development, builds, tests and Java execution run inside the project's
 managed Linux container. Windows scripts inspect files and orchestrate Docker or
 the explicitly approved USB transport; they do not run host build toolchains.
 
+This guide owns the public application/research environment. The private backend
+uses its owner-selected `private-source/code/server/` instructions and dedicated
+container; keep that environment and private implementation separate.
+
 The authoritative definition is
 [`code/container/config.json`](../../code/container/config.json), with
 [`code/dev.ps1`](../../code/dev.ps1) for host orchestration,

@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; style-src-attr 'none'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none'">
+<title>Non-verba Dev — Camera set</title><link rel="stylesheet" href="../common/style.css"><script type="module" src="./camera-set-ui.js"></script></head>
+<body><header class="masthead"><a class="wordmark" href="./index.html">non-verba Dev</a></header><main>
+<h1>Front/back photo capture</h1><p>Developer trial: one shutter takes the rear photo, then the front photo, and retrieves both together. Sequential photos are taken at different times; verification reports the measured exposure-start gap when their clocks are comparable. Concurrent capture is a separate choice requiring device support. Computers can use an explicit single-camera browser request.</p>
+<p>This version includes submitted GPS metadata. It does not collect the separate raw GNSS proof or motion evidence.</p>
+<section class="panel"><h2>1. Prepare the request</h2><button id="discover" type="button">Inspect this device’s cameras</button>
+<label>Device camera inventory<textarea id="inventory" rows="5" readonly></textarea></label>
+<p id="identity">No camera inventory selected.</p>
+<label>Acquisition<select id="acquisition"><option value="native-camera2">Android Camera2</option><option value="browser">Browser single camera</option></select></label>
+<label>Front/back timing<select id="timing-mode"><option value="sequential">Rear then front — sequential</option><option value="concurrent">Concurrent — supported devices only</option></select></label>
+<label id="skew-label" hidden>Maximum exposure-start skew in nanoseconds<input id="max-skew" inputmode="numeric" pattern="[0-9]+" autocomplete="off"></label>
+<label>Required camera profile<textarea id="profile" rows="7" placeholder="Inspect cameras or paste an explicitly selected profile."></textarea></label>
+<p>The profile binds the timing mode and camera order. A concurrent request needs an explicit decimal nanosecond tolerance and never falls back to sequential. Unknown clocks cannot establish an exposure gap or order.</p>
+<label>Requester<input id="requester" value="camera-set-trial"></label><label>Task<input id="task" value="Capture the requested cameras"></label>
+<button id="create" type="button">Create a fresh request</button><label>Original request<textarea id="request" rows="7"></textarea></label>
+<button id="save-request" type="button">Save request</button><label>Import request<input id="import-request" type="file" accept="application/json"></label>
+<p>Keep the original request and independently confirmed media key fingerprint before capture. Copying the current device fingerprint is only a local consistency check.</p></section>
+<section class="panel"><h2>2. Capture the declared set</h2><button id="capture" type="button">Open requested cameras</button><button id="browser-shutter" type="button" hidden>Take the single-camera photo</button><button id="cancel" type="button" disabled>Cancel capture</button>
+<video id="preview" autoplay muted playsinline hidden></video><pre id="status" aria-live="polite">Ready.</pre><button id="save-bundle" type="button" disabled>Save camera set</button><pre id="diagnostics" aria-label="Unsigned native status and cleanup diagnostics"></pre><div id="photos"></div></section>
+<section class="panel"><h2>3. Verify retrieved evidence</h2><label>Expected media certificate fingerprint<input id="pin" autocomplete="off" spellcheck="false"></label>
+<label>Import camera set<input id="import-bundle" type="file" accept="application/json"></label><button id="verify" type="button">Verify against original request</button><pre id="verification-summary" aria-live="polite"></pre><pre id="report"></pre></section>
+</main></body></html>

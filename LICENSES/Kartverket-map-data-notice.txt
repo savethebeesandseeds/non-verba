@@ -2,7 +2,7 @@ Kartverket map display data
 SPDX-License-Identifier: CC-BY-4.0
 © Kartverket
 
-The illustrative Norway administrative coverage in web/src/map-country-data.js
+The illustrative Norway administrative coverage in web/shared/map/map-country-data.js
 is derived from Kartverket's municipality illustration API. The source is a
 coarse display dataset, rather than detailed shoreline or survey geometry.
 

@@ -5,16 +5,39 @@ or mistake a form for proof of identity. An Operator should be able to describe
 the support they need and the qualifications they bring. A Requester should be
 able to do the same. Neither should need to disclose a disability to participate.
 
-The current implementation is an isolated browser inspection workflow for
-**Operators and Requesters**. It prepares a local registration record; there is
-no account server. It does not create an account, authenticate a person, verify
-identity or qualifications, publish a profile, or connect devices. Keep existing
-developer tools directly accessible. Assemble the actual app in a later, explicitly
-requested integration.
+The inspection described below is an isolated browser workflow for **Operators
+and Requesters**. It prepares a local registration record and is not connected to
+the account service. It does not create an account, authenticate a person, verify
+identity or qualifications, publish a profile, or connect devices. Keep its
+existing developer tools directly accessible.
+
+## Owner-directed first functional slice - 21 October 2026
+
+The owner now requests simple email/password account entry and separate reviewed
+identity-document/frontal-photo enrollment with selected persistence. The
+[first-slice contract and Hero 10 handoff](IDENTITY_ENROLLMENT_SLICE.md) records
+the concrete workflow, guidance-only movement animation, retained items,
+service/component seams, Requester role-policy question and remaining decisions.
+Hero 10 owns application development; Hero 2 owns identity policy/components.
+
+Local synthetic [account enrollment, sessions and recovery](SERVICE_ACCOUNT_LIFECYCLE_CHECKPOINT.md)
+and [private per-role records/publication](SERVICE_PARTICIPANT_RECORDS_CHECKPOINT.md)
+now exist in Hero 11's private backend. They do not establish a connected app,
+actual confirmation delivery, identity-media storage or verified identity. The
+newer [email sign-in/current-context checkpoint](SERVICE_SIGNIN_CONTEXT_CHECKPOINT.md)
+adds local email authentication and a coherent authenticated account/session read;
+connecting the application to them remains separate. Never add a client
+email-to-username lookup or infer service authority from the sample UI.
+Google, X and Apple linking are future directions only. Existing recovery uses
+a recovery code plus contact challenge; email-only reset is not selected.
+
+The older inspection and product-gap table below retain their component scope.
+Read service-related rows with those newer checkpoints, rather than interpreting
+them as an assertion that all account/backend capabilities remain absent.
 
 ## The pipeline available now
 
-Open [registration inspection](../../web/src/registration.html). The guided flow
+Open [registration inspection](../../web/inspections/registration/registration.html). The guided flow
 collects personal details, optional accessibility needs, optional certifications,
 privacy choices and a final review. Requesters have these five steps. Operators
 have a sixth step before the final review: deliberate local face reference
@@ -100,7 +123,7 @@ its most personal information.
 | Future capability | Work needed before actual-app use |
 | --- | --- |
 | Real account enrollment | Define account IDs, role changes, uniqueness, duplicate handling, durable transactions and confirmation. Verify contact ownership separately from form validation. Preserve draft/error recovery without accidentally submitting twice. |
-| Google account linking | Select the provider flow and requested scopes, bind a verified provider identity to the intended account, and handle linking, unlinking, conflicts and recovery. Google login is neither identity verification nor proof of a certification. No provider buttons or tokens are simulated here. |
+| Google, X and Apple account linking | Future owner-requested directions: select provider flows and scopes, explicit issuer/subject binding, linking/unlinking, conflicts and recovery. Matching email text never silently merges accounts. Provider login is neither identity verification nor proof of a certification; no functioning provider buttons or integrations exist here. |
 | Access from another device | Define enrollment approval, session/device keys, account binding, synchronization, revocation and lost-device recovery. Reuse the account-wide work privacy boundary; a new login must not undo hold or clock-out. A copied local record is not device access. |
 | Registration identity verification | Choose the evidence, validator, review/appeal process and reference binding. Define when it is required for each role, who receives evidence, and its retention/deletion. Keep that decision independent of enrollment continuity and later authentication. |
 | Operator authentication assurance | Calibrate the selected face comparison pipeline at the required low false-match operating point, including acquisition failures and relevant capture conditions. Define liveness, trusted capture, credential combination, threshold policy and recovery. A retained reference or an experimental match is insufficient. Requesters remain free of face requirements. |
@@ -124,9 +147,9 @@ not become a hidden search ranking or exclusion signal.
 The [Rust module](../../code/crates/nonverba-core/src/registration.rs) validates
 drafts, derives the limited public candidate and requires deliberate preparation
 of the reviewed revision. Its JSON/WASM interface is exposed through the existing
-core Worker. The [workflow adapter](../../web/src/registration-workflow.js) owns
+core Worker. The [workflow adapter](../../web/shared/identity/registration-workflow.js) owns
 page-memory drafts and fences late replies after edits/reset; the
-[UI](../../web/src/registration-ui.js) presents the guided forms and safe review.
+[UI](../../web/inspections/registration/registration-ui.js) presents the guided forms and safe review.
 The selected Operator face step composes the existing bounded authentication
 camera workflow with local MobileFaceNet/YuNet inference and explicit encrypted
 reference retention. It requires a separately prepared, pinned local model/runtime

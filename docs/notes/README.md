@@ -10,9 +10,11 @@ Start with [Non Verba workstreams](WORKSTREAMS.md) for the broad categories of
 work ahead, including APK buildout and server side services. Refine that outline
 and use its workstream numbers when dividing work into tasks.
 
-The [project dashboard](../../web/dashboard/README.md) organizes Heroes, Goals
-and Milestones in one JSON file per Hero, with milestone states and evidence.
-Read its [schema](../../web/dashboard/SCHEMA.md) before updating progress.
+The private workspace's
+[project dashboard](../../../private-source/web/dashboard/README.md) organizes
+Heroes, Goals and Milestones in one JSON file per Hero, with milestone states
+and evidence. Read its [schema](../../../private-source/web/dashboard/SCHEMA.md)
+before updating progress. These local links require the sibling private checkout.
 
 | Folder | Purpose |
 | --- | --- |
@@ -59,6 +61,11 @@ changes no signed profile, legal authority or runtime. The
 [priors note](research/DISPUTE_PRIORS_NOTES.md#four-research-stages) develops the
 stages and their relationship to the wider reasoning system.
 
+The contract-corpus derivation route has a
+[versioned prototype and study entry](../../code/disputes/prototypes/priors-derivation/README.md).
+The expanded v0.2 attempt is owner-paused and produced no validated first set
+of priors; its findings and dated checkpoints remain with the experiment.
+
 The notes retain the 29 September handoff about disagreement, agency and
 understandable declarations; the 30 September seed ideas incorporated on
 1 October; and the two fuller 2 October summaries. Original seed wording about
@@ -66,7 +73,7 @@ honesty, consistency and commitment remains in the priors note. Candidate time,
 useful-compute and hybrid deterrents remain in the dispute note. The summaries
 connect the resolver and inspection harness to symmetric evidence, material
 incidents, external coverage and a possible future insurance institution. The
-contract-corpus experiment remains a proposed derivation route. Material incident
+contract-corpus method remains unadopted. Material incident
 is the preferred provisional successor to catastrophe; gates, coverage,
 consequences, legal authority and evaluation methods remain open.
 

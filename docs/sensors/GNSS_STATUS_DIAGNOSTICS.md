@@ -24,9 +24,9 @@ An observed satellite-status stream with used-in-fix satellites and zero raw cal
 
 All checks ran inside the existing Debian `non-verba-dev` container. Retained logs and exact commands: `code/artifacts/qa/gnss-status-diagnostics-20260928/results.json`.
 
-- `node --test test/location-adapter-tests.mjs`: 33 passed. New cases cover failed-run retention, optional registration failure with an otherwise ready native collection, malformed/private fields, absent versus observed-zero satellites, inconsistent C/N0/counts, future receipt times and the phone reader's 512-character bound.
-- `bash crates/nonverba-android/tests/run-native-session-guards.sh`: 188 pure checks passed, including 50 new status checks for bounds, nonfinite C/N0, stale-value clearing, immutable snapshots, post-stop callbacks, session isolation and saturated counters.
-- `node --check /workspace/web/src/location-ui.js`: passed.
+- `node --test test/unit/location-adapter-tests.mjs`: 33 passed. New cases cover failed-run retention, optional registration failure with an otherwise ready native collection, malformed/private fields, absent versus observed-zero satellites, inconsistent C/N0/counts, future receipt times and the phone reader's 512-character bound.
+- `bash android/tests/platform/run-native-session-guards.sh`: 188 pure checks passed, including 50 new status checks for bounds, nonfinite C/N0, stale-value clearing, immutable snapshots, post-stop callbacks, session isolation and saturated counters.
+- `node --check` on the location UI (current source: `web/apps/non-verba-dev/src/location/location-ui.js`): passed.
 - The new collector and pure diagnostics compiled against cached Android API36 and AndroidX Core1.16.0 jars with the existing Linux Kotlin compiler; exact retained invocation is `compile-collector.sh`, output `collector-compile.log` in the QA directory. This did not build an APK.
 
 These are deterministic boundary checks and API compilation, not physical satellite or raw-GNSS validation. Installation, runtime registration, vendor behavior, physical RF conditions and phone lifecycle cleanup remain for the parent task's next device run.

@@ -26,8 +26,8 @@ MCP adapter or make a browser UI necessary for agent control.
 | Existing component | Reuse and remaining boundary |
 | --- | --- |
 | `code/crates/nonverba-core/src/evidence_session/` and `agent_appraisal` | Typed signed requests, receipts and actual artifact appraisal; no agent service or acceptance store |
-| `web/src/agent-requester.js` | Transport-independent workflow semantics: start, receive, verify, retained inspection, accept and cancel; currently depends on browser lifecycle, Worker and IndexedDB |
-| `web/src/agent-evidence-storage.js` | Local atomic session/nonce reservations and acceptance; a server needs its own durable, principal-scoped implementation preserving these semantics |
+| `web/shared/evidence/agent-requester.js` | Transport-independent workflow semantics: start, receive, verify, retained inspection, accept and cancel; currently depends on browser lifecycle, Worker and IndexedDB |
+| `web/shared/evidence/agent-evidence-storage.js` | Local atomic session/nonce reservations and acceptance; a server needs its own durable, principal-scoped implementation preserving these semantics |
 | [Image requester CLI](IMAGE_REQUESTER_CLI.md) | Separate-process image request/receipt demonstration; memory-only requester identity, no restart, transport service or acceptance ledger |
 | Existing Android collectors | Independent camera, GPS and microphone acquisition with explicit composition and platform lifecycle restrictions |
 

@@ -1,0 +1,403 @@
+{
+  "version": 1,
+  "sourceRoots": [
+    "apps/non-verba-dev/src",
+    "inspections",
+    "shared"
+  ],
+  "assets": [
+    {
+      "source": "shared/evidence/agent-evidence-storage.js",
+      "output": "agent-evidence-storage.js"
+    },
+    {
+      "source": "shared/evidence/agent-requester.js",
+      "output": "agent-requester.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/camera/app.js",
+      "output": "app.js"
+    },
+    {
+      "source": "shared/audio/audio-capture.js",
+      "output": "audio-capture.js"
+    },
+    {
+      "source": "shared/audio/audio-controller.js",
+      "output": "audio-controller.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/audio/audio-demo.js",
+      "output": "audio-demo.js"
+    },
+    {
+      "source": "shared/audio/audio-peer.js",
+      "output": "audio-peer.js"
+    },
+    {
+      "source": "shared/audio/audio-platform.js",
+      "output": "audio-platform.js"
+    },
+    {
+      "source": "shared/audio/audio-receipts.js",
+      "output": "audio-receipts.js"
+    },
+    {
+      "source": "shared/audio/audio-session.js",
+      "output": "audio-session.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/audio/audio-ui.js",
+      "output": "audio-ui.js"
+    },
+    {
+      "source": "shared/audio/audio-worklet.js",
+      "output": "audio-worklet.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/audio/audio.css",
+      "output": "audio.css"
+    },
+    {
+      "source": "apps/non-verba-dev/src/audio/audio.html",
+      "output": "audio.html"
+    },
+    {
+      "source": "shared/identity/authentication-camera.js",
+      "output": "authentication-camera.js"
+    },
+    {
+      "source": "shared/identity/device-attestation.js",
+      "output": "device-attestation.js"
+    },
+      {
+        "source": "shared/identity/browser-attestation-keys.js",
+        "output": "browser-attestation-keys.js"
+      },
+    {
+      "source": "apps/non-verba-dev/src/keys/device-attestation.html",
+      "output": "device-attestation.html"
+    },
+    {
+      "source": "apps/non-verba-dev/src/keys/device-attestation-ui.js",
+      "output": "device-attestation-ui.js"
+    },
+    {
+      "source": "shared/identity/enrollment-camera.js",
+      "output": "enrollment-camera.js",
+      "consumer": "participant"
+    },
+    {
+      "source": "shared/identity/identity-capture.js",
+      "output": "identity-capture.js",
+      "consumer": "participant"
+    },
+    {
+      "source": "inspections/authentication/authentication-privacy-ui.js",
+      "output": "authentication-privacy-ui.js"
+    },
+    {
+      "source": "inspections/authentication/authentication-privacy.css",
+      "output": "authentication-privacy.css"
+    },
+    {
+      "source": "inspections/authentication/authentication-privacy.html",
+      "output": "authentication-privacy.html"
+    },
+    {
+      "source": "shared/identity/authentication-workflow.js",
+      "output": "authentication-workflow.js"
+    },
+    {
+      "source": "shared/camera/camera-acceptance.js",
+      "output": "camera-acceptance.js"
+    },
+    {
+      "source": "shared/camera/camera-location.js",
+      "output": "camera-location.js"
+    },
+    {
+      "source": "shared/camera/camera-peer.js",
+      "output": "camera-peer.js"
+    },
+    {
+      "source": "shared/camera/camera-platform.js",
+      "output": "camera-platform.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/camera/camera-quality.js",
+      "output": "camera-quality.js"
+    },
+    {
+      "source": "shared/camera/camera-session-capture.js",
+      "output": "camera-session-capture.js"
+    },
+    {
+      "source": "shared/camera/camera-session-policy.js",
+      "output": "camera-session-policy.js"
+    },
+    {
+      "source": "shared/camera/camera-session-preflight.js",
+      "output": "camera-session-preflight.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/camera/camera-session-ui.js",
+      "output": "camera-session-ui.js"
+    },
+    {
+      "source": "shared/camera/camera-session.js",
+      "output": "camera-session.js"
+    },
+    {
+      "source": "shared/camera/camera-set-platform.js",
+      "output": "camera-set-platform.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/camera/camera-set-ui.js",
+      "output": "camera-set-ui.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/camera/camera-set.html",
+      "output": "camera-set.html"
+    },
+    {
+      "source": "shared/runtime/core-client.js",
+      "output": "core-client.js"
+    },
+    {
+      "source": "shared/runtime/core-worker.js",
+      "output": "core-worker.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/common/developer-inspection-navigation.js",
+      "output": "developer-inspection-navigation.js"
+    },
+    {
+      "source": "shared/identity/face-alignment.js",
+      "output": "face-alignment.js"
+    },
+    {
+      "source": "shared/identity/face-model-spec.js",
+      "output": "face-model-spec.js"
+    },
+    {
+      "source": "shared/identity/face-reference-store.js",
+      "output": "face-reference-store.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/gps-attempt.js",
+      "output": "gps-attempt.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/gps-warmup.js",
+      "output": "gps-warmup.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/camera/index.html",
+      "output": "index.html"
+    },
+    {
+      "source": "shared/identity/key-enrollment-platform.js",
+      "output": "key-enrollment-platform.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/keys/key-enrollment-ui.js",
+      "output": "key-enrollment-ui.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/keys/key-enrollment.css",
+      "output": "key-enrollment.css"
+    },
+    {
+      "source": "apps/non-verba-dev/src/keys/key-enrollment.html",
+      "output": "key-enrollment.html"
+    },
+    {
+      "source": "shared/location/live-location-session.js",
+      "output": "live-location-session.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/live-location-ui.js",
+      "output": "live-location-ui.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/live-location.html",
+      "output": "live-location.html"
+    },
+    {
+      "source": "shared/location/live-peer.js",
+      "output": "live-peer.js"
+    },
+    {
+      "source": "shared/evidence/live-session-storage.js",
+      "output": "live-session-storage.js"
+    },
+    {
+      "source": "shared/location/location-capture.js",
+      "output": "location-capture.js"
+    },
+    {
+      "source": "shared/location/location-platform.js",
+      "output": "location-platform.js"
+    },
+    {
+      "source": "shared/location/location-policy.js",
+      "output": "location-policy.js"
+    },
+    {
+      "source": "shared/location/location-profile-readiness.js",
+      "output": "location-profile-readiness.js"
+    },
+    {
+      "source": "shared/location/location-session-policy.js",
+      "output": "location-session-policy.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/location-ui.js",
+      "output": "location-ui.js"
+    },
+    {
+      "source": "shared/location/location-verification-inputs.js",
+      "output": "location-verification-inputs.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/location.css",
+      "output": "location.css"
+    },
+    {
+      "source": "apps/non-verba-dev/src/location/location.html",
+      "output": "location.html"
+    },
+    {
+      "source": "shared/location/location.js",
+      "output": "location.js"
+    },
+    {
+      "source": "shared/map/map-controller.js",
+      "output": "map-controller.js"
+    },
+    {
+      "source": "shared/map/map-country-data.js",
+      "output": "map-country-data.js"
+    },
+    {
+      "source": "shared/map/map-geometry.js",
+      "output": "map-geometry.js"
+    },
+    {
+      "source": "shared/map/map-policy.js",
+      "output": "map-policy.js"
+    },
+    {
+      "source": "shared/map/map-tiles.js",
+      "output": "map-tiles.js"
+    },
+    {
+      "source": "inspections/map/map-ui.js",
+      "output": "map-ui.js"
+    },
+    {
+      "source": "shared/map/map-view.js",
+      "output": "map-view.js"
+    },
+    {
+      "source": "inspections/map/map.css",
+      "output": "map.css"
+    },
+    {
+      "source": "inspections/map/map.html",
+      "output": "map.html"
+    },
+    {
+      "source": "shared/identity/mobile-face-model.js",
+      "output": "mobile-face-model.js"
+    },
+    {
+      "source": "shared/identity/operator-face-workflow.js",
+      "output": "operator-face-workflow.js"
+    },
+    {
+      "source": "shared/evidence/pairing-import.js",
+      "output": "pairing-import.js"
+    },
+    {
+      "source": "inspections/registration/registration-ui.js",
+      "output": "registration-ui.js"
+    },
+    {
+      "source": "shared/identity/registration-workflow.js",
+      "output": "registration-workflow.js"
+    },
+    {
+      "source": "inspections/registration/registration.css",
+      "output": "registration.css"
+    },
+    {
+      "source": "inspections/registration/registration.html",
+      "output": "registration.html"
+    },
+    {
+      "source": "shared/evidence/request-presets.js",
+      "output": "request-presets.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/common/retained-evidence-ui.js",
+      "output": "retained-evidence-ui.js"
+    },
+    {
+      "source": "apps/non-verba-dev/src/common/style.css",
+      "output": "style.css"
+    },
+    {
+      "source": "shared/identity/work-privacy-controller.js",
+      "output": "work-privacy-controller.js"
+    },
+    {
+      "source": "shared/runtime/base64.js",
+      "output": "base64.js"
+    },
+    {
+      "source": "shared/runtime/database.js",
+      "output": "database.js"
+    },
+    {
+      "source": "shared/evidence/capture-storage.js",
+      "output": "capture-storage.js"
+    },
+    {
+      "source": "shared/identity/identity-vault.js",
+      "output": "identity-vault.js"
+    },
+    {
+      "source": "shared/location/location-diagnostics.js",
+      "output": "location-diagnostics.js"
+    },
+    {
+      "source": "shared/location/location-presentation.js",
+      "output": "location-presentation.js"
+    }
+  ],
+  "entries": {
+    "browser": [
+      "index.html",
+      "camera-set.html",
+      "audio.html",
+      "location.html",
+      "live-location.html",
+      "key-enrollment.html",
+      "device-attestation.html",
+      "registration.html",
+      "authentication-privacy.html",
+      "map.html"
+    ],
+    "android": [
+      "index.html",
+      "camera-set.html",
+      "audio.html",
+      "location.html",
+      "live-location.html",
+      "key-enrollment.html",
+      "device-attestation.html"
+    ]
+  }
+}

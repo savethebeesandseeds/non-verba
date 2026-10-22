@@ -8,10 +8,14 @@ integration. The isolated implementation below exercises them without providing
 deployed account authentication, legal identity verification, account-wide sensor
 shutdown or notification delivery.
 
-The current app is a developer inspection surface. Keep quick access to its
-existing functionality. Develop the components below independently and combine
-them only when building the actual app is explicitly requested. This document
-does not request that integration, a deployment or physical sensor collection.
+The isolated implementation described here is a developer inspection surface.
+Keep quick access to its existing functionality. On 21 October 2026 the owner
+requested the [first functional account and identity-enrollment slice](IDENTITY_ENROLLMENT_SLICE.md):
+email/password account entry plus separate document/frontal-picture review and
+selected persistence. Hero 10 owns the application; Hero 2 supplies identity
+policy/components. The newer local synthetic backend checkpoints linked there
+do not convert this inspection into integrated authentication or authorize real
+data, deployment or physical sensor collection.
 
 Read alongside the [agent workflow requirements](AGENT_WORKFLOWS_MCP.md),
 [security design record](../SECURITY_DESIGN_RECORD.md),
@@ -30,7 +34,7 @@ face features. Genuine authentication and
 deployed account protection remain false in every result. Simulated success is
 usable only when the inspection requirement explicitly permits simulation.
 
-The [browser inspection entry](../../web/src/authentication-privacy.html) uses
+The [browser inspection entry](../../web/inspections/authentication/authentication-privacy.html) uses
 these policies through the existing Rust Worker. Its independent workflow and
 privacy controller own cancellation, local resource cleanup, lease expiry,
 callback fencing and simulated linked devices. Synthetic profiles and notification
@@ -156,10 +160,17 @@ and evaluation.
 
 ### Requester mode
 
-Provide its own configurable steps and result requirements. Its concrete
-authentication method is not selected. Requester registration and authentication
-have no face capture, enrollment, comparison or liveness requirement. They do
-not instantiate the Operator face model or local biometric store.
+Provide its own configurable steps and result requirements. The owner now selects
+email/password for account sign-in; the newer local
+[email/current-context service](SERVICE_SIGNIN_CONTEXT_CHECKPOINT.md) supplies
+the credential interface, while application connection and task-scoped Requester
+authentication/reuse policy remain open.
+The existing inspection registration and recurring Requester authentication have
+no face-model/reference, comparison or liveness requirement. Initial identity
+enrollment is separate: the new picture request's role applicability remains an
+explicit owner decision in the first-slice handoff. It must not silently impose
+recurring face authentication or instantiate the Operator model/store for a
+Requester picture.
 
 Both modes remain distinct from registration identity verification. Deciding how
 recurring checks reference a verified registration identity is future work.

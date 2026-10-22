@@ -9,7 +9,7 @@ The source entry is `web/site/index.html`. Generate the static bundle inside the
 managed development environment; the snapshot bridge uses:
 
 ```powershell
-./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/export-homepage.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/build/export-homepage.mjs')
 ```
 
 The command replaces only the generated `code/artifacts/pages/` directory with

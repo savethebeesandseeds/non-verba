@@ -4,7 +4,7 @@ The interactive and USB procedure below describes the preserved, matching
 pre-unification checkout. Public-checkout [snapshot validation](CONTAINER_MIGRATION.md)
 does not provide an interactive owner session or authorize phone operations.
 
-`code/tools/image-requester-session.mjs` runs one requester session in Debian,
+`code/tools/evidence/image-requester-session.mjs` runs one requester session in Debian,
 using the shipped Rust/WASM image and evidence-session APIs. It creates a separate
 requester identity before any fresh challenge. The private key stays in process
 memory; the tool has no restart, transport service, phone control or acceptance
@@ -20,7 +20,7 @@ From the repository root, open the existing container shell:
 Then, inside Debian at `/workspace/code`, start:
 
 ```sh
-node tools/image-requester-session.mjs --operator-pin YOUR_INDEPENDENTLY_KNOWN_64_HEX_CAMERA_PIN \
+node tools/evidence/image-requester-session.mjs --operator-pin YOUR_INDEPENDENTLY_KNOWN_64_HEX_CAMERA_PIN \
   --requester 'Requester agent' --task 'Photograph the requested subject' \
   --output-dir /workspace/code/artifacts/device-acceptance/NEW_UNIQUE_DIRECTORY
 ```
@@ -71,7 +71,7 @@ send `dispatch`, wait for `dispatched`, then run this separate Windows PowerShel
 command against the newly retained file:
 
 ```powershell
-./code/tools/usb-device.ps1 -Action AppCameraChallenge -CameraChallengeFile C:\Work\Non-verba\open-source\code\artifacts\device-acceptance\NEW_UNIQUE_DIRECTORY\challenge.json
+./code/tools/device/usb-device.ps1 -Action AppCameraChallenge -CameraChallengeFile C:\Work\Non-verba\open-source\code\artifacts\device-acceptance\NEW_UNIQUE_DIRECTORY\challenge.json
 ```
 
 The helper preserves those original bytes and timestamps. It derives a compact
@@ -174,7 +174,7 @@ clock, trusted hardware or proof of physical scene/location authenticity.
 Run focused tests inside Debian:
 
 ```powershell
-./code/dev.ps1 -Action Exec -Command @('node','--test','test/image-requester-session-tests.mjs')
+./code/dev.ps1 -Action Exec -Command @('node','--test','test/evidence/image-requester-session-tests.mjs')
 ```
 
 The suite uses real shipped WASM, C2PA and COSE signatures, plus synthetic image

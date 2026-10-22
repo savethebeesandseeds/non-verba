@@ -13,21 +13,26 @@ does not prove that a camera scene, sound, or location is truthful. Read the
 See [Non Verba workstreams](docs/notes/WORKSTREAMS.md) for the broad categories of
 work ahead and the outline to refine when dividing tasks.
 
-The [project dashboard](web/dashboard/README.md) organizes the work as Heroes,
-Goals and Milestones, with color-coded states and evidence. Read the
-[schema](web/dashboard/SCHEMA.md) to update one JSON per Hero.
+The private workspace's [project dashboard](../private-source/web/dashboard/README.md)
+organizes the work as Heroes, Goals and Milestones, with color-coded states and
+evidence. Its [schema](../private-source/web/dashboard/SCHEMA.md) defines updates
+to one JSON per Hero. These local links require the sibling private checkout;
+dashboard source and progress records are outside this public repository.
 
 ## Project structure
 
 | Path | Responsibility |
 | --- | --- |
 | `web/site/` | Public homepage and project artwork |
-| `web/simulator/` | Standalone cooperation simulator and setup editor |
-| `web/src/` | Shared requester, operator, and verifier browser UI |
+| `web/apps/non-verba/` | Non-verba participant UI shared by browser and APK; currently a nonbinding workspace preview |
+| `web/apps/non-verba-dev/` | Non-verba-dev evidence UI shared by browser and APK |
+| `web/shared/` | Reusable evidence, platform and workflow components |
+| `web/inspections/` | Isolated component inspections awaiting product integration |
+| `web/simulator/` | Standalone fictional cooperation simulator and setup editor |
 | `code/crates/nonverba-cooperation/` | Task-scoped remuneration calculations |
 | `code/crates/nonverba-core/` | Sensor policies, evidence formats, signing, and verification |
 | `code/crates/nonverba-android/` | Native sensor JNI interface |
-| `code/android/` | Android application and native acquisition adapters |
+| `code/android/app/`, `code/android/participant/` | Native Android hosts for Non-verba-dev and Non-verba respectively |
 | `code/requests/` | Three-party assignment protocol and portable verifier |
 | `code/disputes/` | Analysis-only dispute workflow; no financial authority |
 | `code/protocol/`, `code/simulator/` | Cooperation host API and simulator model |
@@ -39,6 +44,13 @@ All five Rust packages share the workspace and lockfile in `code/`. Sensor,
 Android, cooperation, assignment, and dispute code remain separate packages with
 their own module boundaries. Generated packages, captures, local trust material,
 build outputs, and toolchains are excluded from version control.
+The [implementation map](code/README.md) gives tool/test ownership and the
+Android platform versus JNI test boundaries.
+
+Each app has one web UI implementation. APKs bundle their selected UI in an
+Android WebView with native platform adapters. See the
+[web architecture guide](web/README.md) for application status, source placement
+and generated asset sets.
 
 Release builds use the shared size-optimized profile with LTO and
 `panic = "abort"`; tests retain Cargo's normal test profile.
@@ -96,12 +108,14 @@ Earlier public revisions through `63e5884` were released under Apache 2.0; those
 grants remain valid. The previously separate application source enters this
 public repository with this consolidation under AGPLv3. Its private Git history,
 operational records, signing material, and personal captures are not imported.
-The private repository remains a reserve for future work. Its former source,
-uncommitted work and private journals remain in a small local recovery archive;
-obsolete caches and host toolchains were removed at the owner's request. The
-private repository now tracks only its README, ignore rules and text attributes.
-Its original Git history and ignored local records remain private.
-See [the completed consolidation record](docs/development/VALIDATION.md#private-reserve-and-recovery-record).
+The owner-selected backend is developed separately in the private repository;
+its implementation, deployment configuration and operational records are not
+part of this public tree. The [public environment checkpoint](docs/development/SERVICE_ENVIRONMENT_CHECKPOINT.md)
+records the limited shareable scope and leaves service readiness separate.
+Earlier private application source, uncommitted work and journals remain in a
+small local recovery archive; the private Git history and local records remain
+private. The [consolidation record](docs/development/VALIDATION.md#private-reserve-and-recovery-record)
+describes that earlier transition, not the current scope of backend development.
 
 Read the [governance principles](GOVERNANCE.md) for the project's intended rights
 and cooperation model. They are a draft design, not a legal charter or a

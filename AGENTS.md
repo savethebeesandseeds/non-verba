@@ -5,8 +5,12 @@
 - Keep changes limited to the requested outcome. A source cleanup is not a disk
   cleanup, backup, toolchain migration, or container rebuild.
 - Inspect Git status before edits. Preserve other sessions' changes and never
-  stage unrelated work. The unified public repository is the active source;
-  the sibling private repository is retained for private records and future work.
+  stage unrelated work. This repository owns the public applications, protocols
+  and reference tools. The sibling `private-source/code/server/` is the
+  owner-selected active private backend, with its own instructions, dedicated
+  container and explicitly approved separate Cargo package. Keep backend source,
+  deployment configuration and operational records private; do not merge its
+  workspace into this one.
 - Use `git ls-files`, `rg`, and targeted reads. Do not recursively inventory,
   hash, copy, or archive ignored build outputs, dependency caches, toolchains,
   captures, or the whole checkout for an ordinary source task.
@@ -18,99 +22,30 @@
 
 ## Project progress dashboard
 
-- Maintain one JSON per Hero in `web/dashboard/heroes/`, for example
-  `web/dashboard/heroes/01-sensors.json`. The fixed hierarchy
-  is Hero -> Goal -> Milestone; the previous eleven categories are Heroes. Read
-  `web/dashboard/SCHEMA.md` and the relevant Hero JSON before updates; the schema
-  is sufficient for ordinary progress edits. `docs/notes/WORKSTREAMS.md` defines
-  Hero boundaries.
-- Keep the dashboard root limited to `README.md`, `SCHEMA.md`, `manifest.json`
-  and `package.json`. Hero records live in `heroes/`, interface sources in `src/`,
-  build/validation/refresh helpers in `scripts/`, formal schemas in `schemas/`,
-  prepared artwork in `assets/branding/`, focused checks in `tests/`, and generated
-  output in `public/`. Use the current manifest paths; do not recreate the old
-  root-level Hero files when continuing a session started before this migration.
-- Keep this a partial record of confirmed work. Add Goals and Milestones only
-  from explicit owner requests, agreed task records or evidenced implementation;
-  do not seed guessed tasks, acceptance criteria, dependencies or active states
-  from a broad workstream description. Leave `goals: []` when the breakdown is
-  unconfirmed, or `milestones: []` for a confirmed Goal with no scoped steps.
-  An existing evidence file alone does not prove a Milestone's state. Record
-  the outcome and its limits; omit unknown dates and ownership. Completion
-  indicators apply only to listed Milestones, including local prototypes.
-- When a task achieves a milestone, update its Hero JSON in the same change
-  as the implementation or decision. Record the actual scoped outcome, status,
-  acceptance criteria and authored evidence references. Update the Hero's
-  `updatedAt`; Milestone dates/owner/dependencies are optional. Use `completedAt`
-  only for a known achievement date. Ordinary updates touch no shared manifest.
-- Mark a Milestone done only when its stated acceptance criteria are met and evidence
-  is linked. Track prototype, software, physical-device and deployment milestones
-  separately. Record an unresolved blocker explicitly; preserve historical limits
-  and avoid treating a successful component check as whole-workstream completion.
-- Add Goals and Milestones as scope becomes concrete. Store states only on
-  Milestones; Hero/Goal summaries are computed. Preserve stable globally unique
-  IDs and valid Milestone dependencies. Update the manifest and workstream outline
-  only when Heroes change.
-  Keep private captures, device records, credentials and operational logs out of
-  dashboard JSON. Preserve other sessions' Hero edits.
-- Whenever any Hero JSON changes, including Goals, descriptions, evidence or
-  Milestone states, refresh the dashboard in the same task. The chat editing the
-  JSON is responsible for this step unless the owner explicitly coordinates
-  refresh elsewhere; do not wait for the user to ask. Run
-  `./web/dashboard/scripts/refresh.ps1` from the repository root, or
-  `bash web/dashboard/scripts/refresh.sh` from Windows Bash. The shell helper
-  delegates to PowerShell on Windows; inside managed Debian it updates only the
-  current snapshot's HTML. The Windows workflow validates and regenerates the
-  standalone HTML in the existing managed container through a source snapshot,
-  then copies `public/index.html` back. Hero JSONs
-  remain the source of truth; preserve concurrent edits and never hand-edit the
-  generated HTML. Confirm that the helper completed successfully before reporting
-  the dashboard updated; JSON/schema inspection or `-Check` alone does not refresh
-  it. If a guard or environment blocker prevents refresh, preserve the guards and
-  concurrent work and explicitly report that the dashboard refresh is pending.
-  Dashboard upkeep needs no APK or aggregate project build.
-- Use `./web/dashboard/scripts/refresh.ps1 -Check` to validate data and HTML freshness
-  without host writes. When UI/model/template/schema code or behavior changes,
-  use `-BrowserCheck` for focused model and file-open browser checks as well as
-  freshness; refresh the generated HTML before delivery. Keep scripts protected
-  by generated CSP hashes.
-- The dashboard opens directly as `web/dashboard/public/index.html`, already populated
-  from its last validated snapshot; do not create a webserver or require a picker
-  to use it. Browser file-open security prevents automatically fetching adjacent
-  JSONs. JSON edits become visible only after refresh and reopening/reloading the
-  HTML. Opening the finished HTML requires no container or development runtime.
-- Keep navigation at overview -> one Hero -> one Goal. Start with neither
-  selected; do not automatically render all Hero or Goal detail sections.
-  A selected Hero shows compact vertical Goal choices with done/total rings,
-  recorded state dots, clear selected styling and a fixed chevron cue. Keep
-  View Goal/Viewing Goal action text visually hidden for accessibility, retaining
-  button semantics, selection attributes and live announcements. Keep one adjacent
-  detail panel on desktop and a compact swipeable strip above details on phones.
-  Make the Goal navigator's scrolling area taller but bounded and its buttons
-  compact. Keep surfaces in the cream, sage and earthy sand theme, with contrasting
-  pale olive/sage around ivory/sage Goal choices, soft sage criteria,
-  warm parchment evidence and translucent sand Milestone headers with dark ink.
-  Emphasize actual source statuses through stronger rails/top rules, markers and
-  badges; preserve semantic status colors and keep any body tint consistent.
-  Show each Milestone's description once in its header: a two-line closed preview
-  and the complete literal text when expanded, without a duplicate body copy.
-  Goal selection
-  updates only that panel, retains the choices and button focus, and causes no
-  automatic document scroll. Goals overview preserves position and returns focus
-  to the previous choice; Project overview clears both selections.
-  Filters retain all choices and the selected Goal, with full-scope progress,
-  separate match counts and an explicit reset path when none match. Reset keeps
-  both selections. Active filters reveal matching Milestones;
-  clearing them restores the normal Goal hide/show choice.
-  Dependency/focus links select the actual owning Hero and Goal and intentionally
-  jump to the requested Milestone. Preserve source order and states, including
-  empty planning Goals; invent no priority or progress.
-- Reuse the project artwork in `web/site/branding/` for the dashboard. Keep
-  originals unchanged and embed its small dashboard derivatives through
-  `web/dashboard/scripts/branding.mjs`; the standalone page must retain its artwork
-  without neighboring assets or network requests. Completion indicators count
-  tracked milestones, and the current-work panel reflects actual active/blocked
-  records; do not invent priorities or imply production readiness.
+- The project progress dashboard is maintained in the sibling private checkout at
+  `../private-source/web/dashboard/`. Follow the private
+  [working instructions](../private-source/AGENTS.md) and dashboard
+  [schema](../private-source/web/dashboard/SCHEMA.md) before editing its records.
+  These local links require the shared workspace; the dashboard is outside the
+  public repository and public release exports.
+- When a public-source task achieves a recorded Milestone, update its private
+  Hero JSON with the actual scoped outcome and public evidence, preserve other
+  sessions' edits, and complete the dashboard's refresh procedure in the same
+  task. Report a blocked refresh explicitly; do not weaken its guards or treat a
+  component check as whole-workstream completion.
+
+## Legal documents and notices
+
+- Hx02 is the owner's continuing steward of
+  [the legal document register](docs/LEGAL_DOCUMENT_REGISTER.md). Keep its source
+  references, versions, review dates, states and outstanding decisions current
+  whenever legal text, notices, agreement flows, offering/coverage or relevant
+  data handling changes. Follow its maintenance procedure; preserve earlier
+  exact agreement and notice bytes and their acceptance records.
+- Other Heroes retain implementation and subject ownership. Record their actual
+  evidence and unresolved gaps without promoting draft text, synthetic notices
+  or technical checks into legal approval or adoption. Operator, country and
+  adoption decisions remain with the owner and applicable legal review.
 
 ## Builds and generated data
 
@@ -125,6 +60,13 @@
 - The five Rust packages share `code/Cargo.toml` and `code/Cargo.lock`. Add new
   packages to that workspace; do not introduce nested workspaces or lockfiles
   as an incidental implementation choice. Keep module responsibilities separate.
+- Follow `code/README.md` for source ownership. Place utilities in the existing
+  purpose directories under `code/tools/`, and JavaScript checks in the scoped
+  groups under `code/test/`; register their prerequisites in
+  `code/tools/test/test-suites.mjs`. Android platform tests belong to
+  `code/android/tests/`, JNI integration tests to their Rust crate, and frozen
+  research to its versioned experiment. Update consumers when moving source;
+  do not recreate flat compatibility copies or duplicate test harnesses.
 - Run the smallest relevant validation. Documentation, license, ignore-rule,
   and instruction edits do not justify aggregate tests, Android builds, browser
   screenshots, or release packages.

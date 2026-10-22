@@ -94,7 +94,8 @@ the lock and after signing; cancellation cannot be bypassed by a queued signer.
 ## Validation boundary
 
 The production lifecycle and monotonic freshness gates have a deterministic host
-Kotlin harness at `code/crates/nonverba-android/tests/run-native-session-guards.ps1`.
+Kotlin harness at `code/android/tests/platform/run-native-session-guards.sh`
+inside the managed Linux container.
 It exercises clock changes, stale samples, authority revocation, lock contention
 and expiry during signing. The companion catalog harness checks exact-generation
 lookup, legacy compatibility, ambiguous exports, duplicate records, absent pins,

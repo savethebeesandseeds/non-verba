@@ -93,7 +93,7 @@ The requester must record wall and monotonic dispatch/reception locally. Operato
 
 ## Live audio integration in 0.7
 
-`web/src/audio-session.js` connects this protocol to the existing audio page,
+`web/shared/audio/audio-session.js` connects this protocol to the existing audio page,
 WebRTC transport and browser/native microphone adapters. Version 2 audio pairing
 offers carry connection details, requester and operator pins, a pairing ID, and
 task/duration/assurance hints. They contain no sensor request. The operator must
@@ -147,7 +147,7 @@ reception. It has no transport service, restart or acceptance ledger.
 
 ## Acceptance boundary and tests
 
-`web/src/agent-requester.js` exposes `AgentRequester`, using the shared Rust/WASM
+`web/shared/evidence/agent-requester.js` exposes `AgentRequester`, using the shared Rust/WASM
 worker and a separate IndexedDB ledger. Create it with `createCoreClient()`.
 `identity()` loads the persistent requester key before a sensor challenge exists.
 `start(async (engine, nowSecs) => spec, {contextJson, send})` creates and signs the

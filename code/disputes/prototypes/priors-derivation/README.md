@@ -13,10 +13,21 @@ timings, clustering diagnostics and interpretations belong to each retained run.
 A test pass, separated cluster or repeated contractual phrase establishes neither
 fairness nor the usefulness of a proposed prior.
 
-The proposed [0.2 study plan](plans/STUDY_0_2_PLAN.md) expands to 10,000 discovery
-records and a sealed 5,000-record confirmation/replication reserve, with improved
-representation, scalable processing and independent meaning evaluation. It is
-planned work; the 0.1 recipe and its limits below describe the completed prototype.
+## Choose the research version
+
+| Entry | Status and purpose |
+| --- | --- |
+| This README and the adjacent `lib/`, `fixtures/`, `review/` and tests | Completed v0.1 prototype recipe, local use and limitations |
+| [v0.2 study entry](study-v0.2/README.md) | Executed but incomplete expanded study; OWNER-PAUSED since 19 October 2026 |
+| [v0.2 findings and handoff](study-v0.2/handoff/2026-10-19/Priors_Derivation_PROTOTYPE_Findings_and_Handoff.md) | Results, reusable work, exact stop positions and missing evidence |
+| [v0.2 checkpoint history](study-v0.2/HISTORY.md) | Detailed dated investigation record, with original evidence and links preserved |
+
+The [0.2 study plan](plans/STUDY_0_2_PLAN.md) declares 10,000 discovery records
+and a sealed 5,000-record confirmation/replication reserve. Its calibration was
+executed but the study did not produce a validated first set of priors.
+Fresh100 and both reserves remain unopened. Current authority is NONE;
+the paused study does not resume automatically. The v0.1 instructions below
+describe that version only and do not authorize v0.2 work.
 
 ## The experiment
 

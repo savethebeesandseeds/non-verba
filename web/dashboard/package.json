@@ -1,7 +1,0 @@
-{
-  "name": "@non-verba/workstream-dashboard",
-  "private": true,
-  "type": "module",
-  "license": "AGPL-3.0-only",
-  "description": "Standalone file-open dashboard generated from authored Hero JSON records"
-}

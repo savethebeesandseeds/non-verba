@@ -6,6 +6,7 @@ plugins {
 
 android {
     namespace = "org.nonverba.participant"
+    buildFeatures { buildConfig = true }
     compileSdk = 36
 
     defaultConfig {
@@ -14,9 +15,12 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.7.0"
+        buildConfigField("boolean", "KEEP_SCREEN_AWAKE", providers.gradleProperty("nonverba.keepScreenAwake")
+            .orElse("false").get().toBooleanStrict().toString())
     }
 
-    sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/participant-assets"))
+    sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/participant-capture-assets-v1"))
+    sourceSets.getByName("main").java.srcDir("../shared/src/main/kotlin")
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -43,12 +47,19 @@ dependencies {
 }
 
 val verifyParticipantAssets by tasks.registering {
-    val assets = layout.buildDirectory.dir("generated/participant-assets")
+    val assets = layout.buildDirectory.dir("generated/participant-capture-assets-v1")
     inputs.dir(assets)
     doLast {
         val required = setOf(
             "participant/index.html", "participant/participant.css",
-            "participant/participant.js", "participant/branding/sprout.svg"
+            "participant/participant.js", "participant/branding/sprout.svg",
+            "participant/branding/home-sprout.webp", "participant/branding/waajacu.webp",
+            "participant/onboarding-ui.js", "participant/onboarding-account.js", "participant/account-transport.js",
+            "participant/account-terms.js",
+            "participant/recovery-export.js",
+            "participant/identity/enrollment-camera.js", "participant/identity/identity-capture.js",
+            "participant/identity/device-attestation.js",
+            "participant/identity/browser-attestation-keys.js"
         )
         val root = assets.get().asFile
         check(required.all { root.resolve(it).isFile }) {
@@ -57,7 +68,14 @@ val verifyParticipantAssets by tasks.registering {
         val actual = root.walkTopDown().filter { it.isFile }
             .map { it.relativeTo(root).invariantSeparatorsPath }.toSet()
         check(actual.filterNot { it.startsWith("nonverba-license/") }.toSet() == required) {
-            "Participant assets differ from the four reviewed shell files; developer tools and generated models must remain outside this APK."
+            "Participant assets differ from the reviewed account, capture and attestation files; developer tools and generated models must remain outside this APK."
+        }
+        check(required.sumOf { root.resolve(it).length() } <= 296 * 1024) {
+            "Participant runtime exceeds the reviewed 296 KiB account and recovery-code export budget."
+        }
+        check(required.filter { it.endsWith(".svg") || it.endsWith(".webp") }
+            .all { root.resolve(it).length() <= 8 * 1024 }) {
+            "Participant images exceed their unchanged 8 KiB individual budget."
         }
         check(setOf("nonverba-license/LICENSE.txt", "nonverba-license/SOURCE.txt").all { it in actual }) {
             "Participant license/source notices are missing. Stage the current corresponding-source notices before building :participant."

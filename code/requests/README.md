@@ -74,6 +74,32 @@ role keys are separately pinned and never inferred from a sensor signature.
 | `src/bin/nonverba-assignment.rs` | Independent native signing, inspection, verification and import/export commands |
 | `src/bin/nonverba-workflow/` | Guided synthetic drafts, exact signing reviews and readable core-report inspection |
 | `src/ports.rs` | Signing, storage, transport, evidence and payment-observation integration boundaries |
+| `src/client_operation.rs` | Transport-independent exact-byte operation identity and uncertain/pending/service-observation bookkeeping |
+
+The client-operation core is an original local model, not a service wire schema
+or a connected APK adapter. It binds an opaque operation ID and body to the
+original principal/key, Assignment, kind and explicitly labelled content hashes.
+Its initial opaque-body budget is 4 MiB; that is not the private service's upload
+limit or support for every maximum-sized evidence request. It uses the existing
+identifier, digest and raw-byte hashing functions without a new dependency.
+
+The host must durably reserve the ID and journal the binding, exact bytes and
+dispatch intent before requesting dispatch. The guard permits one dispatch per
+memory instance; it has no persistence, cross-process reservation, restart
+reconstruction, transport, credentials, signing, random IDs or retry loop.
+Unconfirmed/pending results permit read-only lookup. Missing status cannot
+establish that an operation was never sent or authorize resubmission.
+
+A matching service-accepted observation remains distinct from independent
+protocol verification. Duplicate observations are idempotent, stale pending
+observations cannot regress acceptance, and explicit conflicts remain visible
+without erasing previously observed acceptance. Adapters must authenticate the
+observation and current principal/key independently, translate their reviewed
+wire contract and retain contradictory observations. Exact-byte hash matching
+alone validates no signature or Contract: retrieve the originals and use the
+existing verifier with independently pinned trust. See the Android guide's
+[client integration foundation](../android/README.md#participant-client-integration-foundation--21-october-2026)
+for the selected scope and remaining integration work.
 
 There is no arbitrary policy interpreter. Incoming records cannot select an
 algorithm, enroll a key, mutate a balance or make a mediator assessment binding.

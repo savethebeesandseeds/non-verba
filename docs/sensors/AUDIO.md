@@ -68,15 +68,15 @@ Untrusted JSON, WAV, PCM, signaling and data-channel fragments have size/order l
 | --- | --- |
 | `code/crates/nonverba-core/src/audio_signal.rs` | Deterministic signal profile and bounded detector |
 | `code/crates/nonverba-core/src/audio.rs` | Requests, nonces, transcript validation, canonical PCM, C2PA WAV signing/verification |
-| `web/src/audio-worklet.js` | Continuous microphone sample collection; silent output |
-| `web/src/audio-capture.js` | Browser microphone/speaker adapter and lifecycle cancellation |
-| `web/src/audio-platform.js` | Native-owned microphone session, challenge and artifact bridge |
-| `web/src/audio-peer.js` | Bounded ordered WebRTC transport and manual pairing |
-| `web/src/pairing-import.js` | Shared bounded pre-challenge answer-file import lifecycle gate |
-| `web/src/audio-ui.js` | Requester/operator state machine, receipt timing, verification UI |
-| `web/src/audio-session.js` | Fresh signed audio session, agreed policy, final WAV receipt and independently pinned bundle verification |
-| `web/src/agent-requester.js`, `web/src/agent-evidence-storage.js` | Shared requester authority, arrival observation, durable evidence and atomic local acceptance |
-| `web/src/audio-receipts.js` | Legacy requester round-transcript persistence |
+| `web/shared/audio/audio-worklet.js` | Continuous microphone sample collection; silent output |
+| `web/shared/audio/audio-capture.js` | Browser microphone/speaker adapter and lifecycle cancellation |
+| `web/shared/audio/audio-platform.js` | Native-owned microphone session, challenge and artifact bridge |
+| `web/shared/audio/audio-peer.js` | Bounded ordered WebRTC transport and manual pairing |
+| `web/shared/evidence/pairing-import.js` | Shared bounded pre-challenge answer-file import lifecycle gate |
+| `web/apps/non-verba-dev/src/audio/audio-ui.js` | Requester/operator state machine, receipt timing, verification UI |
+| `web/shared/audio/audio-session.js` | Fresh signed audio session, agreed policy, final WAV receipt and independently pinned bundle verification |
+| `web/shared/evidence/agent-requester.js`, `web/shared/evidence/agent-evidence-storage.js` | Shared requester authority, arrival observation, durable evidence and atomic local acceptance |
+| `web/shared/audio/audio-receipts.js` | Legacy requester round-transcript persistence |
 | `code/crates/nonverba-core/src/evidence_session/` | Shared signed requester request/receipt verification and frozen sensor policy |
 | `code/android` | C++ AAudio input/output; Kotlin foreground, permission, recording-configuration and Keystore integration |
 

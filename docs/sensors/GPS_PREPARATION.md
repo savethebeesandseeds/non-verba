@@ -19,7 +19,7 @@ provider loss stop preparation. Preparation does not prompt for permission, use
 the microphone, retain coordinates or run a background service. Reading its
 capabilities or status does not start it. See the
 [native preparation adapter](../../code/android/app/src/main/kotlin/org/nonverba/camera/NativeGpsWarmup.kt)
-and [foreground controls](../../web/src/gps-warmup.js).
+and [foreground controls](../../web/apps/non-verba-dev/src/location/gps-warmup.js).
 
 Preparation may keep the receiver available between nearby requests. It cannot
 guarantee reception, prevent Android or hardware from restarting the receiver, or

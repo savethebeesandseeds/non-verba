@@ -108,7 +108,7 @@ separate report has the independently supplied inputs needed to perform that che
 parameters and observations made
 by unmodified [RTKLIB](https://github.com/tomojitakasu/RTKLIB) at commit
 `71db0ffa0d9735697c6adfd06fdf766d0e5ce807`. The generator is
-`code/test/rtklib-oracle.c`. The pinned upstream source digests and attribution
+`code/test/integration/rtklib-oracle.c`. The pinned upstream source digests and attribution
 are retained in the [fixture notice](../../../../../../LICENSES/RTKLIB-fixtures-notice.txt).
 The original Windows generation procedure is retired.
 

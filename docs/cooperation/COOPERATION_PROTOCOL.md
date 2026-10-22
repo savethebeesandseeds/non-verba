@@ -288,10 +288,10 @@ access; the host wrapper only loads the compiled asset and invokes supplied
 verifiers. Callers provide time explicitly. Rust dependency versions and the
 toolchain are pinned; no npm runtime dependencies are required. Tests use
 synthetic records and clearly identified trust stubs.
-Run `cargo test --locked --workspace`, `node tools/build-wasm.mjs`,
-`node --test test/cooperation.test.mjs test/wasm.test.mjs`
+Run `cargo test --locked --workspace`, `node tools/build/build-wasm.mjs`,
+`node --test test/cooperation/cooperation.test.mjs test/cooperation/wasm.test.mjs`
 and `node examples/cooperation.mjs` from the repository's `code/` directory.
-The optional browser check is `node test/browser-smoke.mjs`. The WASM suite retains
+The optional browser check is `node test/browser/browser-smoke.mjs`. The WASM suite retains
 the original behavior tests and adds real-binary and boundary regression checks.
 Changes to the formulas, tie rule, work unit, decay semantics or settlement rule
 require versioned specification changes and regression tests. Admission decisions

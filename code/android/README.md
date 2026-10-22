@@ -1,24 +1,38 @@
 # Android applications
 
-## Two applications, one shared implementation
+## Two applications, one web UI source per application
 
 The owner selected a branded participant shell and APK separation as the first
 increment on 16 October 2026. Keep these two applications separate:
 
-| Application | Module / package ID | Purpose |
-| --- | --- | --- |
-| Non-verba Dev | `app` / `org.nonverba.camera` | Existing developer sensor, evidence, enrollment and diagnostic tools. Its package identity, version sequence, private data and established debug signer are preserved. |
-| Non-verba | `participant` / `org.nonverba.participant` | The Requester/Operator application. Its first increment is an informational, branded role preview; account access, tasks, Contracts and service connectivity remain unavailable. |
+| Application | Browser/APK UI source | Android module / package ID | Purpose |
+| --- | --- | --- | --- |
+| Non-verba-dev | `web/apps/non-verba-dev/src/` | `app` / `org.nonverba.camera` | Existing developer sensor, evidence, enrollment and diagnostic tools. Its package identity, version sequence, private data and established debug signer are preserved. |
+| Non-verba | `web/apps/non-verba/src/` | `participant` / `org.nonverba.participant` | The Requester/Operator application. Workspace drafts remain nonbinding. Local accounts, mock confirmation and memory-only document/frontal-photo capture are implemented; publication, signatures, protected media custody and identity decisions remain separate. |
+
+Each app has one HTML, CSS and JavaScript UI source for browser and APK. Android
+bundles that UI in a WebView; `code/android/app/` and
+`code/android/participant/` contain the respective native hosts. Platform
+adapters isolate browser and Android capabilities. See the
+[web architecture guide](../../web/README.md) for source and packaging boundaries.
 
 Different package IDs let the apps coexist with separate Android-private data,
-permissions and updates. Role selection in the participant preview changes only
-the introduction in memory. It creates no identity, account, task or record.
+permissions and updates. Workspace drafts and navigation use memory only; a reload
+clears drafts. Drafting creates no identity, account, published task or signed record.
 There is no migration or automatic sharing of developer keys, evidence or grants.
 Neither a debug APK nor the participant name establishes release readiness.
 
-The participant source lives in `web/participant/src/`; canonical artwork lives
+The participant source lives in `web/apps/non-verba/src/`; canonical artwork lives
 in `web/site/branding/` (there is no separate `src/branding` directory in this
-checkout). The shell stages `sprout.svg`. The participant APK launcher uses the
+checkout). The shared UI stages `sprout.svg` and two bounded prepared WebP
+artwork files for Home and the Waajacu credit. Account-first onboarding adds two
+app modules and an isolated account transport. Camera acquisition and memory-only
+review use shared identity modules. The current fifteen-file closure includes
+the reusable attestation tool, its browser-key module, versioned account terms and recovery export, as described
+below; synthetic illustrations remain source fixtures outside this runtime. The original
+artwork recipe, About layout and narrow author-link handoff are recorded in
+[the participant UI guide](../../web/apps/non-verba/README.md#quiet-home-about-and-author-credit).
+The participant APK launcher uses the
 owner-selected `individual/01-sprout.png`, preserving the complete transparent
 character over the cream app background. Its reviewed 432px PNG foreground keeps
 the original square within the inner 72dp region of the 108dp adaptive layer;
@@ -26,7 +40,7 @@ regular and round launcher masks use that same resource. The canonical image
 remains unchanged.
 
 Regenerate this small resource explicitly with
-`node tools/prepare-participant-icon.mjs --write` through the managed snapshot
+`node tools/build/prepare-participant-icon.mjs --write` through the managed snapshot
 launcher, then review its circular/rounded preview; `--check` compares the
 prepared resource with the canonical artwork and recipe. Normal APK builds use
 the prepared source resource and add no Chromium preparation dependency.
@@ -48,6 +62,492 @@ measurement report is preserved rather than rewritten. The four web-shell
 assets remain unchanged. This change applies to the participant launcher only;
 no phone installation was performed.
 
+### Developer launcher artwork — 21 October 2026
+
+The owner selected `web/site/branding/individual/07-bonsai.png` for
+**Non-verba-dev**. The original 1,011,022-byte artwork is unchanged. Its reviewed
+transparent 432px foreground is 81,010 bytes, with the full original square in
+the same adaptive safe region as the participant icon. Circle and rounded-square
+masks were visually reviewed over the cream background.
+
+Developer-only managed assembly/lint and retained-signer inspection passed.
+Compiled regular and round icons resolve to the same adaptive resource; the
+packaged foreground PNG matches the prepared source bytes exactly. The debug
+APK is 33,792,810 bytes. Its application label, package, version, permissions and
+debug signer remain unchanged. The approved USB helper installed this developer
+update with data-preserving replacement and verified the exact installed APK
+hash. No app launch or collection test was needed for this launcher-only update.
+
+Both icons now use one explicit preparation entry point:
+`node tools/build/prepare-launcher-icon.mjs developer --write` or
+`node tools/build/prepare-launcher-icon.mjs participant --write`. Use `--check` to
+compare the prepared source with its canonical artwork and recipe. The existing
+`prepare-participant-icon.mjs --write|--check` remains a compatibility entry.
+Both byte comparisons passed; the participant foreground is unchanged. These
+commands remain optional artwork maintenance, outside routine APK builds.
+
+## Next participant outcome and Hx11 integration — 21 October 2026
+
+The next Goal is a usable participant workspace carrying one
+selected Requester/Operator journey from its first action through an exact
+agreement and a clearly reported result. The present role introduction is the
+installed foundation. The owner requested pursuit of the next Goal after the
+simplicity review. The bounded preview selected below advances the interface
+while retaining the separate backend and participant-comprehension work.
+
+The first visible increment should show the participant's work and one clear
+next action. Choose the fewest views needed for that journey, keeping work
+details and account controls available when relevant. The roadmap's engineering
+steps do not prescribe a separate screen for every backend operation or state.
+Review the flow before implementing it, then make the phone layout, back/re-entry,
+readability and empty/loading/error states coherent. Use clearly labelled
+synthetic preview data while service-dependent actions remain unavailable.
+Keep these states separate from real account creation, publication, signatures,
+sensor operations or accepted work. This UI work can advance while backend
+provisioning proceeds; its selection/review checkpoint does not require a live API.
+
+### Participant simplicity requirement
+
+Owner direction, 21 October 2026: both Requesters and Operators should find the
+app straightforward. The developer APK carries technical diagnostics and controls.
+The participant experience should answer: what is happening, what do I need to
+do next, and what did my action achieve?
+
+Candidate user flows are: Requester describes the work, reviews an offer and its
+terms, confirms the agreement and follows progress; Operator finds or receives
+work, reviews the terms, confirms the agreement and carries out/reports the work.
+Select the precise scenario without turning each phrase into a required screen.
+
+Use one clear primary action, short everyday language and only the information
+needed at that point. Reuse known details under the agreed privacy policy and
+reveal optional detail when relevant. Keep account/settings secondary. The usual
+journey must not require protocol vocabulary, hashes, key management, manual
+pairing or diagnostic reports. Exact agreement and record details remain
+inspectable; explain relevant terms, cost, recipients and sensor purpose before
+a consequential action and retain deliberate review/consent.
+
+Checks, storage and safe retry/status handling belong behind that interaction.
+Explain what was saved, what is awaiting confirmation and the available next
+step in plain language. An uncertain result cannot appear complete, and automatic
+recovery cannot create another signature or resume collection. Review success
+by whether a participant understands the work and next action without developer
+knowledge; retain Hero 3's separate comprehension/consent responsibility.
+
+The client review on 21 October confirmed that Hero 11's private environment and
+local-parity foundation are complete. Its versioned API now supplies synthetic
+account/device sessions, seeded Assignment originals, one initial Operator
+completion and a scoped recipient inbox. A bounded read-only check inside its
+managed container confirmed the current versioned API and mounted OpenAPI
+contract. Exact versions, source/document pins and endpoint details are retained
+privately. This is a local development boundary. In a subsequent owner scope
+correction, Hx11 removed its authored private APK harness and phone gate; it now
+validates services with container-only signed clients. APK integration belongs
+to Hx10. Its removal of APK-validation metadata supersedes the earlier exact
+contract pin, which remains retained historically while a final service pin is
+pending. Existing APK/capture/device data is preserved. See the
+[sanitized backend checkpoint](../../docs/development/SERVICE_BACKEND_CHECKPOINT.md).
+
+The available API does not publish free-form Requests/quotes or list marketplace
+work. Our two-field request and optional textual budget are preview inputs,
+not signed protocol records. Connected action review must first supply the
+independently pinned parties/domain, exact terms and assent, deliverables,
+revision and structured compensation required by the unchanged Rust protocol.
+Do not silently fill those choices or turn Publish/Send on against seeded
+Assignment endpoints. Keep private implementation, API schemas and operating
+details private while the selected client handoff is reviewed.
+
+The Android sequence under the existing service/offline Goal is:
+
+1. Agree the selected journey's versioned API, data/error/status shapes,
+   account/device/key authority, environment and operation/retry contract with
+   Hx11 and the Identity/Workflow owners. Resolve the choices needed for this
+   scenario and retain the remaining questions explicitly.
+2. Implement the narrowly scoped Android service/session/signing adapter. Keep
+   participant keys on the device, use the shared Rust verifier and preserve
+   the selected protected-storage, revocation and work-privacy rules. Choose
+   the endpoint allowlist and Android network/credential boundary deliberately;
+   the current bundled-only WebView is not already a service client.
+3. Prove one real APK/backend round-trip with exact reviewed/signed records,
+   authorized original-evidence transfer and independent verification after
+   retrieval. A candidate sequence is Request, quote, exact agreement, selected
+   evidence and status; the owner/domain review must choose its actual scope.
+4. Prove interruption, timeout/lost-response, duplicate/conflict, offline and
+   revoked-session behavior for that same journey. Show pending, unknown,
+   rejected and committed results accurately; reconnect must not create another
+   signature, renew a challenge or reactivate sensors. Add notification UI only
+   after its channel, content and silent-work-state rules are selected.
+
+Hero 11's local-parity/OpenAPI checkpoint supplies the backend foundation.
+Its device-session and signed-APK Milestones are joint integration counterparts:
+the Android contribution must not depend on its own joint demonstration already
+being completed. Keep Android, backend, physical collector and participant
+comprehension results separately scoped within the shared exercise. Hosted
+outbox/access/restore work stays with Hx11; Android owns the corresponding
+client behavior once its interface and cases are agreed.
+
+Hero 10's first bounded client handoff is agreed and its generic Rust foundation
+has passed the focused software checks under the owner's direction to continue
+without the phone. The later session/signing adapter, real APK round-trip and
+interruption acceptance remain separate future work,
+preserving their existing Goal and Milestone IDs. Private development identity
+choices do not select a participant production provider, deployment endpoint,
+notification channel or rollout. The workspace preview below remains a separate
+completed checkpoint. Retain the small shared UI, thin Kotlin platform adapters
+and shared Rust rules; revisit runtime/APK budgets explicitly when real features
+require additional payloads.
+
+See the private workspace's
+[Hero 10](../../../private-source/web/dashboard/heroes/10-apk.json) and
+[Hero 11](../../../private-source/web/dashboard/heroes/11-services.json)
+(local links requiring the sibling private checkout),
+[Hero responsibilities](../../docs/notes/WORKSTREAMS.md#participant-journey-workflow-android-and-hosting)
+and the [account-lifecycle limits](../../docs/development/REGISTRATION_PIPELINES.md#what-is-still-missing-and-why-it-matters).
+
+### Participant client integration foundation — 21 October 2026
+
+The owner asked to continue backend integration while the phone is disconnected.
+The first supported increment is a transport-independent operation core in the
+existing `nonverba-requests` Rust package. It establishes client bookkeeping for
+one exact prepared operation; it does not connect the participant preview to the
+private service or copy the private OpenAPI schema, routes or server code into
+the public repository. Its model is independent of the eventual HTTP adapter.
+
+Prepared material retains the original opaque ID, principal/key context,
+Assignment, operation kind, labelled expected hashes and exact body bytes.
+Dispatch changes local state to unconfirmed before returning those same bytes.
+Lost responses, unavailable service and missing status cannot create success or
+rearm dispatch. Matching pending observations remain pending; matching accepted
+observations record only attributed service handling. Complete-binding mismatches
+fail without changing state. Duplicate observations are idempotent, accepted
+state does not regress to pending, and explicit conflicts remain visible while
+retaining any earlier matching acceptance observation. No signature or sensing
+operation can be triggered by this core.
+
+The core calls the existing Rust identifier/digest/raw-hash functions. Exact
+SignedEvent byte hashes stay distinct from canonical envelope/protocol hashes.
+Its raw-byte helper does not verify a signature or adopt a server's trust: the
+existing protocol verifier and independently selected bindings still govern
+retrieved originals. The initial opaque-body budget is 4 MiB, not a promise to
+support the backend's largest encoded evidence upload. There is no new crate,
+dependency, Java source, APK library, UI asset, bridge or permission.
+
+This is an in-memory guard, not a durable queue or global at-most-once guarantee.
+The eventual host must reserve/journal the exact ID, context, bytes and dispatch
+intent before I/O, and retain uncertain outcomes across restart. No retry/reset
+API is exposed: retention, idempotency-window and explicit exact-resubmission
+rules must first be agreed. HTTP adapter/authentication, protected session and
+operation storage, Keystore signing and single-flight refresh/recovery remain
+future work. Authentication alone supplies no exact-action consent or renewed
+work/sensor authority. The separate developer JNI library pulls in sensor/C2PA
+dependencies and is not selected as a participant packaging shortcut.
+
+Managed Debian validation passed all 18 focused Rust integration tests and
+`rustfmt --edition 2024 --check` for the new module/tests. Clippy passed for the
+library and focused test with `-D clippy::all`. The initial stricter `-D warnings`
+run stopped on two deprecations of `Nonce::from_slice` in the unchanged local
+vault module; those warnings remain visible, with no suppression or dependency
+upgrade in this increment. Checks used one formatted source snapshot and the
+existing workspace lockfile. The earlier formatting invocation used a login
+shell that reset the managed PATH; it was corrected to the documented non-login
+execution, without installing tools. Independent source review found no
+actionable issue in binding checks, sticky acceptance/conflict or scope limits.
+No APK build/export, service mutation or physical-device acceptance is claimed
+by these Rust checks.
+
+One owner-authorized Hx11 handoff confirmed the first participant connection:
+authenticate the participant app's own
+approved key-bound session, read durable work state and retrieve/reverify one
+known seeded Assignment original against independently supplied trust. Explicit
+provisioning must supply that app's own account/key, membership, Assignment and
+trust; the private harness identity must not be reused. No enrollment, identity
+search or Assignment discovery is supplied. Exact contract bytes, independently
+checked source/document hashes, debug transport and the agreement are retained
+in ignored private records; none is embedded in the public client model. A later
+direct owner scope correction removed Hx11's private-APK prerequisite and
+harness. The old contract pin is historical after APK-status metadata changed;
+Hx11 will retain the final pin after its server-only acceptance checks. Hx10
+continues to own all APK work and its independently scoped phone acceptance.
+
+The later adapter must preserve Hold/clock-out on reconnect and serialize token
+refresh with atomic replacement-token persistence. Refresh replay can revoke a
+session; this increment supplies no refresh or crash-recovery implementation.
+No retention/garbage-collection/immutability or general resend-window commitment
+was selected. The approved debug transport requires a scoped participant-host
+review before any network permission/helper/bridge extension, and selects no
+release cleartext exception. Marketplace publication/discovery and conversion of
+preview drafts into real Requests/quotes remain separate service and consent
+work. Physical signing, APK/backend exchange and restored replay remain with
+their respective device checkpoints; no Hx10 device operation was performed in
+this increment. The participant preview's Publish and Send controls remain
+disabled.
+
+### Participant workspace preview scope — 21 October 2026
+
+The selected example is a **garden photo check**, with no payment amount implied.
+Requester starts with a title and description; place and budget are optional. Review shows
+the entered details with surrounding whitespace trimmed and supports editing. Operator starts with one explicitly
+synthetic work card, reads its detail, then drafts and reviews an offer. Neither
+role must complete onboarding, choose sensors or understand protocol terminology
+to try this preview. No loading or remote-error simulation implies a connection.
+
+Separate fixed examples explain proposed terms, progress and a result. Every
+example stays labelled and independent of entered drafts: switching roles cannot
+create a counterparty response, agreement or completion. Publishing, sending,
+agreeing, collection and completion are unavailable, with a short explanation.
+No account, signature, evidence, backend call or persistent record is created.
+Preview terms do not select the eventual service or legal contract.
+
+Back, editing and role switching retain each role's own draft in memory. Reload
+returns Home with empty drafts. Draft-management controls are deferred. App
+views and drawer state stay in memory and same-URL history, never in a URL path,
+query or fragment. The Android host accepts only its plain bundled document
+for document navigation, rejects queries and fragments, and uses WebView history
+for Back. Runtime assets retain the exact allowlist for the selected feature set.
+API 33+ registers its platform Back callback only while internal history exists;
+older devices use the legacy Back override. This follows the
+[Android Back guidance](https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture)
+without adding a UI runtime or native bridge.
+
+The runtime remains three authored HTML/CSS/JavaScript files plus the existing
+SVG, within the 64 KiB source guard. No new dependency, model, font, Rust/WASM
+payload, authored Java source, storage authority or network permission is needed. Kotlin
+continues to provide the thin Android/WebView boundary. All builds and checks
+remain in managed Debian. Browser interaction, package inspection, physical
+phone behavior and eventual participant comprehension are separate evidence.
+
+The selected preview can finish before services are ready. The integrated Goal
+still needs a reviewed Hx11 client contract, real end-to-end records and recovery,
+plus Hero 3's participant comprehension/consent review. This preview does not
+establish any of those outcomes.
+
+### Workspace and screen-awake build validation — 21 October 2026
+
+The final managed Debian snapshot passed 60 focused build, source-boundary,
+participant, GPS-panel and screen-awake checks plus ten USB helper guards.
+Nine intercepted Chromium groups passed request/offer validation, review/edit,
+role isolation, Back/history, reset/reload, invalid-route recovery, literal markup,
+unavailable consequential actions and zero service/storage/native calls. Layout
+checks covered 320, 390, 900 and 1280px widths and 200% text scaling; phone-sized
+request, operator, review and enlarged-text screenshots were visually reviewed.
+
+The canonical explicit `all --export --baseline-report PATH` build assembled and
+linted both APKs, then inspected each against the independently retained debug
+signer. The developer inspector reported no current-build gaps; participant
+inspection retained its narrower asset/manifest/signature scope. The exact
+bounded USB export copies passed those unchanged inspectors again. Both
+generated BuildConfig constants are true. No Windows Java/toolchain was used.
+
+| Output | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Developer APK | 33,790,989 | `b7a88e4d9d8d6e764b50bb62b727fe2b8e1b90f1576afa73cf527d98ab192df4` |
+| Participant APK | 2,569,334 | `dfd7735e5f28ba8f150979b02ce687ac5ef1495950cf23aa29dec96cd0e45689` |
+| Four participant runtime assets | 34,587 | Within the unchanged 65,536-byte source and 8 MiB APK guards |
+
+The combined Gradle phase took 55 seconds: 41 tasks executed and 60 were up to
+date. Each cached Rust preparation finished in under one second. These are
+observations from this build, not cold-cache or reproducibility benchmarks.
+Earlier failing browser and lint records remain retained: invalid-route focus
+was corrected, fresh-document boot tests were corrected, and the legacy Back
+override received a narrow documented lint annotation because API 33+ already
+uses the platform dispatcher. Lint passed afterward without disabling the check
+globally or adding a new activity dependency.
+
+The build and authentic inspection records remain private. Physical phone
+observations are recorded separately below; no hosted integration, exact signed
+workflow, participant comprehension or wider device acceptance follows from
+these software/package checks.
+
+Both updates were installed for user 0 on the existing Cat S62 Pro, Android
+11/API 30. Installed-hash readback matched each row above. Bounded own-window
+observations reported `KEEP_SCREEN_ON=true` separately for both Activities, and
+the developer screenshot showed the removed toggle. Its existing permitted GPS
+warm-up appeared on launch; this was not a new collection/verification test.
+Switching to the participant app leaves the developer Activity's normal pause
+cleanup in force. Manual locking, unattended duration, API 33+ Back and other
+devices remain outside this physical checkpoint.
+
+The concurrent source reorganization placed the shared browser/APK UIs under
+`web/apps/non-verba-dev/src/` and `web/apps/non-verba/src/`. All four current
+participant inputs were independently compared with the authentic installed-APK
+inspection hashes and match. The retained APK reports keep their original
+pre-move snapshot metadata; none was rewritten. See the separate
+[named-source validation](../../docs/development/VALIDATION.md#named-application-ui-sources--21-october-2026)
+for the source-only rename checks.
+
+Phone automation exposed helper-only viewport issues: an inert WebView on a
+short page was filtered out, and this phone sometimes exposes nested host and
+document WebViews with identical bounds. The parser now retains the selected
+package's structural host and omits only its enabled, identical-bounds nested
+WebView wrapper, preserving descendant controls. Siblings or different bounds
+remain ambiguous. Node caps, bounds, focus, observed-scrollability and exactly
+one enabled viewport requirements remain enforced. Refusals now classify fixed
+project apps, system overlays or another window without disclosing unknown app
+names or sending input. Thirteen USB guards passed, along with 34 repeated
+participant/source/flag checks and all nine browser groups against the named
+source paths: 73 distinct focused checks across the build and follow-up runs.
+These helper/source-path corrections did not change APK runtime bytes or require
+another Android build.
+
+The phone's participant start and request-review screens were visually reviewed.
+An empty request showed field errors; semantic batches entered public synthetic
+title/details and the review displayed both exactly, with publishing disabled
+and the keyboard dismissed. One initial screenshot/tap fallback was needed for
+the root-only hierarchy; subsequent form interactions used semantic selectors.
+After restored own-app focus, a controlled Requester edit → review → Android
+Back returned to the form with the exact title and description retained. The
+Operator flow opened the synthetic garden work, accepted a public offer message
+and displayed it exactly on review, with Send unavailable and no invented price.
+Its form, keyboard and review were visually checked; one Android Back dismissed
+the keyboard, and a separate Back from review returned to the offer form with
+its exact message retained. Returning to Requester and reviewing again preserved
+both original request fields, with publishing still disabled. These are
+resulting-state checks, not merely input acknowledgments. Earlier focus failures
+stopped input; a redacted diagnostic
+identified a system overlay, which the owner dismissed. No other window was
+inspected or controlled. A final read-only window recheck refused after the
+separate private integration test APK took the foreground; no further input was
+sent. The earlier independent positive screen-awake observations remain scoped
+as recorded above. This completes the selected single-phone workspace preview
+checks; human comprehension, API 33+ Back and hosted integration remain separate
+open outcomes.
+
+## Synthetic onboarding asset boundary — 21 October 2026
+
+This is the earlier fixture checkpoint. The later current capture boundary below
+supersedes its fourteen-file selection, DOM storage and camera exclusions.
+
+The participant collector, preview, Gradle preflight, native resource guard and
+APK inspector use the same closed fourteen-file runtime: six application UI/client
+files, one shared enrollment workflow, the three existing branding assets and
+four synthetic SVG illustrations. The app source directory permits exactly
+`index.html`, `participant.css`, `participant.js`, `onboarding-ui.js` and
+`onboarding-account.js`, plus `account-transport.js`; it cannot silently package
+another screen or helper.
+The shared module is staged from
+`code/test/fixtures/identity/synthetic-enrollment-workflow.js` (its current location), without copying its rules
+into the app or Kotlin.
+
+The explicit managed producer decodes the authoritative shared
+`SYNTHETIC_ENROLLMENT_MEDIA` export byte for byte into
+`web/apps/non-verba/assets/identity/{document-a,document-b,face-a,face-b}.svg`.
+It creates no photographs, document scans, raster conversion, downloaded model
+or runtime dependency. Run inside managed Debian:
+
+```sh
+node tools/build/prepare-participant-identity.mjs --write
+node tools/build/prepare-participant-identity.mjs --check
+```
+
+Routine packaging consumes those four prepared files. The focused package check
+compares them with the shared export and rejects extra identity illustrations.
+The reviewed total runtime bound is 296 KiB for device proof and session inventory,
+compact email-code entry, centered signup, terms review, fixed username prefix,
+recovery-code export and the account/API-key UI;
+each SVG/WebP retains an 8 KiB bound. Notices remain outside the runtime count,
+and the APK's separate 8 MiB limit is unchanged. This deliberately supersedes the
+initial shell's 64 KiB and synthetic onboarding's 128 KiB allowances; it grants
+no open-ended asset directory.
+
+The WebView enables DOM storage for the explicit synthetic fixture adapter. Its
+shared UI restricts persistence to the synthetic enrollment key prefix; no real
+credential, account session token or selected personal media belongs there. This
+is development fixture storage, not a protected account vault. Bundled previews
+use self-hosted image assets, keeping `img-src 'self'` without `data:`. Network
+loads, file/content access, geolocation and native media permissions remain
+unavailable. Native resource/document URL guards retain their exact paths and
+reject queries/fragments. The debug account transport below is the only added
+native message channel; real identity capture and protected custody remain separate.
+
+## Current capture asset boundary — 21 October 2026
+
+The selected runtime now has eleven files: six app UI/client files, the shared
+`identity/enrollment-camera.js` and `identity/identity-capture.js`, and three
+branding assets. It totals 164,069 bytes under the unchanged 192 KiB guard.
+The new `participant-capture-assets-v1` stage leaves the old fixture stage intact;
+Gradle and independent inspection retain exact-file/byte guards. DOM storage is
+disabled and actual photos remain in memory, with no fixture persistence/upload.
+
+CAMERA is the only added main-manifest permission; hardware camera features are
+optional. WebView permission requires the exact bundled origin/document, video
+only, current OS permission and foreground Activity. Cancellation/backgrounding
+stop tracks and fence late permission/encoder results. Own-origin camera and blob
+previews are allowed by the selected CSP/Permissions-Policy; microphone,
+geolocation, file/content access and remote WebView resources remain blocked.
+Email confirmation is explicitly mock-only until the last mile. No identity or
+liveness result follows from capture. See [the capture contract and checks](../../docs/development/PARTICIPANT_CAPTURE.md).
+
+### Explicit local account transport
+
+The participant preview relay is disabled by default. Opt in only in the managed
+preview process with `NONVERBA_ACCOUNT_RELAY=local`; no caller-selected upstream
+URL is supported. The existing preview binding stays on port 4173, published on
+host loopback. The relay connects to the verified Docker Desktop host route on
+port 8080 while retaining the account service's canonical loopback issuer. It
+does not start a service, create a container or configure a phone.
+
+The browser uses same-origin `/account-api/config` and `/account-api/transport`.
+Transport POSTs require the exact loopback Host and Origin, JSON content type
+and the app's custom header. Requests have a closed account/enrollment/recovery/
+development-OIDC route, method, field and header allowlist. No CORS exception,
+arbitrary proxy, redirect following or user cookie forwarding is supplied.
+The relay bounds requests to 16 KiB, serialized responses to 64 KiB, concurrent
+exchanges to four, traffic to 120 requests per minute and upstream waits to seven
+seconds. Responses are `no-store`; exception text and account material are not
+logged. Credentials and bearer tokens pass only with the current request.
+
+Development OIDC sign-in uses the existing client and exact loopback callback,
+with PKCE/state/nonce verified by the shared client. The relay retains only the
+service's exact CSRF cookie in a bounded, random-flow-specific memory jar, expiring
+at five minutes even when idle. Each authorization POST attempt consumes its jar
+entry, including refused or failed attempts. No Set-Cookie reaches the browser or
+APK, and the relay retains no ambient bearer or persistent account session.
+
+The debug APK installs `NonverbaAccount` through AndroidX's origin-scoped web
+message listener when that capability exists. It accepts only the main frame
+of the exact bundled document, uses a bounded worker queue and sends to the
+fixed numeric-loopback relay on port 4173. Activity stop/destroy cancels workers,
+disconnects the current exchange and discards late replies; an interrupted
+server-side operation can still have an unknown outcome. The existing approved
+USB reverse for 4173 supplies the physical-phone route when explicitly configured.
+The browser and APK use the same account client and request envelope.
+
+Only the debug manifest requests `INTERNET`, with cleartext allowed exclusively
+for numeric `127.0.0.1`. The release manifest requests no network permission and
+installs no account bridge. WebView network loads and cookies remain blocked;
+native CSP still forbids direct connections. Browser CSP allows same-origin
+connections only. This is a local development connection, not production
+credential custody, provider selection, deployment or physical-device acceptance.
+Account credentials/session tokens remain in memory; only explicitly synthetic
+identity fixtures use their existing storage namespace. The package inspector
+accepts the debug network permission and rejects camera, location, storage and
+other unselected permissions; its release-mode permission check rejects INTERNET.
+
+## Recovery-code text download
+
+The shared recovery screen's Download recovery codes action uses a dedicated
+origin-scoped WebMessageListener on Android. It accepts only the fixed text
+format containing eight distinct canonical recovery tokens, keeps pending bytes
+in memory for at most two minutes and opens the system Create document picker
+for `non-verba-recovery-codes.txt` with MIME type `text/plain`. It adds no storage
+permission, arbitrary URL/path access, app cache, retained URI grant or network
+download service. Existing WebView file/content access remains blocked.
+
+The picker itself may pause/stop the Activity, so only that bounded owned picker
+round trip retains the pending bytes. Writing waits for the same bundled
+document to resume; cancellation, navigation, ordinary background writes,
+expiry and destruction clear the lease and fence stale results. The bridge
+reports saved only after the chosen stream writes and closes successfully.
+Worker plaintext is leased as well: it is copied only after provider open and a
+fresh state check, and cancellation or expiry zeroes it before provider cleanup.
+Potentially blocking cancellation-close runs off the UI thread; unresolved owned
+cleanup refuses another save rather than accumulate stalled provider streams.
+Browser download acknowledgement cannot prove disk completion; Android provider
+and physical lifecycle acceptance remain distinct from the software checks.
+The save flow follows Android's
+[Storage Access Framework](https://developer.android.com/training/data-storage/shared/documents-files);
+the resume fence follows the documented
+[Activity result ordering](https://developer.android.com/reference/android/app/Activity#onActivityResult(int,int,android.content.Intent)).
+
 ## Development notes: keep the participant APK small and clear
 
 - Keep shared validation, policy, cryptography, evidence and protocol rules in
@@ -63,14 +563,17 @@ no phone installation was performed.
   adapter rather than reimplementing collectors as part of this split.
 - Use the system WebView and small bundled HTML/CSS/JavaScript with system fonts.
   Do not add another embedded browser, UI runtime, dependency or model merely
-  for the shell. The initial runtime asset closure is four files, bounded to
-  64 KiB; its debug APK inspector has an 8 MiB regression guard. These are initial
-  shell budgets to revisit deliberately when a real feature is introduced.
-- Keep developer pages, synthetic demos, diagnostics, raw sensor controls and
+  for the shell. The initial four-file shell used a 64 KiB bound. The selected
+  synthetic onboarding increment reviewed 128 KiB; the selected local account
+  client/capture and API-key dashboard preview now have a fifteen-file runtime bound
+  of 296 KiB including device proof, session inventory, terms review, the fixed username prefix and recovery-code export, retaining 8 KiB per
+  image and the 8 MiB debug APK guard.
+- Keep developer pages, unselected inspection demos, diagnostics, raw sensor controls and
   models out of participant staging. `participant` is a separate application
   module, not a hidden developer menu or a role flag over all existing bridges.
-  Its current manifest requests no Android permissions and it exposes no native
-  JavaScript bridge, file picker, account storage or remote resource loading.
+  Its main/release manifest requests CAMERA only. The debug-only account
+  channel is scoped above; it adds no file picker, persistent real account
+  storage or remote WebView resource loading.
 - Keep native access opt-in and scoped when actual workflows are added. Opening
   the app or selecting a role must not warm GPS, activate a camera/microphone,
   enroll a key or resume work. Hero 2 supplies policy, Hero 8 the grant/workflow
@@ -124,6 +627,61 @@ connected account/task journey or release distribution was performed. Package
 identity/data isolation is configured, not a new physical-device acceptance
 claim. This checkpoint completes the separate-app shell foundation only.
 
+## Two-APK USB preview — 21 October 2026
+
+Both debug APKs were assembled and linted in the preserved managed Debian
+container, independently inspected against the retained debug signer, copied
+through the bounded export bridge and installed on the same Android 11/API 30
+phone for user 0. Each installation's exact APK hash matched its inspected
+export. The developer update used data-preserving replacement; the participant
+package was newly installed alongside it. Authentic reports and installation
+readbacks remain private.
+
+Both fixed activities then returned Android launch status `ok`. One focused
+own-app screenshot per application confirmed the developer home with its local
+engine ready and the complete branded participant preview. The participant app
+was left in the foreground. Both semantic dumps exposed only three root nodes,
+so these screenshots establish visual rendering, not successful semantic
+navigation or a new phone test of the role buttons. The developer screenshot
+also showed its existing foreground GPS warm-up under an already granted
+permission; no evidence challenge or collection acceptance was performed.
+
+The initial developer launcher in this checkpoint was named **Non-verba-dev**
+with a dark copper N icon; its later bonsai update is recorded above. The
+participant launcher is **Non-verba** with the selected sprout
+adaptive icon. Compiled launcher labels and distinct resources were checked,
+and the participant APK's foreground PNG matched the prepared source bytes.
+The developer APK is 33,792,641 bytes; the participant APK is 2,569,334 bytes.
+This establishes bounded co-installation, not wider device acceptance,
+account/task services, production signing or release distribution.
+
+The approved original USB helper accepts an explicit fixed application target
+for status, verified installation, launch and own-app UI inspection. The later
+workspace extension also selects routine guarded own-app input. Developer
+remains the default; sensor, native-camera, share, restart and export actions
+remain developer only. See the
+[USB procedure](../../docs/development/USB_DEBUGGING.md).
+
+### Cargo freshness correction
+
+The first export inspection correctly stopped rather than installing an APK
+with an unresolved freshness check. Its broad workspace scan had treated a
+newer, uncompiled Rust example as an input to the cached WASM library. Inspection
+now reads each WASM/JNI artifact's Cargo dep-info, requires the exact output and
+current source snapshot, and retains workspace/package manifests, lockfile,
+toolchain, configuration and build scripts as freshness inputs. Actual compiled
+modules and included non-Rust bytes still invalidate older outputs; examples,
+test-only modules and unrelated crates do not. Missing, malformed, foreign or
+linked dependency inputs fail closed. No output timestamps or reports were
+rewritten, and the failed export was preserved.
+
+Forty-five focused checks passed in Debian: 18 developer-inspector tests
+(including six Cargo regressions), 11 participant-package tests, two catalog
+checks and 14 transport checks (including five fixed-application guards).
+The subsequent combined build/lint and both snapshot and bounded-copy package
+inspections passed. These checks establish build/package behavior; collection
+and workflow acceptance remain separate.
+
 ## Existing developer host
 
 This APK packages the shared web UI and Rust WebAssembly module, plus the same
@@ -144,18 +702,69 @@ client's silencing, source, format and effect state; API 30+ also requires confi
 privacy-sensitive capture. Raw GNSS requires supported API 29+ measurements.
 Unsupported required capabilities fail rather than falling back to WebView capture.
 
-## Temporary foreground screen-awake preference
+## Development screen-awake build flag
 
-The opt-in **Keep screen awake** control now grants a two-hour development lease.
-The lease survives Activity/process restarts and APK updates on the same boot;
-its expiry appears beside the control. Off clears it. Expiry, reboot or inconsistent
-wall/monotonic clocks revoke it. Leaving the foreground clears the window flag,
-and returning rechecks the unexpired lease. It never wakes or unlocks the phone,
-changes Android lock settings, or changes sensor lifecycle rules.
+Owner direction, 21 October 2026: both APKs keep the display on automatically
+while their Activity is resumed. There is no toggle or two-hour expiry. The
+developer preference/lease bridge, timer and JavaScript control were removed;
+the participant app needs no new bridge. Old private lease preferences are left
+untouched and unused. A hidden developer-page anchor remains solely for the
+existing GPS preparation panel.
 
-Software harnesses cover native clock/storage guards and UI behavior. Physical
-restart, expiry, reboot and update checks remain separate device acceptance
-work; see the [validation limits](../../docs/sensors/VALIDATION.md).
+One reviewed property, `nonverba.keepScreenAwake=true` in
+`android/gradle.properties`, supplies `BuildConfig.KEEP_SCREEN_AWAKE` to both
+modules. Both parse a strict boolean and default to false when absent. Set that
+property to false and rebuild when this development convenience is no longer
+needed; no installation flag or user setting is required. The canonical build
+copies this shared input and package verification includes the current sources.
+
+Each host applies Android's `FLAG_KEEP_SCREEN_ON` on start and reasserts it on
+resume, preserving it while paused but still visible. Stop/destruction clears
+it in both hosts. Opening or returning to the app restores the configured
+behavior, including after restart or update. This
+uses no wake-lock permission, service, background lock or Android timeout change.
+Manual locking remains available and sensor authorization/lifecycle stays
+separate. See the [Android screen-on guidance](https://developer.android.com/develop/background-work/background-tasks/awake/screen-on).
+
+The initial implementation cleared the flag on pause, which was narrower than
+the owner's visible-app requirement: Android can leave a paused Activity visible
+under a translucent Activity or in multi-window mode. The 21 October correction
+removes only that screen-flag cleanup from pause; all sensor, permission, pairing
+and WebView pause cleanup remains. This closes a source-level lifecycle gap,
+without establishing which screen caused the owner's reported timeout. See
+[Android's pause/visibility distinction](https://developer.android.com/guide/components/activities/activity-lifecycle#onpause).
+
+### Visible-window screen-awake correction — 21 October 2026
+
+The six updated screen-awake guards and 17 bounded transport/parser groups
+passed in the managed container. Both APKs passed canonical assembly/lint and
+retained-signer inspection, including the exact bounded USB copies. Gradle took
+46 seconds with 35 tasks executed and 66 up to date; this is one warm-build
+observation, not a benchmark. No runtime dependency, permission, model or UI
+asset was added. Sensor and permission pause cleanup remains unchanged.
+
+| Corrected installed output | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Developer APK | 33,791,366 | `395217b389770e89f13043cc8f4a506a63e72d3a80e0e6bf15b1478c1732efac` |
+| Participant APK | 2,569,334 | `3ee1e264a65cdc2213870b3734d81ff778690102fe2eac1cce02dd5d6ab0cfa5` |
+
+Both updates were installed with exact hash readback and preserved application
+data. Before updating, the installed sprout Activity reported KEEP_SCREEN_ON,
+and both old APK hashes matched their earlier verified exports. The owner could
+not identify which screen had timed out; the exact reported cause remains
+unconfirmed. The confirmed lifecycle gap above was corrected independently.
+The USB guard later classified a system overlay and stopped app observation;
+it did not inspect or dismiss that overlay. After the owner unlocked the phone,
+each corrected app passed a bounded idle check against the unchanged 60-second
+screen-off timeout. The sprout app remained focused with KEEP_SCREEN_ON,
+wakefulness Awake and display state ON after 215.9 seconds; the developer app
+reported the same after 125.6 seconds. The helper sent no input during either
+interval. The sprout app was then brought back to the foreground and again
+reported the flag, Awake and ON.
+
+These are timed endpoint observations on one Android 11 phone. Source guards
+and native build checks cover the lifecycle correction; physical paused-visible,
+multi-window, manual-lock and indefinite-duration behavior were not exercised.
 
 ## Build contract
 
@@ -182,15 +791,31 @@ selected modules; use `all` deliberately when both APKs need validation:
 
 | Target | Preparation before selected Android assembly/lint |
 | --- | --- |
-| `participant` | Four shell/branding files and current notices. No Cargo, WASM, native developer libraries, browser model or cooperation build. |
+| `participant` | Fifteen selected UI/client/capture/attestation/terms/export/branding files and current notices, within the reviewed 296 KiB runtime bound. No Cargo, WASM, native developer libraries, browser model or cooperation build. |
 | `developer` | Locked `nonverba-core` WASM with pinned bindgen, current web assets/notices, and locked `nonverba-android` Rust for both ABIs. No cooperation WASM, browser face-model preparation or local review-page generation. |
 | `all` | Both preparations once, then both modules in one Gradle invocation. |
 
-`code/dev.sh build` and `tools/build-android.sh` use this same pipeline; avoid
+`code/dev.sh build` and `tools/build/build-android.sh` use this same pipeline; avoid
 adding a second build recipe. Gradle loads only the selected application projects
 via `nonverba.target` (an IDE without that property can load both). Keep shared
 Gradle/plugin/toolchain pins in their existing declarations. All generated
 assets, Java, compilers and caches remain inside Debian.
+
+Authored Android inputs stay under each module's `src/main/`. Generated developer
+web assets and release notices are staged directly under
+`/opt/nonverba-build/android/app/build/generated/developer-assets/`; Rust JNI
+libraries use the sibling `developer-jniLibs/` directory. Gradle explicitly uses
+these generated roots. Participant assets already follow the same pattern in
+`participant/build/generated/participant-capture-assets-v1/`. The earlier
+illustration stage is preserved and excluded from current builds. Retained legacy
+`src/main/assets/` and `src/main/jniLibs/` staging is preserved and excluded from
+developer source sets; it is not copied or merged into new packages.
+
+Pure Kotlin Android platform harnesses belong to
+[`tests/platform`](tests/platform), with their shared container environment and
+commands documented in [the Android test guide](tests/README.md). Real JVM-to-Rust
+JNI integration checks remain in
+[`nonverba-android/tests`](../crates/nonverba-android/tests).
 
 Routine builds keep APKs in `/opt/nonverba-build/android/<module>/build/outputs/`
 and create no handoff copies. To request an export, supply an independently
@@ -259,17 +884,17 @@ Windows intermediate outputs are preserved, but are not the Linux build director
 The legacy developer filename stays `nonverba-debug.apk` for compatibility with
 the existing bounded installation helper. The participant output is
 `nonverba-participant-debug.apk`; it is not an authorized phone installation or a
-production release. Inspect it with `tools/verify-participant-package.mjs`, using
+production release. Inspect it with `tools/build/verify-participant-package.mjs`, using
 the exact `--apk` and independently retained debug `--baseline-report` paths in
-the same snapshot. The existing `tools/verify-android-package.mjs` remains the
+the same snapshot. The existing `tools/build/verify-android-package.mjs` remains the
 developer inspector. Reports are separate and never rewritten. Package/source
 metadata must be preserved through follow-up commands in that snapshot.
 
 Focused split checks, also through the managed snapshot launcher:
 
 ```powershell
-./code/dev.ps1 -Snapshot -Action Exec -Command @('node', '--test', 'test/participant-package-tests.mjs', 'test/android-package-verifier-tests.mjs', 'test/test-suites-tests.mjs')
-./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'test/participant-browser-check.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', '--test', 'test/unit/participant-package-tests.mjs', 'test/unit/android-package-verifier-tests.mjs', 'test/unit/test-suites-tests.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'test/browser/participant-browser-check.mjs')
 ```
 
 The browser check uses the existing managed Chromium runtime and intercepts only
@@ -308,7 +933,7 @@ checks below. No cold-cache cleanup or numerical speed claim is implied.
 Focused pipeline checks run in their own prerequisite group:
 
 ```powershell
-./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/run-tests.mjs', 'build_process')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/test/run-tests.mjs', 'build_process')
 ```
 
 The full `Test` command also includes this synthetic regression group. The
@@ -334,8 +959,8 @@ The build-curation Goal includes a retained workload suite, not only individual
 successful builds. Run it through the managed snapshot launcher:
 
 ```powershell
-./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/benchmark-android-builds.mjs')
-./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/benchmark-android-builds.mjs', '--baseline', '/absolute/container/path/retained-benchmark.json')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/build/benchmark-android-builds.mjs')
+./code/dev.ps1 -Snapshot -Action Exec -Command @('node', 'tools/build/benchmark-android-builds.mjs', '--baseline', '/absolute/container/path/retained-benchmark.json')
 ```
 
 Schema 1 defines one fixed warm workload for each APK: one preparation build,
@@ -373,8 +998,10 @@ With only two warm samples, timing is an advisory review signal. The initial
 threshold is the larger of twice the observed maximum and that maximum plus
 10 seconds, allowing JVM startup and scheduling variation. Any APK growth against
 a comparable retained baseline requires review; unchanged-input growth remains a
-hard failure. Keep the participant's separate 64 KiB runtime and 8 MiB debug APK
-guards. After an intentional feature/toolchain change, retain a new reviewed
+hard failure. The earlier shell used a 64 KiB runtime guard, synthetic onboarding
+reviewed 128 KiB, the selected local account client used 192 KiB, the static key
+dashboard used 196 KiB, the editable demo used 200 KiB, simple sign-in used 204 KiB, email-first routing used 208 KiB, compact code entry used 212 KiB, and device proof/inventory now uses 240 KiB, retaining the
+8 MiB debug APK limit. After an intentional feature/toolchain change, retain a new reviewed
 baseline and its reason rather than quietly widening limits. This suite covers
 warm and CSS-change costs, not cold-cache or Rust/Kotlin compilation performance.
 

@@ -15,13 +15,13 @@ tracking service or routing engine.
 
 | Module | Responsibility |
 | --- | --- |
-| `web/src/map-country-data.js` | Reviewed mainland/coastal Norway administrative display geometry and provenance |
-| `web/src/map-policy.js` | Non-verba deployment catalog and requester/operator visibility |
-| `web/src/map-geometry.js` | Web Mercator projection, polygon membership and tile intersection |
-| `web/src/map-controller.js` | Bounded, immutable display inputs, access changes and position expiry |
-| `web/src/map-tiles.js` | Explicit tile providers, attribution and same-origin URL construction |
-| `web/src/map-view.js` | Reusable clipped canvas viewport and tile lifecycle |
-| `web/src/map-ui.js`, `map.html`, `map.css` | Standalone component inspection and accessible text equivalents |
+| `web/shared/map/map-country-data.js` | Reviewed mainland/coastal Norway administrative display geometry and provenance |
+| `web/shared/map/map-policy.js` | Non-verba deployment catalog and requester/operator visibility |
+| `web/shared/map/map-geometry.js` | Web Mercator projection, polygon membership and tile intersection |
+| `web/shared/map/map-controller.js` | Bounded, immutable display inputs, access changes and position expiry |
+| `web/shared/map/map-tiles.js` | Explicit tile providers, attribution and same-origin URL construction |
+| `web/shared/map/map-view.js` | Reusable clipped canvas viewport and tile lifecycle |
+| `web/inspections/map/map-ui.js`, `map.html`, `map.css` | Standalone component inspection and accessible text equivalents |
 
 The initial catalog contains Norway mainland and coastal islands, excluding
 Svalbard, Jan Mayen and Bouvet. This is component configuration, not a claim that
@@ -163,7 +163,7 @@ Inside the documented managed Linux container, using the source snapshot bridge:
 ```powershell
 ./code/dev.ps1 -Snapshot -Action Exec -Command @(
   'bash', '-c',
-  'node --test test/map-component-tests.mjs test/test-suites-tests.mjs && NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers node test/map-browser-tests.mjs'
+  'node --test test/unit/map-component-tests.mjs test/unit/test-suites-tests.mjs && NONVERBA_PLAYWRIGHT_PATH=/opt/nonverba-tools/browser-tests/node_modules/playwright PLAYWRIGHT_BROWSERS_PATH=/opt/nonverba-tools/browser-tests/browsers node test/browser/map-browser-tests.mjs'
 )
 ```
 

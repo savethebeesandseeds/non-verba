@@ -7,7 +7,7 @@ on:
       - .github/workflows/pages.yml
       - LICENSE
       - LICENSES/Primer-Octicons-MIT.txt
-      - code/tools/export-homepage.mjs
+      - code/tools/build/export-homepage.mjs
       - web/site/index.html
       - web/site/index.css
       - web/site/index.js
@@ -39,7 +39,7 @@ jobs:
           package-manager-cache: false
       - uses: actions/configure-pages@v5
       - name: Export homepage
-        run: node code/tools/export-homepage.mjs
+        run: node code/tools/build/export-homepage.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: code/artifacts/pages

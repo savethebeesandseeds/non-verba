@@ -19,6 +19,7 @@ __pycache__/
 /code/artifacts/
 /code/dist/
 /web/dist/
+/web/dist-android/
 /code/android/**/build/
 /code/android/app/src/main/assets/web/
 /code/android/app/src/main/assets/nonverba-license/

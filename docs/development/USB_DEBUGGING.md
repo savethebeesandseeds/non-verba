@@ -6,6 +6,12 @@ are preserved. Publishing a source copy does not install ADB, authorize a new
 phone operation or change the explicitly approved helper path. Public-checkout
 snapshot validation excludes ADB and does not use this transport.
 
+The public source copy is
+[`code/tools/device/usb-device.ps1`](../../code/tools/device/usb-device.ps1).
+Executable examples below use the approved original
+`private-source/code/tools/usb-device.ps1`; moving public source does not move
+the authorized Windows transport.
+
 The user approved this narrow host exception on 28 September 2026: the existing
 native Windows ADB and its two USB DLLs communicate with the phone over a cable.
 Java, Gradle, Rust, C++, builds and tests remain in `non-verba-dev`. This is a
@@ -29,10 +35,11 @@ installation was needed. This establishes transport access, not sensor trust.
 - Device operations use `adb -d`: USB only, and fail if multiple USB phones exist.
 - No wireless pairing, `connect`, `tcpip` or arbitrary shell is exposed.
 - `InstallVerified` accepts only a successful Linux package-verification report
-  for an exported container build. It checks the retained development signer and
-  exact local APK hash, installs only `org.nonverba.camera` for the foreground
-  user, preserves app data, and checks the installed hash. It does not downgrade,
-  uninstall, grant permissions or launch the app.
+  for the selected exported container build. It checks the retained development
+  signer and exact local APK hash, installs the fixed developer or participant
+  package for the foreground user, preserves app data, then checks both the
+  installed hash and unchanged local APK hash. It does not downgrade, uninstall,
+  grant permissions or launch the app.
 
 ADB uses its normal host authorization key under the Windows user's `.android`
 directory. The phone must approve the computer before commands can run. This
@@ -54,17 +61,27 @@ For the existing authorized setup, from `C:\Work\Non-verba\private-source` on Wi
 ./code/tools/usb-device.ps1 Status
 ./code/tools/usb-device.ps1 DeviceInfo
 ./code/tools/usb-device.ps1 AppStatus
+./code/tools/usb-device.ps1 AppStatus -AppTarget participant
+./code/tools/usb-device.ps1 AppWindowState -AppTarget participant
 # Read-only GNSS startup diagnosis while Non-verba has user-0 focus:
 ./code/tools/usb-device.ps1 GpsDiagnostics
 # After a successful Linux package verification, using its exact JSON path:
 ./code/tools/usb-device.ps1 InstallVerified -VerificationReport C:\Work\Non-verba\private-source\code\artifacts\qa\REPORT.json
 ./code/tools/usb-device.ps1 Launch
+# Separate authentic participant report; this does not reuse a developer report:
+./code/tools/usb-device.ps1 InstallVerified -AppTarget participant -VerificationReport C:\Work\Non-verba\private-source\code\artifacts\qa\PARTICIPANT-REPORT.json
+./code/tools/usb-device.ps1 Launch -AppTarget participant
+./code/tools/usb-device.ps1 AppUiState -AppTarget participant
+./code/tools/usb-device.ps1 AppScreenshot -AppTarget participant
+# Omit AppTarget for original developer actions and transport controls below:
 ./code/tools/usb-device.ps1 RestartApp
 ./code/tools/usb-device.ps1 AppScreenshot
 ./code/tools/usb-device.ps1 ExportEnrollments
 ./code/tools/usb-device.ps1 ExportLocations
 ./code/tools/usb-device.ps1 ExportCamera
 ./code/tools/usb-device.ps1 ExportCameraQuality
+# Explicitly saved developer device-attestation request/proof JSON only:
+./code/tools/usb-device.ps1 ExportDeviceAttestation
 # Compare API29+ direct Downloads copies against an original public retrieval:
 ./code/tools/usb-device.ps1 VerifySavedDownloads -RetrievalManifest C:\Work\Non-verba\private-source\code\artifacts\device-acceptance\RETRIEVAL-DIRECTORY\retrieval.json
 ./code/tools/usb-device.ps1 Preview
@@ -75,13 +92,49 @@ For the existing authorized setup, from `C:\Work\Non-verba\private-source` on Wi
 list means there is no usable ADB connection yet; `unauthorized` means the phone
 still needs approval. `DeviceInfo` reads the model and Android version.
 `AppStatus` reads fixed properties, relevant declared features and the foreground
-Android user's Non-verba installation/hash. It handles an absent package without
+Android user's selected Non-verba installation/hash. It handles an absent package without
 mistaking it for a disconnected phone, and rechecks the foreground user. It does
 not launch the app or activate sensors. `Preview`
 forwards the phone's localhost port 4173 over the USB cable to Windows loopback,
 which Docker forwards to the Debian preview. It does not route through Wi-Fi.
 `Stop` stops only this dedicated helper server. It does not disable the setting
 on the phone or stop another ADB server on port 5037.
+
+`-AppTarget developer|participant` is accepted only by `AppStatus`, `AppWindowState`,
+`InstallVerified`, `Launch`, `AppUiState`, `AppScreenshot`, `AppUiBatch`, `AppTap`,
+`AppSwipe`, `AppBack` and `AppText`. Omitting it retains the developer target.
+Other actions reject an explicit `-AppTarget`; sensor, restart and retrieval
+actions remain restricted to the developer app.
+The helper accepts these two fixed identities, with no caller-supplied package
+or activity:
+
+| Target | Package / launch activity | Exported APK filename | Authentic Linux report |
+| --- | --- | --- | --- |
+| `developer` | `org.nonverba.camera/.MainActivity` | `nonverba-debug.apk` | `verify-android-package.mjs`, schema 2 |
+| `participant` | `org.nonverba.participant/.ParticipantActivity` | `nonverba-participant-debug.apk` | `verify-participant-package.mjs`, schema 1 |
+
+`AppWindowState` is a separate read-only screen-awake diagnostic. It requires
+unchanged own-app focus for user 0, selects only that exact window from bounded
+window-manager output and reports its `KEEP_SCREEN_ON` flag. Other windows are
+discarded. Fixed bounded reads also report the configured user-0 screen timeout
+and only the OS wakefulness/display-state scalars. Invalid or unavailable scalar
+output becomes null; raw settings/power output is discarded. No setting is
+changed. These observations can bracket a bounded idle check; a flag snapshot
+alone does not prove unattended duration or physical panel behavior.
+`AppStatus` remains usable without foreground focus for installation checks;
+neither action sends input or starts sensors.
+
+Both installation reports must name their exact file beneath
+`/workspace/code/artifacts/container-builds/YYYYMMDDTHHMMSSZ/`, pass the package
+checks without errors, and match the pinned existing debug signer. Developer
+reports also require current Linux build verification with no gaps. Participant
+reports require `package_kind: participant-shell-debug`, the exact participant
+`application_id`, and true boolean `debug_signature_verified`,
+`same_debug_signer_as_baseline`, `compiled_manifest_permissions_verified`,
+`zip_alignment_verified` and `license_source_notices_verified`. These schema 1
+checks do not claim compiled-source reproducibility or physical-device coverage.
+Keep authentic inspector reports unchanged; a report for one target cannot
+authorize the other target's APK.
 
 After explicitly saving native GPS attempt reports in the Location page's
 separate failed-attempt panel, `ExportLocations` retrieves the exact public
@@ -93,23 +146,24 @@ the independently retained original request and trusted key. Unsigned/signing
 or storage-failure exports must not be relabeled as signed reports. See
 [GPS attempt reports](../sensors/GPS_ATTEMPT_REPORTS.md).
 
-`Launch` opens the app's normal bundled home page. Capture, permissions and
+`Launch` opens the selected app's fixed bundled activity. Capture, permissions and
 sound-producing actions still require separate UI interactions. Installation
 and launch are explicit commands, never a side effect of status checks.
 
 `RestartApp` is an explicit process-recovery check for the already installed app.
-First finish collection, export/verify evidence and turn preparation and awake
-controls off. It requires focused user-0 Non-verba, stops only its fixed package,
+First finish collection, export/verify evidence and turn preparation off.
+It requires focused user-0 Non-verba, stops only its fixed package,
 verifies process absence, launches its fixed MainActivity, and checks unchanged
 APK, user and own-app focus. It preserves app data, keys, journals, caches and OS
 settings; it does not grant permissions. Its unique report retains each completed
-stage and any failure without an automatic retry. Check preparation and a fresh
-awake lease after relaunch. This tests process stop/relaunch, not arbitrary
+stage and any failure without an automatic retry. Confirm preparation remains
+off and inspect the foreground window flag after relaunch. This tests process stop/relaunch, not arbitrary
 mid-transaction death or a phone reboot; no collection is explicitly invoked.
 
 Authorized public-source updates use the reviewed
 [bounded snapshot APK export](CONTAINER_MIGRATION.md#bounded-snapshot-apk-export-for-an-authorized-phone-update).
-The original `InstallVerified` checks and USB helper path remain unchanged.
+The original approved helper path, retained signer and bounded export directory
+remain in force; the target-specific report checks above cover both APKs.
 
 `GpsDiagnostics` requires focused user-0 Non-verba before and after its fixed
 read-only queries. It records Android build metadata, the developer/full-tracking
@@ -126,7 +180,8 @@ Owner instruction, 16 October 2026: optimize APK control using text content and
 semantic selectors. Avoid routine image-only interaction; screenshot/coordinate
 round trips are too slow for normal navigation and data inspection.
 
-1. Start with the original helper's `AppUiState`. Use the observed resource ID,
+1. Start with the original helper's `AppUiState`, selecting `-AppTarget participant`
+   for the user shell. Use the observed resource ID,
    exact nontruncated text, content description or unambiguous semantic ID.
 2. Group related authorized actions into `AppUiBatch` (at most eight steps). Each
    step obtains fresh own-app state and checks focus, rotation, visibility and
@@ -139,6 +194,20 @@ round trips are too slow for normal navigation and data inspection.
    is genuinely missing from semantic state. Follow the existing freshness and
    coordinate guards for that fallback. Recheck semantic access after navigation
    or an app update rather than continuing an image-only loop.
+
+Participant semantic inspection and screenshots enforce its own fixed user-0
+activity and discard observations if focus changes. The semantic parser retains
+only nodes belonging to the selected package. Routine batches and individual
+input actions also accept the participant target, with the same fresh focus,
+rotation and own-app bounds. Native-camera batch handling remains developer only.
+
+When `AppUiState` or the shared own-app focus guard refuses an observation,
+its diagnostic classifies only the focus/user values already queried. It may
+name the fixed developer, participant or private integration test app, a system
+overlay, another/unknown Android user, or a generic "another window". It never
+prints an unknown app or window name, queries another window's contents, or
+adds an input action. These labels explain a refusal; they do not authorize
+following that window or bypassing the existing focus guard.
 
 A root-only accessibility hierarchy does not establish a blank or stuck page.
 For example, the 16 October pre-update observation exposed only three nodes while
@@ -158,10 +227,24 @@ summary says long text was omitted, read the specific node from its saved state
 file; that avoids another device or image round trip. Check its truncation flag
 before treating the excerpt as complete. Accessibility limits can be page-specific.
 
-`AppScreenshot` reads a bounded PNG only while the focused window is Non-verba's
-user-0 activity, and rechecks focus before saving it uniquely under device
+The parser retains the selected app's structural WebView even when a short page
+is non-scrollable and its root has no label or interaction flags. Android may
+also expose a nested virtual-document WebView inside the native host. Only an
+enabled selected-package descendant whose already validated, enabled own-app
+WebView ancestor has identical raw bounds is omitted as a structural duplicate;
+all descendant controls are still visited. Sibling WebViews and nested WebViews
+with different bounds remain distinct. Routine input still requires exactly
+one enabled own-app WebView with valid bounds; this does not substitute a
+generic container when the WebView is missing or ambiguous. Scroll input still
+requires that retained viewport's observed scrollable flag.
+
+`AppScreenshot` reads a bounded PNG only while the focused window is the selected
+Non-verba app's user-0 activity, and rechecks focus before saving it uniquely under device
 acceptance artifacts. It rejects notification/lock screens or another app. It
-does not inject input, take a camera photo, or activate the microphone.
+does not inject input, take a camera photo, or activate the microphone. New
+screenshots include the fixed target in their filename. Participant input accepts
+only a participant-labelled capture; developer input also accepts its legacy
+unlabelled captures. A capture from the other app is rejected.
 
 After explicit authorization to control the phone, `AppTap`, `AppSwipe`,
 `AppBack` and `AppText` permit one routine Non-verba UI action per invocation. They require the
@@ -192,11 +275,12 @@ clear fields, select all, use the clipboard or submit a form.
 
 ### Pre-challenge camera pairing files
 
-For a physical check, first use the question prompt to ask the user to unlock
-and show Non-verba; after confirmation, enable **Keep screen awake** immediately
-and verify its active lease before continuing. Manage the lease during testing
-without repeated unlock requests. It persists across app updates and expires
-automatically after two hours while keeping the foreground app awake.
+For an authorized physical check, require the intended own-app window to be
+visible and unlocked. Both current development APKs apply the shared
+[screen-awake build flag](../../code/android/README.md#development-screen-awake-build-flag)
+while resumed. Use the read-only `AppWindowState` action for the selected target
+to confirm `KEEP_SCREEN_ON` before continuing. If unlocking is needed, ask the
+user; never operate the lock screen through the helper.
 
 The [30 September physical follow-up](../sensors/VALIDATION.md)
 passed staged-offer import and saved-answer retrieval. The requester accepted
@@ -206,7 +290,7 @@ not establish a reachable route or sensor evidence.
 The debug test UI can explicitly load a public camera offer staged through USB.
 This path transports signaling only; it does not issue a challenge, grant consent,
 authenticate a peer, start a sensor or provide a WebRTC route. Before phone work,
-check and enable the existing **Keep screen awake** lease as described below.
+check the selected app's foreground screen-awake flag as described below.
 
 ```powershell
 ./code/tools/usb-device.ps1 StageCameraOffer -CameraOfferFile C:\Work\Non-verba\private-source\code\artifacts\device-acceptance\RUN\offer.json
@@ -240,7 +324,7 @@ Its unique manifest includes the untrusted `pairing_id` so the requester can sel
 the current answer. It does not retrieve keys or evidence files. Use the matching
 saved answer in the original requester process; old answers cannot replace it.
 
-The preflight in `code/test/camera-pairing-preflight.mjs` runs only in Debian,
+The preflight in `code/test/browser/camera-pairing-preflight.mjs` runs only in Debian,
 creates no sensor challenge, and waits up to eight minutes for `answer.json` in
 its printed unique directory. Publish the complete copied answer atomically
 (temporary sibling then rename) after matching the retrieval's pairing ID.
@@ -325,18 +409,20 @@ and USB copying; the requester's own complete-file read establishes arrival.
 The transport's retrieval manifest continues to make no independent freshness
 or hardware-attestation claim. No APK rebuild or sensor-policy change was needed.
 
-For development, the agent must manage the app's existing **Keep screen awake**
-control and check its lease before a test. The user should not have to maintain
-screen activity during automation. The control only applies while Non-verba is
-in the foreground; it does not change Android's lock settings. Do not mistake a
-camera session timeout or a stopped automation batch for screen locking.
+For development, check the selected app with `AppWindowState` before a physical
+test. Current APKs automatically apply `KEEP_SCREEN_ON` while resumed under the
+shared build flag; there is no JavaScript toggle, renewal or two-hour expiry.
+The user should not have to maintain screen activity during automation. The
+flag clears when the app leaves the foreground and does not change Android's
+lock settings. Do not mistake a camera session timeout or a stopped automation
+batch for screen locking.
 
-The user reiterated this on 30 September: check the control before phone use,
-enable or renew its two-hour lease when needed, and confirm the displayed active
-state and expiry. If the display goes dark or the phone is locked, stop phone
-input and ask the user to unlock it; then recheck the awake state before resuming.
-Use the existing foreground control instead of relying on incidental taps to
-prevent timeout. Never interact with the lock screen through the helper.
+The earlier 30 September procedure used a timed preference; it is superseded by
+the 21 October build flag contract. Historical observations keep their original
+scope. If the display goes dark or the phone is locked, stop phone input and
+ask the user to unlock it; then recheck own-app focus and its window flag before
+resuming. Never use incidental taps to prevent timeout or interact with the
+lock screen through the helper.
 
 The current interface is a testing interface, not the planned product UI. The
 user authorizes practical interface changes that make these tests easier.
@@ -453,6 +539,37 @@ AppUiState uses the full default UIAutomator dump because the compressed dump on
 
 AppUiState console summaries prioritize controls and status/runtime notices, omitting long stories and JSON. The state file retains text excerpts up to 512 characters with truncation flags; semantic IDs hash the full original fields, with password fields redacted. Truncated text must never be matched as an exact selector. The full XML cap remains 1 MiB and DTD/entity resolution stays disabled. Internal state-read and save functions avoid repeated USB initialization for the explicitly approved guarded input batches.
 
+An enabled own WebView and its validated ancestor with identical raw bounds may
+be represented by one retained viewport. Only observed descendant scrollability
+is merged; this does not borrow click or focus authority. A separate hierarchy
+rule handles exactly two enabled own WebViews with nonidentical contained bounds:
+an inert structural host and its single descendant virtual document. All useful
+app controls must belong to that document subtree. Outside it, only inert
+structural ancestors and the narrowly identified window-bar decorations below
+are admitted. The document's exact bounds and observed scroll flag then define
+the viewport. There is no pixel tolerance. Sibling WebViews, active/labeled
+hosts, outside controls, noncontained bounds and other ambiguous hierarchies
+remain refused. This resolution changes neither app-focus checks nor the
+requirement that the selected action lie within the fresh visible viewport.
+
+The decoration exception accepts only the fixed IDs
+`android:id/statusBarBackground` and `android:id/navigationBarBackground`, in
+the selected own package, on an enabled, unlabelled leaf `android.view.View`.
+All nine flags must be explicitly false: `clickable`, `focused`, `scrollable`,
+`password`, `focusable`, `long-clickable`, `checkable`, `checked` and `selected`.
+Bounds must have valid nonnegative integer syntax and monotonic geometry, and
+must be either empty (including `[0,0][0,0]`) or wholly outside the host viewport.
+A nonempty overlapping bar, active or named node, non-leaf, unknown ID, missing
+flag, reversed rectangle or malformed bounds does not qualify. Empty decoration
+bounds provide no input point and are never promoted into a control.
+
+The saved `viewport_diagnostics` contain bounded WebView counts, closed
+reason/detail categories, ancestor and containment assessments and, when
+applicable, a fixed decoration-kind value with four integer bounds. These
+diagnostic fields retain no raw XML, label/password text or other-package data.
+They explain admission/refusal without widening node selection, focus authority
+or input scope.
+
 
 AppUiBatch is authorized for the quiet tests: at most eight taps, scrolls or
 short test-field insertions, with a fresh own-app check for each action.
@@ -554,7 +671,7 @@ against the retrieved originals. Neither action verifies audio evidence or
 records successful measurement acceptance.
 
 In Debian, prepare one explicit pair with
-`node tools/audio-demo-export.mjs --wav ORIGINAL.wav --receipt ORIGINAL.json
+`node tools/evidence/audio-demo-export.mjs --wav ORIGINAL.wav --receipt ORIGINAL.json
 --operator-pin EXTERNALLY_RETAINED_FINGERPRINT --output-dir NEW_QA_DIRECTORY`,
 then run the existing `verify_audio` Rust example against that original WAV and
 the generated `request.json` and `transcript.json`. The importer preserves the
@@ -568,3 +685,97 @@ authenticity limitations. Do not start another recording if yesterday's saved
 files are unavailable. PowerShell transport fixtures require a separately
 provisioned managed runtime; the current Debian image has none, so those fixtures
 are not claimed as executed there.
+
+## Developer attestation tool public exports
+
+The developer APK's **Device attestation tool** uses the shared attestation tool
+through its exact bundled document, separate from **Signing keys** and the
+sensor-key enrollment path. Open it through the camera tools link and inspect
+the actual semantic state. It checks native capability without generating a key.
+Native proving is unavailable in an ordinary browser; the page does not create
+a browser proof as a substitute for this phone check.
+
+The independent requester creates an original and compact `NVAT1` token using
+`code/tools/evidence/device-attestation-check.mjs` inside the existing managed
+Debian environment. Keep that original outside the phone before entering its
+token. The ASCII token fits the existing 200-character guarded text-insertion
+limit, with no arbitrary JavaScript or ADB command needed. Its fixed fields are
+scope, issue time, canonical random challenge ID and nonce; it retains the
+two-minute window and grants no account/session or sensor authority. The
+[tool contract](../sensors/ATTESTATION_TOOL.md#developer-apk-tool-and-independent-requests)
+documents exact token and request semantics.
+
+Use the original helper's **AppUiState** and bounded **AppUiBatch** with observed
+controls: **Host-issued request token**, **Load request**, **Save request**,
+**Prove test key**, **Cancel** and **Save proof**. On a narrow phone, the proof
+panel follows the request panel and may require normal semantic scrolling.
+Loading performs no proof. The separate deliberate **Prove test key** action may
+create the first key for that synthetic scope; later fresh requests for the same
+scope reuse it. Cancellation acknowledges revoked result authority while an
+already started Keystore call may finish. Existing keys and partial records are
+preserved. Installation, launch, restart and proof collection still need their
+own scoped authorization.
+
+After explicitly saving the public records, from the original private checkout:
+
+```powershell
+./code/tools/usb-device.ps1 ExportDeviceAttestation
+```
+
+Omit `-AppTarget`: this retrieval is restricted to `org.nonverba.camera`, Android
+user 0 and unchanged own-app focus/installed APK hash. It is implemented by the
+bounded [attestation export helper](../../code/tools/device/usb-device-attestation.ps1)
+invoked through the approved original USB entry point. The public helper source
+does not create another authorized Windows transport.
+
+Only these explicitly saved cache-export names are accepted:
+
+- `nonverba-device-attestation-request-<UUID>.json`, at most 4 KiB;
+- `nonverba-device-attestation-proof-<UUID>.json`, at most 192 KiB.
+
+The inventory permits one to eight matching files in total, not eight of each
+kind. Exact path/depth, non-linked file components, closed public schemas,
+canonical encoding, lengths and hashes are checked before/after transfer. Copies
+go into a new exclusive private `code/artifacts/device-acceptance/` retrieval
+directory with a `retrieval.json` manifest. For each file, `received_at_utc` is
+captured immediately after complete bounded canonical bytes have reached and
+been decoded by the host; `retrieved_at_utc` is the later successful
+validation/storage time. A file entry is appended only after its hash, closed
+schema, app/focus and storage checks pass. Existing phone files are preserved;
+failure preserves an incomplete manifest and any already retrieved bytes. This
+action reads no private key or no-backup enrollment record, activates no sensor,
+and performs no cryptographic, hardware or independent-freshness verification.
+`VerifySavedDownloads` keeps its existing allowlist and does not accept these
+attestation records.
+
+Compare the returned original request with the independently retained host
+original and identify the successfully retained matching proof by its exact
+request and hashes. Use that first matching proof entry's `received_at_utc`, not
+its later `retrieved_at_utc` or the manifest completion time, as externally
+observed complete-byte arrival. Retain the first enrollment arrival for all later
+checks; repeated export, retrieval or a fresh possession signature must not reset
+it. A phone **proof ready** or **saved** label alone does not establish complete
+arrival at an independent requester. Unused or expired request tokens retain
+their original times and create no enrollment witness merely by being loaded.
+
+After selecting the matching proof entry, convert its arrival safely even when
+PowerShell 7.5 has automatically parsed the JSON ISO timestamp as `DateTime`:
+
+```powershell
+$attestationReceivedAt = ([DateTimeOffset]$attestationProofEntry.received_at_utc).ToUnixTimeSeconds()
+```
+
+Use the first successful enrollment proof's value for `--enrollment-received-at`.
+For a later fresh possession proof, use that proof's separately recorded arrival
+for `--received-at` while retaining the enrollment value.
+
+Verify the retrieved public proof in managed Debian with the
+[independent CLI](../sensors/ATTESTATION_TOOL.md#offline-proof-and-chain-checking),
+supplying original possession/enrollment requests, externally observed arrivals,
+independent developer-package policy and trust. For restart continuity, explicitly
+select that bounded restart, keep the same synthetic scope, pin the prior SPKI
+and compare complete chain bytes, then verify a fresh possession challenge under
+the original enrollment context. Preserve policy failures as failures; developer
+results do not change the participant sign-in policy or prove current process
+state, live presence or sensor origin. Software checks, installation, key
+continuity and an accepted hardware chain remain separately scoped outcomes.

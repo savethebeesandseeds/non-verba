@@ -93,7 +93,7 @@ no failed nonce is retried and Rust's five-second/same-second checks are unchang
 This avoids a second-boundary scheduling race; it does not attest either clock or
 guarantee success with an unknown camera clock, a clock jump or delayed callbacks.
 The deterministic production-helper regression runs with
-`bash crates/nonverba-android/tests/run-native-camera-timing.sh` inside Debian.
+`bash android/tests/platform/run-native-camera-timing.sh` inside Debian.
 
 Rust assigns the finalization timestamp when sealing begins. It must fall at or after
 acquisition and both image/result delivery times, within thirty seconds of acquisition, and inside the original

@@ -22,7 +22,7 @@ Use [Qualcomm MobileFaceNet](https://huggingface.co/qualcomm/MobileFaceNet), sou
 from foamliu's `weights/mobilefacenet.pt`. This is the 128D checkpoint, distinct
 from InsightFace's 512D MobileFaceNet weights. The
 [source model lock](../../code/models/mobilefacenet/model-lock.json),
-[shared browser profile](../../web/src/face-model-spec.js) and
+[shared browser profile](../../web/shared/identity/face-model-spec.js) and
 [Rust policy profile](../../code/crates/nonverba-core/src/face_identity.rs) bind
 enrollment and comparison to the same version. Changing preprocessing,
 alignment, aggregation, weights or runtime requires a new compatible profile;
@@ -87,7 +87,7 @@ A quality-accepted capture supplies a transient feature vector. Retention needs
 its own review, explicit consent and **Enroll** action. The stored reference
 contains the account/principal binding, enrollment device and operation, time,
 model profile, simulation marker and 128D features. It contains no photograph.
-The [local store](../../web/src/face-reference-store.js) encrypts that record with
+The [local store](../../web/shared/identity/face-reference-store.js) encrypts that record with
 AES-256-GCM and a per-record non-extractable WebCrypto key; the binding is
 authenticated as additional data. The IndexedDB envelope contains only the
 reference ID, key, IV and ciphertext. Review summaries and public profile
@@ -165,8 +165,8 @@ Linux container. The preparation tool uses the dedicated existing-tools cache:
 ```
 
 ```sh
-node tools/prepare-face-model.mjs --download
-node tools/prepare-face-model.mjs --verify
+node tools/provision/prepare-face-model.mjs --download
+node tools/provision/prepare-face-model.mjs --verify
 node --run test:operator-face
 node --run test:model:operator-face
 node --run test:browser:operator-face

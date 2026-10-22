@@ -18,7 +18,17 @@ android {
         targetSdk = 36
         versionCode = 9
         versionName = "0.7.0"
+        buildConfigField("boolean", "KEEP_SCREEN_AWAKE", providers.gradleProperty("nonverba.keepScreenAwake")
+            .orElse("false").get().toBooleanStrict().toString())
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+    }
+
+    // Generated inputs belong to the managed module build directory. Replace
+    // the default source roots so retained legacy staging is never packaged.
+    sourceSets.getByName("main") {
+        java.srcDir("../shared/src/main/kotlin")
+        assets.setSrcDirs(listOf(layout.buildDirectory.dir("generated/developer-assets")))
+        jniLibs.setSrcDirs(listOf(layout.buildDirectory.dir("generated/developer-jniLibs")))
     }
 
     compileOptions {
@@ -53,17 +63,17 @@ dependencies {
 }
 
 val verifyNativeLibraries by tasks.registering {
-    val libraries = layout.projectDirectory.dir("src/main/jniLibs")
+    val libraries = layout.buildDirectory.dir("generated/developer-jniLibs")
     inputs.dir(libraries)
     doLast {
-        check(listOf("arm64-v8a", "x86_64").all { libraries.file("$it/libnonverba_android.so").asFile.isFile }) {
+        check(listOf("arm64-v8a", "x86_64").all { libraries.get().file("$it/libnonverba_android.so").asFile.isFile }) {
             "Missing native location core. Run code/dev.ps1 Native before building the APK."
         }
     }
 }
 
 val verifyWebAssets by tasks.registering {
-    val webAssets = layout.projectDirectory.dir("src/main/assets/web")
+    val webAssets = layout.buildDirectory.dir("generated/developer-assets/web")
     inputs.dir(webAssets)
     doLast {
         val requiredAssets = listOf(
@@ -73,12 +83,13 @@ val verifyWebAssets by tasks.registering {
             "live-location.html", "live-location-ui.js", "live-location-session.js", "live-session-storage.js", "live-peer.js",
             "agent-requester.js", "agent-evidence-storage.js",
             "camera-acceptance.js", "audio-session.js", "audio-controller.js",
-            "key-enrollment.html", "key-enrollment-ui.js", "key-enrollment-platform.js", "key-enrollment.css"
+            "key-enrollment.html", "key-enrollment-ui.js", "key-enrollment-platform.js", "key-enrollment.css",
+            "device-attestation.html", "device-attestation-ui.js", "device-attestation.js", "browser-attestation-keys.js"
         )
-        check(requiredAssets.all { webAssets.file(it).asFile.isFile }) {
-            "Missing shared camera/audio/location app. From code/, run node tools/build-web.mjs and node tools/stage-android.mjs first."
+        check(requiredAssets.all { webAssets.get().file(it).asFile.isFile }) {
+            "Missing shared camera/audio/location app. From code/, run node tools/build/build-web.mjs and node tools/build/stage-android.mjs first."
         }
-        check(webAssets.asFile.walkTopDown().any { it.isFile && it.extension == "wasm" }) {
+        check(webAssets.get().asFile.walkTopDown().any { it.isFile && it.extension == "wasm" }) {
             "Missing Rust WebAssembly module. Build the shared web assets before packaging the APK."
         }
     }

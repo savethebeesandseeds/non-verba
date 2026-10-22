@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: AGPL-3.0-only
 set -euo pipefail
-source "$(dirname -- "${BASH_SOURCE[0]}")/harness-env.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../../../android/tests/harness-env.sh"
 
 skip_build=false
 case "${1:-}" in

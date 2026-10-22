@@ -75,7 +75,7 @@ Rust sensor policy, DSP, quality and artifact verification live in
 `evidence_session/`. `code/crates/nonverba-android/src/` provides internal JNI;
 the Android Kotlin collectors own permissions, terminal snapshots, key access,
 retention and lifecycle, while `native_audio_device.cpp` owns AAudio buffers.
-`web/src/audio-controller.js`, `agent-requester.js` and
+`web/shared/audio/audio-controller.js`, `agent-requester.js` and
 `agent-evidence-storage.js` separate transport coordination from verification
 and local acceptance. Focused regressions live in `code/test/` and
 `code/android/tests/`; use the managed container and the smallest relevant check.

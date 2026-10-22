@@ -219,7 +219,7 @@ would need separate integration and actual service configuration.
 
 The shared [evidence-session API](EVIDENCE_SESSIONS.md) connects requester receipt
 checking, actual sensor appraisal and local atomic task acceptance. Its browser
-controller is `web/src/agent-requester.js`; it is a transport-independent agent
+controller is `web/shared/evidence/agent-requester.js`; it is a transport-independent agent
 integration API. Existing interactive pages retain their individual workflows.
 All app ledgers are local to one browser/app profile and do not provide replay
 exclusion across requesters, devices, or the separate legacy workflow ledgers.

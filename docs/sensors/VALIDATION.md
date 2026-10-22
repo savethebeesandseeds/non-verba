@@ -16,7 +16,7 @@ artifact binding, requester receipt and local duplicate acceptance. Test fixture
 are synthetic inputs; accepting one does not establish physical sensor truth.
 
 Native session guards are tested by the suites in
-[`code/crates/nonverba-android/tests`](../../code/crates/nonverba-android/tests).
+[`code/android/tests/platform`](../../code/android/tests/platform).
 Browser and adapter suites are under [`code/test`](../../code/test), and the core
 Rust tests remain alongside their modules in
 [`nonverba-core`](../../code/crates/nonverba-core).
@@ -518,7 +518,7 @@ no calls, verification stayed inactive and successful acceptance stayed disabled
 This browser run did not repeat signature verification; its original-challenge
 and trusted-key results remain in the preceding separate check.
 
-The reusable source driver is `code/test/camera-quality-delivered-browser.mjs`.
+The reusable source driver is `code/test/browser/camera-quality-delivered-browser.mjs`.
 Native expectations, browser report and log remain in the private camera-quality
 QA directory with separate hashes/checkpoint; earlier results were not replaced.
 A small native expectation driver used existing caches; there was no WASM/web
@@ -1252,7 +1252,7 @@ The final focused run passed all 149 microphone, location, camera and GPS-attemp
 adapter checks, with zero failures, skips or pending tests. The command was:
 
 ```sh
-node --test test/native-audio-adapter-tests.mjs test/location-adapter-tests.mjs test/camera-adapter-tests.mjs test/gps-attempt-adapter-tests.mjs
+node --test test/unit/native-audio-adapter-tests.mjs test/unit/location-adapter-tests.mjs test/unit/camera-adapter-tests.mjs test/unit/gps-attempt-adapter-tests.mjs
 ```
 
 One test-only source snapshot was created through the documented launcher:
@@ -1262,8 +1262,8 @@ One test-only source snapshot was created through the documented launcher:
 That archive describes the initial failing-test source, not the final amended
 source. To reuse the same test snapshot, exactly three authored files were
 subsequently amended, preserving their before-images in its QA directory:
-`web/src/audio-platform.js`, `web/src/location-platform.js` and
-`code/test/location-adapter-tests.mjs`. The original package-producing source
+`web/shared/audio/audio-platform.js`, `web/shared/location/location-platform.js` and
+`code/test/unit/location-adapter-tests.mjs`. The original package-producing source
 was untouched. The final six-file tested hash list matches the current checkout
 exactly, and the private checkpoint records each before/after amendment hash.
 No package or source notice was produced from the amended test snapshot.
@@ -1735,7 +1735,7 @@ A comparison of 130 current authored core/web/build-input files, totalling
 1,859,538 bytes, found no mismatch with that snapshot. No rebuild, new source
 archive, dependency installation, APK or phone operation was needed.
 
-The five focused `audio:` cases in `test/sensor-acceptance-lifecycle-tests.mjs`
+The five focused `audio:` cases in `test/evidence/sensor-acceptance-lifecycle-tests.mjs`
 passed, exit 0. They use actual retained Rust/WASM verification with a Node
 IndexedDB/Worker double: completed transport closure and replay, compatibility
 of the optional guard, cancellation/replacement/pagehide during verification,
@@ -1840,7 +1840,7 @@ files, base revision `8c383bf3450c5d629d384a4e469acb524553d33b`, dirty state `1`
 The evidence web build passed using the existing Debian toolchains and caches.
 No Android build or package export ran.
 
-The new maintained `code/test/audio-acceptance-browser-tests.mjs` creates one
+The new maintained `code/test/browser/audio-acceptance-browser-tests.mjs` creates one
 synthetic four-second PCM fixture with two real Rust-generated challenges,
 actual C2PA signing and an actual signed requester receipt. The requester and
 operator fixture keys differ. There is no microphone, speaker, AudioWorklet,

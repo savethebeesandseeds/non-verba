@@ -195,10 +195,10 @@ No Play Integrity service, carrier/Wi-Fi corroboration, authenticated external b
 | `code/crates/nonverba-core/src/location_proof/position/` | Separate GPS L1 C/A position/clock recomputation against verifier-pinned LNAV data |
 | `code/crates/nonverba-core/src/android_attestation/` and `agent_appraisal/context.rs` | Independent key-enrollment verification and binding to the actual location/media signer |
 | `code/crates/nonverba-core/src/camera_location.rs` | Composition checks between existing C2PA camera evidence and the independent location record |
-| `web/src/location-capture.js` | Reusable begin/finalize/collect orchestration with cancellation |
-| `web/src/location-platform.js` | Native bridge transport, platform identification and proof envelope |
-| `web/src/location-ui.js` | Standalone requester/operator/verifier UI |
-| `web/src/camera-location.js` | Camera request wrapper and proof import/export |
+| `web/shared/location/location-capture.js` | Reusable begin/finalize/collect orchestration with cancellation |
+| `web/shared/location/location-platform.js` | Native bridge transport, platform identification and proof envelope |
+| `web/apps/non-verba-dev/src/location/location-ui.js` | Standalone requester/operator/verifier UI |
+| `web/shared/camera/camera-location.js` | Camera request wrapper and proof import/export |
 | `code/android/.../NativeLocation.kt` | Android callbacks, session ownership, foreground permission and replay reservation |
 | `code/android/.../RawGnssCollector.kt` | Native receiver callback registration, extraction, cadence and teardown; no signing interface |
 | `code/android/.../LocationCaptureKey.kt` | Internal Keystore signing callback |

@@ -1,18 +1,22 @@
 # Non Verba workstreams
 
-Updated 16 October 2026 after the cross-Hero audit. The owner has retained all
-eleven Heroes, with the domain boundaries and handoffs below. Their numbers are
+Updated 22 October 2026 to include reusable attestation-tool hardening alongside
+sensor tools in Hero 1. The 16 October cross-Hero audit retained all eleven
+Heroes, with the domain boundaries and handoffs below. Their numbers are
 stable identifiers; task ownership, priority and implementation order still need
 to be agreed as Goals are divided into Milestones.
 
-Use the [project dashboard](../../web/dashboard/README.md) for the hierarchy of
-Heroes, Goals and Milestones, color-coded states, dependencies and evidence.
-One JSON per Hero in `web/dashboard/heroes/` holds its progress; the
-[schema](../../web/dashboard/SCHEMA.md) defines ordinary edits. After updating a
-Hero, run `./web/dashboard/scripts/refresh.ps1` from the repository root to validate and
-refresh the standalone HTML through the existing managed container. Open the HTML
-directly to see that snapshot; JSON edits appear only after refresh. This outline
-defines the Hero boundaries.
+Use the private workspace's
+[project dashboard](../../../private-source/web/dashboard/README.md) for the
+hierarchy of Heroes, Goals and Milestones, color-coded states, dependencies and
+evidence. One JSON per Hero in `private-source/web/dashboard/heroes/` holds its
+progress; the [schema](../../../private-source/web/dashboard/SCHEMA.md) defines
+ordinary edits. These local links require the sibling private checkout. After
+updating a Hero, run `./web/dashboard/scripts/refresh.ps1` from the
+`private-source/` repository root to validate and refresh the standalone HTML
+through the existing managed container. Open the HTML directly to see that
+snapshot; JSON edits appear only after refresh. This outline defines the Hero
+boundaries.
 
 The table describes broad directions. The dashboard keeps a partial record of
 confirmed tasks and evidence-backed checkpoints; empty Heroes await a confirmed
@@ -27,7 +31,7 @@ hardening, research, integration and institutional development.
 
 | Number | Hero | Work ahead |
 | --- | --- | --- |
-| 1 | [Sensor hardening and evidence quality](../sensors/STATUS.md) | Reliable camera, microphone and GPS acquisition; cancellation and recovery; inspectable failed attempts; calibrated quality requirements; physical-device validation and resistance to replay or substitution. |
+| 1 | [Tool hardening and evidence quality](../sensors/STATUS.md) | Reusable sensor and device-attestation tools; reliable camera, microphone and GPS acquisition; cancellation and recovery; inspectable failed attempts; calibrated quality requirements; physical-device validation and resistance to replay or substitution. |
 | 2 | [Identity, authentication and work privacy](../development/AUTHENTICATION_AND_WORK_PRIVACY.md) | Verified account enrollment, key ownership and recovery, device authorization, face continuity and liveness, and enforceable hold/clock-out across devices. Protect sensitive information throughout. |
 | 3 | [Assignments and participant experience](assignments/PARTICIPANT_NOTES.md) | Connect registration, discovery, maps, task requests, exact Contract review/signing, evidence collection, completion and notifications into a usable Requester/Operator journey. |
 | 4 | [Priors and the reasoning system](research/DISPUTE_PRIORS_NOTES.md) | Develop understandable prior definitions, complete and audit the corpus research, specify how declarations enter case context, and study how they influence reasoning. Evaluate comprehension, consistency, bias, uncertainty and gaming. |
@@ -62,8 +66,9 @@ Hero 2 defines principal/key/device authority, enrollment, authentication,
 delegation, recovery and account work/privacy policy. Hero 8 defines how scoped
 grants, revocation, cancellation and observed shutdown are represented and
 propagated. Hero 11 implements selected hosted authority and enforcement; Hero 10
-implements native key, permission and sensor controls. Hero 1 owns generic sensor
-capture provenance and substitution evaluation; Hero 2 owns enrolled-key and
+implements native key, permission and sensor controls. Hero 1 owns reusable
+attestation-tool hardening, generic sensor capture provenance and substitution
+evaluation; Hero 2 owns enrolled-key and
 face-authentication assurance requirements.
 
 The shared grant interface must bind principal, device, operation, authoritative
@@ -79,10 +84,11 @@ additional permissions. Private registration/authentication media and member
 records require their own access and lifecycle rules; evidence scrutiny or
 insurance research grants no automatic access or reuse authority.
 
-### Sensor evidence, lifecycle and failed attempts
+### Reusable tools, sensor evidence, lifecycle and failed attempts
 
-Hero 1 defines collector-specific evidence and failure formats, quality policy,
-verification and physical assurance. Hero 10 owns app-wide lifecycle and
+Hero 1 defines reusable sensor and attestation tool boundaries, collector-specific
+evidence and failure formats, quality policy, verification and physical assurance.
+Hero 2 supplies identity/enrollment policy. Hero 10 owns app-wide lifecycle and
 permission integration and invokes collector cleanup. Hero 8 exposes operation,
 cancel, status and recovery semantics; Hero 11 retains and exchanges the selected
 artifacts and records. Heroes 3, 5 and 7 define participant, dispute and
@@ -179,7 +185,7 @@ Validation has distinct responsibilities:
 
 | Hero | Validation responsibility |
 | --- | --- |
-| 1 | Physical measurement, evidence quality and independent requester assurance. |
+| 1 | Reusable sensor/attestation-tool validation, physical measurement, evidence quality and independent requester assurance. |
 | 2 | Identity/authentication assurance and work/privacy policy correctness. |
 | 3 | Participant comprehension, exact consent and the integrated journey. |
 | 5, 6, 7 | Their respective procedure, participation/calculation and incident/coverage requirements. |

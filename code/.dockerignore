@@ -8,4 +8,5 @@
 !container/debian-packages.lock
 !container/cuda-packages.lock
 !tools/
-!tools/check-gpu.cpp
+!tools/provision/
+!tools/provision/check-gpu.cpp
