@@ -17,6 +17,18 @@ const insist = (condition, message) => { if (!condition) throw new Error(message
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const PARTICIPANT_APK_BUDGET = 8 * 1024 * 1024;
 const applicationId = 'org.nonverba.participant';
+// The identity profile shares the reviewed acquisition controller, never the
+// developer host, JNI signer or other developer sensors. Keep this set closed.
+const SHARED_CAMERA_CLASSES = new Set(['NativeCameraEngine','NativeCameraProfile','NativeCameraIdentity',
+  'NativeCameraLabels','NativeCameraLensPolicy','NativeCameraWorkQueue','NativeCameraTiming',
+  'NativeSessionGuards','NativeLifecycleCleanup','NativeMainThreadRead']);
+
+function sharedCameraClassesOnly(bytes) {
+  for (const match of bytes.toString('latin1').matchAll(/org[/.]nonverba[/.]camera(?:[/.]([A-Za-z0-9_$/.]+))?/g)) {
+    if (!match[1] || /[/.]/.test(match[1]) || !SHARED_CAMERA_CLASSES.has(match[1].split('$',1)[0])) return false;
+  }
+  return true;
+}
 
 export function participantSourceContract(gradle) {
   const string = field => new RegExp('\\b' + field + '\\s*=\\s*"([^"\\r\\n]+)"').exec(gradle)?.[1];
@@ -161,7 +173,7 @@ export function verifyParticipantArchive(apk, records, assets) {
     } else if (name.endsWith('.dex')) {
       insist(/^classes(?:[2-9]|[1-9]\d+)?\.dex$/.test(name), 'Unexpected participant DEX location: ' + name);
       const bytes = entryBytes(apk, record);
-      insist(!bytes.includes(Buffer.from('org/nonverba/camera')) && !bytes.includes(Buffer.from('org.nonverba.camera')),
+      insist(sharedCameraClassesOnly(bytes),
         'Developer class prefix present in participant DEX: ' + name);
       dex.push({path:name, bytes:bytes.length, sha256:sha256(bytes)});
     }

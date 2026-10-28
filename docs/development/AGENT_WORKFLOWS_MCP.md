@@ -209,3 +209,12 @@ policy/request, never reinterpretation of an existing signed agreement.
    Keep microphone acceptance held until explicitly authorized; retain failed runs
    and precise assurance limits. Build and test only inside `non-verba-dev`, with
    Rust/C++ core logic, minimal Android glue and no Windows toolchains.
+
+## Evidence acceptance separation
+
+Reserved 28 October 2026. This heading is the place for a schema contract that
+separates evidence acceptance from Assignment formation. No schema is frozen.
+File delivery, verification, and evidence-ledger acceptance do not form an
+Assignment, create a proposal or Contract signature, acknowledge completion,
+admit a ballot, settle a dispute, or instruct payment. No consequential MCP
+action is authorized by this note.

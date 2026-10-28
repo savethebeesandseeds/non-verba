@@ -93,6 +93,16 @@
       "consumer": "participant"
     },
     {
+      "source": "shared/identity/identity-camera-tool.js",
+      "output": "identity-camera-tool.js",
+      "consumer": "participant"
+    },
+    {
+      "source": "shared/identity/identity-capture-proof.js",
+      "output": "identity-capture-proof.js",
+      "consumer": "participant"
+    },
+    {
       "source": "inspections/authentication/authentication-privacy-ui.js",
       "output": "authentication-privacy-ui.js"
     },

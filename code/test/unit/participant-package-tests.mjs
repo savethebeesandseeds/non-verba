@@ -77,18 +77,78 @@ async function preview(t) {
   return 'http://127.0.0.1:' + server.address().port;
 }
 
-test('participant browser responses and package inspector share exact canonical asset bytes', async t => {
+function previewHeaders(response) {
+  assert.equal(response.headers.get('Cache-Control'),'no-store');
+  assert.equal(response.headers.get('X-Content-Type-Options'),'nosniff');
+  assert.equal(response.headers.get('Referrer-Policy'),'no-referrer');
+  assert.equal(response.headers.get('Permissions-Policy'),'camera=(self), microphone=(), geolocation=()');
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'),null);
+}
+
+test('root resource aliases and prefixed browser assets retain the exact canonical package bytes', async t => {
   const origin = await preview(t), assets = await collectParticipantAssets(), served = new Map();
+  assert.deepEqual([...assets.keys()].filter(name=>name.endsWith('.html')),['participant/index.html'],
+    'The source closure has one strict packaged document.');
+  served.set('participant/index.html',assets.get('participant/index.html'));
   for (const [name, expected] of assets) {
-    const response = await fetch(origin + '/' + name);
-    assert.equal(response.status, 200, name);
-    const bytes = Buffer.from(await response.arrayBuffer());
-    assert.deepEqual(bytes, expected, 'Browser diverged from the APK source: ' + name);
-    served.set(name, bytes);
+    if (name.endsWith('.html')) continue;
+    const paths = new Set(['/' + name,'/' + name.replace(/^participant\//,'')]);
+    for (const path of paths) {
+      const response = await fetch(origin + path,{redirect:'manual'});
+      assert.equal(response.status,200,path); previewHeaders(response);
+      assert.equal(response.headers.get('Location'),null,path);
+      assert.equal(response.headers.get('Content-Length'),String(expected.length),path);
+      assert.doesNotMatch(response.headers.get('Content-Type') || '',/text\/html/,path);
+      const bytes = Buffer.from(await response.arrayBuffer());
+      assert.deepEqual(bytes,expected,'Browser resource diverged from the APK source: ' + path);
+      const head = await fetch(origin + path,{method:'HEAD',redirect:'manual'});
+      assert.equal(head.status,200,path); previewHeaders(head);
+      assert.equal(head.headers.get('Content-Type'),response.headers.get('Content-Type'),path);
+      assert.equal(head.headers.get('Content-Length'),String(expected.length),path);
+      assert.equal((await head.arrayBuffer()).byteLength,0,path);
+      served.set(name,bytes);
+    }
   }
   verifyEntries(packageEntries(served), assets);
-  assert.equal((await fetch(origin + '/web/apps/non-verba/src/index.html')).status, 404);
-  assert.equal((await fetch(origin + '/participant/participant.js', {method:'POST'})).status, 405);
+});
+
+test('the root is the only preview document and legacy documents redirect without query state', async t => {
+  const origin = await preview(t), document = await fetch(origin + '/',{redirect:'manual'});
+  assert.equal(document.status,200); assert.equal(document.redirected,false); previewHeaders(document);
+  assert.equal(document.headers.get('Location'),null);
+  assert.equal(document.headers.get('Content-Type'),'text/html; charset=utf-8');
+  const bytes = Buffer.from(await document.arrayBuffer());
+  const head = await fetch(origin + '/',{method:'HEAD',redirect:'manual'});
+  assert.equal(head.status,200); previewHeaders(head);
+  assert.equal(head.headers.get('Content-Type'),document.headers.get('Content-Type'));
+  assert.equal(head.headers.get('Content-Length'),String(bytes.length));
+  assert.equal(head.headers.get('X-Robots-Tag'),'noindex, nofollow');
+  assert.equal((await head.arrayBuffer()).byteLength,0);
+  const oldDocuments = ['/index.html','/review.html','/participant','/participant/',
+    '/participant/index.html','/participant/review.html'];
+  for (const path of [...oldDocuments,...oldDocuments.map(path=>path+'?view=identity/status&discard=1'),'/?view=identity/status']) {
+    for (const method of ['GET','HEAD']) {
+      const response = await fetch(origin + path,{method,redirect:'manual'});
+      assert.equal(response.status,308,method + ' ' + path); previewHeaders(response);
+      assert.equal(response.headers.get('Location'),'/',path);
+      assert.equal(response.headers.get('Content-Length'),'0',path);
+      assert.equal((await response.arrayBuffer()).byteLength,0,path);
+    }
+  }
+  for (const path of ['/web/apps/non-verba/src/index.html','/participant/unknown.html','/identity/index.html',
+    '/nonverba-license/index.html','/participant/index.html/','/participant//index.html','/participant%2Freview.html',
+    '/account/sign-in','/identity/document','/requests']) {
+    const response = await fetch(origin + path,{redirect:'manual'});
+    assert.equal(response.status,404,path); previewHeaders(response);
+    assert.equal(response.headers.get('Location'),null,path);
+    assert.doesNotMatch(response.headers.get('Content-Type') || '',/text\/html/,path);
+  }
+  for (const path of ['/','/?view=identity/status',...oldDocuments,'/participant.js','/participant/participant.js']) {
+    const response = await fetch(origin + path,{method:'POST',redirect:'manual'});
+    assert.equal(response.status,405,path); previewHeaders(response);
+    assert.equal(response.headers.get('Allow'),'GET, HEAD',path);
+    assert.equal(response.headers.get('Location'),null,path);
+  }
 });
 
 test('Android accepts one plain participant document and exactly the shared runtime assets', async () => {
@@ -126,6 +186,8 @@ test('Android accepts one plain participant document and exactly the shared runt
   assert.ok(required, 'Missing Gradle participant runtime closure.');
   assert.deepEqual([...required.matchAll(/"([^"]+)"/g)].map(match => match[1]).sort(),
     Object.keys(PARTICIPANT_SHELL_SOURCES).sort(), 'Gradle must inspect the same exact runtime closure.');
+  const runtimeBudget = /required\.sumOf \{ root\.resolve\(it\)\.length\(\) \} <= (\d+) \* 1024/.exec(gradle);
+  assert.equal(Number(runtimeBudget?.[1]) * 1024,PARTICIPANT_SHELL_BUDGET,'Native and browser runtime budgets must agree.');
   assert.match(host, /domStorageEnabled = false/, 'Real identity capture and account credentials stay out of DOM storage.');
   for (const restriction of [/blockNetworkLoads = true/, /allowFileAccess = false/,
     /allowContentAccess = false/, /setGeolocationEnabled\(false\)/]) assert.match(host, restriction);
@@ -163,11 +225,13 @@ test('native enrollment camera is exact-origin, camera-only and stopped on lifec
   for (const lifecycle of ['onStop','onDestroy']) {
     assert.match(host, new RegExp('override fun '+lifecycle+'\\(\\)[\\s\\S]{0,130}stopEnrollmentCamera\\(\\)'));
   }
-  assert.match(host, /if \(!cameraPermissionInFlight\) stopEnrollmentCamera\(\)/);
+  assert.match(host, /override fun onPause\(\)[\s\S]{0,400}identityCamera\?\.pause\(\)/);
+  assert.match(host, /if \(!cameraPermissionInFlight \|\| nativeCameraPermission != null\) stopEnrollmentCamera\(\)/);
   assert.match(host, /nonverba:camera-stop/);
   assert.match(host, /v\.srcObject\.getTracks\(\)\.forEach\(t=>t\.stop\(\)\)/);
   assert.match(host, /camera=\(self\), microphone=\(\), geolocation=\(\)/);
-  assert.doesNotMatch(host, /RESOURCE_AUDIO_CAPTURE|RECORD_AUDIO|READ_EXTERNAL_STORAGE|ACTION_IMAGE_CAPTURE|NativeCamera/);
+  assert.doesNotMatch(host, /RESOURCE_AUDIO_CAPTURE|RECORD_AUDIO|READ_EXTERNAL_STORAGE|ACTION_IMAGE_CAPTURE|addJavascriptInterface|NativeCameraCore/);
+  assert.match(host, /NativeIdentityCameraBridge\(this, webView, "https:\/\/\$APP_HOST\$DOCUMENT_PATH", ::foregroundDocument, ::requestNativeCameraPermission\)/);
 });
 
 test('account networking is debug-only, fixed loopback and keeps WebView resource access blocked', async () => {
@@ -193,7 +257,7 @@ test('account networking is debug-only, fixed loopback and keeps WebView resourc
   assert.match(transport, /"GET" -> path in setOf\("\/v1\/accounts\/capabilities"/);
   assert.match(transport, /"DELETE" -> path == "\/v1\/auth\/session"/);
   assert.match(transport, /"\/v1\/accounts\/mock-mail"/);
-  const nativePostPaths = /"POST" -> path in setOf\(([\s\S]*?)\)\n\s*"DELETE"/.exec(transport)?.[1];
+  const nativePostPaths = /"POST" -> path in setOf\(([\s\S]*?)\) \|\| REVIEW_DECISION\.matches\(path\)\n\s*"DELETE"/.exec(transport)?.[1];
   assert.ok(nativePostPaths, 'Native account transport must retain a closed POST path set.');
   for (const path of ['/v1/account/deletion', '/v1/account/deletion/status']) {
     assert.equal([...nativePostPaths.matchAll(/"([^"]+)"/g)].filter(match => match[1] === path).length, 1,
@@ -206,6 +270,43 @@ test('account networking is debug-only, fixed loopback and keeps WebView resourc
       'Live status must use one exact read-only native GET entry.');
     assert.equal([...nativePostPaths.matchAll(/"([^"]+)"/g)].some(match=>match[1] === path),false);
   }
+  const reviewerRoot=/private const val REVIEWER = "([^"]+)"/.exec(transport)?.[1];
+  const reviewerId=/private const val REVIEW_ID = "([^"]+)"/.exec(transport)?.[1];
+  assert.equal(reviewerRoot,'/v1/identity/reviewer');assert.equal(reviewerId,'[A-Za-z0-9._:-]{1,128}');
+  const nativeReviewPattern=name=>{
+    const source=new RegExp('private val '+name+' = Regex\\("([^"]+)"\\)').exec(transport)?.[1];
+    assert.ok(source,'Missing exact native reviewer route '+name);
+    return new RegExp('^(?:'+source.replaceAll('$REVIEWER',reviewerRoot).replaceAll('$REVIEW_ID',reviewerId)+')$');
+  };
+  const reviewCase=nativeReviewPattern('REVIEW_CASE'),reviewPhoto=nativeReviewPattern('REVIEW_PHOTO'),
+    reviewDecision=nativeReviewPattern('REVIEW_DECISION'),reviewOperation=nativeReviewPattern('REVIEW_OPERATION');
+  assert.ok(reviewCase.test(reviewerRoot+'/cases/submission:fixture'));
+  assert.ok(reviewCase.test(reviewerRoot+'/cases/'+'a'.repeat(128)));
+  for(const kind of ['document_front','face_front'])assert.ok(reviewPhoto.test(reviewerRoot+'/cases/a/photos/'+kind));
+  assert.ok(reviewDecision.test(reviewerRoot+'/cases/a/decisions'));
+  assert.ok(reviewOperation.test(reviewerRoot+'/cases/a/operations/review:fixture'));
+  for(const path of [reviewerRoot+'/cases/',reviewerRoot+'/cases/'+ 'a'.repeat(129),reviewerRoot+'/cases/%61',
+    reviewerRoot+'/cases/a?target=other',reviewerRoot+'/cases/a?',reviewerRoot+'/cases/a/extra',
+    reviewerRoot+'/cases/a/photos/document_back',reviewerRoot+'/cases/a/photos/face_front/extra',
+    reviewerRoot+'/cases/a/operations/'+ 'a'.repeat(129)])
+    assert.equal([reviewCase,reviewPhoto,reviewDecision,reviewOperation].some(pattern=>pattern.test(path)),false,
+      'Malformed/query reviewer paths stay outside the native namespace: '+path);
+  assert.match(transport,/path\.split\('\/'\)\.any \{ it == "\." \|\| it == "\.\." \}/);
+  assert.match(transport,/private fun reviewRead\(path: String\) = path in setOf\("\$REVIEWER\/context", "\$REVIEWER\/cases", "\$IDENTITY\/review\/status"\)/);
+  assert.match(transport,/!BEARER\.matches\(header\("authorization"\) \?: ""\)/);
+  assert.match(transport,/request\.has\("body"\) \|\| header\("content-type"\) != null/);
+  assert.match(transport,/!validReviewDecision\(request\)/);
+  assert.match(transport,/body\.only\("operation_id", "submission_sha256", "receipt_sha256", "expected_revision", "action", "reason"\)/);
+  assert.match(transport,/reason\.codePointCount\(0, reason\.length\) !in 1\.\.500/);
+  assert.match(transport,/Character\.isISOControl\(point\) \|\| point in 0xD800\.\.0xDFFF/);
+  assert.match(transport,/private const val RESPONSE_LIMIT = 64 \* 1024/);
+  assert.match(transport,/private const val REVIEW_DETAIL_LIMIT = 256 \* 1024/);
+  assert.match(transport,/private const val REVIEW_PHOTO_LIMIT = 3 \* 1024 \* 1024/);
+  assert.match(transport,/REVIEW_PHOTO\.matches\(path\) -> REVIEW_PHOTO_LIMIT \+ REQUEST_LIMIT/);
+  assert.match(transport,/path == DEVICES \|\| REVIEW_CASE\.matches\(path\) -> REVIEW_DETAIL_LIMIT \* 6 \+ 2048/);
+  assert.match(transport,/exchange\(id, text, responseLimit, rawResponseLimit\(path\)\)/);
+  assert.match(transport,/payload\.toByteArray\(Charsets\.UTF_8\)\.size <= rawResponseLimit/);
+  assert.match(transport,/Preserve the bounded base64 JSON wire instead of re-escaping it\.\s*return body/);
   assert.match(transport, /instanceFollowRedirects = false/);
   assert.doesNotMatch(transport, /addJavascriptInterface|CookieManager|SharedPreferences|Log\./);
 });
@@ -248,8 +349,9 @@ test('recovery text export uses a scoped message bridge and an explicit system s
 
 test('local participant review changes only policy/indexing metadata and cannot enter the APK', async t => {
   const origin = await preview(t), assets = await collectParticipantAssets();
-  const response = await fetch(origin + '/participant/review.html');
+  const response = await fetch(origin + '/',{redirect:'manual'});
   assert.equal(response.status, 200);
+  assert.equal(response.redirected,false); previewHeaders(response);
   assert.equal(response.headers.get('Content-Security-Policy'), null, 'A cumulative header must not override the review meta policy.');
   assert.equal(response.headers.get('X-Robots-Tag'), 'noindex, nofollow');
   const review = await response.text();
@@ -264,12 +366,19 @@ test('local participant review changes only policy/indexing metadata and cannot 
     .replace(" style-src-elem 'self' 'unsafe-inline'; style-src-attr 'none';", '');
   assert.equal(normalized, assets.get('participant/index.html').toString('utf8'),
     'Review must not change product markup, scripts or styles.');
+  assert.doesNotMatch(review,/<base\b/i,'Root resolution must not add a second document base.');
+  assert.doesNotMatch(assets.get('participant/index.html').toString('utf8'),/style-src-elem|name="robots"/,
+    'Local selector/indexing exceptions must stay outside the strict packaged HTML.');
   assert.equal(assets.has('participant/review.html'), false);
+  assert.equal(assets.has('index.html'),false);
+  assert.equal(assets.has('review.html'),false);
   const injected = packageEntries(assets).map(([name, bytes]) =>
     [name, name === 'assets/participant/index.html' ? Buffer.from(review) : bytes]);
   assert.throws(() => verifyEntries(injected, assets), /differ/);
   assert.throws(() => verifyEntries([...packageEntries(assets), ['assets/participant/review.html', Buffer.from(review)]], assets),
     /Local review entry present in APK/);
+  assert.throws(() => verifyEntries([...packageEntries(assets), ['assets/index.html', Buffer.from(review)]], assets),
+    /Unexpected participant APK asset/);
 });
 
 test('participant collection has exact shell bytes and notices without developer runtime assets', async t => {
@@ -296,9 +405,13 @@ test('participant closure excludes identity source fixtures and retains the per-
   await writeFile(join(extra, 'web/apps/non-verba/assets/identity/another-person.svg'), 'unreviewed');
   const collected = await collectParticipantAssets(extra, {});
   assert.equal([...collected.keys()].some(name => /another-person|document-a|face-a/.test(name)), false);
-  const oversized = await fixture(t);
-  await writeFile(join(oversized, 'web/site/branding/sprout.svg'), Buffer.alloc(PARTICIPANT_IMAGE_BUDGET + 1));
-  await assert.rejects(collectParticipantAssets(oversized, {}), /bounded unlinked regular participant file/);
+  for (const source of ['web/site/branding/sprout.svg',
+    'web/apps/non-verba/assets/identity/level-1.webp','web/apps/non-verba/assets/identity/level-2.webp',
+    'web/apps/non-verba/assets/identity/unverified.webp']) {
+    const oversized = await fixture(t);
+    await writeFile(join(oversized, source), Buffer.alloc(PARTICIPANT_IMAGE_BUDGET + 1));
+    await assert.rejects(collectParticipantAssets(oversized, {}), /bounded unlinked regular participant file/);
+  }
 });
 
 test('shell budget totals all reviewed sources and does not count required license text', async t => {
@@ -307,7 +420,7 @@ test('shell budget totals all reviewed sources and does not count required licen
   assert.ok((await collectParticipantAssets(root, {})).get('nonverba-license/LICENSE.txt').length > PARTICIPANT_SHELL_BUDGET);
   await writeFile(join(root, 'web/apps/non-verba/src/participant.css'), Buffer.alloc(PARTICIPANT_SHELL_BUDGET / 2 + 1, 0x78));
   await writeFile(join(root, 'web/apps/non-verba/src/participant.js'), Buffer.alloc(PARTICIPANT_SHELL_BUDGET / 2 + 1, 0x78));
-  await assert.rejects(collectParticipantAssets(root, {}), /296KiB account-client budget/);
+  await assert.rejects(collectParticipantAssets(root, {}), /448KiB account-client budget/);
 });
 
 test('participant inputs reject file links, hardlinks, missing files and linked parent directories', async t => {
@@ -465,6 +578,14 @@ test('APK closure checks every shell/notice byte and excludes developer assets, 
   const inspected = verifyEntries(entries, assets);
   assert.equal(inspected.assets.length, assets.size);
   assert.equal(inspected.dex.length, 1);
+  const shared = entries.map(([name,bytes]) => [name,name === 'classes.dex' ? Buffer.from(
+    'Lorg/nonverba/camera/NativeCameraEngine; Lorg/nonverba/camera/NativeCameraEngine$Session; org.nonverba.camera.NativeCameraWorkQueue') : bytes]);
+  assert.equal(verifyEntries(shared, assets).dex.length,1,'Reviewed shared acquisition classes are distinct from the developer host.');
+  for (const descriptor of ['Lorg/nonverba/camera/MainActivity;','Lorg/nonverba/camera/NativeCameraCore;',
+    'Lorg/nonverba/camera/Unreviewed;','Lorg/nonverba/camera/NativeCameraEngine/NativeAudio;',
+    'Lorg/nonverba/camera/NativeCameraEngine$Other/NativeAudio;']) {
+    assert.throws(() => verifyEntries(entries.map(([name,bytes]) => [name,name === 'classes.dex' ? Buffer.from(descriptor) : bytes]),assets), /Developer class prefix/);
+  }
   assert.throws(() => verifyEntries(entries.slice(0, -1), assets), /Missing participant APK asset/);
   const changed = entries.map(([name, bytes]) => [name, name === 'assets/participant/index.html' ? Buffer.from('other') : bytes]);
   assert.throws(() => verifyEntries(changed, assets), /asset bytes differ/);

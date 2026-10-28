@@ -21,11 +21,19 @@ review is not another agreement to incorporate silently.
 | Field | Draft value |
 | --- | --- |
 | `id` | `nonverba-account-terms` |
-| `version` | `0.1.0-draft.1` |
+| `version` | `0.1.0-draft.2` (current); `0.1.0-draft.1` preserved |
 | `status` | `draft` |
 | `title` | `Account Terms and Conditions (Draft)` |
-| `contentSha256` | `88609610130c0a7a2594399402aea6db298f6218b5c91eaa07783bd97b746db4` |
+| `contentSha256` | `6fa35455cdd833e3253f44dbcf7cfb9b61342d2d22fd99a6318996433c7d60a7` |
 | Content format | `nonverba-account-terms-jcs-v1` |
+
+28 October 2026 successor: the closure section now says that closing an account
+keeps the account record for a retention period, so the account can still be
+found if information about it is required. The length of that period is not
+selected. Exact `0.1.0-draft.1` bytes remain
+[account-terms-0.1.0-draft.1.json](../legal/account-terms-0.1.0-draft.1.json),
+digest `88609610130c0a7a2594399402aea6db298f6218b5c91eaa07783bd97b746db4`.
+This successor is still a draft. It names no operator, country, or number of days.
 
 The draft supports one account containing both Requester and Operator roles. It
 does not treat role availability, confirmed email or a username as identity,

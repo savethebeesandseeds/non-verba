@@ -26,8 +26,10 @@ function reviewHtml(html) {
 export async function createParticipantServer({accountRelay} = {}) {
   const assets = await collectParticipantAssets();
   const relay = accountRelay || createParticipantAccountRelay();
-  // This in-memory route is never an APK asset or a release export.
-  assets.set('participant/review.html', Buffer.from(reviewHtml(assets.get('participant/index.html').toString('utf8'))));
+  // The single local document is generated in memory, never staged in the APK.
+  const entry = Buffer.from(reviewHtml(assets.get('participant/index.html').toString('utf8')));
+  const oldDocuments = new Set(['/index.html', '/review.html', '/participant', '/participant/',
+    '/participant/index.html', '/participant/review.html']);
   return createServer(async (request, response) => {
     response.setHeader('Cache-Control', 'no-store');
     response.setHeader('X-Content-Type-Options', 'nosniff');
@@ -43,14 +45,18 @@ export async function createParticipantServer({accountRelay} = {}) {
       return send(405, 'Method not allowed\n');
     }
     const pathname = (request.url || '').split('?', 1)[0];
+    if (oldDocuments.has(pathname) || pathname === '/' && request.url !== '/') {
+      response.setHeader('Location', '/');
+      return send(308, '');
+    }
     if (pathname === '/') {
-      response.setHeader('Location', '/participant/review.html');
-      return send(302, '');
+      response.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      return send(200, entry, 'text/html; charset=utf-8');
     }
     const name = pathname.startsWith('/') ? pathname.slice(1) : '';
-    const bytes = assets.get(name);
+    // Root-relative resources resolve to the same closed participant catalog.
+    const bytes = assets.get(name) || assets.get('participant/' + name);
     if (!bytes) return send(404, 'Not found\n');
-    if (name === 'participant/review.html') response.setHeader('X-Robots-Tag', 'noindex, nofollow');
     const type = name.endsWith('.html') ? 'text/html; charset=utf-8'
       : name.endsWith('.css') ? 'text/css; charset=utf-8'
       : name.endsWith('.js') ? 'text/javascript; charset=utf-8'
@@ -71,7 +77,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     server.once('error', reject);
     server.listen(Number(port), host, accept);
   });
-  console.log('Non-verba participant review: http://127.0.0.1:4173/participant/review.html');
+  console.log('Non-verba: http://127.0.0.1:4173/');
   process.once('SIGINT', () => server.close());
   process.once('SIGTERM', () => server.close());
 }

@@ -13,6 +13,7 @@ Run these through the existing managed `non-verba-dev` container from the projec
 ./code/dev.ps1 -Action Exec -Command @('bash', 'android/tests/platform/run-native-audio-lifecycle.sh')
 ./code/dev.ps1 -Action Exec -Command @('bash', 'android/tests/platform/run-native-lifecycle-cleanup.sh')
 ./code/dev.ps1 -Action Exec -Command @('bash', 'android/tests/platform/run-recovery-export.sh')
+./code/dev.ps1 -Action Exec -Command @('bash', 'android/tests/platform/run-identity-camera.sh')
 ```
 
 The first command compiles the production pure Kotlin session, enrollment-catalog,
@@ -57,3 +58,13 @@ format refusal, copy isolation, request cancellation, expiry and stale completio
 after a retry. It does not open an Android document provider. The platform bridge
 uses the system Create document picker and requires a separate device check for
 provider cancellation, chosen-destination writing and Activity round trips.
+
+The identity-camera harness compiles the production closed capture protocol,
+JPEG metadata/orientation policy, strict lens policy, exact-document revocation
+guard and bounded signing queue. It checks a real JCA P-256 signature and emits
+a synthetic detached proof for independent Rust/WebCrypto verification. Its
+blocked-worker test permits one waiting job and refuses excess work without
+growing the queue. Paused documents may revoke, while new authority requires the
+foreground document. This is JVM/software evidence; Android Bitmap decoding,
+Camera2 acquisition, physical front/rear lenses and OS permission-dialog behavior
+still require Android/package and separate phone checks.

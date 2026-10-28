@@ -14,3 +14,5 @@ code/models/mobilefacenet/model-lock.json text eol=lf
 code/**/fixtures/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 *.rnx -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 code/crates/nonverba-core/src/android_attestation/google-roots-2026.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Historical notice bytes are hashed as LF-only UTF-8 without a final newline.
+docs/legal/identity-intake-v1.txt text eol=lf

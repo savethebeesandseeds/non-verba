@@ -31,6 +31,137 @@ const authorizationPage = n => upstream('<form>synthetic page</form>', 200,
   {'content-type':'text/html', 'set-cookie':[cookie(n)]});
 const accepted = () => upstream('', 303, {'set-cookie':[clearCookie], location:`${callback}?${new URLSearchParams({code:factor(7),state:factor(2)})}`});
 
+test('identity intake is an authenticated closed path with a bounded photo budget', async t => {
+  const base = '/v1/account/identity', headers = {authorization:'Bearer owned-session','content-type':'application/json'};
+  const payload = {operation_id:'identity:'+factor(17),level:1,
+    expected:{account_id:'owned-account',principal_id:'owned-principal',session_id:'owned-session',recovery_generation:0},
+    details:{document_type:'passport',full_name:'Synthetic Test',birth_city:'Fixture City',nationality:'Fixture',age:30},
+    document_front:{media_type:'image/jpeg',base64:Buffer.alloc(40000,1).toString('base64')},
+    face_front:{media_type:'image/jpeg',base64:Buffer.alloc(20000,2).toString('base64')},
+    notice:{notice_id:'identity-intake',version:1,sha256:'a'.repeat(64),acknowledged:true}};
+  const submission = {method:'POST',path:base+'/submissions',headers,body:JSON.stringify(payload)};
+  validateAccountTransport(wire(submission));
+  const detached = {payload:{request:{purpose:'identity-capture'}},public_spki_der_b64:Buffer.alloc(91).toString('base64'),signature_b64:Buffer.alloc(64).toString('base64')};
+  const withProof = {...payload,notice:{...payload.notice,version:2},document_front:{...payload.document_front,capture_proof:detached}};
+  validateAccountTransport(wire({...submission,body:JSON.stringify(withProof)}));
+  validateAccountTransport(wire({...submission,body:JSON.stringify({...withProof,notice:{...withProof.notice,version:3}})}));
+  for (const proof of [null,{...detached,extra:true},{...detached,payload:{text:'x'.repeat(16385)}},
+    {...detached,signature_b64:'x'.repeat(89)}]) {
+    assert.throws(() => validateAccountTransport(wire({...submission,body:JSON.stringify({...withProof,
+      document_front:{...withProof.document_front,capture_proof:proof}})})));
+  }
+  validateAccountTransport(wire({...submission,body:JSON.stringify({...payload,details:{...payload.details,full_name:'N'.repeat(200)}})}));
+  for (const path of [base+'/notice',base+'/status',base+'/operations/'+payload.operation_id])
+    validateAccountTransport(wire({method:'GET',path,headers:{authorization:headers.authorization}}));
+  for (const bad of [
+    {...submission,headers:{'content-type':'application/json'}},
+    {...submission,path:base+'/submissions?override=true'},
+    {...submission,path:'/v1/accounts/enrollments'},
+    {...submission,body:JSON.stringify({...payload,level:2})},
+    {...submission,body:JSON.stringify({...payload,verified:true})},
+    {...submission,body:JSON.stringify({...payload,notice:{...payload.notice,acknowledged:false}})},
+    {...submission,body:JSON.stringify({...payload,details:{...payload.details,age:1.5}})},
+    {...submission,body:JSON.stringify({...payload,details:{...payload.details,full_name:'N'.repeat(201)}})},
+    {...submission,body:JSON.stringify({...payload,document_front:{...payload.document_front,base64:Buffer.alloc(2097153).toString('base64')}})},
+    {...submission,body:JSON.stringify({...payload,face_front:{...payload.face_front,media_type:'image/svg+xml'}})},
+    {method:'GET',path:base+'/operations/identity:../other',headers:{authorization:headers.authorization}},
+    {method:'GET',path:base+'/status',headers:{}},
+    {method:'GET',path:base+'/status?account_id=other',headers:{authorization:headers.authorization}},
+    {method:'POST',path:base+'/status',headers:{authorization:headers.authorization},body:'{}'},
+    {method:'GET',path:base+'/photos',headers:{authorization:headers.authorization}}
+  ]) assert.throws(()=>validateAccountTransport(wire(bad)));
+  let count = 0;
+  const send = await relay(t,{exchange:async input => { count++; assert.equal(input.path,submission.path); return upstream(); }});
+  assert.equal((await send(wire(submission))).value.response.status,200);
+  assert.equal(count,1);
+  refused(await send(wire({...submission,body:JSON.stringify({...payload,level:2})})));
+  assert.equal(count,1,'Invalid identity requests never reach the service.');
+});
+
+test('identity capture challenge sends only bounded authenticated context and public key', () => {
+  const path = '/v1/account/identity/capture-challenges';
+  const body = {expected:{account_id:'owned-account',principal_id:'owned-principal',session_id:'owned-session',recovery_generation:0},
+    kind:'face_front',source:'native-camera2',public_spki_der_b64:Buffer.alloc(91).toString('base64')};
+  const input = {...json(path),headers:{'content-type':'application/json',authorization:'Bearer owned-session'},body:JSON.stringify(body)};
+  assert.equal(validateAccountTransport(wire(input)).path,path);
+  for (const changed of [{...body,kind:'document_back'}, {...body,source:'file'}, {...body,image:'unexpected'},
+    {...body,expected:{...body.expected,recovery_generation:0.5}},
+    {...body,public_spki_der_b64:Buffer.alloc(129).toString('base64')},
+    {...body,public_spki_der_b64:body.public_spki_der_b64+'='}]) {
+    assert.throws(() => validateAccountTransport(wire({...input,body:JSON.stringify(changed)})));
+  }
+  assert.throws(() => validateAccountTransport(wire({...input,headers:{'content-type':'application/json'}})));
+  assert.throws(() => validateAccountTransport(wire({...input,path:path+'?override=1'})));
+});
+
+test('synthetic review routes require current bearer and exact closed case, photo and operation targets', () => {
+  const base='/v1/identity/reviewer', subject='/v1/account/identity/review/status',
+    headers={authorization:'Bearer synthetic-review-session'};
+  const paths=[base+'/context',base+'/cases',base+'/cases/submission:fixture',
+    base+'/cases/'+'a'.repeat(128),base+'/cases/submission:fixture/photos/document_front',
+    base+'/cases/submission:fixture/photos/face_front',base+'/cases/submission:fixture/operations/review:fixture',subject];
+  for(const path of paths) {
+    const input={method:'GET',path,headers};
+    assert.equal(validateAccountTransport(wire(input)).path,path);
+    for(const changed of [{...input,headers:{}},{...input,path:path+'?target=other'},{...input,path:path+'?'},
+      {...input,body:''},{...input,headers:{...headers,'content-type':'application/json'}},{...input,flow_id:factor(1)},
+      {...input,method:'POST',headers:{...headers,'content-type':'application/json'},body:'{}'},
+      {...input,method:'DELETE'}]) assert.throws(()=>validateAccountTransport(wire(changed)));
+  }
+  for(const path of [base,base+'/cases/',base+'/cases/a/b',base+'/cases/'+ 'a'.repeat(129),
+    base+'/cases/%61',base+'/cases/.',base+'/cases/..',base+'/cases/a/../b',base+'/cases/a/photos/document_back',
+    base+'/cases/a/photos/face_front/extra',base+'/cases/a/operations/',base+'/cases/a/operations/'+ 'a'.repeat(129),
+    base+'/cases/a/operations/%62',base+'/cases/a/operations/..',base+'/cases/a/decisions',subject+'/other',
+    subject+'?account_id=other']) assert.throws(()=>validateAccountTransport(wire({method:'GET',path,headers})));
+});
+
+test('synthetic decisions keep exact commitments, safe revisions and 500 Unicode characters within the ordinary request budget', () => {
+  const body={operation_id:'review:synthetic',submission_sha256:'a'.repeat(64),receipt_sha256:'b'.repeat(64),
+    expected_revision:0,action:'needs_correction',reason:'Synthetic fixture needs correction.'};
+  const input={...json('/v1/identity/reviewer/cases/submission:fixture/decisions'),
+    headers:{authorization:'Bearer synthetic-review-session','content-type':'application/json'}};
+  for(const action of ['approved','rejected','needs_correction'])
+    validateAccountTransport(wire({...input,body:JSON.stringify({...body,action,reason:'🙂'.repeat(500)})}));
+  validateAccountTransport(wire({...input,body:JSON.stringify({...body,expected_revision:Number.MAX_SAFE_INTEGER})}));
+  for(const changed of [{...body,extra:true},{...body,operation_id:'x'.repeat(129)},{...body,operation_id:'..'},
+    {...body,submission_sha256:['a'.repeat(64)]},{...body,receipt_sha256:'B'.repeat(64)},
+    {...body,expected_revision:-1},{...body,expected_revision:0.5},{...body,expected_revision:Number.MAX_SAFE_INTEGER+1},
+    {...body,action:'verified'},...['',' text','text ','🙂'.repeat(501),'line\nfeed','c1\u0085control','unpaired\ud800'].map(reason=>({...body,reason}))])
+    assert.throws(()=>validateAccountTransport(wire({...input,body:JSON.stringify(changed)})));
+  for(const changed of [{...input,headers:{'content-type':'application/json'},body:JSON.stringify(body)},
+    {...input,path:input.path+'?target=other',body:JSON.stringify(body)},
+    {...input,path:input.path+'?',body:JSON.stringify(body)},
+    {...input,path:'/v1/identity/reviewer/cases/submission:fixture',body:JSON.stringify(body)},
+    {...input,body:JSON.stringify(body)+' '.repeat(16*1024)}]) assert.throws(()=>validateAccountTransport(wire(changed)));
+});
+
+test('review photos and case details use isolated raw and serialized response caps without widening summaries', async t => {
+  const base='/v1/identity/reviewer', headers={authorization:'Bearer synthetic-review-session'},
+    photo=base+'/cases/submission:fixture/photos/document_front', detail=base+'/cases/submission:fixture';
+  let body='{}';
+  const send=await relay(t,{exchange:async()=>upstream(body)});
+  const read=path=>send(wire({method:'GET',path,headers}));
+  const sized=bytes=>JSON.stringify({data:'A'.repeat(bytes-11)});
+  body=JSON.stringify({scope:'synthetic-only',submission_id:'submission:fixture',kind:'document_front',media_type:'image/jpeg',
+    sha256:'a'.repeat(64),size_bytes:2097152,base64:Buffer.alloc(2097152,255).toString('base64')});
+  assert.equal((await read(photo)).value.response.body,body,'A maximum-size bounded base64 photo fits the relay envelope.');
+  body=sized(3*1024*1024);assert.equal((await read(photo)).value.response.status,200);
+  body=sized(3*1024*1024+1);refused(await read(photo));
+  body=sized(256*1024);assert.equal((await read(detail)).value.response.body,body);
+  body=sized(256*1024+1);refused(await read(detail));
+  // A Unicode/escaped history may need more serialized bytes than its raw cap.
+  body=JSON.stringify({reason:'"'.repeat(100000)});assert.ok(Buffer.byteLength(body)<=256*1024);
+  assert.equal((await read(detail)).value.response.body,body);
+  body='"'.repeat(3*1024*1024);refused(await read(photo));
+  body='x'.repeat(65537);
+  for(const path of [base+'/context',base+'/cases','/v1/account/identity/review/status',
+    base+'/cases/submission:fixture/operations/review:fixture','/v1/account/context']) refused(await read(path));
+  const decision={...json(detail+'/decisions'),headers:{...headers,'content-type':'application/json'},body:JSON.stringify({
+    operation_id:'review:fixture',submission_sha256:'a'.repeat(64),receipt_sha256:'b'.repeat(64),expected_revision:0,
+    action:'rejected',reason:'Synthetic fixture.'})};
+  refused(await send(wire(decision)));
+});
+
 test('device proof is a closed authenticated path with its own attestation budget', async t => {
   const headers = {'content-type':'application/json',authorization:'Bearer owned-session'};
   const challenge = {method:'POST',path:'/v1/account/signin-devices/challenge',headers,
@@ -78,6 +209,23 @@ const refused = result => {
   assert.equal(result.value.response.status, 502);
   assert.equal(result.value.response.body, '{"error":"account_transport_refused"}');
 };
+
+test('account presence allows one email or username and no caller-selected result', () => {
+  const email = {method:'POST',path:'/v1/accounts/presence',headers:{'content-type':'application/json'},
+    body:JSON.stringify({email:'person@example.invalid'})};
+  assert.equal(validateAccountTransport(wire(email)).path,email.path);
+  const username = {...email,body:JSON.stringify({username:'person_12'})};
+  assert.equal(validateAccountTransport(wire(username)).body,username.body);
+  for (const input of [
+    {...email,body:JSON.stringify({email:'person@example.invalid',username:'person_12'})},
+    {...email,body:JSON.stringify({})},
+    {...email,body:JSON.stringify({username:'@person'})},
+    {...email,body:JSON.stringify({username:'PERSON'})},
+    {...email,body:JSON.stringify({email:'person@example.invalid',exists:true})},
+    {...email,headers:{...email.headers,authorization:'Bearer unexpected'}},
+    {...email,path:'/v1/accounts/presence?email=person@example.invalid'},
+    {...email,method:'GET',body:undefined}]) assert.throws(()=>validateAccountTransport(wire(input)));
+});
 
 test('account entry allows one canonical email or username selector with exact operation binding', () => {
   const binding = {operation_id:'entry:'+factor(12),operation_secret:factor(13)};

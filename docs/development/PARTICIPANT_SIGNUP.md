@@ -3,12 +3,17 @@
 The shared browser/APK account UI uses a centered, width-bounded column. Entry
 starts with Email or username and Continue. Usernames accept an optional `@`,
 normalize ASCII case and follow the same unique account-handle rules as signup.
-Continue opens the password step locally for every well-formed selector. It
-does not check account existence, send mail or reveal a username's contact.
-Password authentication accepts email or the public handle; unknown or incorrect
-credentials receive the same generic denial. The confirmed contact is exposed
-only through successful authentication and validated current account context.
-Ordinary sign-in does not require a new email code.
+Continue asks the account service whether that email or username can sign in.
+A known account opens the password step. An unknown account says it does not
+exist and offers Create account. That offer keeps a typed email and starts the
+email signup screen; a missing username starts the same screen with an empty
+email. Create account does not send a code until the person continues. The
+lookup returns no paired contact. Password authentication accepts email or the
+public handle; a wrong password still receives the generic denial. The confirmed
+contact is exposed only through successful authentication and validated current
+account context. Ordinary sign-in does not require a new email code. When the
+account service is not configured, Continue still opens the password step and
+the page says the server is unreachable.
 
 Create account is an explicit email-only path. It retains the operation-owned
 eight-character email challenge before enrollment, with exact retry identity
@@ -70,7 +75,8 @@ claim of standards compliance.
 
 Hero 2 authored the full account-only draft in
 `web/apps/non-verba/src/account-terms.js`: ID `nonverba-account-terms`, version
-`0.1.0-draft.1`. Signup has one checkbox sentence with an inline underlined
+`0.1.0-draft.2`. Exact `0.1.0-draft.1` bytes remain in
+`docs/legal/account-terms-0.1.0-draft.1.json`. Signup has one checkbox sentence with an inline underlined
 **account terms** link. The full document view identifies Draft and the version;
 signup omits that separate version line. The strength bar likewise omits a
 visible numeric level, retaining its accessible value and color progression.

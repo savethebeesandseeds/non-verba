@@ -2,8 +2,8 @@
 // Drafts stay in this document's memory.
 const routes = Object.freeze([
   'home', 'requests', 'operations', 'operations/new', 'operations/review', 'services/api', 'services/docs', 'identity/setup',
-  'account/create', 'account/terms', 'account/sign-in', 'account/confirm', 'account/recover', 'account/ready', 'account/delete', 'account/devices',
-  'identity/document', 'identity/face', 'identity/review', 'identity/status',
+  'account/create', 'account/terms', 'account/sign-in', 'account/confirm', 'account/recover', 'account/ready', 'account/delete', 'account/delete-retention', 'account/devices',
+  'identity/document', 'identity/face', 'identity/review', 'identity/notice', 'identity/status', 'reviewer/cases',
   'requester', 'requester/review', 'requester/agreement', 'requester/progress', 'requester/result',
   'operator', 'operator/work', 'operator/offer', 'operator/review',
   'operator/agreement', 'operator/progress', 'operator/result'
@@ -30,9 +30,11 @@ export function workflowAccess(view, accountState = null) {
   if (!routes.includes(view)) return {allowed:false,required:null,redirect:'home',reason:'This screen is unavailable.'};
   const required = view === 'requester' || view.startsWith('requester/') ? 'basic'
     : ['operations/new','operations/review','operator/offer','operator/review','operator/agreement','operator/progress','operator/result'].includes(view) ? 'advanced' : null;
-  const reason = required ? (accountState?.state === 'signed_in' ? '' : 'Sign in and ')
-    + (required === 'basic' ? 'complete identity verification before creating a request.'
-      : 'complete advanced identity verification before creating or accepting an operation.') : '';
+  const prerequisite = accountState?.state === 'signed_in' ? accountState.identity_status?.prerequisites?.[required === 'basic' ? 'requests' : 'operations'] : null;
+  const statusReason = typeof prerequisite?.reason === 'string' && prerequisite.reason.length <= 240 ? prerequisite.reason : '';
+  const reason = required ? statusReason || (accountState?.state === 'signed_in' ? '' : 'Sign in and ')
+    + (required === 'basic' ? 'start Level 1 identity before creating a request.'
+      : 'start Level 2 identity before creating or accepting an operation.') : '';
   return {allowed:required === null,required,redirect:required === 'basic' ? 'requests' : required === 'advanced' ? 'operations' : view,
     reason:reason ? reason[0].toUpperCase()+reason.slice(1) : ''};
 }
@@ -176,13 +178,25 @@ export function renderStatuses(root) {
 }
 
 // Display readiness only; this does not grant posting or operation permissions.
-export function renderRoleSetup(root, ready = {}, signedIn = false) {
+export function renderRoleSetup(root, ready = {}, signedIn = false, prerequisites = {}) {
   const records = [];
   for (const kind of ['requests', 'operations']) {
     const complete = ready?.[kind] === true, link = root.querySelector(`#${kind}-setup-link`);
-    if (link) link.hidden = !signedIn || complete;
-    if (signedIn && !complete) records.push({id:`identity-${kind}`, owner:kind, kind:'warning', message:kind === 'requests'
-      ? 'Set up identity verification before posting requests.' : 'Set up advanced identity verification before accepting operations.'});
+    const prerequisite = prerequisites[kind], status = prerequisite?.status;
+    const awaiting = status === 'awaiting_approval', waitingForLevelOne = kind === 'operations' && status === 'awaiting_prerequisite';
+    if (link) {
+      link.hidden = !signedIn || complete;
+      link.disabled = waitingForLevelOne;
+      link.dataset.navigate = awaiting ? 'identity/status' : 'identity/setup';
+      const label = root.querySelector(`#${kind}-setup-label`);
+      if (label) label.textContent = waitingForLevelOne ? 'Start Level 1 identity first'
+        : awaiting ? 'Awaiting review' : ['checking','unknown'].includes(status) ? 'Check identity status'
+        : kind === 'requests' ? 'Start Level 1 identity' : 'Start Level 1 identity first';
+    }
+    if (signedIn && !complete) records.push({id:`identity-${kind}`, owner:kind,
+      kind:status === 'awaiting_approval' ? 'pending' : ['checking','unknown'].includes(status) ? 'unknown' : 'warning',
+      message:prerequisite?.reason || (kind === 'requests'
+        ? 'Start Level 1 identity before posting requests.' : 'Start Level 2 identity before accepting operations.')});
   }
   return setStatusSources(root, 'role-setup', records);
 }
@@ -244,14 +258,98 @@ export function validateOperation(draft) {
   ]);
 }
 
+const workspaceModes = {
+  requester:{mark:'branding/home-succulent.webp', next:'operator', label:'Switch to Operator', name:'Requester mode', hint:'Requester'},
+  operator:{mark:'branding/home-sprout.webp', next:'requester', label:'Switch to Requester', name:'Operator mode', hint:'Operator'}
+};
+function storedWorkspaceMode() {
+  try {
+    const value = localStorage.getItem('nonverba-mode');
+    return value === 'requester' || value === 'operator' ? value : '';
+  } catch { return ''; }
+}
+function activeWorkspaceMode() {
+  return storedWorkspaceMode() || 'requester';
+}
+function rememberWorkspaceMode(mode) {
+  try { localStorage.setItem('nonverba-mode', mode); } catch {}
+}
+function routeWorkspaceMode(route) {
+  const role = String(route || '').split('/')[0];
+  return role === 'requester' || route === 'requests' ? 'requester'
+    : role === 'operator' || role === 'operations' ? 'operator' : '';
+}
+function paintWorkspaceMode() {
+  if (typeof document === 'undefined' || !document.documentElement || typeof document.getElementById !== 'function' || typeof document.querySelectorAll !== 'function') return;
+  const mode = activeWorkspaceMode();
+  const choice = workspaceModes[mode];
+  const destination = workspaceModes[choice.next];
+  for (const [id, src] of [['brand-mark', choice.mark], ['home-logo', choice.mark], ['mode-from', choice.mark], ['dashboard-mode-mark', destination.mark], ['mode-to', destination.mark]]) {
+    const image = document.getElementById(id);
+    if (image && image.getAttribute('src') !== src) image.setAttribute('src', src);
+  }
+  document.getElementById('mode-switch')?.setAttribute('aria-label', choice.label);
+  const homeHint = document.getElementById('home-mode-hint');
+  if (homeHint && homeHint.textContent !== choice.hint) homeHint.textContent = choice.hint;
+  const dashboardSwitch = document.getElementById('dashboard-mode-switch');
+  const dashboardName = document.getElementById('dashboard-mode-name');
+  const confirmTitle = document.getElementById('mode-confirm-title');
+  const changeLabel = 'Change to ' + destination.name;
+  if (dashboardSwitch && dashboardSwitch.getAttribute('aria-label') !== changeLabel) dashboardSwitch.setAttribute('aria-label', changeLabel);
+  if (dashboardName && dashboardName.textContent !== changeLabel) dashboardName.textContent = changeLabel;
+  if (confirmTitle && confirmTitle.textContent !== changeLabel + '?') confirmTitle.textContent = changeLabel + '?';
+  const focusId = mode === 'operator' ? 'operations-list-link' : 'requests-list-link';
+  for (const id of ['requests-list-link', 'operations-list-link']) {
+    const button = document.getElementById(id);
+    if (!button) continue;
+    if (id === focusId) button.setAttribute('autofocus', '');
+    else button.removeAttribute('autofocus');
+  }
+  for (const section of document.querySelectorAll('[data-workspace-mode]')) section.hidden = section.dataset.workspaceMode !== mode;
+}
+
 async function startPreview() {
   const {startOnboarding, ONBOARDING_VIEWS} = await import('./onboarding-ui.js');
   const $ = (selector) => document.querySelector(selector);
   const workspace = createWorkspace();
   let currentRoute = '';
+  let modeMotion = false;
   let currentPanel = null;
   let afterPanelClose = null;
   let workflowAccountState = null;
+  let homeArrivalPending = true, homeAttentionTimer = null;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function stopHomeArrival() {
+    window.clearTimeout(homeAttentionTimer); homeAttentionTimer = null;
+    document.body.dataset.homeAttention = 'off';
+    delete document.body.dataset.homeAttentionTarget;
+  }
+  function startHomeArrival() {
+    stopHomeArrival();
+    if (!homeArrivalPending || currentRoute !== 'home' || currentPanel || document.hidden) return;
+    homeArrivalPending = false;
+    if (reducedMotion.matches) return;
+    document.body.dataset.homeAttentionTarget = workflowAccountState?.state === 'signed_in' ? 'navigation' : 'options';
+    document.body.dataset.homeAttention = 'character';
+    homeAttentionTimer = window.setTimeout(stopHomeArrival,6500);
+  }
+  $('#home-logo').addEventListener('animationend',event => {
+    if (event.animationName === 'home-arrive' && document.body.dataset.homeAttention === 'character'
+      && currentRoute === 'home' && !currentPanel && !document.hidden && !reducedMotion.matches) {
+      document.body.dataset.homeAttention = 'menu';
+    }
+  });
+  for (const selector of ['#navigation-toggle','#options-toggle']) {
+    $(selector).addEventListener('animationend',event => {
+      if (event.animationName === 'menu-arrival-pulse') stopHomeArrival();
+    });
+    $(selector).addEventListener('focus',stopHomeArrival);
+  }
+  document.addEventListener('visibilitychange',() => {
+    if (document.hidden) stopHomeArrival(); else if (homeArrivalPending) startHomeArrival();
+  });
+  window.addEventListener('pagehide',stopHomeArrival);
+  reducedMotion.addEventListener('change',() => { if (reducedMotion.matches) stopHomeArrival(); });
   const documentUrl = location.pathname;
   const panels = {
     navigation: {dialog: $('#navigation-panel'), toggle: $('#navigation-toggle')},
@@ -259,19 +357,24 @@ async function startPreview() {
   };
   mountBackControl(document, onBack);
   const onboarding = startOnboarding(document, {setStatusSources:(namespace, records) => setStatusSources(document, namespace, records),
-    closeTerms: onBack,
+    closeTerms: onBack, closeIdentityNotice: onBack, closeRetention: onBack,
     workflowAccess,
     onAccountState: state => {
       const previous = workflowAccountState;
       workflowAccountState = state;
+      if (previous?.state !== 'signed_in' && state.state === 'signed_in') {
+        homeArrivalPending = true;
+        if (currentRoute === 'home') startHomeArrival();
+      } else if (previous?.state === 'signed_in' && state.state !== 'signed_in') stopHomeArrival();
       if (!currentRoute) return;
       if (previous?.state === 'signed_in' && (state.state !== 'signed_in'
         || ['email','username','recovery_generation'].some(field => previous[field] !== state[field]))) clearWorkflowDrafts();
       refreshWorkflowControls();
+      applyWorkspaceMode();
       const access = workflowAccess(currentRoute,workflowAccountState);
       if (!access.allowed) redirectWorkflow(access.redirect);
     },
-    setRoleSetup: signedIn => renderRoleSetup(document, {}, signedIn),
+    setRoleSetup: (signedIn, prerequisites) => renderRoleSetup(document, {}, signedIn, prerequisites),
     setHeading: (title, description, view) => {
       if (view !== currentRoute) return;
       $('#view-title').textContent = title; $('#workspace').setAttribute('aria-label',title);
@@ -473,6 +576,7 @@ async function startPreview() {
 
   function showPanel(name) {
     if (currentPanel === name) return;
+    if (name) stopHomeArrival();
     if (currentPanel) {
       const previous = panels[currentPanel];
       previous.dialog.close();
@@ -581,13 +685,16 @@ async function startPreview() {
       route = access.redirect;
       history.replaceState(routeState(localIndex(),route),'',documentUrl);
     }
+    const enteredHome = route === 'home' && currentRoute !== 'home';
+    if (route !== 'home') stopHomeArrival();
     const [role, page] = route.split('/');
     const example = ['agreement', 'progress', 'result'].includes(page);
     if (route !== currentRoute) { showKeyOptions(false); keyOptions.reset(); keyName.setCustomValidity(''); }
     currentRoute = route;
     document.body.classList.toggle('home-view', route === 'home');
     document.body.classList.toggle('services-view', role === 'services');
-    document.body.classList.toggle('compact-account-view', ['account/sign-in','account/create','account/terms'].includes(route));
+    document.body.classList.toggle('compact-account-view', ['account/sign-in','account/create','account/terms','account/delete-retention'].includes(route));
+    document.body.classList.toggle('compact-identity-view', role === 'identity');
     $('.workspace-heading').hidden = route === 'home';
     if (role === 'requester' || role === 'operator') workspace.lastRoutes[role] = route;
     const section = role === 'requester' || route === 'requests' ? 'requests'
@@ -616,10 +723,12 @@ async function startPreview() {
     $('#return-to-workspace').firstChild.textContent = role === 'requester' ? 'Back to your draft ' : 'Back to example work ';
     updateReviews();
     refreshWorkflowControls();
+    applyWorkspaceMode();
     if (focus) {
       $(route === 'home' ? '#home-screen' : '#view-title').focus({ preventScroll: true });
       window.scrollTo(0, 0);
     }
+    if (enteredHome) startHomeArrival();
   }
 
   function clearErrors(kind) {
@@ -690,6 +799,60 @@ async function startPreview() {
     });
   }
 
+  function applyWorkspaceMode() {
+    const routeMode = routeWorkspaceMode(currentRoute);
+    const stored = storedWorkspaceMode();
+    if (stored && routeMode && stored !== routeMode) rememberWorkspaceMode(routeMode);
+    paintWorkspaceMode();
+    const mode = activeWorkspaceMode();
+    const other = mode === 'requester' ? 'operation' : 'request';
+    const waiting = workflowAccountState?.state === 'signed_in' && Object.values(workspace[other]).some(value => value.trim());
+    const note = $('#home-other-draft');
+    note.textContent = waiting ? (other === 'request' ? 'A request draft is waiting.' : 'An operation draft is waiting.') : '';
+    note.hidden = !waiting;
+    if (modeMotion && !reducedMotion.matches) {
+      document.body.classList.remove('mode-changed');
+      void document.body.offsetWidth;
+      document.body.classList.add('mode-changed');
+    }
+    modeMotion = false;
+  }
+  function switchWorkspaceMode() {
+    const next = workspaceModes[activeWorkspaceMode()].next;
+    rememberWorkspaceMode(next);
+    modeMotion = true;
+    for (const list of navigationLists) showList(list, false);
+    const routeMode = routeWorkspaceMode(currentRoute);
+    if (routeMode && routeMode !== next) navigate('home');
+    else applyWorkspaceMode();
+    if (currentPanel === 'navigation') document.getElementById(next === 'operator' ? 'operations-list-link' : 'requests-list-link')?.focus({preventScroll:true});
+  }
+  function openModePrompt() {
+    const dialog = $('#mode-confirm');
+    if (!dialog || dialog.open) return;
+    if (!reducedMotion.matches) {
+      dialog.classList.remove('mode-prompt-arrive');
+      void dialog.offsetWidth;
+      dialog.classList.add('mode-prompt-arrive');
+    }
+    dialog.showModal();
+  }
+  function acceptModePrompt() {
+    const dialog = $('#mode-confirm');
+    if (dialog?.open) dialog.close();
+    switchWorkspaceMode();
+  }
+  for (const id of ['mode-switch', 'dashboard-mode-switch']) $('#' + id).addEventListener('click', openModePrompt);
+  $('#mode-confirm-cancel').addEventListener('click', () => $('#mode-confirm').close());
+  $('#mode-confirm-accept').addEventListener('click', acceptModePrompt);
+  $('#mode-confirm').addEventListener('click', (event) => {
+    const dialog = event.currentTarget;
+    if (event.target !== dialog) return;
+    const bounds = dialog.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right
+        || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+  });
+
   document.addEventListener('click', (event) => {
     const link = event.composedPath().find(node => node.matches?.('button[data-navigate]'));
     if (!link || event.defaultPrevented) return;
@@ -703,7 +866,7 @@ async function startPreview() {
   function onBack() {
     if (localIndex() > 0) return history.back();
     const [role, page] = currentRoute.split('/');
-    const parent = role === 'identity' || role === 'account' ? 'identity/setup' : role === 'operations' ? page === 'review' ? 'operations/new' : page ? 'operations' : 'home'
+    const parent = currentRoute === 'identity/notice' ? 'identity/review' : currentRoute === 'account/delete-retention' ? 'account/delete' : role === 'identity' || role === 'account' ? 'identity/setup' : role === 'operations' ? page === 'review' ? 'operations/new' : page ? 'operations' : 'home'
       : role === 'requester' ? page === 'review' ? 'requester' : page ? 'requester' : 'requests'
       : role === 'requests' || role === 'services' ? 'home' : page === 'review' ? 'operator/offer'
       : page === 'offer' ? 'operator/work' : page ? 'operator' : 'operations';
@@ -745,4 +908,46 @@ async function startPreview() {
   render('home', false);
 }
 
-if (typeof document !== 'undefined') startPreview();
+function installTheme() {
+  const key = 'nonverba-theme';
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const stored = () => {
+    try {
+      const value = localStorage.getItem(key);
+      return value === 'light' || value === 'dark' ? value : 'system';
+    } catch { return 'system'; }
+  };
+  const systemTheme = () => media.matches ? 'dark' : 'light';
+  const paint = choice => {
+    const theme = choice === 'system' ? systemTheme() : choice;
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.dataset.themeChoice = choice;
+    root.style.colorScheme = theme;
+    const meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta) meta.content = theme;
+    const button = document.getElementById('theme-toggle');
+    if (button) {
+      button.setAttribute('aria-label', (choice === 'system' ? 'Theme follows the system, ' : 'Theme is ') + theme + '. Switch theme.');
+      button.querySelector('use')?.setAttribute('href', '#' + (theme === 'dark' ? 'moon' : 'sun'));
+    }
+  };
+  paint(stored());
+  media.addEventListener('change', () => { if (stored() === 'system') paint('system'); });
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const choice = stored();
+    const system = systemTheme();
+    const next = choice === 'system' ? (system === 'dark' ? 'light' : 'dark') : choice === system ? 'system' : system;
+    try {
+      if (next === 'system') localStorage.removeItem(key);
+      else localStorage.setItem(key, next);
+    } catch { /* the choice still applies for this visit */ }
+    paint(next);
+  });
+}
+
+if (typeof document !== 'undefined') {
+  installTheme();
+  paintWorkspaceMode();
+  startPreview();
+}

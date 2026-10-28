@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {createServiceAccountAdapter, loginIdentifier, passwordStrength} from '../../../web/apps/non-verba/src/onboarding-account.js';
 import {ACCOUNT_TERMS_CONTENT_JSON,ACCOUNT_TERMS_CONTENT_SHA256} from '../../../web/apps/non-verba/src/account-terms.js';
+import {IDENTITY_INTAKE_NOTICE,IDENTITY_INTAKE_NOTICE_TEXT,IDENTITY_INTAKE_NOTICE_SHA256} from '../../../web/apps/non-verba/src/identity-intake-notice.js';
 import {recoveryCodesText,createRecoveryExport} from '../../../web/apps/non-verba/src/recovery-export.js';
+import {createAccountTransport} from '../../../web/apps/non-verba/src/account-transport.js';
 
 const issuer = 'http://127.0.0.1:8080/dev-oidc', client = 'nonverba-dev-apk';
 const redirect = 'http://127.0.0.1:8080/dev-callback', email = 'participant@example.invalid';
@@ -28,6 +30,285 @@ function recoveryBatch(values) {
   return [...values];
 }
 const exportCodes = () => Array.from({length:8},(_,index)=>Buffer.alloc(32,index+1).toString('base64url'));
+const identityNoticeText = IDENTITY_INTAKE_NOTICE_TEXT;
+const identityNoticeFixture = (overrides = {}) => ({notice_id:'identity-intake',version:IDENTITY_INTAKE_NOTICE.version,
+  sha256:createHash('sha256').update(identityNoticeText).digest('hex'),text:identityNoticeText,
+  available:true,level:1,max_image_bytes:2097152,media_type:'image/jpeg',...overrides});
+const identityBody = (current,notice) => ({operation_id:'identity:'+Buffer.alloc(32,19).toString('base64url'),level:1,
+  expected:{account_id:current.account_id,principal_id:current.principal_id,session_id:current.current_session_id,recovery_generation:current.recovery_generation},
+  details:{document_type:'passport',full_name:'Synthetic Person',birth_city:'Test City',nationality:'Test Nationality',age:30},
+  document_front:{media_type:'image/jpeg',base64:'c3ludGhldGlj'},face_front:{media_type:'image/jpeg',base64:'c3ludGhldGlj'},
+  notice:{notice_id:notice.notice_id,version:notice.version,sha256:notice.sha256,acknowledged:true}});
+const pendingIdentityReceipt = (operationId = 'identity:'+Buffer.alloc(32,19).toString('base64url')) => ({
+  submission_id:'identity:test',operation_id:operationId,status:'received',identity_verification:'pending',level:1,created_at:1});
+const identityStatusFixture = (owner, receipt = null) => ({account_id:owner.account_id,principal_id:owner.principal_id,
+  recovery_generation:owner.recovery_generation,current_session_id:owner.current_session_id,
+  level_1:{status:receipt ? 'received' : 'not_submitted',receipt}});
+function assertIdentityPrerequisites(snapshot, status) {
+  assert.equal(snapshot.identity_status.status,status);
+  assert.equal(snapshot.identity_verification,'pending','Submission state never awards verification.');
+  assert.equal(snapshot.identity_status.prerequisites.requests.allowed,false);
+  assert.equal(snapshot.identity_status.prerequisites.operations.allowed,false);
+  assert.equal(snapshot.identity_status.submitted_level,status === 'awaiting_approval' ? 1 : null);
+}
+
+test('identity status reads authenticated owner-bound submission state rather than interpreting generic pending as received', async () => {
+  const f = await fixture(), adapter = createServiceAccountAdapter({request:f.request});
+  assertIdentityPrerequisites(adapter.snapshot(),'signed_out');
+  await adapter.signIn({email,password});
+  assertIdentityPrerequisites(adapter.snapshot(),'unverified');
+  const current = await adapter.getAccount();
+  assert.equal(current.identity_verification,'pending');
+  assertIdentityPrerequisites(adapter.snapshot(),'unverified');
+  const reads = f.calls.filter(call=>call.path === '/v1/account/identity/status');
+  assert.ok(reads.length >= 1);
+  for (const read of reads) {
+    assert.equal(read.method,'GET'); assert.ok(read.headers.authorization.startsWith('Bearer '));
+    assert.equal(read.body,undefined);
+    assert.equal(f.calls[f.calls.indexOf(read)-1].path,'/v1/account/context');
+  }
+});
+
+test('fresh authenticated identity status restores saved submission while logout discards its presentation authority', async () => {
+  const received = pendingIdentityReceipt();
+  const f = await fixture({identityStatus:(_value,{context})=>identityStatusFixture(context,received)});
+  const adapter = createServiceAccountAdapter({request:f.request});
+  await adapter.signIn({email,password}); assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+  assert.equal(adapter.snapshot().identity_status.prerequisites.requests.status,'awaiting_approval');
+  assert.equal(adapter.snapshot().identity_status.prerequisites.operations.status,'awaiting_prerequisite');
+  await adapter.signOut(); assertIdentityPrerequisites(adapter.snapshot(),'signed_out');
+  const fresh = createServiceAccountAdapter({request:f.request});
+  assertIdentityPrerequisites(fresh.snapshot(),'signed_out');
+  await fresh.signIn({email,password}); assertIdentityPrerequisites(fresh.snapshot(),'awaiting_approval');
+  const text = JSON.stringify(fresh.snapshot());
+  for (const privateValue of ['identity:test',received.operation_id,'access-token-','Synthetic Person']) assert.equal(text.includes(privateValue),false);
+});
+
+test('unavailable, malformed and mismatched identity status cannot create awaiting or approved authority', async () => {
+  const received = pendingIdentityReceipt();
+  const mutations = [
+    value=>({...value,extra:true}), value=>({...value,account_id:'account:other'}),
+    value=>({...value,principal_id:'principal:other'}), value=>({...value,recovery_generation:1}),
+    value=>({...value,current_session_id:'session:other'}), value=>({...value,level_1:{status:'received',receipt:null}}),
+    value=>({...value,level_1:{status:'not_submitted',receipt:received}}),
+    value=>({...value,level_1:{status:'received',receipt:{...received,identity_verification:'verified'}}}),
+    value=>({...value,level_1:{status:'received',receipt:{...received,level:2}}}),
+    value=>({...value,level_1:{status:'received',receipt:{...received,full_name:'Synthetic Person'}}}),
+    value=>({...value,level_1:{status:'received',receipt:{...received,operation_id:'invalid/operation'}}}),
+    value=>({...value,level_1:{status:'approved',receipt:received}}),
+    () => { throw new Error('Synthetic unavailable status'); }
+  ];
+  for (const identityStatus of mutations) {
+    const f = await fixture({identityStatus}), adapter = createServiceAccountAdapter({request:f.request});
+    await adapter.signIn({email,password});
+    assert.equal(adapter.snapshot().state,'signed_in'); assertIdentityPrerequisites(adapter.snapshot(),'unknown');
+  }
+});
+
+test('authenticated custody accepts the published opaque operation identifier without inferring client generator format', async () => {
+  const received=pendingIdentityReceipt('other-client:synthetic-operation');
+  const f=await fixture({identityStatus:(_value,{context})=>identityStatusFixture(context,received)});
+  const adapter=createServiceAccountAdapter({request:f.request});await adapter.signIn({email,password});
+  assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+  assert.equal(adapter.snapshot().genuine_authentication,false);
+});
+
+test('an authenticated identity-status denial clears signed-in state and every pending prerequisite', async () => {
+  let denied = false;
+  const f = await fixture({identityStatus:(_value,{context})=>identityStatusFixture(context,pendingIdentityReceipt()),
+    intercept:input=>denied && input.path === '/v1/account/identity/status' ? reply({error:'invalid_authorization'},401) : null});
+  const adapter = createServiceAccountAdapter({request:f.request}); await adapter.signIn({email,password});
+  assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval'); denied = true;
+  await rejection(adapter.getAccount(),'invalid_authorization');
+  assert.equal(adapter.snapshot().state,'signed_out'); assertIdentityPrerequisites(adapter.snapshot(),'signed_out');
+});
+
+test('direct identity POST and original-operation receipt update awaiting state without approval or form echoes', async () => {
+  const f = await fixture({intercept:(input,{body})=> {
+    if (input.path === '/v1/account/identity/notice') return reply(identityNoticeFixture());
+    if (input.path === '/v1/account/identity/submissions') return reply(pendingIdentityReceipt(body.operation_id));
+    if (input.path.startsWith('/v1/account/identity/operations/')) return reply(pendingIdentityReceipt(input.path.split('/').at(-1)));
+  }});
+  const adapter = createServiceAccountAdapter({request:f.request}); await adapter.signIn({email,password});
+  const notice = await adapter.getIdentityNotice(), current = await adapter.getAccount(), body = identityBody(current,notice);
+  await adapter.submitIdentity(body); assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+  await adapter.getAccount(); assertIdentityPrerequisites(adapter.snapshot(),'unverified');
+  await adapter.identitySubmissionStatus(body.operation_id); assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+  assert.equal(JSON.stringify(adapter.snapshot()).includes('Synthetic Person'),false);
+});
+
+test('a delayed not-submitted status cannot overwrite a newer accepted identity POST receipt', async () => {
+  const held = gate(); let holdNext = false, entered = false;
+  const f = await fixture({identityStatus:async value=> {
+    if (holdNext) { holdNext = false; entered = true; await held.promise; } return value;
+  },intercept:(input,{body})=> {
+    if (input.path === '/v1/account/identity/notice') return reply(identityNoticeFixture());
+    if (input.path === '/v1/account/identity/submissions') return reply(pendingIdentityReceipt(body.operation_id));
+  }});
+  const adapter = createServiceAccountAdapter({request:f.request}); await adapter.signIn({email,password});
+  const notice = await adapter.getIdentityNotice(), current = await adapter.getAccount();
+  holdNext = true; const olderRead = adapter.getAccount(); await waitFor(()=>entered);
+  await adapter.submitIdentity(identityBody(current,notice)); assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+  held.resolve(); await olderRead; assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+});
+
+test('a late saved-status response cannot restore presentation after a new account, recovery generation or session', async () => {
+  for (const replacement of [{account_id:'account:replacement',principal_id:'principal:replacement'},
+    {recovery_generation:1},{current_session_id:'session:replacement'}]) {
+    const held = gate(); let holdNext = false, entered = false, saved = true;
+    const binding = {account_id:'account:test',principal_id:'principal:test',recovery_generation:0,current_session_id:'session:test'};
+    const f = await fixture({claims:{get sub(){return binding.principal_id;},get sid(){return binding.current_session_id;}},
+      context:value=>({...value,...binding,identity:{...value.identity,subject:binding.principal_id},
+        session:{...value.session,session_id:binding.current_session_id}}),
+      identityStatus:async (_value,{context})=> {
+        const response = identityStatusFixture(context,saved ? pendingIdentityReceipt() : null);
+        if (holdNext) { holdNext = false; entered = true; await held.promise; } return response;
+      }});
+    const adapter = createServiceAccountAdapter({request:f.request}); await adapter.signIn({email,password});
+    assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+    holdNext = true; const pending = adapter.getAccount(), refused = rejection(pending,'stale_operation'); await waitFor(()=>entered);
+    adapter.discardSession(); Object.assign(binding,replacement); saved = false;
+    await adapter.signIn({email,password}); assertIdentityPrerequisites(adapter.snapshot(),'unverified');
+    held.resolve(); await refused; assertIdentityPrerequisites(adapter.snapshot(),'unverified');
+  }
+});
+
+test('a superseded generation status read cannot demote a newer authenticated context and saved receipt', async () => {
+  const held = gate(); let generation = 0, holdNext = false, entered = false;
+  const f = await fixture({context:value=>({...value,recovery_generation:generation}),
+    identityStatus:async (_value,{context})=> {
+      const response = identityStatusFixture(context,context.recovery_generation === 1 ? pendingIdentityReceipt() : null);
+      if (holdNext) { holdNext = false; entered = true; await held.promise; } return response;
+    }});
+  const adapter = createServiceAccountAdapter({request:f.request}); await adapter.signIn({email,password});
+  holdNext = true; const older = adapter.getAccount();
+  const refused = assert.rejects(older,error=>['stale_operation','account_changed'].includes(error.code));
+  await waitFor(()=>entered); generation = 1;
+  await adapter.getAccount(); assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+  held.resolve(); await refused;
+  assert.equal(adapter.snapshot().state,'signed_in'); assert.equal(adapter.snapshot().recovery_generation,1);
+  assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+});
+
+test('cancelled status reads leave checking promptly without clearing a newer received revision', async () => {
+  for (const cancellation of ['abort','entry_reset']) for (const newerReceipt of [false,true]) {
+    const held = gate(), controller = new AbortController(), changes = [];
+    let holdNext = false, entered = false;
+    const f = await fixture({identityStatus:async value=> {
+      if (holdNext) { holdNext = false; entered = true; await held.promise; } return value;
+    },intercept:(input,{body})=> {
+      if (input.path === '/v1/account/identity/notice') return reply(identityNoticeFixture());
+      if (input.path === '/v1/account/identity/submissions') return reply(pendingIdentityReceipt(body.operation_id));
+    }});
+    const adapter = createServiceAccountAdapter({request:f.request,onChange:value=>changes.push(value)});
+    await adapter.signIn({email,password});
+    const notice = await adapter.getIdentityNotice(), owner = await adapter.getAccount();
+    holdNext = true;
+    const pending = adapter.getAccount({signal:controller.signal});
+    const refused = rejection(pending,cancellation === 'abort' ? 'operation_aborted' : 'stale_operation');
+    await waitFor(()=>entered); assertIdentityPrerequisites(adapter.snapshot(),'checking');
+    if (newerReceipt) {
+      await adapter.submitIdentity(identityBody(owner,notice)); assertIdentityPrerequisites(adapter.snapshot(),'awaiting_approval');
+    }
+    if (cancellation === 'abort') controller.abort(); else adapter.resetEntry();
+    held.resolve(); await refused;
+    assert.equal(adapter.snapshot().state,'signed_in');
+    const expected = newerReceipt ? 'awaiting_approval' : 'unknown';
+    assertIdentityPrerequisites(adapter.snapshot(),expected);
+    // The cancellation outcome must reach subscribers as well as snapshot().
+    assertIdentityPrerequisites(changes.at(-1),expected);
+  }
+});
+
+test('identity intake verifies exact notice bytes and fails closed on unavailable or altered notices',async () => {
+  assert.equal(createHash('sha256').update(identityNoticeText).digest('hex'),IDENTITY_INTAKE_NOTICE_SHA256);
+  const otherText = identityNoticeText+'\n';
+  for (const fields of [{sha256:'a'.repeat(64)},{version:IDENTITY_INTAKE_NOTICE.version+1},{media_type:'image/png'},{max_image_bytes:9999},
+    {text:otherText,sha256:createHash('sha256').update(otherText).digest('hex')}]) {
+    const f = await fixture({intercept:input=>input.path === '/v1/account/identity/notice' ? reply(identityNoticeFixture(fields)) : null});
+    const adapter = createServiceAccountAdapter({request:f.request});await adapter.signIn({email,password});
+    await assert.rejects(adapter.getIdentityNotice());
+  }
+  const f = await fixture({intercept:input=>input.path === '/v1/account/identity/notice' ? reply(identityNoticeFixture({available:false})) : null});
+  const adapter = createServiceAccountAdapter({request:f.request});await adapter.signIn({email,password});
+  const notice = await adapter.getIdentityNotice(), current = await adapter.getAccount();
+  assert.equal(notice.available,false);
+  await rejection(adapter.submitIdentity(identityBody(current,notice)),'identity_notice_required');
+  assert.equal(f.calls.filter(call=>call.path === '/v1/account/identity/submissions').length,0);
+});
+
+test('a closed Level 1 intake refusal is definite and does not become an unknown outcome', async () => {
+  const f = await fixture({intercept:input => input.path === '/v1/account/identity/capture-challenges' || input.path === '/v1/account/identity/submissions'
+    ? reply({error:input.path.endsWith('/submissions') ? 'identity_intake_busy' : 'identity_intake_unavailable'},503)
+    : input.path === '/v1/account/identity/notice' ? reply(identityNoticeFixture()) : null});
+  const adapter = createServiceAccountAdapter({request:f.request});
+  await adapter.signIn({email,password});
+  const current = await adapter.getAccount();
+  const challenge = {expected:{account_id:current.account_id,principal_id:current.principal_id,session_id:current.current_session_id,recovery_generation:current.recovery_generation},
+    kind:'document_front',source:'browser-camera',public_spki_der_b64:'AAAA'};
+  await assert.rejects(adapter.issueIdentityCaptureChallenge(challenge), error => error.code === 'identity_intake_unavailable'
+    && error.message === 'Level 1 identity is not open for this account.');
+  assert.equal(adapter.snapshot().state,'signed_in');
+  const notice = await adapter.getIdentityNotice();
+  await assert.rejects(adapter.submitIdentity(identityBody(current,notice)), error => error.code === 'identity_intake_busy'
+    && error.definitely_not_submitted === true && error.message === 'Photo intake is busy. Wait a moment and try again.');
+  assert.equal(adapter.snapshot().state,'signed_in');
+  assert.equal(adapter.snapshot().identity_verification,'pending');
+});
+
+test('identity intake binds writes to the current owner and only accepts a pending receipt without sensitive echoes',async () => {
+  let invalid = false;
+  const f = await fixture({intercept:(input,{body})=> {
+    if (input.path === '/v1/account/identity/notice') return reply(identityNoticeFixture());
+    if (input.path === '/v1/account/identity/submissions') return reply({submission_id:'identity:test',operation_id:body.operation_id,
+      status:'received',identity_verification:invalid ? 'verified' : 'pending',level:1,created_at:1});
+    if (input.path.startsWith('/v1/account/identity/operations/')) return reply({error:'identity_operation_not_found'},404);
+  }});
+  const adapter = createServiceAccountAdapter({request:f.request});await adapter.signIn({email,password});
+  const notice = await adapter.getIdentityNotice(), current = await adapter.getAccount(), body = identityBody(current,notice);
+  await rejection(adapter.submitIdentity({...body,expected:{...body.expected,recovery_generation:1}}),'account_changed');
+  await rejection(adapter.submitIdentity({...body,notice:{...body.notice,sha256:'b'.repeat(64)}}),'identity_notice_required');
+  assert.equal(f.calls.filter(call=>call.path === '/v1/account/identity/submissions').length,0);
+  const received = await adapter.submitIdentity(body);assert.equal(received.identity_verification,'pending');
+  assert.equal(adapter.snapshot().identity_verification,'pending');
+  assert.equal(await adapter.identitySubmissionStatus(body.operation_id),null);
+  invalid = true;await rejection(adapter.submitIdentity(body),'service_response_invalid');
+  assert.ok(f.calls.filter(call=>call.path.includes('/v1/account/identity/')).every(call=>call.headers.authorization?.startsWith('Bearer ')));
+  assert.ok(!JSON.stringify(adapter.snapshot()).includes('Synthetic Person'));
+});
+
+test('identity intake late receipts remain fenced after cancellation',async () => {
+  const held = gate();let entered = false;
+  const f = await fixture({intercept:async(input,{body})=> {
+    if (input.path === '/v1/account/identity/notice') return reply(identityNoticeFixture());
+    if (input.path === '/v1/account/identity/submissions') {
+      entered = true;await held.promise;return reply({submission_id:'identity:test',operation_id:body.operation_id,
+        status:'received',identity_verification:'pending',level:1,created_at:1});
+    }
+  }});
+  const adapter = createServiceAccountAdapter({request:f.request});await adapter.signIn({email,password});
+  const notice = await adapter.getIdentityNotice(), current = await adapter.getAccount();
+  const pending = adapter.submitIdentity(identityBody(current,notice)), refused = rejection(pending,'stale_operation');
+  await waitFor(()=>entered);adapter.cancel();held.resolve();await refused;
+  assert.equal(adapter.snapshot().identity_verification,'pending');
+});
+
+test('leaving Account entry fences prior work but intake refreshes the exact notice under the unchanged owner',async () => {
+  let reads = 0, writes = 0, available = true;
+  const f = await fixture({intercept:(input,{body})=> {
+    if (input.path === '/v1/account/identity/notice') { reads++;return reply(identityNoticeFixture({available})); }
+    if (input.path === '/v1/account/identity/submissions') { writes++;return reply({submission_id:'identity:test',operation_id:body.operation_id,
+      status:'received',identity_verification:'pending',level:1,created_at:1}); }
+  }});
+  const adapter = createServiceAccountAdapter({request:f.request});await adapter.signIn({email,password});
+  const notice = await adapter.getIdentityNotice(), current = await adapter.getAccount(), body = identityBody(current,notice);
+  adapter.resetEntry(); assert.equal(adapter.snapshot().state,'signed_in');
+  const before = reads, result = await adapter.submitIdentity(body);
+  assert.equal(reads,before+1);assert.equal(writes,1);assert.equal(result.identity_verification,'pending');
+  available = false;
+  await assert.rejects(adapter.submitIdentity(body),error=>error.code === 'identity_notice_required' && error.definitely_not_submitted === true);
+  assert.equal(writes,1,'Changed availability is checked before any second write.');
+});
 function nativeExportFixture(t) {
   const sent=[], host=new EventTarget(), native={postMessage:text=>sent.push(JSON.parse(text))};
   Object.assign(host,{crypto,nonverbaRecoveryExport:native});
@@ -284,6 +565,12 @@ async function fixture(options = {}) {
       contextCalls++; if (!access.has(input.headers.authorization?.replace('Bearer ', ''))) return reply({error: 'invalid_authorization'}, 401);
       return reply(accountContext());
     }
+    if (path === '/v1/account/identity/status') {
+      assert.equal(input.method,'GET');
+      if (!access.has(input.headers.authorization?.replace('Bearer ',''))) return reply({error:'invalid_authorization'},401);
+      const context = accountContext(), value = identityStatusFixture(context);
+      return reply(options.identityStatus ? await options.identityStatus(value,{context}) : value);
+    }
     if (path === '/v1/auth/session') { assert.equal(input.method, 'DELETE'); access.clear(); return reply({revoked: true, development_only: true, scope: 'current session'}); }
     if (path === '/v1/account/deletion') {
       assert.ok(access.has(input.headers.authorization?.replace('Bearer ','')));
@@ -299,6 +586,16 @@ async function fixture(options = {}) {
       assert.equal(input.headers.authorization,undefined);
       const found = deletions.get(body.operation_id);
       return found?.secret === body.operation_secret ? reply(found.value) : reply({error:'account_operation_not_found'},404);
+    }
+    if (path === '/v1/accounts/presence') {
+      assert.equal(input.headers?.authorization, undefined);
+      const emailSelector = Object.hasOwn(body, 'email');
+      assert.equal(emailSelector !== Object.hasOwn(body, 'username'), true);
+      assert.deepEqual(Object.keys(body).sort(), [emailSelector ? 'email' : 'username']);
+      const exists = !accountDeleted && (emailSelector
+        ? body.email === (options.email ?? email)
+        : body.username === (options.username ?? metadata.username));
+      return reply({exists, development_only: true});
     }
     if (path === '/v1/accounts/entry/start') {
       const selector = Object.hasOwn(body,'username') ? 'username' : 'email';
@@ -385,27 +682,34 @@ test('service discovery pins the local issuer and refuses malformed contacts bef
   await rejection(invalid.configure(), 'service_response_invalid'); assert.equal(invalid.snapshot().configured, false);
 });
 
-test('ordinary email or username continuation is local and indistinguishable for existing and unknown accounts', async () => {
+test('ordinary email or username continuation distinguishes a missing account without revealing its contact', async () => {
   const f = await fixture({username:metadata.username}), changes = [];
   const adapter = createServiceAccountAdapter({request:f.request,onChange:value=>changes.push(value)});
-  for (const [input,selector] of [[' Participant@Example.Invalid ',{identifier:email,email,username:null}],
-    ['unknown@example.invalid',{identifier:'unknown@example.invalid',email:'unknown@example.invalid',username:null}],
-    [' @SYNTHETIC_PARTICIPANT ',{identifier:'@synthetic_participant',email:null,username:metadata.username}],
-    ['unknown_person',{identifier:'@unknown_person',email:null,username:'unknown_person'}]]) {
-    const value = adapter.beginSignIn({identifier:input});
-    assert.deepEqual(value.entry,{mode:'sign_in',step:'password',...selector});
+  const offline = createServiceAccountAdapter({request:async ()=>{ throw new Error('offline'); }});
+  const local = await offline.beginSignIn({identifier:email});
+  assert.equal(local.configured,false);
+  assert.deepEqual(local.entry,{mode:'sign_in',step:'password',identifier:email,email,username:null});
+  await adapter.configure();
+  for (const [input,selector,step] of [[' Participant@Example.Invalid ',{identifier:email,email,username:null},'password'],
+    ['unknown@example.invalid',{identifier:'unknown@example.invalid',email:'unknown@example.invalid',username:null},'missing'],
+    [' @SYNTHETIC_PARTICIPANT ',{identifier:'@synthetic_participant',email:null,username:metadata.username},'password'],
+    ['unknown_person',{identifier:'@unknown_person',email:null,username:'unknown_person'},'missing']]) {
+    const value = await adapter.beginSignIn({identifier:input});
+    assert.deepEqual(value.entry,{mode:'sign_in',step,...selector});
     assert.equal(value.state,'signed_out'); assert.equal(value.email,null); assert.equal(value.username,null);
-    assert.equal(f.calls.length,0,'Continue cannot discover an account, configure delivery, or send mail.');
+    assert.equal(JSON.stringify(value).includes('participant@example.invalid') && selector.email !== email, false);
     await rejection(adapter.confirmEntry({code:entryConfirmation}),'operation_required');
   }
+  const presence = f.calls.filter(row=>row.path === '/v1/accounts/presence');
+  assert.equal(presence.length,4);
+  assert.deepEqual(presence.map(row=>JSON.parse(row.body)),[
+    {email},{email:'unknown@example.invalid'},{username:metadata.username},{username:'unknown_person'}]);
   for (const identifier of ['', '@ab', '@@alice', 'alice-name', 'Kalice', null])
-    assert.throws(()=>adapter.beginSignIn({identifier}));
-  for (const identifier of [email,'@unknown_person']) {
-    adapter.beginSignIn({identifier});
-    await rejection(adapter.signIn({identifier,password:'incorrect-fixture-password'}),'invalid_authorization');
-    assert.equal(adapter.snapshot().state,'signed_out');
-    assert.equal(adapter.snapshot().email,null);
-  }
+    await rejection(adapter.beginSignIn({identifier}), 'identifier_invalid');
+  await adapter.beginSignIn({identifier:email});
+  await rejection(adapter.signIn({identifier:email,password:'incorrect-fixture-password'}),'invalid_authorization');
+  assert.equal(adapter.snapshot().state,'signed_out');
+  assert.equal(adapter.snapshot().email,null);
   assert.equal(f.calls.some(row=>row.path.includes('/entry/') || row.path.includes('mock-mail') || row.path.includes('/enrollments')),false);
   assert.equal(changes.some(value=>value.confirmed || value.state === 'signed_in'),false);
 });
@@ -413,7 +717,7 @@ test('ordinary email or username continuation is local and indistinguishable for
 test('public username password authentication reveals its contact only after matching authenticated context', async () => {
   const f = await fixture({username:metadata.username}), changes = [];
   const adapter = createServiceAccountAdapter({request:f.request,onChange:value=>changes.push(value)});
-  adapter.beginSignIn({identifier:' @SYNTHETIC_PARTICIPANT '});
+  await adapter.beginSignIn({identifier:' @SYNTHETIC_PARTICIPANT '});
   assert.equal(JSON.stringify(changes).includes(email),false);
   await adapter.signIn({identifier:adapter.snapshot().entry.identifier,password});
   assert.equal(adapter.snapshot().state,'signed_in'); assert.equal(adapter.snapshot().email,email);
@@ -424,7 +728,7 @@ test('public username password authentication reveals its contact only after mat
     account_username:metadata.username,password});
   assert.equal(f.calls.some(row=>row.path.includes('/entry/') || row.path.includes('mock-mail')),false);
   await rejection(adapter.signIn({identifier:metadata.username,email,password}),'identifier_invalid');
-  assert.throws(()=>adapter.beginSignIn({identifier:metadata.username}),error=>error.code === 'account_active');
+  await rejection(adapter.beginSignIn({identifier:metadata.username}), 'account_active');
   for (const context of [value=>value, value=>({...value,username:'other_account'})]) {
     const bad = await fixture({context}), refused = createServiceAccountAdapter({request:bad.request});
     await rejection(refused.signIn({identifier:metadata.username,password}),'account_changed');
@@ -441,13 +745,13 @@ test('local password continuation replaces email proof and fences a late superse
     return result;
   }});
   await adapter.startEntry({email}); await adapter.confirmEntry({code:entryConfirmation});
-  adapter.beginSignIn({identifier:email});
+  await adapter.beginSignIn({identifier:email});
   await rejection(adapter.create(metadata),'email_entry_required');
   const pending = adapter.signIn({identifier:email,password}), refused = rejection(pending,'stale_operation');
   await waitFor(()=>waiting);
-  adapter.beginSignIn({identifier:'@other_account'}); hold.resolve(); await refused;
+  const replaced = adapter.beginSignIn({identifier:'@other_account'}); hold.resolve(); await refused; await replaced;
   assert.equal(waiting.signal.aborted,true);
-  assert.deepEqual(adapter.snapshot().entry,{mode:'sign_in',step:'password',identifier:'@other_account',email:null,username:'other_account'});
+  assert.deepEqual(adapter.snapshot().entry,{mode:'sign_in',step:'missing',identifier:'@other_account',email:null,username:'other_account'});
   assert.equal(adapter.snapshot().email,null); assert.equal(adapter.snapshot().state,'signed_out');
 });
 
@@ -557,7 +861,7 @@ test('entry validation and refused or malformed proofs never select a new or exi
   const invalid = await fixture(), empty = createServiceAccountAdapter({request:invalid.request});
   await rejection(empty.startEntry({email:'not-an-email'}),'email_invalid'); assert.equal(invalid.calls.length,0);
   await rejection(empty.confirmEntry({code:entryConfirmation}),'operation_required');
-  await rejection(empty.startEntry({email:'real@nonverba-fixture.net'}),'email_invalid');
+  await rejection(empty.startEntry({email:'real@nonverba-fixture.net'}),'contact_preview_only');
   assert.equal(invalid.calls.some(input=>input.path === '/v1/accounts/entry/start'),false);
   for (const value of [{next_step:'unknown'}, {next_step:'enrollment',account_id:'private'}, {existing:true}]) {
     const f = await fixture({intercept:input=>input.path === '/v1/accounts/entry/confirm' ? reply(value) : null});
@@ -962,6 +1266,19 @@ test('enrollment sends reviewed metadata, preserves exact retries and confirms w
   for (const secret of [password,starts[0].operation_secret,confirmation,...recovery]) assert.equal(snapshots.includes(secret),false);
 });
 
+test('a proved email creates the account without a second confirmation message', async () => {
+  const f = await fixture({intercept:(input,{body}) => input.path === '/v1/accounts/enrollments'
+    ? reply({account_id:'account:test',principal_id:'principal:test',login_name:'login:test',roles:['O','R'],confirmed:true,recovery_generation:0,username:body.username})
+    : null});
+  const adapter = createServiceAccountAdapter({request:f.request});
+  await reviewedCreate(adapter,f);
+  assert.equal(adapter.snapshot().state,'confirmed');
+  assert.equal(f.calls.some(row => row.path === '/v1/accounts/enrollments/confirm' || row.path === '/v1/accounts/mock-mail'),false);
+  const start = JSON.parse(f.calls.find(row => row.path === '/v1/accounts/enrollments').body);
+  assert.equal(start.recovery_codes.length,8);
+  assert.deepEqual(adapter.recoveryCodes(),start.recovery_codes);
+});
+
 test('signup requires confirmed email ownership, exact current terms and both account roles', async () => {
   const f = await fixture(), adapter = createServiceAccountAdapter({request:f.request});
   assert.deepEqual(await adapter.terms(),termsReceipt);
@@ -1116,6 +1433,24 @@ test('email sign-in uses CSRF-bound S256 PKCE, verifies ES256/nonce and reads au
   await adapter.signOut(); assert.equal(adapter.snapshot().session_outcome, 'revoked'); await rejection(adapter.getAccount(), 'account_required');
 });
 
+test('a stored resume record signs the same account back in after the page is gone', async () => {
+  const items = new Map();
+  const storage = {getItem:key => items.has(key) ? items.get(key) : null, setItem:(key,value) => items.set(key,String(value)), removeItem:key => items.delete(key)};
+  const f = await fixture(), adapter = createServiceAccountAdapter({request:f.request, storage});
+  storage.setItem('nonverba-session', '{"a":1}');
+  await adapter.restore(); assert.equal(storage.getItem('nonverba-session'), null);
+  await adapter.signIn({email, password});
+  const saved = storage.getItem('nonverba-session');
+  assert.equal(typeof saved, 'string'); assert.equal(saved.includes(password), false); assert.equal(saved.includes(email), false);
+  adapter.discardSession(true); assert.equal(adapter.snapshot().state, 'signed_out'); assert.equal(storage.getItem('nonverba-session'), saved);
+  const resumed = createServiceAccountAdapter({request:f.request, storage});
+  assert.equal(resumed.snapshot().state, 'signed_out');
+  await resumed.restore(); assert.equal(resumed.snapshot().state, 'signed_in'); assert.equal(resumed.snapshot().email, email);
+  await resumed.signOut(); assert.equal(storage.getItem('nonverba-session'), null);
+  const signedOut = createServiceAccountAdapter({request:f.request, storage});
+  await signedOut.restore(); assert.equal(signedOut.snapshot().state, 'signed_out');
+});
+
 test('redirect/state, token signature/issuer/audience/nonce/expiry and current-session mismatches refuse login', async () => {
   const cases = [{redirect: value => value.replace('127.0.0.1', 'attacker.invalid')},
     {redirect: value => value.replace(/state=[^&]+/, 'state=wrong')}, {redirect: value => `${value}&code=duplicate`},
@@ -1219,4 +1554,55 @@ test('cancelled context and failed sign-out cannot fabricate revocation or expos
   await rejection(read, 'operation_aborted'); blockContext = false;
   await assert.rejects(adapter.signOut(), error => error.code === 'transport_unavailable' && !error.message.includes('private credential marker'));
   assert.equal(adapter.snapshot().session_outcome, 'unknown'); adapter.discardSession(); assert.equal(adapter.snapshot().session_outcome, 'local_only');
+});
+
+test('review gateway keeps credentials private, requires exact actor binding and passes server permission refusal', async () => {
+  const f = await fixture({intercept:input=>input.path === '/v1/identity/reviewer/context'
+    ? reply({error:'identity_reviewer_required'},403) : null});
+  const adapter = createServiceAccountAdapter({request:f.request});
+  assert.equal(adapter.reviewOwner(),null);
+  await adapter.signIn({email,password});
+  const expected = adapter.reviewOwner();
+  assert.deepEqual(Object.keys(expected).sort(),['account_id','current_session_id','principal_id','recovery_generation']);
+  await rejection(adapter.reviewRequest({method:'GET',path:'/v1/identity/reviewer/context'}),'identity_review_request_invalid');
+  for (const path of ['/v1/account/context','/v1/identity/reviewer/cases?account=foreign','/v1/identity/reviewer/cases/case:test/photos/other'])
+    await rejection(adapter.reviewRequest({method:'GET',path,expected}),'identity_review_request_invalid');
+  const response = await adapter.reviewRequest({method:'GET',path:'/v1/identity/reviewer/context',expected});
+  assert.equal(response.status,403); assert.equal(adapter.snapshot().state,'signed_in');
+  const sent = f.calls.find(input=>input.path === '/v1/identity/reviewer/context');
+  assert.match(sent.headers.authorization,/^Bearer /);
+  assert.doesNotMatch(JSON.stringify(expected),/Bearer|access-token|refresh-token/);
+});
+
+test('review gateway discards delayed case replies after the reviewer session is forgotten', async () => {
+  const held = gate(); let entered = false;
+  const f = await fixture({intercept:async input=>{
+    if (input.path !== '/v1/identity/reviewer/cases') return null;
+    entered = true; await held.promise; return reply({scope:'synthetic-only',cases:[],has_more:false});
+  }});
+  const adapter = createServiceAccountAdapter({request:f.request});
+  await adapter.signIn({email,password});
+  const read = adapter.reviewRequest({method:'GET',path:'/v1/identity/reviewer/cases',expected:adapter.reviewOwner()});
+  const refused = rejection(read,'stale_operation'); await waitFor(()=>entered);
+  adapter.discardSession(); held.resolve(); await refused;
+  assert.equal(adapter.reviewOwner(),null);
+});
+
+test('native review photo/detail bounds do not widen ordinary account responses', async t => {
+  const previous = globalThis.window, sent = [], native = {postMessage:raw=>sent.push(JSON.parse(raw))};
+  globalThis.window = {NonverbaAccount:native,addEventListener(){}};
+  t.after(()=>{if (previous === undefined) delete globalThis.window; else globalThis.window=previous;});
+  const transport = createAccountTransport();
+  async function read(path,size,method='GET') {
+    const pending = transport.request({method,path});
+    const input = sent.at(-1);
+    native.onmessage({data:JSON.stringify({id:input.id,response:{status:200,headers:{},body:'x'.repeat(size)}})});
+    return pending;
+  }
+  assert.equal((await read('/v1/identity/reviewer/cases/case:test/photos/document_front',2*1024*1024)).body.length,2*1024*1024);
+  assert.equal((await read('/v1/identity/reviewer/cases/case:test',128*1024)).body.length,128*1024);
+  for (const path of ['/v1/identity/reviewer/context','/v1/identity/reviewer/cases','/v1/account/identity/review/status'])
+    await assert.rejects(read(path,65537));
+  await assert.rejects(read('/v1/identity/reviewer/cases/case:test',256*1024+1));
+  await assert.rejects(read('/v1/identity/reviewer/cases/case:test/photos/other',128*1024));
 });

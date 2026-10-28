@@ -1,7 +1,9 @@
 # Non Verba workstreams
 
-Updated 22 October 2026 to include reusable attestation-tool hardening alongside
-sensor tools in Hero 1. The 16 October cross-Hero audit retained all eleven
+Updated 27 October 2026 so Hero 4 builds inclusion and the counterfactual
+reasoning engine on the signed catalog, and leaves corpus derivation as later
+refinement. The 22 October note added reusable attestation-tool hardening
+alongside sensor tools in Hero 1. The 16 October cross-Hero audit retained all eleven
 Heroes, with the domain boundaries and handoffs below. Their numbers are
 stable identifiers; task ownership, priority and implementation order still need
 to be agreed as Goals are divided into Milestones.
@@ -32,9 +34,9 @@ hardening, research, integration and institutional development.
 | Number | Hero | Work ahead |
 | --- | --- | --- |
 | 1 | [Tool hardening and evidence quality](../sensors/STATUS.md) | Reusable sensor and device-attestation tools; reliable camera, microphone and GPS acquisition; cancellation and recovery; inspectable failed attempts; calibrated quality requirements; physical-device validation and resistance to replay or substitution. |
-| 2 | [Identity, authentication and work privacy](../development/AUTHENTICATION_AND_WORK_PRIVACY.md) | Verified account enrollment, key ownership and recovery, device authorization, face continuity and liveness, and enforceable hold/clock-out across devices. Protect sensitive information throughout. |
+| 2 | [Identity, authentication and work privacy](../development/AUTHENTICATION_AND_WORK_PRIVACY.md) | Account enrollment, key ownership and recovery, device authorization, face continuity and liveness, and enforceable hold/clock-out across devices. Protect sensitive information. Do not call a person verified or real without an issuing-body check. |
 | 3 | [Assignments and participant experience](assignments/PARTICIPANT_NOTES.md) | Connect registration, discovery, maps, task requests, exact Contract review/signing, evidence collection, completion and notifications into a usable Requester/Operator journey. |
-| 4 | [Priors and the reasoning system](research/DISPUTE_PRIORS_NOTES.md) | Develop understandable prior definitions, complete and audit the corpus research, specify how declarations enter case context, and study how they influence reasoning. Evaluate comprehension, consistency, bias, uncertainty and gaming. |
+| 4 | [Priors and the reasoning system](research/DISPUTE_PRIORS_NOTES.md) | Use the signed five-dimension catalog as the working vocabulary. Specify how declarations enter case context, build the counterfactual reasoning engine, and study how declarations change reasoning. Refine the catalog after that machinery and the dispute procedure exist. The corpus study stays a conditional later refinement. |
 | 5 | [Dispute procedure and settlement](research/DISPUTE_RESOLUTION_NOTES.md) | Define claims, responses, evidence access, challenges, mutual closure, escalation and inconclusive outcomes. Establish the consent and authority needed to turn a proposed resolution into contractual consequences and payment. |
 | 6 | [Cooperation and the Operators union](cooperation/OPERATORS_UNION_NOTES.md) | Extend the remuneration calculator into genuine membership, authenticated completion ballots, collective decisions, approved policy amendments and integration with signed Assignments. |
 | 7 | [Material incidents and insurance](research/INCIDENT_HANDLING_AND_INSURANCE.md) | Define significant-harm reporting, immediate response, evidence preservation, external assistance and coverage verification. Research partnerships and the possible future insurance institution. |
@@ -63,7 +65,11 @@ not establish an integrated participant service or a deployed backend.
 ### Identity, work privacy and permission to act
 
 Hero 2 defines principal/key/device authority, enrollment, authentication,
-delegation, recovery and account work/privacy policy. Hero 8 defines how scoped
+delegation, recovery and account work/privacy policy. The
+[identity validation note](legal/IDENTITY_VALIDATION_AND_LIABILITY.md) limits
+public language: an ID photo and a face photo may be described as validating
+an account, and must not be described as proof that a person is verified or
+real unless an issuing body was actually checked. Hero 8 defines how scoped
 grants, revocation, cancellation and observed shutdown are represented and
 propagated. Hero 11 implements selected hosted authority and enforcement; Hero 10
 implements native key, permission and sensor controls. Hero 1 owns reusable
@@ -175,8 +181,9 @@ Priors and reasoning research develops interpretation. Dispute procedure and
 settlement defines who may authorize a consequence and under what consent. The
 current analysis companion remains analysis only, with no financial authority;
 its workflow milestone does not establish reliable reasoning or an adopted
-settlement policy. These boundaries do not change the active Priors research
-scope or its records.
+settlement policy. Active priors work is inclusion and the counterfactual
+reasoning engine on the current catalog. Corpus derivation stays deferred, and
+these boundaries do not adopt a settlement policy or grant the engine authority.
 
 Security, privacy, accessibility, usability and independent verification apply
 across all workstreams.

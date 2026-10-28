@@ -4,15 +4,24 @@
 // deployed service, mailbox, real-person identity, liveness or Android acceptance.
 import assert from 'node:assert/strict';
 import {createHash, createPublicKey, generateKeyPairSync, sign, verify} from 'node:crypto';
-import {mkdir, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {launchBrowser} from './harness.mjs';
 import {collectParticipantAssets, PARTICIPANT_SHELL_BUDGET, PARTICIPANT_SHELL_SOURCES} from '../../tools/build/participant-assets.mjs';
 import {ACCOUNT_TERMS_CONTENT_JSON,ACCOUNT_TERMS_CONTENT_SHA256} from '../../../web/apps/non-verba/src/account-terms.js';
+import {IDENTITY_INTAKE_NOTICE,IDENTITY_INTAKE_NOTICE_TEXT as IDENTITY_NOTICE_TEXT,IDENTITY_INTAKE_NOTICE_SHA256 as IDENTITY_NOTICE_SHA256}
+  from '../../../web/apps/non-verba/src/identity-intake-notice.js';
 
 assert.equal(process.platform, 'linux', 'Run only in managed Debian.');
 assert.equal(process.env.NONVERBA_CONTAINER, '1', 'Use the managed launcher.');
 const assets = await collectParticipantAssets();
+// Run the same UI checks against the retained v1 preview or the separate v2
+// camera-proof source closure without importing or deploying the other runtime.
+const captureProofAssets = assets.has('participant/identity/identity-capture-proof.js');
+const historicalIdentityNotice = captureProofAssets
+  ? await readFile(new URL('../../../docs/legal/identity-intake-v1.txt', import.meta.url),'utf8') : null;
+if (historicalIdentityNotice !== null) assert.equal(createHash('sha256').update(historicalIdentityNotice).digest('hex'),
+  'e758daf9412756dd37ea43c79a7ebec21745109fa0dc9e9125fd029adbde8a27','The old-service fixture uses exact historical public v1 notice bytes.');
 const origin = 'http://127.0.0.1:4173';
 const entry = origin + '/assets/participant/index.html';
 const EMAIL = 'participant@example.invalid', PASSWORD = 'moss7!Q2';
@@ -20,6 +29,7 @@ const CONFIGURED_EMAIL = 'browser-confirmation@example.org';
 const NEW_PASSWORD = 'fern8?R4';
 const CODE = Buffer.alloc(32, 43).toString('base64url');
 const ENTRY_CODE = 'A1B2C3D4';
+const IDENTITY_DETAILS = {document_type:'passport',full_name:'Synthetic Person',birth_city:'Fixture City',nationality:'Fixture nationality',age:35};
 const protectedWorkspaceViews = ['requester','requester/review','requester/agreement','requester/progress','requester/result',
   'operations/new','operations/review','operator/offer','operator/review','operator/agreement','operator/progress','operator/result'];
 const workspaceDestination = name => name.startsWith('requester') ? 'requests' : 'operations';
@@ -66,6 +76,8 @@ function serviceFixture() {
   const flows = new Map(), credentials = new Map(), consumedRefresh = new Set(), deletions = new Map(), entries = new Map();
   const journal = [], entryStarts = [], inventorySecrets = new Set();
   const signinChallenges = new Map(), signinDevices = new Map(), signinProofs = [];
+  const identitySubmissions = new Map(), identityCaptureChallenges = new Map(); let identityAvailable = true, identityStatusMode = 'normal';
+  const reviewOperations = new Map(), reviewWrites = []; let reviewerAllowed = false, reviewMode = 'normal', reviewCase = null, subjectReviewAction = null;
   let unregisteredSessionIds = [];
   let count = 0, generation = 0, password = PASSWORD, recoveryCodes = [];
   let enrollment = null, recovery = null, confirmed = false, mode = 'normal', enabled = true, gate = null;
@@ -74,14 +86,33 @@ function serviceFixture() {
   let identityGeneration = 0, freshIdentityRequired = false;
   const identity = () => ({account_id:'account-browser-fixture' + (identityGeneration ? '-' + identityGeneration : ''),
     principal_id:'principal-browser-fixture' + (identityGeneration ? '-' + identityGeneration : '')});
-  const opaque = () => Buffer.alloc(32, ++count).toString('base64url');
-  const response = (status, body, headers = {}) => ({status, headers:{'cache-control':'no-store', ...headers},
+  const opaque = () => createHash('sha256').update('synthetic-browser-fixture-'+(++count)).digest('base64url');
+  const response = (status, body, headers = {}) => ({status, headers:{'cache-control':'no-store','content-type':'application/json', ...headers},
     body:typeof body === 'string' ? body : JSON.stringify(body)});
   const pending = scope => response(202, {status:'pending', scope});
   const receipt = () => ({...identity(),
     login_name:'opaque-login-browser', roles:['R','O'], confirmed:true, recovery_generation:generation});
   const json = request => { assert.equal(typeof request.body, 'string', 'JSON transport body is a string.'); return JSON.parse(request.body); };
   const marker = value => { if (typeof value === 'string' && value) sensitive.add(value); };
+  const reviewScope = 'synthetic-only', reviewPolicy = 'identity-review-synthetic-v1';
+  const canonical = value => value===null || typeof value!=='object' ? value : Array.isArray(value)
+    ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])]));
+  const digest = value => createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
+  const reviewHashes = saved => ({submission_sha256:digest({receipt:saved.receipt,details:saved.details,photos:saved.photos}),receipt_sha256:digest(saved.receipt)});
+  const subjectDecision = (saved,action) => ({decision_id:'review-subject-fixture',submission_id:saved.receipt.submission_id,
+    ...reviewHashes(saved),revision:1,action,reason:'Synthetic subject review outcome.',created_at:saved.receipt.created_at+1,scope:reviewScope,policy_id:reviewPolicy});
+  function ownReviewSummary(credential) {
+    const saved=[...identitySubmissions.values()].filter(value=>value.owner===identity().account_id && value.generation===generation).at(-1);
+    const eligible=saved?.notice?.version===3, action=eligible ? subjectReviewAction : null;
+    return {...identity(),recovery_generation:generation,current_session_id:credential.session,scope:reviewScope,
+      level_1:{status:!saved ? 'not_submitted' : !eligible ? 'not_eligible' : action || 'pending',receipt:saved?.receipt || null,
+        submission_sha256:saved ? reviewHashes(saved).submission_sha256 : null,receipt_sha256:saved ? reviewHashes(saved).receipt_sha256 : null,
+        review_revision:action ? 1 : 0,decision:action ? subjectDecision(saved,action) : null}};
+  }
+  function selectedReviewCase() {
+    if (!reviewCase) return null;
+    const {photos,...value}=reviewCase; return structuredClone(value);
+  }
   function token(flow, session) {
     const now = Math.floor(Date.now() / 1000);
     const encode = data => Buffer.from(JSON.stringify(data)).toString('base64url');
@@ -108,8 +139,143 @@ function serviceFixture() {
     const url = new URL(request.path, 'http://127.0.0.1:8080');
     assert.equal(url.origin,'http://127.0.0.1:8080', 'The fixture accepts only the pinned service.');
     journal.push({method:request.method,path:url.pathname});
-    if (gate && gate.path === url.pathname) {
+    if (gate && !gate.afterResponse && gate.path === url.pathname) {
       const current = gate; gate = null; current.enter(); await current.wait;
+    }
+    if (url.pathname.startsWith('/v1/identity/reviewer/')) {
+      const credential=credentials.get((request.headers?.authorization || request.headers?.Authorization || '').replace(/^Bearer /,''));
+      if (!credential || credential.revoked || credential.generation!==generation || credential.account_id!==identity().account_id)
+        return response(401,{error:'invalid_authorization'});
+      if (!reviewerAllowed) return response(403,{error:'identity_reviewer_required'});
+      if (reviewMode==='unavailable') return response(503,{error:'identity_review_unavailable'});
+      assert.equal(url.search,'','Reviewer cases and media never take account/query selectors.');
+      if (request.method==='GET' && url.pathname==='/v1/identity/reviewer/context')
+        return response(200,{scope:reviewScope,can_review:true,...identity(),recovery_generation:generation,current_session_id:credential.session});
+      if (request.method==='GET' && url.pathname==='/v1/identity/reviewer/cases') {
+        const value=selectedReviewCase();
+        return response(200,{scope:reviewScope,cases:value && value.is_current && value.review.status==='pending'
+          ? [Object.fromEntries(['submission_id','account_id','receipt','submission_sha256','receipt_sha256','review'].map(key=>[key,value[key]]))] : [],has_more:false});
+      }
+      const match=/^\/v1\/identity\/reviewer\/cases\/([^/]+)(?:\/(photos|operations|decisions)(?:\/([^/]+))?)?$/.exec(url.pathname);
+      if (!match || !reviewCase || match[1]!==reviewCase.submission_id || reviewCase.account_id===identity().account_id)
+        return response(404,{error:'identity_review_case_not_found'});
+      if (request.method==='GET' && !match[2]) return response(200,selectedReviewCase());
+      if (request.method==='GET' && match[2]==='photos' && ['document_front','face_front'].includes(match[3]))
+        return response(200,{scope:reviewScope,submission_id:reviewCase.submission_id,kind:match[3],...reviewCase.photos[match[3]]});
+      if (request.method==='GET' && match[2]==='operations') {
+        const decision=reviewOperations.get(match[3]);
+        return decision && decision.submission_id===reviewCase.submission_id && decision.reviewer_principal_id===identity().principal_id
+          ? response(200,structuredClone(decision)) : response(404,{error:'identity_review_case_not_found'});
+      }
+      if (request.method==='POST' && match[2]==='decisions' && !match[3]) {
+        const body=json(request);
+        reviewWrites.push(structuredClone(body));
+        assert.deepEqual(Object.keys(body).sort(),['operation_id','submission_sha256','receipt_sha256','expected_revision','action','reason'].sort());
+        assert.match(body.operation_id,/^[A-Za-z0-9._:-]{1,128}$/); assert.ok(['approved','needs_correction','rejected'].includes(body.action));
+        assert.equal(body.reason,body.reason.trim());assert.ok([...body.reason].length>=1 && [...body.reason].length<=500);
+        assert.doesNotMatch(body.reason,/[\u0000-\u001f\u007f-\u009f]/);
+        assert.equal(body.submission_sha256,reviewCase.submission_sha256);assert.equal(body.receipt_sha256,reviewCase.receipt_sha256);
+        const existing=reviewOperations.get(body.operation_id);
+        if(existing) return existing.action===body.action && existing.reason===body.reason
+          ? response(200,structuredClone(existing)) : response(409,{error:'identity_review_operation_retry_differs'});
+        if(reviewMode==='revision-conflict' || body.expected_revision!==reviewCase.review.revision)
+          return response(409,{error:'identity_review_revision_conflict'});
+        const decision={decision_id:'review-decision-'+opaque(),submission_id:reviewCase.submission_id,
+          submission_sha256:body.submission_sha256,receipt_sha256:body.receipt_sha256,revision:body.expected_revision+1,
+          operation_id:body.operation_id,reviewer_principal_id:identity().principal_id,action:body.action,reason:body.reason,
+          created_at:Math.floor(Date.now()/1000),scope:reviewScope,policy_id:reviewPolicy};
+        reviewOperations.set(body.operation_id,structuredClone(decision));
+        reviewCase.review={status:decision.action,revision:decision.revision,decision:structuredClone(decision)};
+        reviewCase.history.unshift(structuredClone(decision));
+        return reviewMode==='decision-response-lost' ? response(503,{error:'identity_review_unavailable'}) : response(200,decision);
+      }
+      throw new Error('Unexpected reviewer fixture method/path.');
+    }
+    if (url.pathname.startsWith('/v1/account/identity/')) {
+      const credential=credentials.get((request.headers?.authorization || request.headers?.Authorization || '').replace(/^Bearer /,''));
+      if (!credential || credential.revoked || credential.generation!==generation || credential.account_id!==identity().account_id)
+        return response(401,{error:'invalid_authorization'});
+      if (request.method==='GET' && url.pathname==='/v1/account/identity/review/status') return response(200,ownReviewSummary(credential));
+      if (request.method==='GET' && url.pathname==='/v1/account/identity/status') {
+        if(identityStatusMode==='unavailable')return response(503,{error:'identity_status_unavailable'});
+        const saved=[...identitySubmissions.values()].filter(value=>value.owner===identity().account_id && value.generation===generation).at(-1);
+        const binding={...identity(),recovery_generation:generation,current_session_id:credential.session};
+        if(identityStatusMode==='foreign-account')binding.account_id='another-synthetic-account';
+        if(identityStatusMode==='stale-session')binding.current_session_id='previous-synthetic-session';
+        const receipt=saved ? structuredClone(saved.receipt) : null;
+        if(receipt && identityStatusMode==='verified-receipt')receipt.identity_verification='verified';
+        return response(200,{...binding,level_1:{status:receipt ? 'received' : 'not_submitted',receipt}});
+      }
+      if (url.pathname.endsWith('/notice') && mode==='identity-service-v1') return response(200,{notice_id:'identity-intake',version:1,
+        sha256:createHash('sha256').update(historicalIdentityNotice).digest('hex'),text:historicalIdentityNotice,
+        available:true,level:1,max_image_bytes:2097152,media_type:'image/jpeg'});
+      if (url.pathname.endsWith('/notice')) return response(200,{notice_id:'identity-intake',version:IDENTITY_INTAKE_NOTICE.version,
+        sha256:mode==='identity-notice-invalid' ? '0'.repeat(64) : IDENTITY_NOTICE_SHA256,text:IDENTITY_NOTICE_TEXT,
+        available:identityAvailable,level:1,max_image_bytes:2097152,media_type:'image/jpeg'});
+      if (request.method==='POST' && url.pathname==='/v1/account/identity/capture-challenges') {
+        if (mode==='identity-service-v1') return response(404,{error:'not_found'});
+        if (!identityAvailable) return response(503,{error:'identity_capture_challenge_unavailable'});
+        const body=json(request);
+        assert.deepEqual(Object.keys(body).sort(),['expected','kind','source','public_spki_der_b64'].sort(),
+          'Camera authorization sends context and public key only; never media or its hash.');
+        assert.deepEqual(body.expected,{...identity(),session_id:credential.session,recovery_generation:generation});
+        assert.ok(['document_front','face_front'].includes(body.kind)); assert.equal(body.source,'browser-camera');
+        const bytes=Buffer.from(body.public_spki_der_b64,'base64'); assert.equal(bytes.toString('base64'),body.public_spki_der_b64);
+        const key=createPublicKey({key:bytes,format:'der',type:'spki'}); assert.equal(key.asymmetricKeyDetails.namedCurve,'prime256v1');
+        const now=Date.now(), value={version:1,purpose:'identity-capture',challenge_id:opaque(),nonce:opaque(),...identity(),
+          current_session_id:credential.session,recovery_generation:generation,kind:body.kind,source:body.source,
+          public_spki_sha256:createHash('sha256').update(bytes).digest('hex'),issued_at_ms:now,
+          capture_expires_at_ms:now+120000,submit_expires_at_ms:now+900000};
+        identityCaptureChallenges.set(value.challenge_id,value); return response(200,value);
+      }
+      if (request.method==='POST' && url.pathname==='/v1/account/identity/submissions') {
+        const body=json(request); assert.equal(identityAvailable,true);
+        assert.deepEqual(Object.keys(body).sort(),['operation_id','level','expected','details','document_front','face_front','notice'].sort());
+        assert.match(body.operation_id,/^identity:[A-Za-z0-9_-]{43}$/); assert.equal(body.level,1);
+        assert.deepEqual(body.expected,{...identity(),session_id:credential.session,recovery_generation:generation});
+        assert.deepEqual(body.notice,{notice_id:'identity-intake',version:IDENTITY_INTAKE_NOTICE.version,sha256:IDENTITY_NOTICE_SHA256,acknowledged:true});
+        assert.deepEqual(Object.keys(body.details).sort(),Object.keys(IDENTITY_DETAILS).sort());
+        assert.ok(['passport','national_id','driving_licence','residence_permit'].includes(body.details.document_type));
+        for (const name of ['full_name','birth_city','nationality']) { assert.equal(typeof body.details[name],'string'); assert.ok(body.details[name].trim()); marker(body.details[name]); }
+        assert.ok(Number.isSafeInteger(body.details.age) && body.details.age>=1 && body.details.age<=130);
+        const photos={};
+        for (const kind of ['document_front','face_front']) {
+          assert.deepEqual(Object.keys(body[kind]).sort(),body[kind].capture_proof === undefined
+            ? ['base64','media_type'] : ['base64','capture_proof','media_type']); assert.equal(body[kind].media_type,'image/jpeg');
+          const bytes=Buffer.from(body[kind].base64,'base64');
+          assert.ok(bytes.toString('base64')===body[kind].base64,'Identity media uses canonical standard base64.'); assert.ok(bytes.length>0 && bytes.length<=2097152);
+          assert.deepEqual([...bytes.subarray(0,2)],[255,216]);
+          photos[kind]={bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+          if (body[kind].capture_proof !== undefined) {
+            const proof=body[kind].capture_proof,payload=proof.payload;
+            assert.deepEqual(Object.keys(proof).sort(),['payload','public_spki_der_b64','signature_b64']);
+            assert.deepEqual(payload.request,identityCaptureChallenges.get(payload.request.challenge_id));
+            assert.equal(payload.request.kind,kind); assert.equal(payload.request.source,'browser-camera');
+            assert.equal(payload.request.current_session_id,credential.session); assert.equal(payload.request.recovery_generation,generation);
+            assert.equal(payload.image_sha256,photos[kind].sha256); assert.equal(payload.image_bytes,bytes.length);
+            assert.equal(payload.acquisition,null); assert.ok(['front','back','external','unknown'].includes(payload.lens_facing));
+            assert.ok(payload.captured_at_ms>=payload.request.issued_at_ms && payload.captured_at_ms<payload.request.capture_expires_at_ms);
+            assert.ok(Date.now()<payload.request.submit_expires_at_ms);
+            const keyBytes=Buffer.from(proof.public_spki_der_b64,'base64');
+            assert.equal(createHash('sha256').update(keyBytes).digest('hex'),payload.request.public_spki_sha256);
+            const sorted=value=>value===null || typeof value!=='object' ? value
+              : Object.fromEntries(Object.keys(value).sort().map(key=>[key,sorted(value[key])]));
+            assert.equal(verify('sha256',Buffer.from('NONVERBA:IDENTITY_CAPTURE:v1\n'+JSON.stringify(sorted(payload))),
+              {key:createPublicKey({key:keyBytes,format:'der',type:'spki'}),dsaEncoding:'ieee-p1363'},Buffer.from(proof.signature_b64,'base64')),true);
+            photos[kind].capture_source=payload.request.source;
+          }
+          marker(body[kind].base64);
+        }
+        if(mode==='identity-intake-reject')return response(422,{error:'invalid_identity_details'});
+        const receipt={submission_id:'identity-fixture-'+(++count),operation_id:body.operation_id,status:'received',identity_verification:'pending',level:1,created_at:Math.floor(Date.now()/1000)};
+        identitySubmissions.set(body.operation_id,{receipt,owner:identity().account_id,generation,photos,details:structuredClone(body.details),notice:structuredClone(body.notice)});
+        if(mode==='identity-submission-unknown')return response(503,{error:'unavailable'});
+        return response(200,mode==='identity-weak-receipt' ? {...receipt,identity_verification:'verified'} : receipt);
+      }
+      const operationId=decodeURIComponent(url.pathname.split('/').at(-1)), saved=identitySubmissions.get(operationId);
+      if(mode==='identity-status-unknown' || !saved || saved.owner!==identity().account_id || saved.generation!==generation)
+        return response(404,{error:'not_found'});
+      return response(200,saved.receipt);
     }
     if (url.pathname.startsWith('/v1/account/signin-devices') || url.pathname === '/v1/account/sessions/revoke') {
       const credential = credentials.get((request.headers?.authorization || request.headers?.Authorization || '').replace(/^Bearer /,''));
@@ -163,6 +329,15 @@ function serviceFixture() {
     }
     if (!enabled && ['/dev-oidc/.well-known/openid-configuration','/readyz'].includes(url.pathname)) {
       return response(503,{error:'unavailable'});
+    }
+    if (request.method === 'POST' && url.pathname === '/v1/accounts/presence') {
+      const body = json(request);
+      const emailSelector = Object.hasOwn(body,'email');
+      assert.equal(emailSelector !== Object.hasOwn(body,'username'), true);
+      assert.deepEqual(Object.keys(body).sort(), [emailSelector ? 'email' : 'username']);
+      if (!emailSelector) assert.match(body.username,/^[a-z][a-z0-9_]{2,29}$/);
+      const exists = confirmed && (emailSelector ? body.email === email : body.username === enrollment?.username);
+      return response(200,{exists,development_only:true});
     }
     if (request.method === 'GET' && url.pathname === '/v1/accounts/capabilities') return response(200,
       {email_delivery:emailDelivery,real_email_enabled:emailDelivery === 'smtp',development_only:true});
@@ -417,6 +592,33 @@ function serviceFixture() {
     newContact(value){email=value;confirmed=false;},
     get recoveryCodes(){return [...recoveryCodes];},get password(){return password;},get enrollmentUsername(){return enrollment?.username;},set mode(value){mode=value;},
     get identity(){return identity();},
+    get identitySubmissions(){return [...identitySubmissions.values()].map(value=>structuredClone(value));},
+    set reviewerAllowed(value){reviewerAllowed=value===true;},set reviewMode(value){reviewMode=value;},
+    set subjectReviewAction(value){assert.ok([null,'approved','needs_correction','rejected'].includes(value));subjectReviewAction=value;},
+    get reviewCase(){return selectedReviewCase();},get reviewDecisions(){return [...reviewOperations.values()].map(value=>structuredClone(value));},
+    get reviewWrites(){return reviewWrites.map(value=>structuredClone(value));},
+    seedReviewerCase(photos) {
+      assert.equal(IDENTITY_INTAKE_NOTICE.version,3,'Reviewable fixture cases require the fresh successor notice.');
+      const retained={};
+      for(const kind of ['document_front','face_front']) {
+        const base64=photos[kind],bytes=Buffer.from(base64,'base64');assert.equal(bytes.toString('base64'),base64);
+        assert.ok(bytes.length>0 && bytes.length<=2097152);assert.deepEqual([...bytes.subarray(0,2)],[255,216]);
+        retained[kind]={media_type:'image/jpeg',sha256:createHash('sha256').update(bytes).digest('hex'),size_bytes:bytes.length,base64};marker(base64);
+      }
+      const receipt={submission_id:'review-case-browser-'+(++count),operation_id:'identity:'+opaque(),status:'received',identity_verification:'pending',level:1,created_at:Math.floor(Date.now()/1000)};
+      reviewCase={scope:reviewScope,submission_id:receipt.submission_id,account_id:'review-subject-browser',receipt,
+        ...reviewHashes({receipt,details:IDENTITY_DETAILS,photos:retained}),details:structuredClone(IDENTITY_DETAILS),
+        notice:{notice_id:'identity-intake',version:3,sha256:IDENTITY_NOTICE_SHA256,text:IDENTITY_NOTICE_TEXT},
+        capture:{document_front:null,face_front:null},is_current:true,review:{status:'pending',revision:0,decision:null},history:[],history_has_more:false,photos:retained};
+      reviewOperations.clear();reviewWrites.length=0;reviewMode='normal';return receipt.submission_id;
+    },
+    set identityStatusMode(value){identityStatusMode=value;},
+    resetIdentityReviewScenario() {
+      // Explicit synthetic-fixture reset between independent intake scenarios;
+      // this is not a service deletion operation or a local authority shortcut.
+      identitySubmissions.clear();identityStatusMode='normal';
+    },
+    set identityAvailable(value){identityAvailable=value;},
     get inventorySecrets(){return [...inventorySecrets];},
     get signinProofs(){return signinProofs.map(value=>({...value}));},
     get unregisteredSessionIds(){return [...unregisteredSessionIds];},
@@ -426,10 +628,15 @@ function serviceFixture() {
       credentials.set(access,{session,generation,...identity(),revoked:false}); return session;
     },
     set probes(value) { apiProbe=value.api ?? 'available'; serviceProbe=value.service ?? 'ready'; keysProbe=value.keys ?? 'empty'; },
-    delay(path) {
+    async responseReady(path) {
+      if(gate?.afterResponse && gate.path===new URL(path,'http://127.0.0.1:8080').pathname) {
+        const held=gate;gate=null;held.enter();await held.wait;
+      }
+    },
+    delay(path,{afterResponse=false}={}) {
       assert.equal(gate,null,'A new fixture delay cannot replace an unobserved request gate.');
       let enter,release; const entered = new Promise(resolve => {enter=resolve;});
-      const held={path,enter,wait:new Promise(resolve=>{release=resolve;})}; gate=held;
+      const held={path,enter,afterResponse,wait:new Promise(resolve=>{release=resolve;})}; gate=held;
       return {get entered(){return bounded(entered,'the fixture request gate '+path);},release(){if(gate===held)gate=null;release();}};
     }};
 }
@@ -448,7 +655,8 @@ async function view(name, {focused = true} = {}) {
     for (const id of ['name','permissions','expiry']) assert.equal(await page.locator('#api-key-'+id).inputValue(),'');
   }
   if (name !== 'home') {
-    if (name === 'services/docs') assert.equal(await page.locator('#api-documentation-screen').evaluate(element=>element.hidden),false);
+    if (name === 'reviewer/cases') await page.locator('#reviewer-screen').waitFor({state:'visible'});
+    else if (name === 'services/docs') assert.equal(await page.locator('#api-documentation-screen').evaluate(element=>element.hidden),false);
     else if (['requests','operations','operator','operator/work'].includes(name)) await page.locator('.screen:not([hidden])[data-view="'+name+'"]').waitFor({state:'visible'});
     else await page.locator(name==='services/api' ? '#api-access-screen' : '[data-onboarding-view="' + name + '"]').waitFor({state:'visible'});
     if (focused) await page.waitForFunction(() => document.activeElement?.id === 'view-title');
@@ -474,6 +682,96 @@ async function settingsChecked() {
   await page.waitForFunction(() => document.querySelector('.service-status-list').getAttribute('aria-busy') === 'false');
   await stableUrl();
 }
+async function noEarnedIdentity(label) {
+  const signedIn=await page.locator('#account-session-entry').evaluate(node=>!node.hidden);
+  assert.equal(await page.locator('#settings-identity-stamps,#settings-identity-link').count(),0,label+' has no duplicate Settings identity status or action.');
+  for (const id of ['account-earned-stamps']) {
+    const group=page.locator('#'+id);
+    assert.equal(await group.evaluate(node=>node.hidden),!signedIn || await current()!=='account/sign-in',label+' shows the current account identity status only in the Account heading.');
+    assert.equal(await group.getAttribute('role'),'group');
+    assert.equal(await group.getAttribute('aria-label'),'Identity');
+    for (const level of [1,2]) {
+      const stamp=group.locator('[data-identity-earned="'+level+'"]');
+      assert.equal(await stamp.count(),1);
+      assert.equal(await stamp.isVisible(),false);
+      assert.equal(await stamp.getAttribute('alt'),'Level '+level+' identity on record');
+    }
+    const unverified=group.locator('[data-identity-unverified]');
+    assert.equal(await unverified.count(),1);
+    assert.equal(await unverified.evaluate(node=>node.hidden),!signedIn,
+      label+' displays the gray unverified badge only while a current account is signed in.');
+    assert.match(await unverified.getAttribute('src'),/identity\/unverified\.webp$/);
+    assert.equal(await unverified.getAttribute('alt'),'No identity on record');
+    await unverified.evaluate(image=>image.decode());
+    if(await unverified.isVisible()) {
+      const bounds=await unverified.boundingBox();
+      assert.ok(bounds && bounds.width>=95.5 && bounds.width<=112.5 && bounds.height>=95.5 && bounds.height<=112.5,
+        'The enlarged Account stamp stays within its responsive 96–112px bounds.');
+      if(id==='account-earned-stamps') {
+        assert.equal(await group.evaluate(node=>node.parentElement.classList.contains('workspace-heading')),true,'Account status belongs beside its heading.');
+        const title=await page.locator('#view-title').boundingBox();
+        const heading=await page.locator('.workspace-heading').boundingBox();
+        assert.ok(Math.abs(bounds.x+bounds.width-heading.x-heading.width)<1.5
+          && (bounds.x>=title.x+title.width-.5 || bounds.y>=title.y+title.height-.5),
+          'The enlarged Account badge aligns right beside the title or wraps safely below it.');
+        assert.equal(await page.locator('#view-title').evaluate(title=>{
+          const badge=document.querySelector('#account-earned-stamps img:not([hidden])').getBoundingClientRect();
+          const range=document.createRange();range.selectNodeContents(title);
+          return [...range.getClientRects()].some(rect=>rect.width>0 && rect.left<badge.right && rect.right>badge.left
+            && rect.top<badge.bottom && rect.bottom>badge.top);
+        }),false,'The larger stamp cannot cover the Account heading text, including enlarged text.');
+        assert.equal(await page.locator('#view-title').evaluate(title=>{
+          const range=document.createRange();range.selectNodeContents(title);
+          return [...range.getClientRects()].filter(rect=>rect.width>0).length;
+        }),1,'The Account title stays whole when it fits the available full heading width, including 320px/200% text.');
+      }
+    }
+  }
+}
+async function identityLevels(label) {
+  const levels=page.locator('#identity-levels');
+  assert.equal(await levels.isVisible(),true,label+' shows the two verification levels.');
+  for (const [level,purpose] of [[1,'Requests'],[2,'Operations']]) {
+    const row=levels.locator('#identity-level-'+level),stamp=row.locator('img');
+    assert.equal(await stamp.count(),1);
+    assert.equal(await stamp.getAttribute('alt'),'','Adjacent level text labels the decorative target stamp.');
+    assert.match(await stamp.getAttribute('src'),new RegExp('identity/level-'+level+'\\.webp$'));
+    assert.match(await row.innerText(),new RegExp('Level ?'+level+' identity[\\s\\S]*'+purpose+'[\\s\\S]*'+(level===1?'Not started':'Start Level 1 identity first'),'i'));
+    await stamp.evaluate(image=>image.decode());
+    assert.equal(await stamp.evaluate(image=>image.complete && image.naturalWidth>0),true);
+    const bounds=await stamp.boundingBox();
+    assert.ok(bounds && bounds.width<=48.5 && bounds.height<=48.5,'Verification target stamps remain compact: '+label+'.');
+  }
+  assert.equal(await page.locator('#enrollment-role').count(),0,'The verification levels are separate pipelines, not a selectable role.');
+  assert.equal(await levels.locator('#identity-level-1 #enrollment-begin').count(),1);
+  assert.equal(await levels.locator('#identity-level-2 #enrollment-level-2').count(),1);
+  assert.equal(await page.locator('#enrollment-level-2').isDisabled(),true,'Level 2 requires a verified Level 1, not a signed-in or locally reviewed account.');
+  assert.match(await levels.locator('#identity-level-2').innerText(),/Start Level 1 identity first/i);
+  await identityNotesBelow('#identity-setup-screen',label);
+  await noEarnedIdentity(label);
+}
+async function identityNotesBelow(selector,label) {
+  assert.equal(await page.locator('#identity-demo-notes #onboarding-notice').count(),1);
+  assert.equal(await page.locator(selector).evaluate(node=>Boolean(node.compareDocumentPosition(document.getElementById('identity-demo-notes')) & Node.DOCUMENT_POSITION_FOLLOWING)),true,
+    'Demo/storage notes follow the pipeline controls: '+label+'.');
+}
+async function identityStep(role,label) {
+  const strip=page.locator('#identity-step-level'),stamp=page.locator('#identity-step-stamp');
+  const level=role==='requester' ? 1 : 2;
+  assert.equal(await strip.isVisible(),true,label+' identifies the selected verification level.');
+  const received=await current()==='identity/status' && await page.locator('#account-earned-stamps').getAttribute('data-identity-state')==='awaiting_approval';
+  assert.equal(await page.locator('#identity-step-label').textContent(),'Level '+level+' identity · '+(received?'Awaiting review':'Not started'));
+  assert.match(await stamp.getAttribute('src'),new RegExp('identity/level-'+level+'\\.webp$'));
+  const bounds=await stamp.boundingBox();
+  assert.ok(bounds && bounds.width<=128.5 && bounds.height<=128.5,'Step watermark remains bounded: '+label+'.');
+  assert.equal(await strip.evaluate(node=>node.parentElement.classList.contains('workspace-heading')),true,'The target seal is behind the step heading.');
+  assert.equal(await strip.evaluate(node=>getComputedStyle(node).pointerEvents),'none');
+  assert.ok(await strip.evaluate(node=>Number(getComputedStyle(node).opacity))<=0.2,'The watermark remains faint behind the heading.');
+  assert.doesNotMatch(await page.locator('.screen:visible').innerText(),/\b(?:OIDC|PKCE|principal|fixture|journey)\b|service-bound|operation-bound|unlock now|click here/i,
+    'Account and identity copy excludes internal terminology and promotional instructions: '+label+'.');
+  await identityNotesBelow('[data-onboarding-view="'+await current()+'"]',label);
+  await noEarnedIdentity(label);
+}
 async function settingsAccess(signedIn) {
   await workspaceLocked(signedIn ? 'Signed-in account' : 'Signed-out account');
   for (const id of ['configure-api-access','settings-budgets']) {
@@ -483,6 +781,8 @@ async function settingsAccess(signedIn) {
   }
   assert.equal(await page.locator('#account-key-label,#account-key-detail,[data-status-source="settings-keys"],[data-status-node="keys"]').count(),0);
   assert.equal(await page.locator('#account-setup-link').getAttribute('data-navigate'),'account/sign-in');
+  assert.equal(await page.locator('#settings-identity-link,#settings-identity-stamps').count(),0,
+    'Settings exposes Account without a duplicate identity action or badge, signed in or signed out.');
   assert.equal((await page.locator('#account-link-label').textContent()).trim(),signedIn ? 'Account' : 'Sign in');
   assert.equal(await page.locator('#options-panel #account-page-actions,#options-panel .account-actions').count(),0);
   for (const id of ['account-devices-link','account-session-continue','account-sign-out','account-delete-link','account-discard-session']) {
@@ -494,6 +794,15 @@ async function settingsAccess(signedIn) {
   if (!signedIn) for (const id of ['account-detail-email','account-detail-username'])
     assert.equal(await page.locator('#'+id).textContent(),'','Losing account authority clears ordinary account details too.');
   if (!signedIn) assert.equal(await page.locator('#account-identity-warning').evaluate(node=>node.hidden),true);
+  await noEarnedIdentity(signedIn ? 'A pending signed-in account' : 'A signed-out account');
+}
+async function showWorkspace(mode) {
+  const visible = () => page.evaluate(() => document.querySelector('[data-workspace-mode]:not([hidden])')?.dataset.workspaceMode || '');
+  if (await visible() === mode) return;
+  const opener = await page.locator('#navigation-panel').isVisible() ? '#dashboard-mode-switch' : '#mode-switch';
+  await page.locator(opener).click();
+  await page.locator('#mode-confirm-accept').click();
+  await page.waitForFunction(expected => document.querySelector('[data-workspace-mode]:not([hidden])')?.dataset.workspaceMode === expected, mode);
 }
 async function workspaceLocked(label) {
   const result=await page.evaluate(()=>['new-request','list-new-request','new-operation','list-new-operation'].map(id=>{
@@ -504,7 +813,7 @@ async function workspaceLocked(label) {
   }));
   for (const item of result) {
     assert.equal(item.disabled,true,label+' cannot enable '+item.id+'.'); assert.equal(item.aria,'true'); assert.equal(item.described,true);
-    assert.match(item.text,item.id.includes('operation') ? /advanced identity verification/i : /identity verification/i);
+    assert.match(item.text,/Level [12] identity/i);
   }
 }
 async function statusKinds(selector) {
@@ -524,7 +833,13 @@ async function restoreViewFixture(name,expected=name) {
 async function gateway() {
   // The capture gateway remains reachable through legacy same-document history;
   // the public Settings entry now goes directly to Sign in.
-  await restoreViewFixture('identity/setup');
+  const signedIn=await page.locator('#account-session-entry').evaluate(node=>!node.hidden);
+  await restoreViewFixture('identity/setup',signedIn ? 'identity/document' : 'identity/setup');
+  if(signedIn) await identityStep('requester','Direct Level 1 entry');
+  else {
+    await identityLevels('Identity setup');
+    assert.equal(await page.locator('#identity-step-level').isVisible(),false,'The target watermark belongs only to capture and review steps.');
+  }
 }
 async function accountEntry() {
   const previous=await current();
@@ -553,19 +868,22 @@ async function signInPage(signedIn=false, expectedEmail=EMAIL) {
   assert.equal(await page.locator('#sign-in-create-account').isVisible(),!signedIn);
   assert.equal((await page.locator('#sign-in-create-account').textContent()).trim(),'Create account');
   assert.equal(await page.locator('#account-session-other').count(),0);
+  await noEarnedIdentity(signedIn ? 'Pending Account details' : 'Signed-out entry');
   if (signedIn) {
-    assert.equal((await page.locator('#account-session-continue').textContent()).trim(),'Identity verification');
+    assert.equal((await page.locator('#account-session-continue').textContent()).trim(),'Level 1 identity');
     const warning=page.locator('#account-identity-warning');
     assert.equal(await warning.isVisible(),true,'Pending identity is shown beside its setup action.');
     assert.equal(await warning.getAttribute('aria-hidden'),'true');
     assert.equal(await page.locator('#account-session-continue #account-identity-warning').count(),1);
-    assert.equal(await panel.getByRole('button',{name:'Identity verification',exact:true}).count(),1);
-    assert.equal(await warning.locator('use').getAttribute('href'),'#warning');
+    assert.equal(await panel.getByRole('button',{name:'Level 1 identity',exact:true}).count(),1);
+    const identityStatus=await page.locator('#account-earned-stamps').getAttribute('data-identity-state');
+    assert.equal(await warning.locator('use').getAttribute('href'),identityStatus==='awaiting_approval' ? '#status-pending'
+      : ['unknown','checking'].includes(identityStatus) ? '#status-unknown' : '#warning');
     assert.ok((await page.locator('#account-session-continue').getAttribute('aria-describedby')).split(/\s+/).includes('account-identity-needed'));
-    assert.equal(await page.locator('#account-identity-needed').textContent(),'Identity verification is required.');
+    assert.match(await page.locator('#account-identity-needed').textContent(),/Level 1 identity/i);
     assert.equal(await panel.locator('dl.account-profile').getAttribute('aria-label'),'Account details');
-    assert.deepEqual(await panel.locator('dl.account-profile dt').allTextContents(),['Email','Username']);
-    assert.deepEqual((await panel.locator('#account-page-actions button:visible').allTextContents()).map(text=>text.trim()),['Devices','Identity verification','Sign out','Delete account']);
+    assert.deepEqual(await panel.locator('dl.account-profile dt').allTextContents(),['Username','Email']);
+    assert.deepEqual((await panel.locator('#account-page-actions button:visible').allTextContents()).map(text=>text.trim()),['Devices','Level 1 identity','Sign out','Delete account']);
     assert.equal(await page.locator('#account-detail-email').textContent(),expectedEmail);
     assert.equal(await page.locator('#account-detail-username').textContent(),'@'+service.enrollmentUsername);
     for (const id of ['account-detail-email','account-detail-username']) {
@@ -597,6 +915,11 @@ async function signInPage(signedIn=false, expectedEmail=EMAIL) {
         targets:rects.every(rect=>rect.height>=44),compact:rects.at(-1).bottom-rects[0].top<=rects.reduce((sum,rect)=>sum+rect.height,0)+8};
     });
     assert.deepEqual(geometry,{count:4,stacked:true,fits:true,targets:true,compact:true},'Account actions use compact separate rows and usable targets.');
+    assert.equal(await page.locator('#account-page-actions').evaluate(group=>{
+      const profile=document.getElementById('account-session-entry'),bottom=group.getBoundingClientRect().bottom;
+      return Boolean(profile.compareDocumentPosition(group)&Node.DOCUMENT_POSITION_FOLLOWING)
+        && getComputedStyle(group).order==='1' && bottom>=document.querySelector('.screen:not([hidden])').getBoundingClientRect().bottom-2;
+    }),true,'Account actions finish the Account page and use the available lower space.');
     await workspaceLocked('Account details with Pending identity');
   }
 }
@@ -634,19 +957,26 @@ async function noSensitiveSideEffects() {
   await stableUrl();
 }
 async function retained() {
-  const entries = await page.evaluate(() => Object.entries(localStorage));
-  assert.deepEqual(entries, [], 'Credentials, selected image bytes, image URLs and account authority stay out of local storage.');
+  const entries = await page.evaluate(() => Object.entries(localStorage).filter(([key]) => !['nonverba-session','nonverba-mode','nonverba-theme'].includes(key)));
+  assert.deepEqual(entries, [], 'Passwords, selected image bytes, image URLs and other records stay out of local storage.');
+  const saved = await page.evaluate(() => localStorage.getItem('nonverba-session'));
+  if (saved) {
+    const value = JSON.parse(saved);
+    assert.deepEqual(Object.keys(value).sort(), ['a','e','p','r','s']);
+    assert.equal(saved.includes(PASSWORD) || saved.includes(EMAIL) || saved.includes(CODE), false,
+      'The resume record stores the session, not the password, email or confirmation secret.');
+  }
   await noSensitiveSideEffects(); return entries;
 }
 async function layout(label) {
   const state = await page.evaluate(() => {
-    const panel = document.querySelector('[data-onboarding-view]:not([hidden])');
+    const panel = document.querySelector('#reviewer-screen:not([hidden])') || document.querySelector('[data-onboarding-view]:not([hidden])');
     return {viewport:document.documentElement.scrollWidth <= innerWidth + 1,
       panel:panel.scrollWidth <= panel.clientWidth + 1,
       labelled:[...panel.querySelectorAll('input:not([type="hidden"]),select,textarea')].every(input => input.labels?.length > 0)};
   });
   assert.deepEqual(state, {viewport:true, panel:true, labelled:true}, 'Readable, labelled onboarding: ' + label);
-  for (const element of await page.locator('[data-onboarding-view]:visible button:visible').all()) {
+  for (const element of await page.locator('[data-onboarding-view]:visible button:visible,#reviewer-screen:visible button:visible').all()) {
     const bounds = await element.boundingBox();
     assert.ok(bounds && bounds.height >= 44, 'Onboarding buttons need usable targets: ' + label);
   }
@@ -717,6 +1047,22 @@ async function emailEntry(identifier=EMAIL, expected='password', capture=false) 
   const beforeContinuation=service.journal.length;
   const beforeEntry=service.journal.filter(item=>['/v1/accounts/entry/start','/v1/accounts/entry/confirm','/v1/accounts/mock-mail','/dev-oidc/authorize'].includes(item.path)).length;
   await page.locator('#sign-in-email').fill(identifier); await submitForm('account-email-form'); await idle();
+  const added = service.journal.slice(beforeContinuation);
+  const normalized=identifier.trim().toLowerCase();
+  const shown=normalized.includes('@') && !normalized.startsWith('@') ? normalized : '@'+normalized.replace(/^@/,'');
+  if (expected==='missing') {
+    assert.deepEqual(added,[{method:'POST',path:'/v1/accounts/presence'}],'A missing account is recognized by one presence check.');
+    await page.locator('#sign-in-missing-status').waitFor({state:'visible'});
+    assert.match(await page.locator('#sign-in-missing-status').innerText(),/this account does not exist/i);
+    assert.equal(await page.locator('#sign-in-missing-status').getAttribute('data-status-kind'),'info');
+    assert.equal(await page.locator('#sign-in-create-account').isVisible(),true);
+    assert.equal(await page.locator('#account-sign-in-form').isVisible(),false);
+    assert.equal(await page.locator('#account-email-form').isVisible(),false);
+    assert.equal(await page.locator('#account-email-confirm-form').isVisible(),false);
+    assert.equal((await page.locator('#sign-in-selected-email').textContent()).trim(),shown);
+    await retained();
+    return;
+  }
   if (expected==='enrollment') {
     await page.locator('#account-email-confirm-form').waitFor({state:'visible'});
     assert.equal(await page.locator('#account-sign-in-form').isVisible(),false,'Explicit signup still requires email ownership proof.');
@@ -733,9 +1079,10 @@ async function emailEntry(identifier=EMAIL, expected='password', capture=false) 
     assert.equal(await page.locator('#account-email').evaluate(element=>element.readOnly),true,'The verified signup email stays bound to enrollment.');
   } else {
     await page.locator('#account-sign-in-form').waitFor({state:'visible'});
-    assert.equal(service.journal.length,beforeContinuation,'Identifier continuation makes no service request.');
+    if (service.enabled) assert.deepEqual(added,[{method:'POST',path:'/v1/accounts/presence'}],'An existing identifier continues after one presence check.');
+    else assert.equal(added.length,0,'An unavailable service continues locally without a presence lookup.');
     assert.equal(service.journal.filter(item=>['/v1/accounts/entry/start','/v1/accounts/entry/confirm','/v1/accounts/mock-mail','/dev-oidc/authorize'].includes(item.path)).length,beforeEntry,
-      'Continuing a sign-in identifier is local: no account lookup, mail or authorization request.');
+      'Continuing a sign-in identifier sends no mail and starts no authorization.');
     assert.equal(await page.locator('#account-email-form').isVisible(),false);
     assert.equal(await page.locator('#account-email-confirm-form').isVisible(),false);
     assert.equal(await page.locator('#sign-in-email-preview').isVisible(),false);
@@ -744,8 +1091,6 @@ async function emailEntry(identifier=EMAIL, expected='password', capture=false) 
     assert.equal(await page.locator('#view-title').textContent(),'Sign in');
     assert.doesNotMatch(await page.locator('#view-description').textContent(),/account found|existing account|code|confirm.*email/i);
     assert.deepEqual(await page.locator('#account-sign-in-form label').allTextContents(),['Password']);
-    const normalized=identifier.trim().toLowerCase();
-    const shown=normalized.includes('@') && !normalized.startsWith('@') ? normalized : '@'+normalized.replace(/^@/,'');
     assert.equal((await page.locator('#sign-in-selected-email').textContent()).trim(),shown);
     if (capture) { await layout('320px / 200% password'); await screenshot('password-sign-in-large-text'); }
   }
@@ -865,7 +1210,15 @@ async function deletionEntry() {
 }
 async function deletionFields(email = EMAIL, password = service.password) {
   await page.locator('#delete-confirm-email').fill(email); await page.locator('#delete-password').fill(password);
-  await page.locator('#delete-deliberate').check();
+  await page.locator('#delete-deliberate').click();
+  await view('account/delete-retention');
+  assert.equal(await page.locator('#delete-deliberate').isChecked(), false, 'Opening the retention terms does not confirm deletion.');
+  assert.match(await page.locator('#delete-retention-document').innerText(), /retention period/i);
+  const accept = page.locator('#delete-retention-accept');
+  assert.equal(await accept.evaluate(input => Boolean(document.querySelector('#delete-retention-document p:last-child').compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING)), true, 'Deletion agreement follows the retention terms.');
+  await accept.check();
+  await view('account/delete');
+  assert.equal(await page.locator('#delete-deliberate').isChecked(), true);
 }
 async function recreateDeletedAccount(previous) {
   await page.locator('#account-deleted').waitFor({state:'visible'});
@@ -884,32 +1237,61 @@ async function recreateDeletedAccount(previous) {
   assert.notEqual(service.identity.account_id,previous.account_id,'The reused email receives a new account identity.');
   assert.notEqual(service.identity.principal_id,previous.principal_id,'The reused email cannot resurrect the deleted principal.');
   await fillSignIn(); await submitForm('account-sign-in-form'); await view('home'); await idle();
+  assert.equal(await page.locator('#home-sign-in').isHidden(), true, 'Signed-in Home hides the sign-in button.');
   assert.equal(await page.locator('#enrollment-begin').isDisabled(),false);
   await settingsAccess(true);
   await retained();
 }
-async function begin(role = 'operator') {
-  await gateway(); await page.locator('#enrollment-role').selectOption(role);
-  await page.locator('#enrollment-begin').click();
+async function begin(role = 'requester') {
+  assert.equal(role,'requester','Pending accounts can prepare only the prerequisite Level 1 pipeline.');
+  if(await page.locator('#account-earned-stamps').getAttribute('data-identity-state')==='awaiting_approval') {
+    service.resetIdentityReviewScenario();await signIn();
+    await page.waitForFunction(()=>document.getElementById('account-earned-stamps').dataset.identityState==='unverified');
+  }
+  await accountEntry();
+  await page.locator('#account-session-continue').click();
   await page.waitForFunction(() => ['identity/document','identity/review','identity/status'].includes(history.state?.view));
   await view(await current());
+  await identityStep(role,'Starting '+role+' identity photos');
+  if(await current()==='identity/document')await identityFieldLayout();
 }
-async function guidance() {
-  const directions = ['up','down','left','right','front'];
-  const selectedURLs = await page.evaluate(() => window.__captureURLs.size);
-  for (const direction of directions) {
-    assert.equal(await page.locator('#face-guide').getAttribute('data-direction'), direction);
-    assert.equal(await page.locator('#camera-shutter').isDisabled(), true,
-      'No frontal still is accepted before the deliberate guidance sequence finishes.');
-    await page.locator('#guidance-next').click(); await idle();
-    assert.equal(await page.locator('#selected-face').getAttribute('src'),null);
-    assert.equal(await page.evaluate(() => window.__captureURLs.size),selectedURLs,
-      'Guidance advances without retaining movement frames.');
+async function identityFieldLayout() {
+  const fields=page.locator('#identity-details');
+  assert.deepEqual(await fields.locator('label').allTextContents(),['Full name','City of birth','Nationality','Age','Document type'],
+    'Identity details start with the full-width name and end with Age and Document type in reading and keyboard order.');
+  assert.equal(await page.locator('#enrollment-cancel').count(),0,'Identity capture has no global Discard photos link.');
+  const layout=await fields.evaluate(fieldset=>{
+    const box=id=>{const r=fieldset.querySelector('#'+id).parentElement.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width};};
+    return {width:innerWidth,name:box('identity-full-name'),city:box('identity-birth-city'),nationality:box('identity-nationality'),age:box('identity-age'),type:box('identity-document-type')};
+  });
+  assert.ok(layout.name.y<layout.city.y && layout.city.y<layout.age.y,'Full name precedes birthplace/nationality and the final identity row.');
+  if(layout.width>380) {
+    assert.ok(Math.abs(layout.city.y-layout.nationality.y)<1 && Math.abs(layout.age.y-layout.type.y)<1,'Birthplace/nationality and Age/document type share their respective rows.');
+    assert.ok(layout.type.x>layout.age.x && layout.name.width>layout.age.width*1.8,'Full name spans the form, with document type beside Age.');
   }
-  assert.equal(await page.locator('#guidance-next').isDisabled(),true);
-  assert.equal(await page.locator('#face-guide').getAttribute('data-direction'),'front');
-  assert.match(await page.locator('#guidance-position').innerText(),/guidance complete.*movement and liveness not checked/i);
-  assert.match(await page.locator('[data-onboarding-view="identity/face"]').innerText(),/movement and liveness are not checked/i);
+}
+async function levelTwoLocked(label,{returnTo=null}={}) {
+  const previous=await current();
+  const action=page.locator('#enrollment-level-2');
+  assert.equal(await action.isDisabled(),false,label+' can open the Level 2 photo steps.');
+  assert.equal(await action.getAttribute('aria-describedby'),'identity-level-2-prerequisite');
+  const photos=await page.evaluate(()=>[...window.__captureURLs].sort());
+  const requests=await page.evaluate(()=>window.__captureRequests.length);
+  await action.evaluate(button=>button.click());
+  await idle();
+  const opened=await current();
+  assert.ok(['identity/document','identity/status'].includes(opened),label+' opens the ID and face photo steps.');
+  assert.equal(await page.evaluate(()=>window.__captureRequests.length),requests,'Opening Level 2 does not start the camera by itself.');
+  assert.deepEqual(await page.evaluate(()=>[...window.__captureURLs].sort()),photos,'Opening Level 2 preserves any existing photo binding.');
+  const destination=returnTo||previous;
+  if(await current()!==destination) await restoreViewFixture(destination);
+  await noEarnedIdentity(label);
+}
+async function identityFields(details=IDENTITY_DETAILS) {
+  await page.locator('#identity-document-type').selectOption(details.document_type);
+  for(const [id,key] of [['identity-full-name','full_name'],['identity-birth-city','birth_city'],['identity-nationality','nationality'],['identity-age','age']])
+    await page.locator('#'+id).fill(String(details[key]));
+  await idle();
 }
 async function cameraStopped({released = false} = {}) {
   await page.waitForFunction(() => window.__captureTracks.every(track => track.readyState === 'ended')
@@ -920,6 +1302,9 @@ async function cameraStopped({released = false} = {}) {
 }
 async function startCamera(kind) {
   await page.locator(kind === 'document_front' ? '#document-camera-start' : '#face-camera-start').click();
+  await cameraReady(kind);
+}
+async function cameraReady(kind) {
   await page.locator('#camera-stage').waitFor({state:'visible'});
   await page.waitForFunction(() => {
     const video = document.getElementById('enrollment-video');
@@ -928,6 +1313,15 @@ async function startCamera(kind) {
   await idle();
   assert.equal(await page.locator('#camera-stage').getAttribute('data-kind'),kind);
   assert.equal(await page.evaluate(() => window.__captureTracks.filter(track=>track.readyState==='live').length),1);
+  if(kind==='face_front') {
+    assert.equal(await page.locator('#face-capture').getAttribute('data-capture-state'),'live');
+    assert.equal(await page.locator('#face-placeholder').isVisible(),false);
+    assert.equal(await page.locator('#face-camera-start').isVisible(),false);
+    assert.equal(await page.locator('#face-selection').isVisible(),false);
+    assert.equal(await page.locator('#face-next').isVisible(),false);
+    assert.equal(await page.locator('#face-camera-slot #camera-stage #camera-frame').isVisible(),true,
+      'The face frame belongs to the actual live camera preview.');
+  }
 }
 async function takePhoto(kind) {
   await page.waitForFunction(() => !document.getElementById('camera-shutter').disabled);
@@ -941,35 +1335,279 @@ async function takePhoto(kind) {
   assert.match(await page.locator(id).getAttribute('src'),/^blob:/);
   const dimensions = await page.locator(id).evaluate(image=>({width:image.naturalWidth,height:image.naturalHeight}));
   assert.ok(Math.max(dimensions.width, dimensions.height) <= (kind === 'document_front' ? 1600 : 960));
+  if(kind==='document_front') {
+    assert.equal(await page.getByRole('button',{name:'Try again',exact:true}).getAttribute('id'),'document-remove',
+      'The selected document has a clearly named retry action.');
+    assert.equal(await page.locator('#document-remove svg').getAttribute('aria-hidden'),'true','The retry label supplies the accessible name without repeating the icon.');
+    assert.equal(await page.locator('#document-remove svg use').getAttribute('href'),'#trash');
+    const proof='document-retry-'+(page.viewportSize().width<=380?'large-text':'normal');
+    if(!screenshots.includes(proof+'.png')) {await layout('Selected document retry');await screenshot(proof);}
+  }
   await retained();
 }
-async function capturePair({skip = false} = {}) {
+async function capturePair() {
   await view('identity/document',{focused:false});
-  await page.locator('#enrollment-processing').check(); await idle();
+  await identityFields();
   await startCamera('document_front'); await takePhoto('document_front');
   await page.locator('#document-next').click(); await view('identity/face');
+  const faceProof = 'face-photo-' + (page.viewportSize().width <= 380 ? 'large-text' : 'normal');
+  const captureProof = !screenshots.includes(faceProof+'-idle.png');
+  assert.equal(await page.locator('#face-guide,#guidance-next,#guidance-skip,#guidance-position').count(),0,
+    'A single frontal photo has no unrelated movement menu or skip action.');
+  assert.equal(await page.locator('#face-next').isDisabled(),true,'Continue needs an actually selected frontal photo.');
+  assert.equal(await page.locator('#face-capture').getAttribute('data-capture-state'),'idle');
+  assert.equal(await page.locator('#face-placeholder').isVisible(),true);
+  assert.equal(await page.locator('#face-camera-start').isVisible(),true);
+  assert.equal(await page.locator('#face-next').isVisible(),false);
+  if(captureProof) { await layout('Frontal photo idle'); await screenshot(faceProof+'-idle'); }
+  const selectedURLs = await page.evaluate(() => window.__captureURLs.size);
   await startCamera('face_front');
-  if (skip) { await page.locator('#guidance-skip').click(); await idle(); }
-  else await guidance();
+  assert.equal(await page.evaluate(() => window.__captureURLs.size),selectedURLs,
+    'Opening the preview retains no movement frames or automatic stills.');
+  assert.equal(await page.locator('#camera-shutter').isDisabled(),false,'A ready frontal camera can take its one deliberate photo directly.');
+  if(captureProof) { await layout('Frontal photo live'); await screenshot(faceProof+'-live'); }
+  if(captureProof && page.viewportSize().width>380) {
+    await page.locator('#camera-stop').click(); await cameraStopped(); await idle();
+    assert.equal(await page.locator('#face-capture').getAttribute('data-capture-state'),'idle');
+    assert.equal(await page.locator('#face-placeholder').isVisible(),true);
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'face-camera-start','Stopping the preview returns keyboard focus to Start camera.');
+    assert.equal(await page.evaluate(() => window.__captureURLs.size),selectedURLs,'Stopping the camera retains no extra still.');
+    await startCamera('face_front');
+  }
   await takePhoto('face_front');
+  assert.equal(await page.evaluate(() => window.__captureURLs.size),selectedURLs+1,
+    'Only the deliberate frontal still is retained alongside the document.');
+  assert.equal(await page.locator('#face-selection').isVisible(),true);
+  assert.equal(await page.locator('#face-capture').getAttribute('data-capture-state'),'selected');
+  assert.equal(await page.locator('#face-placeholder').isVisible(),false);
+  assert.equal(await page.locator('#face-camera-start').isVisible(),false);
+  assert.equal(await page.locator('#face-remove').innerText(),'Retake photo');
+  assert.equal(await page.locator('#face-next').innerText(),'Continue');
+  assert.equal(await page.locator('#face-next').isVisible(),true);
+  assert.equal(await page.locator('#face-next').isDisabled(),false);
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'face-next','Taking the still moves keyboard focus to continuing with the selected image.');
+  if(captureProof) { await layout('Frontal photo selected'); await screenshot(faceProof+'-selected'); }
+  if(captureProof && page.viewportSize().width>380) {
+    const oldFace=await page.locator('#selected-face').getAttribute('src');
+    await page.locator('#face-remove').click(); await cameraReady('face_front');
+    assert.equal(await page.evaluate(url=>window.__captureURLs.has(url),oldFace),false,'Retake revokes the old still before restarting the camera.');
+    assert.equal(await page.locator('#selected-face').getAttribute('src'),null,'The replaced face is cleared immediately.');
+    assert.equal(await page.locator('#enrollment-finish').isDisabled(),true,'Retake invalidates any earlier review.');
+    await takePhoto('face_front');
+    assert.equal(await page.evaluate(() => window.__captureURLs.size),selectedURLs+1,'Retake replaces the old still rather than keeping both.');
+    await restoreViewFixture('identity/review','identity/face');
+    assert.equal(await page.locator('[data-onboarding-view="identity/review"]').isVisible(),false,
+      'History cannot enter final submission until the current document and face were deliberately continued.');
+    assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false);
+  }
   await page.locator('#face-next').click(); await view('identity/review');
+  await compactIdentityReview();
+  await reviewSummary();
+}
+async function reviewerCaseFixture() {
+  const photos=await page.evaluate(async()=>{
+    const result={},canvas=document.createElement('canvas');canvas.width=360;canvas.height=240;
+    const drawing=canvas.getContext('2d');
+    for(const [kind,label,color] of [['document_front','Synthetic test document','#e2e6d9'],['face_front','Synthetic test face','#eef1e5']]) {
+      drawing.fillStyle=color;drawing.fillRect(0,0,360,240);drawing.fillStyle='#253226';drawing.font='20px sans-serif';drawing.fillText(label,24,110);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.85));
+      result[kind]=btoa(String.fromCharCode(...new Uint8Array(await blob.arrayBuffer())));
+    }
+    canvas.width=canvas.height=0;return result;
+  });
+  return service.seedReviewerCase(photos);
+}
+async function openReviewer() {
+  await accountEntry();
+  const entry=page.locator('#account-reviewer-link');await entry.waitFor({state:'visible'});await entry.click();
+  await view('reviewer/cases',{focused:false});
+  await page.locator('#reviewer-screen').getByRole('heading',{name:'Pending test submissions',exact:true}).waitFor({state:'visible'});
+  await stableUrl();
+}
+async function openReviewerCase(id) {
+  const screen=page.locator('#reviewer-screen');
+  await screen.getByRole('button',{name:new RegExp(id)}).click();
+  await page.waitForFunction(()=>{
+    const images=[...document.querySelectorAll('#reviewer-screen .review-media img')];
+    return images.length===2 && images.every(image=>image.complete && image.naturalWidth>0 && image.getAttribute('src')?.startsWith('blob:'));
+  });
+  await screen.getByRole('button',{name:'Approve for test',exact:true}).waitFor({state:'visible'});
+  await page.waitForFunction(()=>[...document.querySelectorAll('#reviewer-screen button')].some(button=>button.textContent==='Approve for test' && !button.disabled));
+  await stableUrl();return screen;
+}
+async function reviewerSaved(label) {
+  await page.waitForFunction(expected=>document.querySelector('#reviewer-screen [role="status"]')?.textContent.includes(expected),label);
+  assert.equal(await page.locator('#reviewer-screen').getByRole('button',{name:'Check original operation',exact:true}).count(),0);
+  await stableUrl();await workspaceLocked(label+' never grants work authority');
+}
+async function reviewerProof(name) {
+  const viewport=page.viewportSize(),fontSize=await page.evaluate(()=>document.documentElement.style.fontSize);
+  try {
+    await layout('Test reviewer '+name);await screenshot('identity-reviewer-'+name+'-normal');
+    await page.setViewportSize({width:320,height:900});
+    await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+    await layout('Test reviewer '+name+' at 320px / 200% text');await screenshot('identity-reviewer-'+name+'-large-text');
+  } finally {
+    await page.evaluate(value=>{document.documentElement.style.fontSize=value;},fontSize);
+    if(viewport)await page.setViewportSize(viewport);
+  }
+}
+async function compactIdentityReview() {
+  assert.equal(await page.locator('#view-title').innerText(),'Submit Level 1 identity');
+  assert.equal(await page.locator('#enrollment-review,#identity-submission-notice').count(),0,
+    'The final step has no repeated photo-confirmation action or duplicate submission explanation.');
+  assert.equal(await page.locator('#identity-review-edit').evaluate(details=>details.open),false,
+    'Already selected photos and details start behind a deliberate review disclosure.');
+  for(const id of ['#identity-review-details','#review-document','#review-face','#retake-document','#retake-face','#identity-details-edit'])
+    assert.equal(await page.locator(id).isVisible(),false,'The compact final step omits repeated evidence by default: '+id);
+  assert.equal(await page.locator('#identity-review-edit > summary').innerText(),'Review or change details');
+  assert.equal(await page.locator('#identity-processing-note').isVisible(),true);
+  assert.match(await page.locator('#identity-processing-note').textContent(),/document checks.*validation.*developed/i);
+  assert.match(await page.locator('#identity-processing-note').textContent(),/test submissions.*stored privately.*pending/i);
+  assert.equal(await page.locator('#identity-review-edit').evaluate(details=>Boolean(details.compareDocumentPosition(document.getElementById('identity-notice-choice'))&Node.DOCUMENT_POSITION_FOLLOWING)),true,
+    'Optional evidence review comes before the final notice agreement in reading order.');
+  const proof='identity-submit-'+(page.viewportSize().width<=380?'large-text':'normal');
+  if(!screenshots.includes(proof+'.png')) {
+    await page.locator('#identity-review-edit > summary').focus();await page.keyboard.press('Tab');
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'identity-notice-reviewed',
+      'Keyboard users reach optional review before the final notice checkbox.');
+    await page.locator('#view-title').focus();await layout('Compact identity submission');await screenshot(proof);
+  }
+}
+async function openReviewEdit() {
+  if(!await page.locator('#identity-review-edit').evaluate(details=>details.open))
+    await page.locator('#identity-review-edit > summary').click();
+  assert.equal(await page.locator('#identity-review-details').isVisible(),true);
+}
+async function reviewSummary(details=IDENTITY_DETAILS) {
+  await openReviewEdit();
+  const list=page.locator('#identity-review-details');
+  assert.equal(await list.isVisible(),true,'Deliberate review shows the actual submitted details beside both photos.');
+  assert.deepEqual(await list.locator('dt').allTextContents(),['Document type','Full name','City of birth','Nationality','Age']);
+  const type={passport:'Passport',national_id:'National ID',driving_licence:'Driver’s licence',residence_permit:'Residence permit'}[details.document_type];
+  assert.deepEqual(await list.locator('dd').allTextContents(),[type,details.full_name,details.birth_city,details.nationality,String(details.age)]);
+  assert.equal(await list.locator('input,textarea,select,script,b,a').count(),0,'Reviewed identity details use plain labelled text.');
+  for(const id of ['#review-document','#review-face']) {
+    assert.equal(await page.locator(id).isVisible(),true);
+    assert.equal(await page.locator(id).evaluate(image=>image.complete && image.naturalWidth>0),true);
+    assert.match(await page.locator(id).getAttribute('src'),/^blob:/);
+  }
+  const proof='identity-submit-expanded-'+(page.viewportSize().width<=380?'large-text':'normal');
+  if(!screenshots.includes(proof+'.png')) {await layout('Expanded identity review');await screenshot(proof);}
+  await page.locator('#identity-review-edit > summary').click();
 }
 async function reviewAndFinish() {
-  await page.locator('#enrollment-review').click(); await idle();
+  await agreeIdentityNotice();
   await page.waitForFunction(() => !document.getElementById('enrollment-finish').disabled);
   await page.locator('#enrollment-finish').click(); await view('identity/status');
-  await workspaceLocked('Reviewed local document and face photos');
+  await receivedDone();
+  assert.equal(await page.locator('#enrollment-status-description').innerText(),'Your Level 1 identity has been received. Review is pending. It is not confirmed with the issuer.');
+  assert.equal(await page.locator('#enrollment-reopen').isVisible(),false,'A received submission releases its local images.');
+  await cameraStopped({released:true});
+  await workspaceLocked('Received private identity submission');
+  await noEarnedIdentity('Received photos without an identity verification decision');
+  await levelTwoLocked('Received Level 1 photos without a verification decision',{returnTo:'identity/status'});
+}
+async function receivedDone() {
+  await page.waitForFunction(()=>document.getElementById('account-earned-stamps').dataset.identityState==='awaiting_approval');
+  assert.equal(await page.locator('#view-title').innerText(),'Awaiting review');
+  assert.equal(await page.locator('#workspace').getAttribute('aria-label'),'Awaiting review');
+  assert.equal(await page.locator('#onboarding-screen').getAttribute('aria-label'),'Awaiting review');
+  assert.equal(await page.locator('#identity-step-label').textContent(),'Level 1 identity · Awaiting review');
+  assert.equal(await page.locator('#enrollment-status-description').innerText(),'Your Level 1 identity has been received. Review is pending. It is not confirmed with the issuer.');
+  const done=page.locator('#enrollment-delete');
+  assert.equal(await done.innerText(),'Done');assert.equal(await done.isDisabled(),false);
+  assert.equal(await done.evaluate(button=>button.classList.contains('primary') && !button.classList.contains('text-link')),true,
+    'A received identity submission finishes with a primary Done action.');
+  assert.equal(await done.evaluate(button=>getComputedStyle(button).backgroundColor),'rgb(76, 99, 68)','Done uses the green primary action.');
+  const proof='identity-received-done-'+(page.viewportSize().width<=380?'large-text':'normal');
+  if(!screenshots.includes(proof+'.png')) {await layout('Received identity Done');await screenshot(proof);}
+}
+async function pendingIdentityPresentation({proof=false}={}) {
+  await page.waitForFunction(()=>document.getElementById('account-earned-stamps').dataset.identityState==='awaiting_approval');
+  await accountEntry();await signInPage(true);
+  assert.equal(await page.locator('#account-identity-status').isVisible(),true);
+  assert.equal(await page.locator('#account-identity-status').innerText(),'Awaiting review');
+  await noEarnedIdentity('A received pending submission');await workspaceLocked('Awaiting approval');
+  assert.deepEqual(await statusKinds('[data-status-source="identity-requests"]'),['pending'],
+    'A received Level 1 submission replaces its request warning with a waiting clock.');
+  assert.deepEqual(await statusKinds('[data-status-source="identity-operations"]'),['warning'],
+    'Pending Level 1 is a prerequisite for Level 2, not a submitted Level 2 application.');
+  assert.match(await page.locator('#new-operation-prerequisite').textContent(),/Awaiting review of Level 1 identity before Level 2 identity/i);
+  assert.equal(await page.locator('#account-session-continue .status-icon').getAttribute('data-status-kind'),'pending');
+  assert.equal(await page.locator('#requests-setup-label').textContent(),'Awaiting review');
+  assert.equal(await page.locator('#requests-setup-link').getAttribute('data-navigate'),'identity/status');
+  assert.equal(await page.locator('#requests-setup-link').isDisabled(),false,'Received Level 1 has a read-only status link.');
+  assert.equal(await page.locator('#operations-setup-label').textContent(),'Start Level 1 identity first');
+  assert.equal(await page.locator('#operations-setup-link').isDisabled(),true,'Awaiting Level 1 cannot start the Level 2 pipeline.');
+  if(proof) {
+    const suffix=page.viewportSize().width<=380?'large-text':'normal';
+    await layout('Pending Account');await screenshot('identity-awaiting-account-'+suffix);
+    await page.locator('#navigation-toggle').click();await page.locator('#navigation-panel').waitFor({state:'visible'});
+    await screenshot('identity-awaiting-navigation-'+suffix);
+    for(const section of ['requests','operations']) {
+      await showWorkspace(section === 'operations' ? 'operator' : 'requester');
+      if(await page.locator('#'+section+'-list-link').getAttribute('aria-expanded')!=='true')await page.locator('#'+section+'-list-link').click();
+      await page.locator('#'+section+'-setup-link').scrollIntoViewIfNeeded();
+      assert.equal(await page.locator('#'+section+'-setup-link').isVisible(),true);
+      assert.equal(await page.locator('#navigation-panel').evaluate(panel=>panel.scrollWidth<=panel.clientWidth+1),true,
+        'Expanded pending navigation stays within its panel at '+suffix+'.');
+      await screenshot('identity-awaiting-'+section+'-expanded-'+suffix);
+    }
+    await showWorkspace('operator');
+    assert.equal(await page.locator('#operations-setup-link').evaluate(button=>getComputedStyle(button).textDecorationLine),'none',
+      'The unmet Level 1 requirement is plain text rather than a misleading actionable link.');
+    const previous=await current(),posts=service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length,
+      captures=await page.evaluate(()=>window.__captureRequests.length);
+    await page.locator('#operations-setup-link').evaluate(button=>{button.click();button.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));});
+    await idle();assert.equal(await current(),previous,'A disabled prerequisite cannot navigate or start Level 2.');
+    await showWorkspace('requester');
+    if(await page.locator('#requests-list-link').getAttribute('aria-expanded')!=='true')await page.locator('#requests-list-link').click();
+    await page.locator('#requests-setup-link').click();await view('identity/status');await receivedDone();
+    await page.evaluate(() => localStorage.removeItem('nonverba-mode'));
+    await cameraStopped({released:true});
+    assert.equal(await page.evaluate(()=>window.__captureRequests.length),captures,'Awaiting Requests opens its saved status without opening a camera.');
+    assert.equal(service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length,posts,
+      'Opening saved approval status never resubmits identity details.');
+    await page.locator('#enrollment-delete').click();await view('account/sign-in');
+  }
+}
+async function noPendingIdentity(label) {
+  assert.notEqual(await page.locator('#account-earned-stamps').getAttribute('data-identity-state'),'awaiting_approval',label);
+  const status=await page.locator('#account-earned-stamps').getAttribute('data-identity-state');
+  if(['unknown','checking'].includes(status)) {
+    assert.equal(await page.locator('#account-identity-status').evaluate(node=>node.hidden),false,label+' explains its unresolved status.');
+    assert.equal(await page.locator('#account-identity-status').textContent(),status==='unknown'?'Status unavailable':'Checking status');
+  } else assert.equal(await page.locator('#account-identity-status').evaluate(node=>node.hidden),true,label+' has no approval-waiting overlay.');
+  await noEarnedIdentity(label);await workspaceLocked(label);
+}
+async function agreeIdentityNotice() {
+  assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Continuing with selected photos cannot accept the retention notice.');
+  const posts=service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length;
+  await page.locator('#identity-notice-reviewed').click(); await view('identity/notice');
+  await identityNoticeDocument();
+  assert.equal(service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length,posts,
+    'Opening the full identity notice sends no identity submission.');
+  await page.locator('#identity-notice-accept').click(); await view('identity/review');
+  assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),true,'Only the end-of-notice agreement checks the compact final choice.');
+}
+async function identityNoticeDocument() {
+  assert.equal(await page.locator('#identity-notice-text').textContent(),IDENTITY_NOTICE_TEXT,'The complete canonical notice is shown on its own page.');
+  assert.match(await page.locator('#identity-notice-version').textContent(),new RegExp('draft.*version '+IDENTITY_INTAKE_NOTICE.version,'i'));
+  assert.equal(await page.locator('#identity-notice-accept').isChecked(),false);
+  assert.equal(await page.locator('#identity-notice-accept').evaluate(input=>Boolean(input.compareDocumentPosition(document.getElementById('identity-notice-text'))&Node.DOCUMENT_POSITION_PRECEDING)),true,
+    'Explicit agreement follows the complete notice.');
 }
 async function lateCameraBack() {
-  await begin('operator'); await view('identity/document');
-  await page.locator('#enrollment-processing').check(); await idle();
+  await begin('requester'); await view('identity/document');
+  await identityFields();
   await page.evaluate(() => { window.__delayNextCapture = true; });
   await page.locator('#document-camera-start').click();
   await page.waitForFunction(() => window.__cameraPermissionPending === true);
-  try { await page.goBack(); await page.waitForFunction(() => history.state?.view === 'identity/setup'); }
+  try { await page.goBack(); await page.waitForFunction(() => history.state?.view === 'account/sign-in'); }
   finally { await page.evaluate(() => window.__releaseCameraPermission?.()); }
-  await view('identity/setup',{focused:false}); await cameraStopped();
-  assert.equal(await current(),'identity/setup','A late permission result must not navigate over Back.');
+  await view('account/sign-in',{focused:false}); await cameraStopped();
+  assert.equal(await current(),'account/sign-in','A late permission result must not navigate over Back.');
   assert.equal(await page.locator('#selected-document').getAttribute('src'),null);
   assert.equal(await page.locator('#onboarding-message').isVisible(),false,
     'A cancelled camera result must not replace focus with an old error.');
@@ -979,6 +1617,9 @@ async function lateCameraBack() {
 try {
   context = await browser.newContext({viewport:{width:390, height:844}, reducedMotion:'reduce', permissions:['camera']});
   await context.addInitScript(() => {
+    // Ordinary fixture journeys use the unsupported fallback. The dedicated
+    // manager case installs its own synthetic chooser and never reads secrets.
+    Object.defineProperty(window,'PasswordCredential',{configurable:true,value:undefined});
     window.__onboardingForbidden = [];
     window.__copiedEmailCode = null; window.__clipboardRefuse = false; window.__clipboardGate = false;
     Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async value=>{
@@ -1014,16 +1655,20 @@ try {
       window[name] = new Proxy(Original, {construct(target,args) { note(name); return Reflect.construct(target,args); }});
     }
     const setItem = Storage.prototype.setItem;
-    Storage.prototype.setItem = function (...args) { note('Storage.setItem'); return setItem.apply(this,args); };
+    Storage.prototype.setItem = function (...args) {
+      if (args[0] === 'nonverba-session' || args[0] === 'nonverba-mode' || args[0] === 'nonverba-theme') return setItem.apply(this, args);
+      note('Storage.setItem'); return setItem.apply(this, args);
+    };
     window.__captureTracks = [];
     window.__captureRequests = [];
     window.__captureURLs = new Set();
+    window.__captureBlobInfo = new Map();
     const createObjectURL = URL.createObjectURL.bind(URL), revokeObjectURL = URL.revokeObjectURL.bind(URL);
     URL.createObjectURL = blob => {
       if (window.__refuseRecoveryDownload && blob.type.startsWith('text/plain')) throw new DOMException('Synthetic download refusal','NotAllowedError');
-      const url=createObjectURL(blob); window.__captureURLs.add(url); return url;
+      const url=createObjectURL(blob); window.__captureURLs.add(url); window.__captureBlobInfo.set(url,{type:blob.type,bytes:blob.size}); return url;
     };
-    URL.revokeObjectURL = url => { window.__captureURLs.delete(url); return revokeObjectURL(url); };
+    URL.revokeObjectURL = url => { window.__captureURLs.delete(url); window.__captureBlobInfo.delete(url); return revokeObjectURL(url); };
     if (navigator.mediaDevices?.getUserMedia) {
       const getUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
       navigator.mediaDevices.getUserMedia = async constraints => {
@@ -1051,6 +1696,7 @@ try {
         const envelope = request.postDataJSON();
         assert.ok(typeof envelope.id === 'string' && envelope.request, 'Relay correlates its structured request.');
         const response = await service.request(envelope.request);
+        await service.responseReady(envelope.request.path);
         await route.fulfill({json:{id:envelope.id,response},headers:{'Cache-Control':'no-store'}}).catch(error => {
           if (!request.failure()?.errorText.includes('ERR_ABORTED')) throw error;
         });
@@ -1093,7 +1739,8 @@ try {
       assert.equal(await page.locator('[data-status-source="identity-'+role+'"] [data-status-kind="warning"]').count(),0,
         'Identity setup warnings require an authenticated account.');
     }
-    await page.waitForFunction(() => /unavailable|not connected|not configured/i.test(document.getElementById('account-service-status').textContent));
+    await page.waitForFunction(() => /server unreachable/i.test(document.getElementById('account-service-status').textContent));
+    await page.waitForFunction(() => document.querySelector('#sign-in-service-status use')?.getAttribute('href') === '#status-error');
     assert.equal(service.journal.every(item=>item.method === 'GET'
       && ['/dev-oidc/.well-known/openid-configuration','/readyz'].includes(item.path)),true,
     'An unavailable relay may check public readiness, but cannot issue credential or private-account requests.');
@@ -1425,11 +2072,12 @@ try {
     await layout('account enrollment');
     await page.locator('#account-create-submit').click(); await view('account/confirm');
     assert.equal(service.enrollmentUsername,'browser_available','The account API receives the bare canonical username after prefix editing.');
-    assert.match(await page.locator('#confirmation-delivery').innerText(),/mock|simulat|test inbox/i);
+    assert.match(await page.locator('#confirmation-delivery').innerText(),/email preview.*no email is sent/i);
     assert.equal(await page.locator('#account-password').inputValue(),'');
     assert.equal(service.journal.some(item=>item.path==='/v1/account/context'),false);
     await page.locator('#account-enrollment-status').click(); await idle();
-    assert.match(await page.locator('#account-operation-state').innerText(),/pending/i);
+    assert.match(await page.locator('#account-operation-state').innerText(),/awaiting email confirmation/i,
+      'A pending enrollment still needs contact confirmation before account access.');
     await page.goBack(); await view('account/sign-in'); await page.goForward(); await view('account/confirm');
     await page.locator('#account-confirm-code').fill(Buffer.alloc(32,99).toString('base64url'));
     await page.locator('#account-confirm-deliberate').check(); await submitForm('account-confirm-form');
@@ -1439,9 +2087,32 @@ try {
     await page.locator('#account-confirm-deliberate').check();
     await submitForm('account-confirm-form'); await ready();
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true,'Confirmed enrollment alone must not sign in.');
+    await page.emulateMedia({reducedMotion:'no-preference'});
     await fillSignIn(); await submitForm('account-sign-in-form'); await view('home'); await idle();
+    assert.equal(await page.locator('#home-sign-in').isHidden(), true, 'Signed-in Home hides the sign-in button.');
+    await page.waitForFunction(()=>document.body.dataset.homeAttention==='character');
+    assert.equal(await page.locator('body').getAttribute('data-home-attention-target'),'navigation',
+      'A fresh signed-in Home directs its menu hint to workspace navigation.');
+    assert.equal(await page.locator('#navigation-toggle').evaluate(element=>element.getAnimations().some(animation=>animation.animationName==='menu-arrival-pulse')),false,
+      'A fresh signed-in transition starts with the character before drawing attention to navigation.');
+    await page.waitForFunction(()=>document.body.dataset.homeAttention==='menu');
+    assert.equal(await page.locator('#navigation-toggle').evaluate(element=>element.getAnimations().filter(animation=>animation.animationName==='menu-arrival-pulse').length),1);
+    assert.equal(await page.locator('#options-toggle').evaluate(element=>element.getAnimations().some(animation=>animation.animationName==='menu-arrival-pulse')),false,
+      'Signed-in Navigation pulses alone; Options stays still.');
+    await page.waitForFunction(()=>document.getElementById('navigation-toggle').getAnimations().some(animation=>animation.currentTime>=650));
+    await screenshot('home-navigation-pulse');
+    await page.locator('#navigation-toggle').focus();
+    await page.waitForFunction(()=>document.body.dataset.homeAttention==='off');
+    assert.equal(await page.locator('body').getAttribute('data-home-attention-target'),null,'Focusing the target consumes its cue.');
+    await page.locator('#home-screen').focus();
+    await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+    assert.equal(await page.locator('body').getAttribute('data-home-attention'),'off',
+      'An ordinary network status refresh cannot replay the consumed signed-in arrival cue.');
+    await page.emulateMedia({reducedMotion:'reduce'});
     assert.equal(await page.locator('#sign-in-password').inputValue(),'');
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),false);
+    await page.waitForFunction(()=>document.getElementById('account-earned-stamps').dataset.identityState==='unverified');
+    await noPendingIdentity('Generic pending verification context before any saved submission');
     await settingsAccess(true);
     assert.ok(service.journal.some(item=>item.path==='/dev-oidc/token'));
     assert.ok(service.journal.some(item=>item.path==='/v1/account/context'));
@@ -1450,16 +2121,32 @@ try {
     for (const id of ['#publish-request','#save-operation','#send-offer']) assert.equal(await page.locator(id).isDisabled(),true);
     await accountEntry(); await signInPage(true);
     await page.setViewportSize({width:711,height:871}); await compactCentered('Account'); await screenshot('account-details');
+    await openSettings(); await settingsChecked(); await settingsAccess(true); await screenshot('settings-account-only');
+    await page.keyboard.press('Escape'); await page.locator('#options-panel').waitFor({state:'hidden'});
     await page.setViewportSize({width:390,height:844});
+    await page.locator('#navigation-toggle').click();await page.locator('#navigation-panel').waitFor({state:'visible'});
+    await showWorkspace('operator');
+    if(await page.locator('#operations-list-link').getAttribute('aria-expanded')!=='true')await page.locator('#operations-list-link').click();
+    assert.equal(await page.locator('#operations-setup-label').textContent(),'Start Level 1 identity first');
+    assert.equal(await page.locator('#operations-setup-link').isDisabled(),false,'An unverified account can open its prerequisite Level 1 form.');
+    assert.equal(await page.locator('#operations-setup-link').getAttribute('data-navigate'),'identity/setup');
+    const beforePrerequisiteCamera=await page.evaluate(()=>window.__captureRequests.length);
+    await page.locator('#operations-setup-link').click();await view('identity/document');
+    assert.equal(await page.locator('#identity-step-label').textContent(),'Level 1 identity · Not started');
+    assert.equal(await page.evaluate(()=>window.__captureRequests.length),beforePrerequisiteCamera,'The prerequisite form opens without a camera or Level 2 capture.');
+    await showWorkspace('requester');
+    await page.evaluate(() => localStorage.removeItem('nonverba-mode'));
+    await accountEntry();await signInPage(true);
     const beforeContinue=service.journal.filter(item=>item.path==='/v1/account/context').length, reuse=service.delay('/v1/account/context');
     try {
       await page.locator('#account-session-continue').focus(); await page.keyboard.press('Enter'); await reuse.entered;
       assert.equal(await page.locator('#account-session-continue').isDisabled(),true);
       assert.equal(await page.locator('#account-sign-out').isDisabled(),true);
     } finally { reuse.release(); }
-    await view('identity/setup');
-    assert.equal(service.journal.filter(item=>item.path==='/v1/account/context').length,beforeContinue+1,
-      'Identity verification revalidates the current account before opening its separate setup.');
+    await view('identity/document');
+    await identityStep('requester','Signed-in direct Level 1 entry'); await identityFieldLayout(); await layout('Direct Level 1 identity form'); await screenshot('direct-level-one-form');
+    assert.ok(service.journal.filter(item=>item.path==='/v1/account/context').length>beforeContinue,
+      'Identity verification revalidates the current account before opening the Level 1 form.');
     await accountEntry(); await signInPage(true);
     const beforeOther=service.journal.filter(item=>item.method==='DELETE' && item.path==='/v1/auth/session').length;
     await page.locator('#account-sign-out').focus(); await page.keyboard.press('Enter'); await idle();
@@ -1471,6 +2158,78 @@ try {
       'The Account sign-out action explicitly revokes the current server session.');
     await fillSignIn(); await submitForm('account-sign-in-form'); await view('home');
     assert.deepEqual(await retained(),[]); await screenshot('fixture-account-signed-in');
+  });
+
+  await check('silent saved-password retrieval skips the password step without requesting a chooser and fences stale credentials', async () => {
+    await page.evaluate(()=>{
+      window.__managerRestore={credential:Object.getOwnPropertyDescriptor(navigator,'credentials'),password:Object.getOwnPropertyDescriptor(window,'PasswordCredential')};
+      window.__managerCalls=[];window.__managerScenario={mode:'null'};window.__managerPasswordFocus=0;
+      window.__managerFocus=event=>{if(event.target.matches?.('input[type="password"]'))window.__managerPasswordFocus++;};
+      document.addEventListener('focusin',window.__managerFocus);
+      Object.defineProperty(window,'PasswordCredential',{configurable:true,value:class {}});
+      Object.defineProperty(navigator,'credentials',{configurable:true,value:{get:async options=>{
+        window.__managerCalls.push({password:options.password,mediation:options.mediation,signal:options.signal instanceof AbortSignal});
+        const value=window.__managerScenario;
+        if(value.mode==='reject')throw new DOMException('Synthetic silent access refusal','NotAllowedError');
+        if(value.mode==='delay')return new Promise(resolve=>{window.__releaseManagerCredential=()=>{delete window.__releaseManagerCredential;resolve(value.credential);};});
+        return value.credential || null;
+      }}});
+    });
+    const authorize=()=>service.journal.filter(item=>item.path==='/dev-oidc/authorize').length;
+    const scenario=value=>page.evaluate(next=>{window.__managerScenario=next;},value);
+    try {
+      for(const identifier of [EMAIL,'@'+service.enrollmentUsername]) {
+        await signOut();await scenario({mode:'matching',credential:{type:'password',id:identifier,password:service.password}});
+        assert.equal(await page.locator('#account-email-form').getAttribute('autocomplete'),'on');
+        assert.equal(await page.locator('#sign-in-email').getAttribute('name'),'username');
+        assert.equal(await page.locator('#account-email-form input[type="password"]').count(),0,'The first identifier step gains no visible or hidden password field.');
+        const before=authorize(),focus=await page.evaluate(()=>window.__managerPasswordFocus);
+        await page.locator('#sign-in-email').fill(identifier);await submitForm('account-email-form');await view('home');await idle();
+        assert.equal(authorize(),before+2,'A matching silently supplied credential uses one authorization GET and its credential POST.');
+        assert.equal(await page.evaluate(()=>window.__managerPasswordFocus),focus,'Saved sign-in never focuses or presents the password step.');
+        assert.equal(await page.locator('#sign-in-password').inputValue(),'');
+        assert.deepEqual(await page.evaluate(()=>window.__managerCalls.at(-1)),{password:true,mediation:'silent',signal:true});
+        await settingsAccess(true);await retained();
+      }
+      await signOut();
+      for(const outcome of [{mode:'null'},{mode:'reject'},{mode:'mismatch',credential:{type:'password',id:'another-synthetic@example.invalid',password:PASSWORD}}]) {
+        await scenario(outcome);const before=authorize();await emailEntry();
+        assert.equal(authorize(),before,'Unavailable, refused or mismatched saved credentials make no authentication attempt.');
+        assert.equal(await page.locator('#sign-in-password').inputValue(),'');
+        assert.equal(await page.evaluate(()=>window.__managerCalls.at(-1).mediation),'silent','Null/refused/mismatched results never request an interactive chooser.');
+        await page.locator('#view-back').click();await idle();await signInPage();
+      }
+      await scenario({mode:'delay',credential:{type:'password',id:EMAIL,password:PASSWORD}});
+      let before=authorize();await page.locator('#sign-in-email').fill(EMAIL);await submitForm('account-email-form');
+      await page.waitForFunction(()=>typeof window.__releaseManagerCredential==='function');
+      await page.goBack();await view('home',{focused:false});
+      await page.evaluate(()=>window.__releaseManagerCredential());await idle();
+      assert.equal(authorize(),before,'A late manager result cannot authenticate after Back.');
+      assert.equal(await page.locator('#onboarding-message').isVisible(),false);
+      await accountEntry();await signInPage();
+      await scenario({mode:'delay',credential:{type:'password',id:EMAIL,password:PASSWORD}});
+      before=authorize();await page.locator('#sign-in-email').fill(EMAIL);await submitForm('account-email-form');
+      await page.waitForFunction(()=>typeof window.__releaseManagerCredential==='function');
+      await page.locator('#sign-in-email').fill('changed-synthetic@example.invalid');
+      await page.evaluate(()=>window.__releaseManagerCredential());await idle();
+      assert.equal(authorize(),before,'Editing the identifier fences a silent result for its previous value.');
+      assert.equal(await page.locator('#account-email-form').isVisible(),true);
+      const calls=await page.evaluate(()=>window.__managerCalls.length);
+      await scenario({mode:'matching',credential:{type:'password',id:EMAIL,password:PASSWORD}});
+      await page.locator('#sign-in-create-account').click();await page.locator('#sign-in-email').fill('synthetic-saved-signup@example.invalid');
+      await submitForm('account-email-form');await page.locator('#account-email-confirm-form').waitFor({state:'visible'});await idle();
+      assert.equal(await page.evaluate(()=>window.__managerCalls.length),calls,'Explicit signup never invokes saved-password sign-in.');
+      await restoreViewFixture('home');await retained();
+    } finally {
+      await page.evaluate(()=>{
+        const saved=window.__managerRestore;
+        if(saved.credential)Object.defineProperty(navigator,'credentials',saved.credential);else delete navigator.credentials;
+        if(saved.password)Object.defineProperty(window,'PasswordCredential',saved.password);else delete window.PasswordCredential;
+        document.removeEventListener('focusin',window.__managerFocus);
+        for(const key of ['__managerRestore','__managerCalls','__managerScenario','__managerPasswordFocus','__managerFocus','__releaseManagerCredential'])delete window[key];
+      });
+    }
+    await signIn();
   });
 
   await check('username and email sign-in require only a password and disclose no account or contact before authentication', async () => {
@@ -1495,13 +2254,16 @@ try {
       await settingsAccess(false); await retained();
     };
     const beforeUnknownAuth=count('/dev-oidc/authorize');
-    await fillSignIn('@unknown_fixture'); await privatePasswordStep('@unknown_fixture');
-    assert.equal(count('/dev-oidc/authorize'),beforeUnknownAuth,'Continuing an unknown identifier performs no account lookup.');
-    await submitForm('account-sign-in-form'); await alertShown(/^Check your email or username and password\.$/);
-    const denied=await page.locator('#onboarding-message').textContent(); await privatePasswordStep('@unknown_fixture');
+    await emailEntry('@unknown_fixture','missing');
+    assert.equal(count('/dev-oidc/authorize'),beforeUnknownAuth,'An unknown username is not sent to password authentication.');
+    assert.match(await page.locator('#sign-in-missing-status').innerText(),/you can create one with an email/i);
+    await page.locator('#sign-in-create-account').click(); await idle();
+    assert.equal(await page.locator('#sign-in-email').inputValue(),'','A missing username starts email signup with an empty contact.');
+    assert.equal(await page.locator('#account-email-form').isVisible(),true);
+    await page.locator('#view-back').click(); await idle();
+    await page.locator('#view-back').click(); await idle(); await signInPage();
     await fillSignIn('  @'+username.toUpperCase()+'  ','wrong-browser-fixture-password'); await privatePasswordStep(shown);
     await submitForm('account-sign-in-form'); await alertShown(/^Check your email or username and password\.$/);
-    assert.equal(await page.locator('#onboarding-message').textContent(),denied,'Existing and unknown usernames have the same credential denial.');
     await privatePasswordStep(shown);
     const beforeDeviceProof=service.signinProofs.length;
     service.mode='username-context-mismatch';
@@ -1531,6 +2293,7 @@ try {
   await check('confirmed signed-in accounts and browser device proof cannot unlock identity-gated requests or operations', async () => {
     await workspaceLocked('Confirmed email, current account and independently registered browser key');
     assert.ok(service.signinProofs.length>0);
+    await levelTwoLocked('Confirmed email, account roles and browser possession');
     const before=service.journal.length;
     for (const target of protectedWorkspaceViews) {
       await restoreViewFixture(target,workspaceDestination(target));
@@ -1562,6 +2325,8 @@ try {
     assert.equal(service.journal.length,before,'Blocked local workflow input, history and activation issue no service request.');
     await signOut(); service.mode='forged-workspace-claims'; await signIn();
     await workspaceLocked('Unsupported verified flags, capability booleans and readiness claims');
+    await noEarnedIdentity('Unsupported identity flags, level, capability and readiness claims');
+    await levelTwoLocked('Forged identity flags and capability claims');
     for (const target of ['requester/review','operations/review','operator/agreement'])
       await restoreViewFixture(target,workspaceDestination(target));
     service.mode='normal'; await retained(); await restoreViewFixture('home');
@@ -1821,12 +2586,17 @@ try {
     await alertShown(/^Check your email or username and password\.$/);
     const generic = await page.locator('#onboarding-message').innerText();
     const noAutomaticSignup=service.journal.filter(item=>item.path==='/v1/accounts/enrollments').length;
-    await fillSignIn('unknown@example.invalid'); await submitForm('account-sign-in-form'); await alertShown(/^Check your email or username and password\.$/);
-    assert.equal(await page.locator('#onboarding-message').textContent(),generic,'Unknown email credentials use the same generic denial.');
-    assert.equal(await page.locator('#enrollment-begin').isDisabled(),true,'Unknown email credentials cannot establish account authority.');
+    const beforeUnknownAuth=service.journal.filter(item=>item.path==='/dev-oidc/authorize').length;
+    await emailEntry('unknown@example.invalid','missing');
+    assert.equal(service.journal.filter(item=>item.path==='/dev-oidc/authorize').length,beforeUnknownAuth,'An unknown email stops before password authentication.');
+    assert.equal(await page.locator('#enrollment-begin').isDisabled(),true,'An unknown email cannot establish account authority.');
     assert.equal(service.journal.filter(item=>item.path==='/v1/accounts/enrollments').length,noAutomaticSignup,'An unknown sign-in email never chooses signup.');
-    await page.goBack(); await view('account/sign-in',{focused:false}); await signInPage();
-    assert.equal(await page.evaluate(()=>document.activeElement.id),'sign-in-email','Back from a refused password step returns focus to the identifier.');
+    await page.locator('#sign-in-create-account').click(); await idle();
+    assert.equal(await page.locator('#sign-in-email').inputValue(),'unknown@example.invalid','Creating an account keeps the missing email.');
+    assert.equal(await page.locator('#account-email-confirm-form').isVisible(),false,'The offer does not send an email code until the person continues.');
+    await page.locator('#view-back').click(); await idle();
+    await page.locator('#view-back').click(); await idle(); await signInPage();
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'sign-in-email','Back from a missing account returns focus to the identifier.');
     service.mode = 'credential-denial'; await fillSignIn(); await submitForm('account-sign-in-form'); await idle();
     assert.equal(await page.locator('#onboarding-message').innerText(),generic,'Other generic credential denials do not disclose an account state.');
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true);
@@ -1861,17 +2631,68 @@ try {
     await retained();
   });
 
-  await check('service-bound document scan and guided frontal capture require deliberate consent and exact photo review', async () => {
+  await check('private identity intake requires complete details, exact photo review and an authenticated pending receipt', async () => {
     const before = await page.evaluate(() => window.__captureRequests.length);
-    await begin('operator'); await view('identity/document');
+    await begin('requester'); await view('identity/document');
+    await page.evaluate(()=>{
+      const previous=history.state,index=previous.index;
+      history.pushState({...previous,index:index+1,view:'identity/document',role:'operator',identity_level:2,
+        identity_verified:true,level_one_verified:true},'',location.pathname);
+      history.pushState({...previous,index:index+2},'',location.pathname);
+    });
+    await page.goBack(); await view('identity/document',{focused:false});
+    await identityStep('requester','Restored operator claims cannot replace the bound Level 1 pipeline');
     assert.equal(await page.evaluate(() => window.__captureRequests.length),before,'Entering capture never opens a sensor.');
     assert.equal(await page.locator('#document-next').isDisabled(),true);
-    assert.equal(await page.locator('#document-camera-start').isDisabled(),true);
-    assert.equal(await page.locator('#document-file').isDisabled(),true);
+    assert.equal(await page.locator('#enrollment-processing').count(),0,'Identity intake has no page-only processing checkbox.');
+    assert.equal(await page.locator('#document-camera-start').isDisabled(),false);
+    assert.equal(await page.locator('#document-file').isDisabled(),false);
+    for(const id of ['identity-document-type','identity-full-name','identity-birth-city','identity-nationality','identity-age'])
+      assert.equal(await page.locator('#'+id).evaluate(input=>input.required && input.labels.length>0),true,'Requested identity field is required and labelled: '+id);
+    await startCamera('document_front'); await takePhoto('document_front');
+    assert.equal(await page.locator('#document-next').isDisabled(),true,'A document photo alone cannot bypass required identity details.');
+    await identityFields({...IDENTITY_DETAILS,age:131});
+    assert.equal(await page.locator('#document-next').isDisabled(),true,'An invalid age cannot advance the document step.');
     await capturePair();
-    assert.equal(await page.locator('#enrollment-finish').isDisabled(),true);
-    await page.locator('#enrollment-review').click(); await idle();
+    assert.equal(await page.locator('#enrollment-finish').isDisabled(),false,'An available Submit opens the notice when agreement is still missing.');
+    const beforeNotice=service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length;
+    const savedPhotos=await page.evaluate(()=>[...window.__captureURLs].sort());
+    for(const activation of ['checkbox','Space','label','link','submit']) {
+      if(activation==='checkbox')await page.locator('#identity-notice-reviewed').click();
+      else if(activation==='Space') {await page.locator('#identity-notice-reviewed').focus();await page.keyboard.press('Space');}
+      else if(activation==='label')await page.locator('label[for="identity-notice-reviewed"]').click();
+      else if(activation==='link')await page.locator('#identity-notice-link').click();
+      else await page.locator('#enrollment-finish').click();
+      await view('identity/notice');await identityNoticeDocument();
+      assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,activation+' opens the full document without accepting it.');
+      await page.locator('#view-back').click();await view('identity/review');
+      assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Back leaves the final identity agreement unchecked.');
+      assert.equal(await page.locator('#identity-notice-accept').isChecked(),false);
+      assert.equal(service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length,beforeNotice,
+        'Reviewing or leaving the notice cannot send identity details or photos.');
+      assert.deepEqual(await page.evaluate(()=>[...window.__captureURLs].sort()),savedPhotos,'Notice navigation preserves selected evidence without making extra copies.');
+    }
+    await agreeIdentityNotice();
     assert.equal(await page.locator('#enrollment-finish').isDisabled(),false);
+    await openReviewEdit();await page.locator('#identity-details-edit').click();await view('identity/document');
+    assert.match(await page.locator('#selected-document').getAttribute('src'),/^blob:/,'Editing metadata preserves the selected document until deliberately replaced.');
+    const beforeIncompleteDetails=await page.evaluate(()=>[...window.__captureURLs].sort());
+    await page.locator('#identity-full-name').fill('');await idle();
+    await page.goBack();await view('identity/document',{focused:false});
+    assert.equal(await page.locator('#identity-full-name').inputValue(),'','Back does not restore old identity details over a real incomplete edit.');
+    assert.equal(await page.locator('#document-next').isDisabled(),true,'Incomplete details cannot advance even when both selected photos remain.');
+    assert.equal(await page.locator('#face-next').isDisabled(),true,'The face continuation also enforces the complete metadata prerequisite.');
+    assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Making the form incomplete clears the exact package agreement.');
+    assert.deepEqual(await page.evaluate(()=>[...window.__captureURLs].sort()),beforeIncompleteDetails,'Correcting metadata preserves both chosen photos.');
+    await restoreViewFixture('identity/status','identity/document');
+    assert.equal(await page.locator('#document-next').isDisabled(),true,'A restored status route cannot skip incomplete identity details.');
+    await identityFields({...IDENTITY_DETAILS,age:36});
+    assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Editing identity metadata invalidates the previous exact review and agreement.');
+    await page.locator('#document-next').click(); await view('identity/face');
+    await page.locator('#face-next').click(); await view('identity/review');
+    await reviewSummary({...IDENTITY_DETAILS,age:36});
+    assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Continuing an edited package cannot restore its old agreement.');
+    await agreeIdentityNotice();await openReviewEdit();
     const oldDocument = await page.locator('#review-document').getAttribute('src');
     await page.locator('#retake-document').click(); await view('identity/document');
     assert.equal(await page.locator('#enrollment-finish').isDisabled(),true);
@@ -1880,34 +2701,331 @@ try {
     await startCamera('document_front'); await takePhoto('document_front');
     await page.locator('#document-next').click(); await view('identity/face');
     await page.locator('#face-next').click(); await view('identity/review');
-    await page.locator('#enrollment-review').click(); await idle();
+    assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Replacing the document clears the previous final agreement.');
+    await agreeIdentityNotice();await openReviewEdit();
     const oldFace = await page.locator('#review-face').getAttribute('src');
     await page.locator('#retake-face').click(); await view('identity/face');
     assert.equal(await page.locator('#enrollment-finish').isDisabled(),true);
     assert.equal(await page.evaluate(url=>window.__captureURLs.has(url),oldFace),false,'Retaking the face revokes the old still.');
-    await startCamera('face_front'); await page.locator('#guidance-skip').click(); await idle();
-    assert.match(await page.locator('#guidance-position').innerText(),/guidance skipped.*movement and liveness not checked/i);
+    await cameraReady('face_front');
+    assert.equal(await page.locator('#camera-shutter').isDisabled(),false,'Retaking a frontal photo does not require simulated movement steps.');
     await takePhoto('face_front'); await page.locator('#face-next').click(); await view('identity/review');
+    assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'Retaking the face clears the previous final agreement.');
+    await openReviewEdit();
+    const beforeCancelledRetake=await page.evaluate(()=>window.__captureRequests.length), retakeContext=service.delay('/v1/account/context');
+    try {
+      await page.locator('#retake-face').click(); await retakeContext.entered;
+      await page.goBack();
+      await page.waitForFunction(()=>history.state?.view==='identity/face'
+        && document.querySelector('.screen:not([hidden])')?.dataset.view==='identity/face'
+        && document.activeElement?.id==='view-title');
+      assert.equal(await page.locator('#face-capture').getAttribute('data-capture-state'),'idle',
+        'Back during a pending retake leaves the face step without an old selected photo.');
+    } finally { retakeContext.release(); }
+    await idle();
+    assert.equal(await page.evaluate(()=>window.__captureRequests.length),beforeCancelledRetake,
+      'A delayed Review retake cannot open the camera after Back has already returned to the same Face route.');
+    await cameraStopped();
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'view-title',
+      'A cancelled retake cannot replace the Back destination focus with a stale shutter or error.');
+    assert.equal(await page.locator('#onboarding-message').isVisible(),false);
+    await startCamera('face_front'); await takePhoto('face_front');
+    await page.locator('#face-next').click(); await view('identity/review');
+    await openReviewEdit();
     for (const id of ['#review-document','#review-face']) {
       assert.equal(await page.locator(id).evaluate(image=>image.complete && image.naturalWidth>0),true);
       assert.match(await page.locator(id).getAttribute('src'),/^blob:/);
     }
-    await layout('camera photo review'); await reviewAndFinish();
-    assert.match(await page.locator('[data-onboarding-view="identity/status"]').innerText(),/not submitted|no identity service has received/i);
-    assert.match(await page.locator('[data-onboarding-view="identity/status"]').innerText(),/not verified|not checked|guidance only/i);
-    await retained(); await screenshot('synthetic-camera-photos-reviewed');
+    await page.locator('#identity-review-edit > summary').click();
+    await layout('compact camera submission'); await reviewAndFinish();
+    assert.equal(service.identitySubmissions.at(-1).details.age,36,'The saved intake contains the currently reviewed details.');
+    await identityStep('requester','Submitted document and face photos');
+    await retained(); await screenshot('synthetic-identity-received');
   });
 
-  await check('discard, late permission completion after Back and reload clear photos without restoring account authority', async () => {
+  await check('received identity state survives Done and fresh authenticated status reads without granting workflow authority', async () => {
+    const posts=()=>service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length;
+    const savedPosts=posts(),savedCaptures=await page.evaluate(()=>window.__captureRequests.length);
+    await receivedDone();await page.locator('#enrollment-delete').click();await view('account/sign-in');
+    await pendingIdentityPresentation({proof:true});
+    await page.locator('#account-session-continue').click();await view('identity/status');await receivedDone();
+    await cameraStopped({released:true});
+    assert.equal(posts(),savedPosts,'Opening a received submission status does not submit it again.');
+    assert.equal(await page.evaluate(()=>window.__captureRequests.length),savedCaptures,'A received submission opens a read-only status without a sensor.');
+    await page.locator('#enrollment-delete').click();await view('account/sign-in');
+    await signOut();await noPendingIdentity('Signed out after a received submission');
+    await signIn();await pendingIdentityPresentation();
+    assert.equal(posts(),savedPosts,'A new authenticated summary restores only the existing receipt.');
+    await page.reload();await view('home',{focused:false});await idle();
+    await page.waitForFunction(() => document.getElementById('home-sign-in').hidden);
+    await page.waitForFunction(() => document.getElementById('account-earned-stamps').dataset.identityState === 'awaiting_approval');
+    await cameraStopped({released:true});await retained();
+    await signIn();await pendingIdentityPresentation();
+    for(const mode of ['foreign-account','stale-session','verified-receipt','unavailable']) {
+      await signOut();service.identityStatusMode=mode;await signIn();
+      await page.waitForFunction(()=>document.getElementById('account-earned-stamps').dataset.identityState==='unknown');
+      await accountEntry();await signInPage(true);
+      assert.equal(await page.locator('#account-identity-status').isVisible(),true,'An authenticated Account visibly explains unavailable identity status.');
+      await noPendingIdentity('Rejected latest identity status: '+mode);
+    }
+    service.identityStatusMode='normal';await signIn();await pendingIdentityPresentation();
+    assert.equal(posts(),savedPosts,'Invalid summaries and status retries send no identity package.');
+    service.resetIdentityReviewScenario();await signIn();
+    await page.waitForFunction(()=>document.getElementById('account-earned-stamps').dataset.identityState==='unverified');
+    await noPendingIdentity('A fresh independent fixture scenario with validated not_submitted status');
+  });
+
+  await check('storage availability, invalid notices and ambiguous receipts cannot duplicate intake or grant identity authority', async () => {
+    const posts=()=>service.journal.filter(item=>item.method==='POST' && item.path==='/v1/account/identity/submissions').length;
+    if(captureProofAssets) {
+      service.mode='identity-service-v1';service.identityAvailable=true;
+      await begin();await identityFields();
+      const before=posts(),journal=service.journal.length,cameras=await page.evaluate(()=>window.__captureRequests.length);
+      await page.locator('#document-camera-start').click();await alertShown(/unavailable|service|could not|camera|capture|request/i);await idle();
+      await cameraStopped({released:true});
+      assert.equal(await page.evaluate(()=>window.__captureRequests.length),cameras,
+        'Main source refuses an absent capture service before asking the browser for a sensor.');
+      assert.equal(service.journal.slice(journal).filter(item=>item.method==='POST' && item.path==='/v1/account/identity/capture-challenges').length,1,
+        'An absent capture endpoint is checked once without a legacy capture retry.');
+      assert.equal(await page.locator('#selected-document').getAttribute('src'),null);
+      assert.equal(await page.locator('#selected-face').getAttribute('src'),null);
+      assert.equal(await page.locator('#identity-notice-choice').evaluate(node=>node.hidden),true,
+        'The main client cannot offer its old service notice as a v2 agreement.');
+      assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false);
+      assert.equal(await page.locator('#identity-notice-accept').isDisabled(),true);
+      await page.locator('#enrollment-finish').evaluate(button=>{button.disabled=false;button.click();});await idle();
+      assert.equal(posts(),before,'A v1 notice and absent capture API cannot upload media, submit identity or downgrade the current protocol.');
+      assert.equal(await page.locator('#account-earned-stamps').getAttribute('data-identity-state'),'unverified',
+        'Unsupported capture does not erase a valid authenticated current-status result.');
+      await settingsAccess(true);await noPendingIdentity('Main source against old notice and absent capture service');await retained();
+      service.mode='normal';
+    }
+    service.identityAvailable=false;
+    if(captureProofAssets) {
+      await begin(); await identityFields();
+      const deniedPosts=posts(),deniedCameras=await page.evaluate(()=>window.__captureRequests.length);
+      await page.locator('#document-camera-start').click();await alertShown(/unavailable|service|could not|camera/i);await idle();
+      await cameraStopped();
+      assert.equal(await page.evaluate(()=>window.__captureRequests.length),deniedCameras,
+        'Unavailable capture policy refuses the challenge before requesting a camera.');
+      assert.equal(await page.locator('#selected-document').getAttribute('src'),null);
+      assert.equal(posts(),deniedPosts,'A refused challenge sends no photo to identity intake.');
+      service.identityAvailable=true;await begin();await capturePair();await agreeIdentityNotice();
+      service.identityAvailable=false;
+      const beforeGateRefusal=posts();
+      await page.locator('#enrollment-finish').click();await alertShown(/unavailable|service|could not|notice/i);await idle();
+      assert.equal(posts(),beforeGateRefusal,'A changed storage policy is checked before any image POST.');
+    } else {await begin();await capturePair();}
+    assert.equal(await page.locator('#enrollment-finish').isDisabled(),true,'Unavailable private storage prevents submission after review.');
+    assert.equal(await page.locator('#enrollment-finish').isVisible(),false,'Unavailable submission has no dead Submit button.');
+    assert.equal(await page.locator('#identity-notice-choice').isVisible(),true,'A valid full notice remains readable while storage is unavailable.');
+    assert.match(await page.locator('#review-state').textContent(),/unavailable|not available/i);
+    assert.equal(await page.locator('[data-onboarding-view="identity/review"] button:visible:disabled').count(),0,
+      'The unavailable final step exposes useful review and notice controls without disabled action clutter.');
+    await screenshot('identity-submit-unavailable');
+    if(!captureProofAssets)await agreeIdentityNotice();
+    const unavailable=posts();
+    await page.locator('#enrollment-finish').evaluate(button=>{button.disabled=false;button.click();});
+    await idle(); assert.equal(posts(),unavailable,'A DOM-enabled submit cannot bypass storage availability.');
+    service.identityAvailable=true; service.mode='identity-notice-invalid';
+    await begin(); await capturePair();
+    assert.equal(await page.locator('#enrollment-finish').isDisabled(),true,'An unverified notice digest prevents upload.');
+    assert.equal(await page.locator('#enrollment-finish').isVisible(),false);
+    assert.equal(await page.locator('#identity-notice-choice').isVisible(),false,'An invalid document cannot be offered as an agreement.');
+    assert.match(await page.locator('#review-state').textContent(),/unavailable|not available/i);
+    assert.equal(posts(),unavailable);
+    service.mode='normal'; await begin(); await capturePair(); await agreeIdentityNotice();
+    const beforeRejected=posts(), saved=service.identitySubmissions.length;
+    service.mode='identity-intake-reject'; await page.locator('#enrollment-finish').click(); await alertShown(/not accepted|check.*form|try again/i);
+    assert.equal(posts(),beforeRejected+1);assert.equal(service.identitySubmissions.length,saved,'A rejected intake does not invent a stored receipt.');
+    assert.equal((await page.locator('#enrollment-finish').innerText()).trim(),'Submit Level 1 identity','A known rejection remains distinct from an ambiguous submission.');
+    assert.equal(await page.locator('#identity-document-type').isDisabled(),false,'A rejected package can be corrected deliberately.');
+    const before=posts(); service.mode='identity-submission-unknown';
+    await page.locator('#enrollment-finish').click(); await alertShown(/unavailable|unconfirmed|could|request|service|try/i);
+    assert.equal(await current(),'identity/review');
+    assert.equal((await page.locator('#enrollment-finish').innerText()).trim(),'Check submission');
+    assert.equal(await page.locator('#enrollment-finish').isVisible(),true);
+    assert.equal(await page.locator('#identity-review-edit').isVisible(),false,'An unresolved package cannot be edited or retaken.');
+    assert.equal(await page.locator('#identity-notice-choice').isVisible(),false,'An unresolved submission has no duplicate agreement controls.');
+    assert.equal(posts(),before+1);
+    await noPendingIdentity('An unresolved submission response before any confirmed receipt');
+    assert.equal(await page.locator('#enrollment-status-description').textContent(),'Submission unconfirmed.');
+    assert.match(await page.locator('#review-state').textContent(),/^Submission unconfirmed\./);
+    assert.notEqual(await page.locator('#view-title').innerText(),'Awaiting review','An unknown original operation cannot claim a received review state.');
+    await restoreViewFixture('identity/status','identity/review');
+    assert.equal(await page.locator('#enrollment-status-description').textContent(),'Submission unconfirmed.');
+    assert.equal(await page.locator('#identity-step-label').textContent(),'Level 1 identity · Not started');
+    for(const id of ['#review-document','#review-face'])assert.match(await page.locator(id).getAttribute('src'),/^blob:/);
+    service.mode='identity-status-unknown';
+    await page.locator('#enrollment-finish').click(); await alertShown(/unconfirmed.*no new submission/i);
+    assert.equal(posts(),before+1,'An unresolved status checks the original operation without another POST.');
+    service.mode='normal'; await page.locator('#enrollment-finish').click(); await view('identity/status');
+    assert.equal(posts(),before+1,'Receipt resolution does not resubmit details or photos.');
+    await cameraStopped({released:true}); await noEarnedIdentity('Resolved private storage receipt'); await workspaceLocked('Resolved private storage receipt');
+    await begin(); await capturePair(); await agreeIdentityNotice();
+    service.mode='identity-weak-receipt'; await page.locator('#enrollment-finish').click(); await alertShown(/response|invalid|protocol|service|unexpected/i);
+    await noPendingIdentity('An unsupported verification claim in the submission response');
+    assert.equal((await page.locator('#enrollment-finish').innerText()).trim(),'Check submission','An unsupported verified claim is treated as an unknown outcome.');
+    await noEarnedIdentity('Unsupported identity claim in an intake receipt');
+    service.mode='normal'; await page.locator('#enrollment-finish').click(); await view('identity/status');
+    await cameraStopped({released:true}); await retained();
+  });
+
+  await check('ordinary accounts cannot expose a reviewer queue or case media through local UI state', async () => {
+    service.reviewerAllowed=false;await accountEntry();await signInPage(true);
+    const reviewer=page.locator('#account-reviewer-link');
+    assert.equal(await reviewer.evaluate(button=>button.hidden),true,'R/O membership and intake custody do not grant reviewer entry.');
+    const before=service.journal.filter(item=>item.path.startsWith('/v1/identity/reviewer/cases')).length;
+    await reviewer.evaluate(button=>{button.hidden=false;button.disabled=false;button.click();});await idle();
+    assert.equal(service.journal.filter(item=>item.path.startsWith('/v1/identity/reviewer/cases')).length,before,
+      'A forged local reviewer entry cannot request a queue, selected case or photo.');
+    const screen=page.locator('#reviewer-screen');
+    if(await screen.isVisible()) for(const label of ['Approve for test','Request correction','Reject'])
+      assert.equal(await screen.getByRole('button',{name:label,exact:true}).count(),0,'Denied entry offers no decision action.');
+    await accountEntry();await workspaceLocked('Ordinary account without reviewer permission');await retained();
+  });
+
+  await check('permitted synthetic review shows exact case evidence and records test approval without work eligibility', async () => {
+    const id=await reviewerCaseFixture();service.reviewerAllowed=true;
+    await signOut();await signIn();await openReviewer();
+    await reviewerProof('cases');
+    const cameras=await page.evaluate(()=>window.__captureRequests.length),screen=await openReviewerCase(id);
+    assert.match(await screen.innerText(),/synthetic submissions only/i);
+    assert.match(await screen.innerText(),/do not verify a real identity or grant work access/i);
+    for(const value of [IDENTITY_DETAILS.full_name,IDENTITY_DETAILS.birth_city,IDENTITY_DETAILS.nationality])
+      assert.ok((await screen.locator('.facts').textContent()).includes(value),'The selected case shows its exact invented details.');
+    assert.equal(await screen.locator('.identity-notice').textContent(),IDENTITY_NOTICE_TEXT,'Review uses the exact accepted v3 notice text.');
+    assert.equal(await page.evaluate(()=>window.__captureRequests.length),cameras,'Opening reviewer evidence starts no camera.');
+    assert.equal(await screen.locator('.review-media img').count(),2);
+    await reviewerProof('evidence');
+    const reason=screen.getByRole('textbox',{name:'Reason',exact:true}),approve=screen.getByRole('button',{name:'Approve for test',exact:true});
+    const before=service.reviewWrites.length;await approve.click();
+    assert.equal(service.reviewWrites.length,before,'An empty reason cannot dispatch a decision.');
+    await reason.fill('Synthetic package meets the test checklist.');await approve.click();await reviewerSaved('Approved for test');
+    await reviewerProof('saved');
+    assert.equal(service.reviewDecisions.length,1);assert.equal(service.reviewDecisions[0].action,'approved');
+    assert.equal(service.reviewWrites.length,before+1,'One deliberate action writes one exact decision.');
+    assert.equal(service.reviewWrites[0].expected_revision,0);
+    for(const [action,label] of [['approved','Approved for test'],['needs_correction','Correction requested'],['rejected','Rejected for test']]) {
+      service.subjectReviewAction=action;await accountEntry();
+      await page.waitForFunction(expected=>document.getElementById('account-synthetic-review-status')?.textContent.includes(expected),label);
+      assert.equal(await page.locator('#account-synthetic-review-status').isVisible(),true);
+      await noEarnedIdentity(label+' is synthetic feedback');await workspaceLocked(label+' grants neither Requests nor Operations');
+      if(action==='needs_correction') {
+        await page.locator('#account-session-continue').click();await view('identity/status');
+        await page.waitForFunction(()=>document.getElementById('enrollment-test-review-status')?.textContent.includes('Correction requested'));
+        const replacement=page.locator('#enrollment-new-test');await replacement.waitFor({state:'visible'});
+        assert.equal(await replacement.innerText(),'Submit corrected test details');
+        const beforeReplacement=service.journal.length;await replacement.click();await view('identity/document');
+        assert.ok(service.journal.slice(beforeReplacement).some(item=>item.method==='GET' && item.path==='/v1/account/identity/review/status'),
+          'A corrected package starts only after a fresh server-owned subject review status.');
+        for(const photo of ['#selected-document','#selected-face','#review-document','#review-face'])
+          assert.equal(await page.locator(photo).getAttribute('src'),null,'A corrected package cannot reuse retained evidence: '+photo);
+        assert.equal(await page.locator('#identity-full-name').inputValue(),'','A replacement begins with new details.');
+        assert.equal(await page.locator('#identity-notice-reviewed').isChecked(),false,'The replacement requires a fresh exact-notice agreement.');
+        assert.equal(await page.evaluate(()=>window.__captureURLs.size),0,'Starting correction retains no previous image URLs.');
+        await noEarnedIdentity('Corrected test details');await workspaceLocked('Preparing a corrected test package');
+      }
+    }
+    service.subjectReviewAction=null;await accountEntry();await retained();
+  });
+
+  await check('an unknown reviewer decision checks only its original operation without a replacement write', async () => {
+    const id=await reviewerCaseFixture();await openReviewer();const screen=await openReviewerCase(id);
+    await screen.getByRole('textbox',{name:'Reason',exact:true}).fill('Synthetic correction requested after fixture inspection.');
+    service.reviewMode='decision-response-lost';await screen.getByRole('button',{name:'Request correction',exact:true}).click();
+    const checkOriginal=screen.getByRole('button',{name:'Check original operation',exact:true});await checkOriginal.waitFor({state:'visible'});
+    await reviewerProof('unknown');
+    assert.equal(service.reviewWrites.length,1);assert.equal(service.reviewDecisions.length,1);
+    assert.equal(service.reviewDecisions[0].action,'needs_correction');
+    assert.deepEqual(await screen.getByRole('button').allTextContents(),['Check original operation'],
+      'Unknown reviewer writes expose only original-operation lookup.');
+    const operation=service.reviewWrites[0].operation_id;service.reviewMode='normal';await checkOriginal.click();await reviewerSaved('Correction requested');
+    assert.equal(service.reviewWrites.length,1,'Resolving an unknown result sends no replacement decision POST.');
+    assert.ok(service.journal.some(item=>item.method==='GET' && item.path===`/v1/identity/reviewer/cases/${id}/operations/${operation}`),
+      'The result is read through the exact original case and operation.');
+    await accountEntry();await retained();
+  });
+
+  await check('stale review revisions require reload before another deliberate test decision', async () => {
+    const id=await reviewerCaseFixture();await openReviewer();const screen=await openReviewerCase(id);
+    await screen.getByRole('textbox',{name:'Reason',exact:true}).fill('Synthetic review revision conflict.');
+    service.reviewMode='revision-conflict';await screen.getByRole('button',{name:'Request correction',exact:true}).click();
+    const reload=screen.getByRole('button',{name:'Reload case',exact:true});await reload.waitFor({state:'visible'});
+    assert.match(await screen.getByRole('status').textContent(),/changed|reload|conflict/i);
+    assert.equal(service.reviewWrites.length,1);assert.equal(service.reviewDecisions.length,0,'A 409 response cannot appear as a saved decision.');
+    service.reviewMode='normal';await reload.click();
+    await page.waitForFunction(()=>[...document.querySelectorAll('#reviewer-screen button')].some(button=>button.textContent==='Approve for test' && !button.disabled));
+    assert.equal(service.reviewWrites.length,1,'Reload is read-only and cannot automatically repeat the decision.');
+    await screen.getByRole('textbox',{name:'Reason',exact:true}).fill('Synthetic package rejected for this test.');
+    await screen.getByRole('button',{name:'Reject',exact:true}).click();await reviewerSaved('Rejected for test');
+    assert.equal(service.reviewWrites.length,2);assert.equal(service.reviewDecisions.length,1);assert.equal(service.reviewDecisions[0].action,'rejected');
+    await accountEntry();await retained();
+  });
+
+  await check('a late authorized reviewer photo cannot republish evidence after navigation and sign-out', async () => {
+    const id=await reviewerCaseFixture();await openReviewer();
+    const held=service.delay(`/v1/identity/reviewer/cases/${id}/photos/document_front`,{afterResponse:true});
+    try {
+      await page.locator('#reviewer-screen').getByRole('button',{name:new RegExp(id)}).click();await held.entered;
+      await signOut();await page.waitForFunction(()=>window.__captureURLs.size===0);
+      held.release();await idle();await signInPage();
+      assert.equal(await page.locator('#reviewer-screen .review-media img').count(),0,'Leaving review clears both selected photo elements.');
+      assert.equal(await page.evaluate(()=>window.__captureURLs.size),0,'The delayed old response creates no retained image URL.');
+      assert.equal(await page.locator('#account-reviewer-link').evaluate(button=>button.hidden),true);
+      await workspaceLocked('Late reviewer media after sign-out');await retained();
+    } finally {held.release();service.reviewerAllowed=false;service.reviewMode='normal';service.subjectReviewAction=null;}
+    await signIn();
+  });
+
+  await check('heavy phone JPEGs and PNGs are normalized locally with bounded decoding and stripped metadata', async () => {
+    const result=await page.evaluate(async()=>{
+      const {prepareEnrollmentImage}=await import('./identity/enrollment-camera.js');
+      const blob=(canvas,type,quality)=>new Promise(resolve=>canvas.toBlob(resolve,type,quality));
+      const canvas=document.createElement('canvas'); canvas.width=8000;canvas.height=6000;
+      const tile=document.createElement('canvas');tile.width=512;tile.height=512;
+      const drawing=tile.getContext('2d'),pixels=drawing.createImageData(512,512);let random=47;
+      for(let i=0;i<pixels.data.length;i+=4){random=(random*1664525+1013904223)>>>0;const byte=random>>>24;pixels.data.set([byte,byte,byte,255],i);}
+      drawing.putImageData(pixels,0,0);const context=canvas.getContext('2d');context.fillStyle=context.createPattern(tile,'repeat');context.fillRect(0,0,8000,6000);
+      const source=await blob(canvas,'image/jpeg',0.85),exif=new Uint8Array(36),view=new DataView(exif.buffer);
+      exif.set([255,225,0,34,69,120,105,102,0,0,73,73,42,0,8,0,0,0,1,0]);view.setUint16(20,0x112,true);view.setUint16(22,3,true);view.setUint32(24,1,true);view.setUint16(28,6,true);
+      const canary=new TextEncoder().encode('synthetic-coordinate-canary-not-real'),comment=new Uint8Array(canary.length+4);comment.set([255,254,0,canary.length+2]);comment.set(canary,4);
+      const phone=new Blob([source.slice(0,2),exif,comment,source.slice(2)],{type:'image/jpeg'}),photo=await prepareEnrollmentImage(phone),bitmap=await createImageBitmap(photo);
+      const encoded=new Uint8Array(await photo.arrayBuffer()),metadataMarkers=[];
+      for(let offset=2;offset<encoded.length;) {
+        if(encoded[offset++]!==255)throw Error('Invalid normalized JPEG');while(encoded[offset]===255)offset++;
+        const marker=encoded[offset++];if(marker===218 || marker===217)break;
+        const length=encoded[offset]*256+encoded[offset+1];if(marker>=224 || marker===254)metadataMarkers.push({marker,length});offset+=length;
+      }
+      const jpeg={inputBytes:phone.size,outputBytes:photo.size,width:bitmap.width,height:bitmap.height,metadataRemoved:!new TextDecoder().decode(encoded).includes('synthetic-coordinate-canary-not-real'),metadataMarkers};bitmap.close();
+      canvas.width=640;canvas.height=480;context.fillStyle='#fff';context.fillRect(0,0,640,480);context.fillStyle='#123';context.font='30px serif';context.fillText('Synthetic identity fixture',20,80);
+      const png=await blob(canvas,'image/png'),normalized=await prepareEnrollmentImage(png,{kind:'face_front'}),small=await createImageBitmap(normalized);
+      const converted={type:normalized.type,width:small.width,height:small.height,bytes:normalized.size};small.close();canvas.width=canvas.height=tile.width=tile.height=0;
+      return {jpeg,converted};
+    });
+    assert.ok(result.jpeg.inputBytes>8*1024*1024 && result.jpeg.inputBytes<=32*1024*1024);
+    assert.ok(result.jpeg.outputBytes<=2*1024*1024);assert.deepEqual([result.jpeg.width,result.jpeg.height],[1800,2400]);assert.equal(result.jpeg.metadataRemoved,true);
+    assert.deepEqual(result.jpeg.metadataMarkers,[{marker:224,length:16}],'Prepared JPEG retains only the fixed JFIF rendering marker, without ICC/EXIF/IPTC/comments.');
+    assert.deepEqual([result.converted.type,result.converted.width,result.converted.height],['image/jpeg',640,480]);assert.ok(result.converted.bytes<=2*1024*1024);
+    await retained();
+  });
+
+  await check('discard, late permission completion after Back and reload clear photos and keep the account session', async () => {
+    // The preceding reviewer revocation scenario deliberately signs out. Restore
+    // this existing capture check's saved-status precondition through normal UI.
+    await signIn(); await accountEntry();
+    await page.locator('#account-session-continue').click(); await view('identity/status');
     const beforeBrowserReload = service.signinProofs.at(-1);
     assert.ok(beforeBrowserReload,'The current account has an independently verified browser proof.');
-    await page.locator('#enrollment-cancel').click(); await view('identity/setup');
+    assert.equal(await page.locator('#enrollment-cancel').count(),0,'The removed global discard link cannot duplicate the final action.');
+    await page.locator('#enrollment-delete').click(); await view('account/sign-in');
     await cameraStopped({released:true});
     for (const id of ['#review-document','#review-face','#selected-document','#selected-face']) assert.equal(await page.locator(id).getAttribute('src'),null);
     await lateCameraBack(); await retained();
-    await begin('operator'); await capturePair(); await reviewAndFinish();
-    await page.reload(); await view('home',{focused:false}); await gateway(); await idle();
-    assert.equal(await page.locator('#enrollment-begin').isDisabled(),true,'Reload cannot restore in-memory service authority.');
+    await begin('requester'); await capturePair(); await reviewAndFinish();
+    await page.reload(); await view('home',{focused:false}); await idle();
+    await page.waitForFunction(() => document.getElementById('home-sign-in').hidden);
+    assert.equal(await page.locator('#enrollment-begin').isDisabled(),false,'Reload restores the signed-in account.');
     for (const id of ['#review-document','#review-face','#selected-document','#selected-face']) assert.equal(await page.locator(id).getAttribute('src'),null);
     assert.deepEqual(await retained(),[],'Reload leaves no photos, illustrated records or synthetic receipts.');
     await signIn();
@@ -1916,22 +3034,26 @@ try {
       'Fresh authentication after reload proves the same retained browser-profile key.');
     assert.notEqual(afterBrowserReload.session_id,beforeBrowserReload.session_id,
       'Retaining the browser key does not reuse the prior authenticated session.');
-    await begin('operator'); await view('identity/document');
-    assert.equal(await page.locator('#enrollment-processing').isChecked(),false);
+    await begin('requester'); await view('identity/document');
+    assert.equal(await page.locator('#identity-full-name').inputValue(),'');
     assert.equal(await page.locator('#document-next').isDisabled(),true);
-    await page.locator('#enrollment-cancel').click(); await view('identity/setup');
+    await identityFields(); await startCamera('document_front'); await takePhoto('document_front');
+    await page.locator('#view-back').click(); await view('account/sign-in');
+    await cameraStopped({released:true});
+    assert.equal(await page.locator('#selected-document').getAttribute('src'),null,'Back releases the selected document after removing the global discard link.');
+    assert.equal(await page.locator('#identity-full-name').inputValue(),'','Back clears unsubmitted identity details.');
   });
 
   await check('foreground interruption and navigation stop camera tracks; invalid files never become selected photos', async () => {
     await begin('requester'); await view('identity/document');
-    await page.locator('#enrollment-processing').check(); await idle(); await startCamera('document_front');
+    await identityFields(); await startCamera('document_front');
     await page.evaluate(() => window.dispatchEvent(new Event('nonverba:camera-stop')));
-    await view('identity/setup',{focused:false}); await cameraStopped({released:true});
+    await view('account/sign-in',{focused:false}); await cameraStopped({released:true});
     assert.equal(await page.locator('#selected-document').getAttribute('src'),null);
     await begin('requester'); await view('identity/document');
-    assert.equal(await page.locator('#enrollment-processing').isChecked(),false,
-      'Foreground loss clears the transient capture and processing choice.');
-    await page.locator('#enrollment-processing').check(); await idle();
+    assert.equal(await page.locator('#identity-full-name').inputValue(),'',
+      'Foreground loss clears unsubmitted identity details.');
+    await identityFields();
     await page.locator('#document-file').setInputFiles({name:'synthetic-invalid.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>')});
     await alertShown(/JPEG|PNG|image/i); assert.equal(await page.locator('#document-file').inputValue(),'');
     assert.equal(await page.locator('#selected-document').getAttribute('src'),null);
@@ -1947,15 +3069,24 @@ try {
     await page.waitForFunction(() => document.getElementById('selected-document').complete
       && document.getElementById('selected-document').getAttribute('src')?.startsWith('blob:'));
     await idle(); assert.equal(await page.locator('#document-file').inputValue(),'');
+    const prepared=await page.locator('#selected-document').evaluate(image=>window.__captureBlobInfo.get(image.getAttribute('src')));
+    assert.equal(prepared.type,'image/jpeg','Selected PNG files are normalized before becoming workflow media.');
+    assert.ok(prepared.bytes>0 && prepared.bytes<=2*1024*1024);
     assert.equal(await page.evaluate(() => window.__captureRequests.length),previousCaptures,'Deliberate file selection opens no camera.');
+    const previousDocument=await page.locator('#selected-document').getAttribute('src');
     await page.locator('#document-remove').click(); await idle(); await cameraStopped({released:true});
+    assert.equal(await page.evaluate(url=>window.__captureURLs.has(url),previousDocument),false,'Trying again revokes the previous document preview.');
+    assert.equal(await page.locator('#selected-document').getAttribute('src'),null);
+    assert.equal(await page.locator('#document-next').isDisabled(),true,'A retry requires a replacement document before continuing.');
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'document-camera-start','Trying again returns focus to the enabled camera action without opening it.');
+    assert.equal(await page.evaluate(() => window.__captureRequests.length),previousCaptures,'Trying again never opens the camera automatically.');
     await startCamera('document_front');
     await page.locator('#navigation-toggle').click(); await page.locator('#navigation-panel').waitFor({state:'visible'});
     assert.equal(await page.locator('#new-request').isDisabled(),true);
     await page.locator('#requests-list-link').click(); await page.locator('#requests-setup-link').click();
-    await view('identity/setup');
+    await view('identity/document');
     await cameraStopped({released:true}); await retained();
-    await gateway();
+    await accountEntry();
   });
   await check('failed server sign-out remains unconfirmed and two-factor recovery requires fresh login with rotated credentials', async () => {
     service.mode = 'signout-unknown';
@@ -1985,6 +3116,7 @@ try {
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true);
     await fillSignIn(EMAIL,PASSWORD); await submitForm('account-sign-in-form'); await alertShown(/^Check your email or username and password\.$/);
     await fillSignIn(); await submitForm('account-sign-in-form'); await view('home'); await idle();
+    assert.equal(await page.locator('#home-sign-in').isHidden(), true, 'Signed-in Home hides the sign-in button.');
     await retained();
   });
 
@@ -1994,7 +3126,8 @@ try {
     await page.evaluate(() => { document.documentElement.style.fontSize='200%'; });
     await accountEntry(); await signInPage(true); await layout('Account details at 320px / 200%');
     await compactCentered('Account details at 320px / 200%'); await screenshot('account-details-large-text');
-    await page.locator('#view-back').click(); await view('identity/setup');
+    await page.locator('#view-back').click(); await view('identity/document');
+    await identityStep('requester','Direct Level 1 at 320px / 200% text'); await layout('Direct Level 1 at 320px / 200% text'); await screenshot('direct-level-one-large-text');
     await openSettings(); await settingsChecked(); await settingsAccess(true);
     await page.locator('#configure-api-access').focus(); await page.keyboard.press('Enter');
     await page.locator('#options-panel').waitFor({state:'hidden'}); await view('services/api');
@@ -2084,7 +3217,7 @@ try {
     assert.equal((await page.evaluate(()=>JSON.stringify(history.state))).includes(full),false);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'The demo result and masked row fit at 320px / 200% text.');
     assert.equal(service.journal.length,requests,'Demo editing, validation and generation do not contact the service.');
-    await page.locator('#view-back').click(); await view('identity/setup');
+    await page.locator('#view-back').click(); await view('identity/document');
     await page.evaluate(()=>{window.__clipboardGate=false;window.__releaseClipboard();delete window.__releaseClipboard;});
     assert.equal(await copyStatus.evaluate(element=>element.hidden && element.textContent===''),true,'Navigation fences late clipboard feedback and clears the key result.');
     await page.evaluate(()=>{window.__copiedEmailCode=null;});
@@ -2118,7 +3251,7 @@ try {
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'The empty documentation view fits at 320px / 200% text.');
     await page.locator('#view-back').click(); await view('services/api');
     assert.equal(service.journal.length,beforeDocs,'The documentation entry and Back stay local without loading the named host.');
-    await retained(); await page.locator('#view-back').click(); await view('identity/setup');
+    await retained(); await page.locator('#view-back').click(); await view('identity/document');
     await signOut(); await emailEntry('large_text@example.invalid','enrollment');
     await layout('320px / 200% create'); await compactCentered('Create account at 320px / 200%');
     await accountEntry(); await signInPage(); await layout('320px / 200% sign-in');
@@ -2133,17 +3266,29 @@ try {
     assert.equal(service.journal.length,beforeRecoveryBack,'Back from recovery makes no implicit authentication, proof or mail request.');
     await fillSignIn();
     await page.locator('#account-sign-in-submit').focus(); await page.keyboard.press('Enter'); await view('home'); await idle();
-    await gateway(); await layout('320px / 200% gateway'); await begin('requester'); await layout('320px / 200% document');
-    await page.locator('#enrollment-processing').focus(); await page.keyboard.press('Space');
-    assert.equal(await page.locator('#enrollment-processing').isChecked(),true);
+    await begin('requester'); await layout('320px / 200% document');
+    await page.locator('#identity-full-name').focus();
+    for(const id of ['identity-birth-city','identity-nationality','identity-age','identity-document-type']) {
+      await page.keyboard.press('Tab'); assert.equal(await page.evaluate(()=>document.activeElement.id),id,'Keyboard order follows the visible identity form.');
+    }
+    await page.locator('#identity-document-type').focus(); await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter');
+    assert.equal(await page.locator('#identity-document-type').inputValue(),'passport');
     await idle();
-    await capturePair({skip:true}); await layout('320px / 200% review');
-    await page.waitForFunction(() => !document.getElementById('enrollment-review').disabled);
-    await page.locator('#enrollment-review').focus(); await page.keyboard.press('Enter');
+    await capturePair(); await layout('320px / 200% review');
+    await page.locator('#identity-review-edit > summary').focus();await page.keyboard.press('Enter');
+    assert.equal(await page.locator('#identity-review-details').isVisible(),true,'The compact evidence disclosure is keyboard usable.');
+    await layout('320px / 200% expanded review');await screenshot('identity-submit-expanded-large-text');
+    await page.keyboard.press('Enter');assert.equal(await page.locator('#identity-review-details').isVisible(),false);
+    await page.locator('#identity-notice-reviewed').focus(); await page.keyboard.press('Space'); await view('identity/notice');
+    await identityNoticeDocument();
+    await layout('320px / 200% full identity notice'); await screenshot('identity-notice-large-text');
+    await page.locator('#identity-notice-accept').focus(); await page.keyboard.press('Space'); await view('identity/review');
     await page.waitForFunction(() => !document.getElementById('enrollment-finish').disabled);
     await page.locator('#enrollment-finish').focus(); await page.keyboard.press('Enter'); await view('identity/status');
+    await receivedDone();
     await layout('320px / 200% capture status'); await screenshot('synthetic-camera-onboarding-large-text');
-    await page.locator('#enrollment-delete').click(); await view('identity/setup',{focused:false}); await cameraStopped({released:true}); await retained();
+    await page.locator('#enrollment-delete').click(); await view('account/sign-in',{focused:false}); await cameraStopped({released:true}); await retained();
+    await pendingIdentityPresentation({proof:true});
     await page.evaluate(() => document.documentElement.style.removeProperty('font-size'));
     await retained(); assert.deepEqual(errors,[]); assert.deepEqual(unexpected,[]);
   });
@@ -2157,7 +3302,9 @@ try {
     await deletionFields(); await page.locator('#delete-password').fill('wrong-browser-deletion-password');
     assert.equal(await page.locator('#delete-deliberate').isChecked(),false,'Editing the deletion password invalidates explicit review.');
     assert.equal(await page.locator('#account-delete-submit').isDisabled(),true);
-    await page.locator('#account-delete-cancel').click(); await view('identity/setup');
+    await page.locator('#account-delete-cancel').click(); await view('identity/status');
+    await receivedDone();
+    assert.equal(await page.locator('#account-earned-stamps').getAttribute('data-identity-state'),'awaiting_approval','Cancelling deletion returns a received submission to read-only status.');
     assert.equal(await page.locator('#delete-password').inputValue(),'');
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),false,'Cancelling deletion preserves the current account session.');
     await deletionEntry(); await deletionFields('different@example.invalid'); await submitForm('account-delete-form');
@@ -2179,7 +3326,7 @@ try {
     await deletionFields(); await submitForm('account-delete-form'); await idle();
     await page.locator('#account-deleted').waitFor({state:'visible'});
     await settingsAccess(false);
-    assert.match(await page.locator('#account-deleted').innerText(),/historical|records|backups/i);
+    assert.match(await page.locator('#account-deleted').innerText(),/retention period/i);
     assert.equal(await page.locator('#delete-password').inputValue(),'');
     await cameraStopped({released:true}); await retained(); await screenshot('mock-account-deleted');
     await recreateDeletedAccount(previous);
@@ -2215,12 +3362,16 @@ try {
     await signOut(); service.delivery = 'disabled';
     await page.reload(); await view('home',{focused:false}); await gateway();
     await page.waitForFunction(() => document.getElementById('sign-in-service-status').hidden);
-    assert.match(await page.locator('#onboarding-notice').textContent(),/not configured|disabled|test contact/i);
+    assert.match(await page.locator('#onboarding-notice').textContent(),/email is unavailable/i);
     await accountEntry(); await signInPage();
     const beforeEntry = service.journal.filter(item=>item.path === '/v1/accounts/entry/start').length;
-    await emailEntry(CONFIGURED_EMAIL);
+    await emailEntry(EMAIL);
     assert.equal(service.journal.filter(item=>item.path === '/v1/accounts/entry/start').length,beforeEntry,
       'Existing account sign-in does not require configured mail delivery.');
+    await page.locator('#view-back').click(); await idle(); await signInPage();
+    await emailEntry(CONFIGURED_EMAIL,'missing');
+    assert.equal(service.journal.filter(item=>item.path === '/v1/accounts/entry/start').length,beforeEntry,
+      'A missing account offers creation without starting email entry.');
     await page.locator('#view-back').click(); await idle(); await signInPage();
     await page.locator('#sign-in-create-account').click(); await idle();
     await page.locator('#sign-in-email').fill(CONFIGURED_EMAIL); await submitForm('account-email-form'); await alertShown(/email|available|continue/i);
@@ -2239,7 +3390,8 @@ try {
     service.realEmail = true; service.newContact(CONFIGURED_EMAIL);
     await page.reload(); await view('home',{focused:false}); await gateway();
     await page.waitForFunction(() => document.getElementById('sign-in-service-status').hidden);
-    assert.match(await page.locator('#onboarding-notice').textContent(),/email confirmation is configured/i);
+    assert.match(await page.locator('#onboarding-notice').textContent(),/unsubmitted details and photos.*cleared.*leave.*submission does not verify identity/i);
+    assert.doesNotMatch(await page.locator('#onboarding-notice').textContent(),/test email|nothing is sent/i);
     await accountEntry(); await signInPage();
     await page.locator('#sign-in-create-account').click(); await idle();
     await page.locator('#sign-in-email').fill(CONFIGURED_EMAIL); await submitForm('account-email-form'); await idle();
@@ -2255,7 +3407,7 @@ try {
     await page.waitForFunction(()=>!document.getElementById('account-create-reviewed').disabled);
     await agreeToAccountTerms();
     await submitForm('account-create-form'); await view('account/confirm');
-    assert.match(await page.locator('#confirmation-delivery').innerText(),/check your email.*app cannot retrieve/i);
+    assert.match(await page.locator('#confirmation-delivery').innerText(),/check your email for the confirmation code/i);
     assert.doesNotMatch(await page.locator('#confirmation-delivery').innerText(),/private test inbox/i);
     assert.equal(await page.locator('#account-mock-email').isVisible(),false);
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true);
@@ -2266,6 +3418,7 @@ try {
 
   const result = {passed:true,scope:'Exact bundled client against intercepted account HTTP, signed OIDC fixtures and synthetic Chromium camera acquisition',checks,
     shellBytes:Object.keys(PARTICIPANT_SHELL_SOURCES).reduce((sum,key)=>sum+assets.get(key).length,0),
+    noticeVersion:IDENTITY_INTAKE_NOTICE.version,cameraProofAssets:captureProofAssets,
     requests:service.journal,screenshots:output,screenshotFiles:screenshots,real_accounts_created:false,
     backend_service_tested:false,mailbox_delivery_tested:false,synthetic_browser_camera_used:true,
     physical_camera_tested:false,real_identity_data_used:false,liveness_evaluated:false,android_device_tested:false};

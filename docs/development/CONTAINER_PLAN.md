@@ -61,10 +61,11 @@ for verified exports and retained workload checks. `Test` dispatches project
 checks inside Debian. `Prepare` is
 dependency-image preparation; it does not create or replace a container.
 
-The evidence application preview uses the documented loopback port 4173. Camera
-access needs localhost or HTTPS. The optional local `review.html` entry permits
+The application preview uses the documented loopback port 4173. The participant
+app has one local URL, `http://127.0.0.1:4173/`; old document URLs redirect there.
+Camera access needs localhost or HTTPS. The server-generated root entry permits
 only the narrow style-element exception needed for Codex annotations. Production
-HTML keeps its strict CSP, and Android assets exclude the review entry.
+HTML keeps its strict CSP, and Android assets exclude the local entry.
 
 ## Browser and Android checks
 

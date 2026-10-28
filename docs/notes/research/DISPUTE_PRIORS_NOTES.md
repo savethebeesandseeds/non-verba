@@ -564,3 +564,12 @@ changes no signed record and selects no mechanism.
 
 Use [Terminology](../../requests/TERMINOLOGY.md) for shared names and
 [the research index](../README.md#research) for the three connected subjects.
+
+## Evaluation criteria freeze
+
+Reserved 28 October 2026. This heading is the place for frozen evaluation
+criteria, metrics, and data boundaries. No criteria document is frozen. No
+thresholds are adopted. The initial data boundary is intended to be synthetic
+pairs only, and no corpus material is opened by this note. Close conditions
+(supported, negative, or inconclusive) are not yet stated as a contract.
+This note does not claim model competence. The paused corpus study stays paused.

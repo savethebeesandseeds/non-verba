@@ -140,9 +140,24 @@ async function openPanel(name) {
   await page.locator('#' + name + '-panel').waitFor({state:'visible'});
   await stableUrl();
   if (name === 'navigation') {
-    await page.waitForFunction(() => document.activeElement?.id === 'requests-list-link');
+    await page.waitForFunction(() => {
+      const mode = document.querySelector('[data-workspace-mode]:not([hidden])')?.dataset.workspaceMode;
+      return document.activeElement?.id === (mode === 'operator' ? 'operations-list-link' : 'requests-list-link');
+    });
     await collapsedNavigation();
   } else await page.waitForFunction(() => document.activeElement?.id === 'options-title');
+}
+async function showWorkspace(mode) {
+  const visible = () => page.evaluate(() => document.querySelector('[data-workspace-mode]:not([hidden])')?.dataset.workspaceMode || '');
+  if (await visible() === mode) return;
+  const opener = await page.locator('#navigation-panel').isVisible() ? '#dashboard-mode-switch' : '#mode-switch';
+  await page.locator(opener).click();
+  await page.locator('#mode-confirm-accept').click();
+  await page.waitForFunction(expected => document.querySelector('[data-workspace-mode]:not([hidden])')?.dataset.workspaceMode === expected, mode);
+}
+async function restoreRequesterMode() {
+  if (await page.locator('[data-workspace-mode="requester"]').isHidden()) await showWorkspace('requester');
+  await page.evaluate(() => localStorage.removeItem('nonverba-mode'));
 }
 async function collapsedNavigation() {
   for (const kind of ['requests','operations']) {
@@ -452,14 +467,19 @@ async function quietHomeLayout(label, {largeText = false} = {}) {
   const layout = await page.locator('#workspace').evaluate(workspace => {
     const bounds = workspace.getBoundingClientRect();
     const logo = document.getElementById('home-logo').getBoundingClientRect();
+    const signIn = document.getElementById('home-sign-in');
+    const signInBox = signIn && !signIn.hidden ? signIn.getBoundingClientRect() : null;
+    const groupTop = logo.top, groupBottom = signInBox ? signInBox.bottom : logo.bottom;
     const creditElement = document.getElementById('app-credit'), credit = creditElement.getBoundingClientRect();
     const creditLogo = creditElement.querySelector('img').getBoundingClientRect();
     const creditLabel = creditElement.querySelector('span').getBoundingClientRect();
     return {
       centered:Math.abs((bounds.left + bounds.right - logo.left - logo.right) / 2),
-      verticallyCentered:Math.abs((bounds.top + bounds.bottom - logo.top - logo.bottom) / 2),
+      verticallyCentered:Math.abs((bounds.top + bounds.bottom) / 2 - (groupTop + groupBottom) / 2),
+      signInCentered:signInBox ? Math.abs((bounds.left + bounds.right - signInBox.left - signInBox.right) / 2) : 0,
+      signInBelow:signInBox ? signInBox.top >= logo.bottom - 1 : true,
       logoWidth:logo.width, logoHeight:logo.height,
-      noOverlap:logo.bottom + 8 <= credit.top,
+      noOverlap:groupBottom + 8 <= credit.top,
       creditCentered:Math.abs((credit.left + credit.right) / 2 - innerWidth / 2),
       creditBottom:credit.bottom, viewportHeight:innerHeight,
       creditFits:creditElement.scrollWidth <= creditElement.clientWidth + 1
@@ -469,10 +489,12 @@ async function quietHomeLayout(label, {largeText = false} = {}) {
     };
   });
   assert.ok(layout.centered <= 2, 'Home artwork must be centered: ' + label);
-  assert.ok(layout.verticallyCentered <= 2, 'Home artwork must sit in the center of the main area: ' + label);
+  assert.ok(layout.verticallyCentered <= 2, 'Home content must sit in the center of the main area: ' + label);
+  assert.ok(layout.signInCentered <= 2, 'Home sign-in must be centered: ' + label);
+  assert.equal(layout.signInBelow, true, 'Home sign-in must sit below the artwork: ' + label);
   assert.ok(layout.logoWidth > 0 && layout.logoWidth <= 140 && layout.logoHeight > 0 && layout.logoHeight <= 140,
     'Home artwork must stay small: ' + label);
-  assert.equal(layout.noOverlap, true, 'Home artwork overlaps the credit: ' + label);
+  assert.equal(layout.noOverlap, true, 'Home content overlaps the credit: ' + label);
   assert.ok(layout.creditCentered <= 2, 'The app credit must be centered: ' + label);
   assert.equal(layout.creditFits, true, 'The footer logo and text must remain readable without clipping: ' + label);
   assert.equal(layout.creditClear, true, 'The footer logo must not overlap its text: ' + label);
@@ -489,7 +511,7 @@ async function focusStaysInPanel(name) {
     [...element.querySelectorAll('button, a[href], input, textarea, select, summary, [tabindex="0"]')]
       .filter(control => !control.disabled && control.getClientRects().length > 0).length);
   assert.ok(count > 0, name + ' panel needs a usable control.');
-  if (name === 'options') assert.equal(count, 1, 'Signed-out Settings exposes only the account entry.');
+  if (name === 'options') assert.equal(count, 2, 'Signed-out Settings exposes the theme control and Account sign-in.');
   for (const direction of ['Tab','Shift+Tab']) {
     for (let index = 0; index <= Math.max(count, 2); index++) {
       await page.keyboard.press(direction);
@@ -501,13 +523,27 @@ async function focusStaysInPanel(name) {
 async function noAuthority() {
   const state = await page.evaluate(() => ({
     forbiddenCalls:window.__participantForbiddenCalls,
-    localStorage:localStorage.length, sessionStorage:sessionStorage.length, cookies:document.cookie,
+    storage:Object.keys(localStorage).filter(key => key !== 'nonverba-mode' && key !== 'nonverba-theme'),
+    mode:localStorage.getItem('nonverba-mode'), theme:localStorage.getItem('nonverba-theme'),
+    sessionStorage:sessionStorage.length, cookies:document.cookie,
     bridge:['NativeVault','NativeLocation','NativeCamera','NativeAudio'].filter(key => key in window),
     injection:window.__participantInjected === true,
   }));
-  assert.deepEqual(state, {forbiddenCalls:[], localStorage:0, sessionStorage:0, cookies:'', bridge:[], injection:false});
+  assert.deepEqual(state.storage, []);
+  assert.ok(state.mode === null || state.mode === 'requester' || state.mode === 'operator');
+  assert.ok(state.theme === null || state.theme === 'light' || state.theme === 'dark');
+  assert.deepEqual({forbiddenCalls:state.forbiddenCalls, sessionStorage:state.sessionStorage, cookies:state.cookies, bridge:state.bridge, injection:state.injection},
+    {forbiddenCalls:[], sessionStorage:0, cookies:'', bridge:[], injection:false});
   for (const id of ['new-request','list-new-request','new-operation','list-new-operation'])
     assert.equal(await page.locator('#'+id).isDisabled(),true,'An unverified shell cannot enable '+id+'.');
+  assert.equal(await page.locator('#settings-identity-stamps,#settings-identity-link').count(),0,'Settings contains only the Account entry, without duplicate identity controls.');
+  for (const id of ['account-earned-stamps']) {
+    const group=page.locator('#'+id);
+    assert.equal(await group.evaluate(node=>node.hidden),true,'Shell presentation and restored history cannot earn identity stamps.');
+    assert.equal(await group.locator('[data-identity-earned]:visible').count(),0);
+    assert.equal(await group.locator('[data-identity-unverified]').count(),1);
+    assert.equal(await group.locator('[data-identity-unverified]:visible').count(),0,'Signed-out viewers have no Account status stamp.');
+  }
 }
 async function statusKinds(selector) {
   return page.locator(selector).evaluate(host => host.hidden ? [] : [...new Set(
@@ -548,19 +584,38 @@ async function roleSetupState(requests, operations, signedIn = false) {
 }
 async function accountSetupView() {
   await route('identity/setup');
-  assert.equal(await page.locator('#view-title').textContent(), 'Account and identity');
+  assert.equal(await page.locator('#view-title').textContent(), 'Identity');
   const screen = page.locator('#identity-setup-screen');
   assert.equal(await screen.isVisible(), true);
   const purpose = await screen.innerText();
-  assert.match(purpose, /account.*(?:first|before)|first.*account/is,
-    'The shared setup flow must place account creation before identity verification.');
-  assert.match(purpose, /post(?:ing)? (?:a )?requests?/i);
-  assert.match(purpose, /accept(?:ing)? (?:an? )?operations?/i);
+  assert.equal(await screen.locator('#onboarding-sign-in').isVisible(),true,
+    'Signed-out identity setup offers sign-in before photo preparation.');
+  assert.match(purpose, /requests/i);
+  assert.match(purpose, /operations/i);
+  assert.doesNotMatch(purpose,/\b(?:OIDC|PKCE|principal|fixture|synthetic|journey)\b|service-bound|operation-bound|unlock now|click here/i,
+    'Identity setup uses plain compact copy without implementation or promotional wording.');
+  const levels=screen.locator('#identity-levels');
+  for (const [level,purpose] of [[1,'Requests'],[2,'Operations']]) {
+    const row=levels.locator('#identity-level-'+level),stamp=row.locator('img');
+    assert.equal(await stamp.getAttribute('alt'),'');
+    assert.match(await stamp.getAttribute('src'),new RegExp('identity/level-'+level+'\\.webp$'));
+    assert.match(await row.innerText(),new RegExp('Level ?'+level+' identity[\\s\\S]*'+purpose+'[\\s\\S]*'+(level===1?'Not started':'Start Level 1 identity first'),'i'));
+    await stamp.evaluate(image=>image.decode());
+    const bounds=await stamp.boundingBox();
+    assert.ok(bounds && bounds.width<=48.5 && bounds.height<=48.5,'Identity target stamps remain small.');
+  }
+  assert.equal(await page.locator('#identity-step-level').isVisible(),false);
   assert.equal(await screen.locator('form, input, textarea').count(), 0,
     'The setup gateway must not collect credentials or identity documents.');
   assert.equal(await page.locator('#enrollment-begin').isDisabled(), true,
     'A role display flag must not open enrollment before a confirmed service account exists.');
-  assert.match(await page.locator('#onboarding-notice').textContent(), /photos stay only in this open page.*(?:uploaded|verified)/i);
+  assert.equal(await page.locator('#enrollment-role').count(),0,'Level selection is replaced by sequential verification pipelines.');
+  assert.equal(await page.locator('#enrollment-level-2').isDisabled(),true,'Level 2 remains locked before authoritative Level 1 verification.');
+  assert.match(await page.locator('#identity-level-2').innerText(),/Start Level 1 identity first/i);
+  assert.equal(await page.locator('#identity-demo-notes #onboarding-notice').count(),1);
+  assert.equal(await screen.evaluate(node=>Boolean(node.compareDocumentPosition(document.getElementById('identity-demo-notes')) & Node.DOCUMENT_POSITION_FOLLOWING)),true,
+    'Development notes appear after the pipeline controls.');
+  assert.match(await page.locator('#onboarding-notice').textContent(), /unsubmitted details and photos.*cleared.*submission does not verify identity/i);
   assert.equal(await page.locator('#start-verification').count(), 0,
     'Verification cannot start before an account exists.');
 }
@@ -675,11 +730,99 @@ async function menuIndicatorsFit(label) {
 }
 async function freshDocument(suffix = '') {
   // A separate page tests boot behavior independently of the document's memory.
+  if (page) await page.evaluate(() => localStorage.removeItem('nonverba-mode')).catch(() => {});
   await page?.close();
   page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
   await page.goto(entry + suffix);
+}
+async function homeAttentionMotion() {
+  const motion=await context.newPage();
+  motion.on('pageerror',error=>errors.push(error.message));
+  motion.on('console',message=>{if(message.type()==='error')consoleErrors.push(message.text());});
+  const state=expected=>motion.waitForFunction(value=>document.body.dataset.homeAttention===value,expected);
+  const animations=selector=>motion.locator(selector).evaluate(element=>element.getAnimations({subtree:true}).filter(animation=>typeof animation.animationName==='string').map(animation=>({
+    name:animation.animationName,duration:animation.effect.getTiming().duration,iterations:animation.effect.getTiming().iterations})));
+  const stopped=async()=>{
+    await state('off');
+    assert.equal(await motion.locator('body').getAttribute('data-home-attention-target'),null);
+    assert.deepEqual(await animations('#home-logo'),[]);
+    assert.deepEqual(await animations('#navigation-toggle'),[]);
+    assert.deepEqual(await animations('#options-toggle'),[]);
+  };
+  const start=async()=>{await motion.goto(entry);await state('character');};
+  try {
+    await motion.goto(entry);await stopped();
+    assert.equal(await motion.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true,
+      'The default reduced-motion preference suppresses both arrival cues.');
+    await motion.emulateMedia({reducedMotion:'no-preference'});await stopped();
+    await start();
+    assert.equal(await motion.locator('body').getAttribute('data-home-attention-target'),'options','Signed-out Home directs its cue to account options.');
+    assert.deepEqual(await animations('#home-logo'),[{name:'home-arrive',duration:900,iterations:1}],
+      'The character arrives once with a bounded motion.');
+    assert.deepEqual(await animations('#navigation-toggle'),[],'The navigation hint waits for the character to settle.');
+    assert.deepEqual(await animations('#options-toggle'),[],'The options hint also waits for the character to settle.');
+    await motion.waitForFunction(()=>document.getElementById('home-logo').getAnimations().some(animation=>animation.currentTime>=400));
+    await motion.screenshot({path:output+'/home-character-arrival.png',animations:'allow',fullPage:true});screenshots.push('home-character-arrival.png');
+    await state('menu');
+    assert.deepEqual(await animations('#options-toggle'),[{name:'menu-arrival-pulse',duration:1400,iterations:3}],
+      'Signed-out options draw attention with three bounded pulses.');
+    assert.deepEqual(await animations('#navigation-toggle'),[],'Both menus never pulse simultaneously.');
+    const peak=await motion.locator('#options-toggle').evaluate(element=>{
+      const frames=element.getAnimations().find(animation=>animation.animationName==='menu-arrival-pulse').effect.getKeyframes();
+      return {frame:frames.find(frame=>frame.offset===.5),opacityUnchanged:frames.every(frame=>!Object.hasOwn(frame,'opacity'))};
+    });
+    assert.equal(peak.frame.backgroundColor,'rgb(223, 194, 164)','The pulse uses the sampled warm beige robe shade.');
+    assert.equal(peak.frame.color,'rgb(76, 99, 68)','The sage foreground stays readable at the pulse peak.');
+    assert.match(peak.frame.boxShadow,/rgba\(193, 150, 100, 0\.16\).*8px/,'A soft garment-colored halo reinforces the hint.');
+    assert.equal(peak.opacityUnchanged,true,'The menu never fades or blinks out.');
+    assert.equal(await motion.locator('#options-toggle .options-icon').evaluate(element=>getComputedStyle(element).opacity),'1');
+    await motion.waitForFunction(()=>document.getElementById('options-toggle').getAnimations().some(animation=>animation.currentTime>=650));
+    await motion.screenshot({path:output+'/home-options-pulse.png',animations:'allow',fullPage:true});screenshots.push('home-options-pulse.png');
+    await stopped();
+    await motion.locator('#options-toggle').click();await motion.locator('#options-panel').waitFor({state:'visible'});
+    await motion.locator('#account-setup-link').click();await motion.waitForFunction(()=>history.state?.view==='account/sign-in');
+    await motion.locator('#view-back').click();await motion.waitForFunction(()=>history.state?.view==='home');
+    await stopped();
+
+    await start();await motion.locator('#options-toggle').focus();await stopped();
+    await motion.locator('#home-logo').dispatchEvent('animationend',{animationName:'home-arrive'});await stopped();
+    await start();await motion.locator('#options-toggle').click();await motion.locator('#options-panel').waitFor({state:'visible'});await stopped();
+    await motion.keyboard.press('Escape');await motion.locator('#options-panel').waitFor({state:'hidden'});await stopped();
+
+    await start();
+    await motion.evaluate(()=>{
+      const index=history.state.index;history.pushState({nonverbaPreview:true,index:index+1,view:'requests'},'',location.pathname);
+      history.pushState({nonverbaPreview:true,index:index+2,view:'home'},'',location.pathname);history.back();
+    });
+    await motion.waitForFunction(()=>history.state?.view==='requests');await stopped();
+    await motion.goBack();await motion.waitForFunction(()=>history.state?.view==='home');await stopped();
+
+    await start();
+    await motion.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
+    await stopped();
+    await motion.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});await stopped();
+    await start();await motion.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true})));await stopped();
+    await motion.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));await stopped();
+
+    await start();await motion.emulateMedia({reducedMotion:'reduce'});await stopped();
+    await motion.emulateMedia({reducedMotion:'no-preference'});await stopped();
+    await motion.clock.install({time:new Date()});await start();await motion.clock.fastForward(6500);await stopped();
+  } finally {await motion.close();}
+  const initiallyHidden=await context.newPage();
+  initiallyHidden.on('pageerror',error=>errors.push(error.message));
+  try {
+    await initiallyHidden.emulateMedia({reducedMotion:'no-preference'});
+    await initiallyHidden.addInitScript(()=>Object.defineProperty(document,'hidden',{configurable:true,value:true}));
+    await initiallyHidden.goto(entry);
+    await initiallyHidden.waitForFunction(()=>history.state?.view==='home' && document.body.dataset.homeAttention==='off');
+    assert.equal(await initiallyHidden.locator('body').getAttribute('data-home-attention'),'off','A hidden initial page does not animate.');
+    await initiallyHidden.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
+    await initiallyHidden.waitForFunction(()=>document.body.dataset.homeAttention==='character');
+    await initiallyHidden.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
+    assert.equal(await initiallyHidden.locator('body').getAttribute('data-home-attention'),'off','A started cue interrupted by hiding never resumes.');
+  } finally {await initiallyHidden.close();}
 }
 try {
   context = await browser.newContext({viewport:{width:390, height:844}, reducedMotion:'reduce'});
@@ -696,7 +839,10 @@ try {
     const note = name => window.__participantForbiddenCalls.push(name);
     for (const name of ['setItem','removeItem','clear']) {
       const original = Storage.prototype[name];
-      Storage.prototype[name] = function (...args) { note('storage.' + name); return original.apply(this, args); };
+      Storage.prototype[name] = function (...args) {
+        if (name !== 'clear' && (args[0] === 'nonverba-mode' || args[0] === 'nonverba-theme')) return original.apply(this, args);
+        note('storage.' + name); return original.apply(this, args);
+      };
     }
     const open = indexedDB.open.bind(indexedDB);
     indexedDB.open = (...args) => { note('indexedDB.open'); return open(...args); };
@@ -775,12 +921,27 @@ try {
     await noAuthority(); await screenshot('home-phone');
   });
 
-  await check('quiet home shows only its artwork and credit before drawer selection', async () => {
+  await check('signed-out home arrival precedes a bounded warm beige options hint and respects interaction, navigation and reduced motion',homeAttentionMotion);
+
+  await check('quiet home shows its artwork, sign-in, and credit before drawer selection', async () => {
     assert.equal(await page.locator('main form:visible').count(), 0, 'Landing must not select a request or offer form.');
     assert.equal(await page.locator('.preview-strip, .preview-label, #requester-choice, #operator-choice').count(), 0);
     assert.equal(await page.locator('#home-request-list, #home-operation-list, #preview-details').count(), 0);
-    assert.equal(await page.locator('#home-screen a, #home-screen button, #home-screen form').count(), 0,
-      'Home must leave workflow choices in navigation.');
+    const homeSignIn = page.locator('#home-sign-in');
+    assert.equal(await page.locator('#home-screen a, #home-screen button, #home-screen form').count(), 1,
+      'Home offers sign-in beneath the current mode artwork.');
+    assert.equal(await page.locator('#home-screen img').count(), 1, 'Home shows one mode artwork.');
+    assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Requester');
+    assert.equal((await homeSignIn.innerText()).trim(), 'Sign in');
+    assert.equal(await homeSignIn.getAttribute('data-navigate'), 'account/sign-in');
+    assert.equal(await homeSignIn.getAttribute('type'), 'button');
+    assert.equal(await homeSignIn.isDisabled(), false);
+    assert.equal(await homeSignIn.isVisible(), true);
+    await usableTarget('#home-sign-in', 'home sign-in');
+    await homeSignIn.click();
+    assert.equal(await page.locator('#view-title').textContent(), 'Sign in');
+    await page.locator('#view-back').click();
+    await page.locator('#home-screen').waitFor({state:'visible'});
     assert.equal(await page.locator('#home-screen').getAttribute('tabindex'), '-1');
     const credit = page.locator('a#app-credit, #app-credit a');
     assert.equal(await credit.getAttribute('href'), 'https://waajacu.com/');
@@ -795,49 +956,129 @@ try {
     assert.equal(await page.locator('#operation-list-draft').isVisible(), false);
     assert.doesNotMatch(await page.locator('main').innerText(), /Check a small garden/);
     await visit('#home');
+    assert.equal(await page.locator('#mode-switch').getAttribute('aria-label'), 'Switch to Operator');
+    assert.match(await page.locator('#home-logo').getAttribute('src'), /home-succulent\.webp$/);
+    assert.match(await page.locator('#brand-mark').getAttribute('src'), /home-succulent\.webp$/);
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    const promptArrived = page.waitForFunction(() => document.getElementById('mode-confirm')?.getAnimations().some(animation => animation.animationName === 'mode-menu'));
+    await page.locator('#mode-switch').click();
+    await promptArrived;
+    assert.equal((await page.locator('#mode-confirm-title').innerText()).trim(), 'Change to Operator mode?');
+    assert.equal((await page.locator('#mode-confirm-note').innerText()).trim(), 'A requester asks for the work.\nAn operator does the work.');
+    assert.match(await page.locator('#mode-from').getAttribute('src'), /home-succulent\.webp$/);
+    assert.match(await page.locator('#mode-to').getAttribute('src'), /home-sprout\.webp$/);
+    await page.locator('#mode-confirm-cancel').click();
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    assert.match(await page.locator('#home-logo').getAttribute('src'), /home-succulent\.webp$/);
+    assert.equal(await page.locator('#mode-switch').getAttribute('aria-label'), 'Switch to Operator');
+    const arrived = page.waitForFunction(() => ['brand-mark','home-figure'].some(id => document.getElementById(id)?.getAnimations().some(animation => animation.animationName === 'mode-arrive')));
+    await page.locator('#mode-switch').click();
+    await page.locator('#mode-confirm-accept').click();
+    await arrived;
+    assert.match(await page.locator('#home-logo').getAttribute('src'), /home-sprout\.webp$/);
+    assert.equal(await page.locator('#home-screen img').count(), 1);
+    assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Operator');
+    assert.equal(await page.locator('#mode-switch').getAttribute('aria-label'), 'Switch to Requester');
+    await page.locator('#mode-switch').click();
+    assert.match(await page.locator('#mode-from').getAttribute('src'), /home-sprout\.webp$/);
+    assert.match(await page.locator('#mode-to').getAttribute('src'), /home-succulent\.webp$/);
+    await page.locator('#mode-confirm-accept').click();
+    await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-succulent.webp'));
+    assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Requester');
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    await page.emulateMedia({reducedMotion:'reduce'});
     await openPanel('navigation');
     assert.equal(await page.locator('#home-link, #navigation-close, #options-close').count(), 0);
     assert.equal(await page.locator('#navigation-panel').getAttribute('aria-labelledby'), 'navigation-title');
     assert.equal(await page.locator('#navigation-panel .panel-heading h2').textContent(), 'Dashboard');
     await matchingDashboardDividers('390px drawer');
     await setupPresentation('requests', false); await setupPresentation('operations', false);
-    for (const kind of ['requests','operations']) {
-      const selector = '#' + kind + '-list-link';
-      assert.equal(await page.locator(selector).evaluate(element => element.tagName), 'BUTTON');
-      assert.equal(await page.locator(selector).getAttribute('href'), null);
-      assert.equal(await page.locator(selector).evaluate(element => getComputedStyle(element).fontWeight), '650');
-      await usableTarget(selector, 'navigation disclosure');
+    assert.equal(await page.locator('[data-workspace-mode="operator"]').isHidden(), true, 'The dashboard shows only the current mode.');
+    for (const [kind, action, view, label] of [
+      ['requests','request','requester','New request'],
+      ['operations','operation','operations/new','New operation']]) {
+      const list = page.locator('#' + kind + '-list-link');
+      const created = page.locator('#new-' + action);
+      assert.equal(await list.evaluate(element => element.tagName), 'BUTTON');
+      assert.equal(await list.getAttribute('href'), null);
+      assert.equal(await list.evaluate(element => getComputedStyle(element).fontWeight), '650');
+      assert.equal(await created.evaluate(element => element.tagName), 'BUTTON');
+      assert.equal(await created.getAttribute('data-navigate'), view);
+      assert.equal(await created.getAttribute('href'), null);
+      assert.equal(await created.getAttribute('title'), label, 'New icon actions need a native hover label.');
+      assert.equal(await created.getAttribute('aria-label'), label);
+      assert.equal(await created.locator('svg').count(), 1, 'New actions use a bundled line icon.');
+      assert.equal(await created.locator('svg').getAttribute('aria-hidden'), 'true');
     }
-    for (const [selector, view] of [['#new-request','requester'], ['#new-operation','operations/new']]) {
-      assert.equal(await page.locator(selector).evaluate(element => element.tagName), 'BUTTON');
-      assert.equal(await page.locator(selector).getAttribute('data-navigate'), view);
-      assert.equal(await page.locator(selector).getAttribute('href'), null);
-      await usableTarget(selector, 'navigation');
-    }
-    for (const [selector, label] of [['#new-request','New request'], ['#new-operation','New operation']]) {
-      assert.equal(await page.locator(selector).getAttribute('title'), label,
-        'New icon actions need a native hover label.');
-      assert.equal(await page.locator(selector).getAttribute('aria-label'), label);
-      assert.equal(await page.locator(selector + ' svg').count(), 1, 'New actions use a bundled line icon.');
-      assert.equal(await page.locator(selector + ' svg').getAttribute('aria-hidden'), 'true');
-    }
+    await usableTarget('#requests-list-link', 'navigation disclosure');
+    await usableTarget('#new-request', 'navigation');
+    await usableTarget('#dashboard-mode-switch', 'dashboard mode switch');
+    assert.equal((await page.locator('#dashboard-mode-name').innerText()).trim(), 'Change to Operator mode');
+    assert.equal(await page.locator('#dashboard-mode-switch').getAttribute('aria-label'), 'Change to Operator mode');
+    assert.match(await page.locator('#dashboard-mode-mark').getAttribute('src'), /home-sprout\.webp$/);
     await page.locator('#requests-list-link').focus(); await page.keyboard.press('Enter');
     assert.equal(await page.locator('#requests-list-link').getAttribute('aria-expanded'), 'true');
     assert.equal(await page.locator('#navigation-requests').isVisible(), true);
     assert.equal(await page.locator('#navigation-requests-empty').isVisible(), true);
-    await setupPresentation('requests', true);
+    await setupPresentation('requests', true); await dashboardRowIcons(['requests']);
     assert.equal(await page.locator('#navigation-operations').isVisible(), false);
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.locator('#dashboard-mode-switch').click();
+    await page.locator('#mode-confirm').waitFor({state:'visible'});
+    assert.equal(await page.locator('[data-workspace-mode="operator"]').isHidden(), true, 'The prompt waits before changing mode.');
+    await page.locator('#mode-confirm-cancel').click();
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    const menuArrived = page.waitForFunction(() => document.getElementById('dashboard-mode-mark').getAnimations().some(animation => animation.animationName === 'mode-arrive'));
+    await page.locator('#dashboard-mode-switch').click();
+    await page.locator('#mode-confirm-accept').click();
+    await menuArrived;
+    await page.emulateMedia({reducedMotion:'reduce'});
+    assert.equal(await page.locator('[data-workspace-mode="requester"]').isHidden(), true, 'Switching modes replaces the dashboard section.');
+    assert.equal((await page.locator('#dashboard-mode-name').innerText()).trim(), 'Change to Requester mode');
+    assert.equal(await page.locator('#dashboard-mode-switch').getAttribute('aria-label'), 'Change to Requester mode');
+    assert.match(await page.locator('#dashboard-mode-mark').getAttribute('src'), /home-succulent\.webp$/);
+    assert.equal(await page.locator('#operations-list-link').getAttribute('aria-expanded'), 'false');
+    await usableTarget('#operations-list-link', 'navigation disclosure');
+    await usableTarget('#new-operation', 'navigation');
     await page.locator('#operations-list-link').click();
     assert.equal(await page.locator('#operations-list-link').getAttribute('aria-expanded'), 'true');
     assert.equal(await page.locator('#navigation-operations-empty').isVisible(), true);
-    assert.equal(await page.locator('#navigation-requests').isVisible(), true,
-      'Request and operation lists must expand independently.');
-    await setupPresentation('operations', true); await dashboardRowIcons();
-    await page.locator('#requests-list-link').click();
-    assert.equal(await page.locator('#requests-list-link').getAttribute('aria-expanded'), 'false');
     assert.equal(await page.locator('#navigation-requests').isVisible(), false);
-    await setupPresentation('requests', false);
-    assert.equal(await page.locator('#navigation-operations').isVisible(), true);
+    await setupPresentation('operations', true); await dashboardRowIcons(['operations']);
+    await page.locator('#operations-list-link').click();
+    assert.equal(await page.locator('#operations-list-link').getAttribute('aria-expanded'), 'false');
+    await setupPresentation('operations', false);
+    const pinned = await page.evaluate(() => {
+      const panel = document.getElementById('navigation-panel');
+      const list = document.getElementById('navigation-operations');
+      const added = [];
+      for (let index = 0; index < 30; index += 1) {
+        const item = document.createElement('p');
+        item.style.minHeight = '48px';
+        item.textContent = 'Pinned check ' + index;
+        list.appendChild(item);
+        added.push(item);
+      }
+      list.hidden = false;
+      const row = document.querySelector('.dashboard-mode-row').getBoundingClientRect();
+      const bounds = panel.getBoundingClientRect();
+      const nav = panel.querySelector('nav');
+      const line = getComputedStyle(document.querySelector('.dashboard-mode-row'));
+      const result = {
+        rowInView: row.top >= bounds.top - 1 && row.bottom <= bounds.bottom + 1,
+        navScrolls: nav.scrollHeight > nav.clientHeight + 1,
+        belowList: nav.getBoundingClientRect().bottom <= row.top + 1,
+        line: line.borderTopWidth + ' ' + line.borderTopStyle
+      };
+      for (const item of added) item.remove();
+      list.hidden = true;
+      return result;
+    });
+    assert.equal(pinned.rowInView, true, 'The mode switch stays visible at the bottom of the dashboard.');
+    assert.equal(pinned.navScrolls, true, 'A long dashboard list scrolls above the mode switch.');
+    assert.equal(pinned.belowList, true, 'The mode switch sits under the dashboard list.');
+    assert.equal(pinned.line, '1px solid');
+    await showWorkspace('requester');
     assert.equal(await currentView(), 'home', 'List disclosure must not navigate.');
     await stableUrl();
     await focusStaysInPanel('navigation');
@@ -854,7 +1095,7 @@ try {
     await page.keyboard.press('Escape'); await page.locator('#navigation-panel').waitFor({state:'hidden'});
     await visit('#requests');
     assert.equal(await page.locator('#list-new-request').isDisabled(),true);
-    await screenshot('locked-requests-phone'); await noAuthority();
+    await screenshot('locked-requests-phone'); await restoreRequesterMode(); await noAuthority();
   });
 
   await check('header drawers are labelled, keyboard-contained and dismiss without opening locked drafts', async () => {
@@ -879,12 +1120,16 @@ try {
       await centeredPanelHeading(name, '390px drawer');
       if (name === 'navigation') {
         assert.equal(labelledBy, 'navigation-title');
-        await page.waitForFunction(() => document.activeElement?.id === 'requests-list-link');
+        await page.waitForFunction(() => {
+          const mode = document.querySelector('[data-workspace-mode]:not([hidden])')?.dataset.workspaceMode;
+          return document.activeElement?.id === (mode === 'operator' ? 'operations-list-link' : 'requests-list-link');
+        });
         await collapsedNavigation();
       } else {
         assert.equal(labelledBy, 'options-title');
-        assert.equal(await panel.locator('button:visible').count(), 1);
+        assert.equal(await panel.locator('button:visible').count(), 2, 'Signed-out Settings shows the theme control and Account sign-in.');
         assert.equal(await panel.locator('#account-setup-link').isVisible(), true);
+        assert.equal(await panel.locator('#settings-identity-link,#settings-identity-stamps').count(), 0);
         assert.equal(await panel.locator('#configure-api-access').isVisible(), false);
         assert.equal(await panel.locator('#settings-budgets').isVisible(),false);
         assert.equal(await panel.locator('#account-sign-out').isVisible(), false);
@@ -1018,7 +1263,7 @@ try {
       const action=page.locator(selector);
       assert.equal(await action.isDisabled(),true);
       assert.ok((await action.getAttribute('aria-describedby')).split(/\s+/).includes(description));
-      assert.match(await page.locator('#'+description).textContent(),/identity|verification/i);
+      assert.match(await page.locator('#'+description).textContent(),/Level [12] identity/i);
       const before=await currentView();
       await action.evaluate(button=>{button.focus();button.click();button.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));});
       assert.equal(await action.evaluate(button=>button===document.activeElement),false);
@@ -1131,9 +1376,12 @@ try {
         await centeredPanelHeading(name, width + 'px');
         if (name === 'navigation') {
           await matchingDashboardDividers(width + 'px');
-          for (const selector of ['#requests-list-link','#operations-list-link','#new-request','#new-operation']) {
-            await usableTarget(selector, width + 'px');
+          for (const [mode, kind, action] of [['requester','requests','request'],['operator','operations','operation']]) {
+            await showWorkspace(mode);
+            await usableTarget('#' + kind + '-list-link', width + 'px');
+            await usableTarget('#new-' + action, width + 'px');
           }
+          await restoreRequesterMode();
         } else {
           await usableTarget('#account-setup-link', width + 'px Settings');
           await groupedSettings(width + 'px Settings');
@@ -1160,9 +1408,12 @@ try {
       await noOverflow('320px, 200% text, ' + name);
       if (name === 'navigation') {
         await matchingDashboardDividers('320px, 200% text');
-        for (const selector of ['#requests-list-link','#operations-list-link','#new-request','#new-operation']) {
-          await usableTarget(selector, '320px, 200% text');
+        for (const [mode, kind, action] of [['requester','requests','request'],['operator','operations','operation']]) {
+          await showWorkspace(mode);
+          await usableTarget('#' + kind + '-list-link', '320px, 200% text');
+          await usableTarget('#new-' + action, '320px, 200% text');
         }
+        await restoreRequesterMode();
       } else {
         await usableTarget('#account-setup-link', '320px, 200% text Settings');
         await groupedSettings('320px, 200% text Settings');
@@ -1179,17 +1430,23 @@ try {
     await freshDocument(); await route('home',{focused:false});
     await page.setViewportSize({width:390,height:844}); await roleSetupState(false,false);
     await visit('requests'); const previousAccountView=await currentView();
-    await openPanel('options'); await page.locator('#account-setup-link').click();
+    await openPanel('options');
+    assert.equal(await page.locator('#settings-identity-link,#settings-identity-stamps').count(),0,'Signed-out Settings exposes Account sign-in without identity controls.');
+    await usableTarget('#account-setup-link','Settings Account sign-in');
+    await page.locator('#account-setup-link').focus(); await page.keyboard.press('Enter');
     await page.locator('#options-panel').waitFor({state:'hidden'}); await signInView();
+    await noAuthority();
     await restoreViewFixture('account/recover'); await route('account/recover');
     assert.equal(await page.locator('#onboarding-notice').isVisible(),false);
     await page.locator('#view-back').click(); await signInView();
     await page.locator('#view-back').click(); await route(previousAccountView);
     for (const kind of ['requests','operations']) {
-      const previous=await currentView();
       // A display-only status rendering has no account session or identity authority.
       await page.evaluate(async()=>{(await import('./participant.js')).renderRoleSetup(document,{},true);});
       await openPanel('navigation');
+      await showWorkspace(kind === 'operations' ? 'operator' : 'requester');
+      await page.evaluate(async()=>{(await import('./participant.js')).renderRoleSetup(document,{},true);});
+      const previous=await currentView();
       const warning=page.locator('[data-status-summary="'+kind+'"] [data-status-kind="warning"]');
       const origin=page.locator('[data-status-source="identity-'+kind+'"]');
       const originalOrigin=await origin.elementHandle();
@@ -1200,7 +1457,7 @@ try {
       assert.equal(await currentView(),previous,'A warning expands its role without navigating.');
       const link=page.locator('#'+kind+'-setup-link');
       assert.equal(await link.getAttribute('data-navigate'),'identity/setup');
-      assert.equal((await link.innerText()).trim(),kind==='operations' ? 'Set up advanced identity verification' : 'Set up identity verification');
+      assert.equal((await link.innerText()).trim(),kind==='operations' ? 'Start Level 1 identity first' : 'Start Level 1 identity');
       await setupPresentation(kind,true,true); await dashboardRowIcons([kind]);
       await page.locator('#'+kind+'-list-link').click(); await setupPresentation(kind,false,true);
       await page.locator('#'+kind+'-list-link').click(); await setupPresentation(kind,true,true);
@@ -1215,7 +1472,7 @@ try {
       await roleSetupState(ready.requests,ready.operations,true);
       await noAuthority();
       await restoreViewFixture(ready.requests ? 'requester' : 'operations/new',{expected:ready.requests ? 'requests' : 'operations'});
-      for (const id of ['#enrollment-begin','#publish-request','#save-operation','#send-offer'])
+      for (const id of ['#enrollment-begin','#enrollment-level-2','#publish-request','#save-operation','#send-offer'])
         assert.equal(await page.locator(id).isDisabled(),true,'Display readiness does not grant identity authority.');
       await page.evaluate(async()=>{(await import('./participant.js')).renderRoleSetup(document,{},false);});
     }

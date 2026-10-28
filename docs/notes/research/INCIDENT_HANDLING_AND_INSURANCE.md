@@ -191,3 +191,40 @@ implementation scope and [Terminology](../../requests/TERMINOLOGY.md) for the
 provisional names.
 
 Return to [research](../README.md#research) or [all notes](../README.md).
+
+## Materiality threshold contract
+
+Reserved 28 October 2026. This heading is the place for frozen threshold
+language that distinguishes significant harm from ordinary disagreement.
+No threshold is frozen. Metrics for an assessment bound and for the
+distinction from delivery, reading, and silence are not adopted. The data
+seen at this stage would be synthetic notices. A response-time bound is not
+stated. Inactivity is not fault. This note does not open a dispute and does
+not create an operational incident service.
+
+## Urgent assistance contract
+
+Reserved 28 October 2026. This heading is the place for a contract that keeps
+urgent assistance and evidence preservation available without awaiting
+classification. No contract is frozen. No staffing, contact list, or service
+promise is selected.
+
+## Evidence minimization contract
+
+Reserved 28 October 2026. This heading is the place for recipient and purpose
+minimization. No contract is frozen. Scrutiny does not authorize automatic
+underwriting reuse. Private registration, identity media, and member records
+are not admitted by this note.
+
+## Coverage admission contract
+
+Reserved 28 October 2026. This heading is the place for a verifiable-coverage
+admission gate. No gate is selected. Withholding admission must not erase an
+already formed Contract. A policy document is not event coverage. No task
+class or verification method is chosen.
+
+## Payment resolution contract
+
+Reserved 28 October 2026. This heading is the place for the boundary between
+payment resolution and harm claims. No contract is frozen. An incident notice
+is not a payment instruction, a liability finding, or closure authority.

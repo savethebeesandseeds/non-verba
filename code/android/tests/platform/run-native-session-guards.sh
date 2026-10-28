@@ -6,7 +6,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../harness-env.sh"
 mkdir -p "$CARGO_TARGET_DIR"
 output="$(mktemp -d "$CARGO_TARGET_DIR/native-session-guards.XXXXXXXX")"
 compile_harness "$output" \
-    "$KOTLIN_PRODUCTION/NativeSessionGuards.kt" \
+    "$CODE_ROOT/android/shared/src/main/kotlin/org/nonverba/camera/NativeSessionGuards.kt" \
     "$KOTLIN_PRODUCTION/NativeCameraLocationSelection.kt" \
     "$KOTLIN_PRODUCTION/NativeLocationDiagnostics.kt" \
     "$KOTLIN_PRODUCTION/NativeGnssStatusDiagnostics.kt" \

@@ -6,7 +6,7 @@ source "$(dirname -- "$0")/../harness-env.sh"
 mkdir -p "$CARGO_TARGET_DIR"
 output="$(mktemp -d "$CARGO_TARGET_DIR/native-audio-lifecycle.XXXXXXXX")"
 compile_harness "$output" \
-    "$KOTLIN_PRODUCTION/NativeSessionGuards.kt" \
+    "$CODE_ROOT/android/shared/src/main/kotlin/org/nonverba/camera/NativeSessionGuards.kt" \
     "$KOTLIN_PRODUCTION/NativeAudioLifecycle.kt" \
     "$HARNESS_DIR/NativeAudioLifecycleSmoke.kt"
 run_harness "$output" org.nonverba.camera.NativeAudioLifecycleSmokeKt

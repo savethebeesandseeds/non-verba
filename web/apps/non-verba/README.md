@@ -5,6 +5,14 @@ the HTML, CSS and JavaScript in a WebView; its native host lives in
 `code/android/participant/` with package ID `org.nonverba.participant`. Keep
 participant behavior in this one UI source and platform differences in adapters.
 
+Current source camera acquisition uses the shared
+[identity camera tool](../../../docs/development/IDENTITY_CAMERA_TOOL.md): strict
+native front/rear capture without location, best-effort browser proofs, and
+final-byte validation before optional proof-bearing intake. The native preview
+owns its shutter. Imported documents have no capture proof. Synthetic notice
+v2 discloses the new metadata while preserving v1 history; source integration
+does not activate or reload the live service.
+
 ## One application across browser and Android
 
 Edit this shared source to change either platform's interface. The browser
@@ -22,7 +30,11 @@ checks exercise shared behavior, while Android still needs its host, lifecycle,
 permission and native-adapter checks.
 
 A source edit reaches an installed phone only after rebuilding and installing
-the APK. The browser preview also needs a fresh source snapshot after edits.
+the APK. The browser preview also needs a fresh source snapshot after edits. Run
+one preview from the unmodified main working tree; do not patch a retained
+snapshot into a separate client version. The local app has one document URL,
+`http://127.0.0.1:4173/`. Its generated HTML adds only the local annotation CSP
+exception and noindex metadata to the packaged application.
 Temporary changes in browser developer tools do not edit source or an APK.
 
 On 21 October 2026, all 20 focused participant package/workspace checks passed
@@ -40,6 +52,40 @@ current account contract reports only pending identity, so these actions and
 their editors remain locked. Service-dependent publication, agreement and work
 actions remain unavailable. The account service described below is separate
 from this unconnected work preview.
+
+## Compact Account and identity levels — 23 October 2026
+
+Identity setup presents two small stamp targets: sage Level 1 for Requests and
+mahogany Level 2 for Operations. Separate fixed entry points replace the level
+selector. Level 2 requires authoritative Level 1 eligibility before dispatch,
+during account revalidation and on restored capture routes. Local photo review
+does not satisfy that prerequisite. The current pending-only contract therefore
+keeps Level 2 locked. Level 1 currently prepares a document and face photo for
+review; no verification service or advanced decision is implemented.
+
+Account has an identity-stamp area driven by the
+same authoritative workflow-access policy as request/operation eligibility.
+The current validated pending-only contract unlocks neither level. Signed-in
+accounts instead show a gray stamp in Account that says **No identity on record**;
+signed-out views show no account stamp. Earned Level 2 also requires Level 1.
+Settings contains only the Sign in or Account entry, without an identity stamp.
+Email confirmation, photo review, device attestation, display flags and history
+cannot grant an identity record or unlock a workflow. A document photo and a
+face photo are not confirmed with the issuer. Capture indicators follow
+the immutable bound pipeline rather than a selectable level.
+
+Account/identity headings, controls and notices use concise literal wording.
+The shared pages keep deliberate photo consent, unsubmitted/unverified status,
+direct single-photo capture without liveness checks, recovery factors, versioned
+terms and explicit unknown sign-out/deletion outcomes. Demo and page-lifetime
+notes appear below the actions. Stamp masters remain in
+`assets/identity/originals/`; the container-only branding recipe prepares the
+128px transparent WebPs. Account displays its badge at 112px (96px on narrow
+screens); capture uses a faint 128px watermark and setup uses 48px stamps.
+The closed browser/APK asset set includes only
+the three small WebPs, retaining the individual 8 KiB bound with a 400 KiB runtime
+bound for this feature. No new native interface, permission or dependency is
+introduced.
 
 ## Identity prerequisites — 22 October 2026
 
@@ -216,13 +262,14 @@ For a browser design review, run from the repository root on Windows:
 ```
 
 This uses the existing managed container and host loopback port 4173. Open
-`http://127.0.0.1:4173/participant/review.html`. No Android or WASM build is needed.
-The server serves only the participant APK's reviewed assets and an in-memory
-review entry. That entry permits style elements for Codex selection, forbids
-style attributes, keeps script policy strict and is marked noindex. The ordinary
-`/participant/index.html` retains the exact production bytes and CSP. Neither
-the review entry nor server becomes an APK asset. A source snapshot is fixed;
-restart this preview from a fresh snapshot after editing the UI.
+`http://127.0.0.1:4173/`. No Android or WASM build is needed. Root serves the
+application directly. Old document URLs redirect to root; they do not expose
+another page version. Relative resources resolve to exact participant catalog
+bytes. The in-memory local HTML permits style elements for Codex selection,
+forbids style attributes, keeps script policy strict and is marked noindex.
+Production/package HTML keeps its exact strict source bytes; the local entry
+and server do not enter the APK. A source snapshot is fixed; restart this
+preview from a fresh snapshot after editing the UI.
 
 Use the [Android guide](../../../code/android/README.md) for the separate participant
 build, package checks and acceptance boundaries. All builds and checks run in
@@ -525,8 +572,11 @@ No APK installation or physical-camera/phone acceptance is claimed. See
 Settings now offers **Delete test account** while signed in to the local mock
 service. Type the current email and password and explicitly confirm. This closes
 that account, revokes its credentials and frees its email for registration again
-with fresh account/principal IDs. Historical records and backups remain; this is
-not a data-erasure claim. Cancel clears the controls. A lost result stays unknown
+with fresh account/principal IDs. The account record stays for a retention period,
+so it can still be found if information about the account is required. The
+length of that period is not selected. Deletion confirms only after the same
+read-then-agree checkbox used for account terms. Cancel clears the controls.
+A lost result stays unknown
 until **Check original deletion** resolves the same private operation, without
 blind mutation retries.
 
@@ -604,9 +654,9 @@ main-workspace preview. It does not accept server configuration or an existing
 secret. This visibility rule grants no server authority and does not change
 the inert prototype's history-restoration routes.
 The signed-out account entry is **Sign in**. Dashboard identity warnings appear only
-for signed-in accounts still awaiting verification and clear on sign-out. Requests
-use **Set up identity verification** and Operations use **Set up advanced identity
-verification**; these readiness labels do not implement or grant verification.
+for signed-in accounts still awaiting review and clear on sign-out. Requests
+use **Start Level 1 identity** and Operations use **Start Level 1 identity first**.
+These labels name the identity level. They do not confirm a person with an issuer.
 Settings account actions use separate compact rows with 44px targets. Header
 issues occupy the inward lower corner: lower-right on Dashboard and lower-left
 on Settings. Independent notification bells use the matching upper corners.
@@ -637,12 +687,12 @@ If this open page holds a signed-in session, the centered **Account** page shows
 its email and public @username. These are
 selectable details from the validated account snapshot, with no editable fields
 or secret credentials. Devices, Sign out and the red Delete account action use
-decorative SVG icons. Identity verification shows the existing yellow warning
-with an accessible prerequisite description while verification is missing;
+decorative SVG icons. **Level 1 identity** shows the existing yellow warning
+with an accessible prerequisite description while that level is missing;
 there is no separate Pending profile row. These actions live on that
 page; Settings keeps its compact account summary and Account link. Deletion
 retains its development-only availability and existing confirmation flow.
-**Identity verification** performs a fresh current-account read, including the
+**Level 1 identity** performs a fresh current-account read, including the
 adapter's bounded refresh and principal/session binding checks, before opening
 identity setup. Failure cannot grant authority. Confirmed server sign-out clears
 the details and returns to a fresh sign-in entry. An uncertain result retains
@@ -772,3 +822,164 @@ completed write. Navigation clears memory-only codes. One code plus separate
 email proof completes recovery, retiring the entire old set and issuing eight
 fresh codes. Legacy single keys remain valid; no existing account is silently
 rotated. See the signup record for retention, compatibility and validation limits.
+
+## Account layout and identity intake — 23 October 2026
+
+Account shows username before email, the current status stamp beside the heading,
+and compact device, identity, sign-out and deletion actions at the bottom. Capture
+headings use a faint decorative level watermark. For accounts without a saved
+submission, opening identity verification leads directly to the Level 1 form.
+Accounts awaiting approval reopen their saved status. The Level 2 prerequisite
+remains authoritative.
+
+Settings shows only the Sign in or Account entry for the account section.
+Identity verification and its status badge stay on the Account page. Full name
+spans the first form row, city of birth and nationality share the next, and Age
+and Document type share the final row. Narrow layouts stack in the same reading
+order. The capture-wide Discard photos link is removed; Back and leaving the
+identity flow retain their existing cleanup behavior.
+
+The form adds document type, full name, city of birth, nationality and age. Large
+JPEG/PNG photos are resized and re-encoded automatically before selection. Review
+includes the complete versioned Identity Intake Notice, agreement at its end and
+a separate submission action. Saved status requires a private service receipt;
+interrupted replies require checking the original operation. Submission grants no
+verified badge or work authority.
+
+Face photo uses one card for idle, live preview and the selected still. Start
+camera opens the front camera with an oval guide; Take photo becomes available
+when the frame is ready. Retake photo clears the prior selection and review,
+then opens the camera directly. Continue accepts the selected photos and opens
+the final submission step. The movement
+wizard and skip controls are removed; no movement video or liveness result is
+collected. Stop and Back keep the existing camera and draft cleanup guards.
+
+The final step puts a closed Review or change details disclosure before the
+notice checkbox. It has no repeated photo-confirmation action. Its notice
+checkbox, associated label and link open the complete pinned document without
+agreeing; only the checkbox at the document end records agreement and returns
+through Back. Available Submit without agreement opens that same document and
+sends nothing. Unavailable intake shows one status instead of a disabled submit
+action. An uncertain submission offers only the original operation's status
+check. Editing required details or replacing photos still invalidates review
+and notice agreement, and incomplete details return directly to the form.
+
+Current intake is a synthetic development implementation and is unavailable by
+default pending the custody and retention decisions tracked by Hx02. See the
+[capture and custody checkpoint](../../../docs/development/PARTICIPANT_CAPTURE.md#identity-details-image-preparation-and-private-intake--23-october-2026)
+and [notice contract](../../../docs/development/IDENTITY_INTAKE_NOTICE_REVIEW.md).
+
+## Home arrival guidance and test intake — 23 October 2026
+
+Home briefly animates the centered character, then pulses Options while signed
+out or Navigation while signed in. Three pulses use the character's warm beige robe
+(`#dfc2a4`), keeping the sage icon and a soft eight-pixel tan halo at their peak. The icon stays
+visible throughout. The cue runs once on
+initial entry and once after a fresh sign-in; ordinary revisits and status checks
+do not restart it. Either menu gaining focus, opening a panel, leaving Home, backgrounding
+or page exit stops it. Reduced-motion preference suppresses both animations.
+The sequence has a bounded timeout and never opens the menu or moves focus.
+
+Document Try again uses a trash icon, clears the selected photo and returns
+focus to the camera action without opening a sensor. Entered details remain.
+Review/change details now precedes the final notice checkbox in both reading
+and keyboard order. The final screen and receipt explain that test submissions
+remain pending while document checks and account validation are developed;
+they grant no verification or work access.
+
+The owner selected test-data submissions under the existing exact v1 notice.
+Hx10 owns this client integration, Hx11 owns intake/service activation and its
+evidence, and Hx02 owns notice/custody records. Actual availability comes from
+the authenticated service. This selects no real-ID intake or successor notice.
+
+Hx11 has completed the [selected test-only activation](../../../docs/development/SERVICE_IDENTITY_INTAKE_CHECKPOINT.md)
+for the current client review account and one owned service fixture. The served
+preview initially retained a v1 client to match that service. At the owner's
+direction it now runs unmodified main, including the current camera-proof/v2
+client. The selected live service remains v1. Account sign-in and retained
+submission status remain supported; new camera capture and intake are
+unavailable until the selected service supports the current notice and proof
+contract. No preview-only downgrade or notice substitution is performed.
+
+## Account identity status and saved-password sign-in — 23 October 2026
+
+The account adapter owns an explicit identity submission state machine:
+signed out, checking, unverified, awaiting approval, or unavailable. Generic
+`identity_verification: pending` is insufficient to establish a submission.
+Only an exact authenticated Level 1 custody receipt can show Awaiting review.
+Fresh sign-in restores that state through `GET /v1/account/identity/status`,
+bound to the current account, principal, recovery generation and session.
+Stale results cannot replace a newer receipt or restore a previous account.
+Unknown, malformed and failed reads remain unavailable. No client status is
+persisted as authority, and neither pending receipt nor badge unlocks work.
+
+Awaiting review appears over the gray account stamp. Requests use the waiting
+clock; Operations still require Level 1 identity before Level 2 and retain their warning.
+The saved-submission screen ends with a green Done button. A pending account's
+identity action opens its status without starting another capture.
+
+While review is pending, Requests says Awaiting review and
+opens the saved status. Operations shows the inactive requirement to start Level 1 identity first.
+It does not offer Level 2 setup during that wait. The saved
+status heading is Awaiting review. The explanation says the Level 1 identity
+has been received, review is pending, and it is not confirmed with the issuer.
+Unconfirmed original submissions retain their separate unconfirmed message and lookup action.
+
+Continue on the identifier screen can use an origin-bound PasswordCredential
+when the browser supports silent access and the identifier matches. Retrieval
+uses `mediation: 'silent'`: it does not request a separate account chooser. If
+the browser needs interaction, it returns no credential and the existing
+password step opens. A supplied credential uses the existing sign-in operation
+and adds no visible password field to the identifier screen.
+Unsupported, cancelled or mismatched manager results also keep the password step;
+third-party managers that provide only a username cannot universally supply a
+password through this API. There is no passive credential request, hidden bait
+field, password storage or credential logging. Route changes and backgrounding
+cancel and fence a pending silent request. The implementation follows the
+[Credential Management specification](https://www.w3.org/TR/credential-management-1/#mediation-requirements)
+and [Chrome's feature-detection guidance](https://web.dev/articles/security-credential-management).
+
+The two helpers add explicitly listed runtime assets. The shared browser/native
+runtime budget is 400 KiB; the image and APK bounds remain 8 KiB each and 8 MiB.
+Source, package and browser checks are separate from service activation and
+physical-device or real password-manager acceptance.
+
+## Synthetic identity review — 23 October 2026
+
+The same participant app includes a small test reviewer interface. Account
+shows Review test submissions only after an authenticated, owner-bound reviewer
+permission response. Ordinary Requester/Operator roles do not grant access.
+The server rechecks every queue, case, photo and decision request. The one local
+app remains at `http://127.0.0.1:4173/`.
+
+An authorized reviewer opens one case, sees its exact details, submission and
+receipt commitments, accepted notice and two private photos, then deliberately
+records Approve for test, Request correction or Reject with a 1–500-character
+reason. Decisions bind the immutable case and expected revision. A conflict
+requires a read-only reload; an uncertain write permits only original-operation
+lookup. Its recovered receipt is historical and cannot replace current status.
+Case departure, backgrounding, logout and permission loss release displayed
+media; late results cannot restore it.
+
+Own-subject review results use a separate authenticated read and remain available
+without reviewer permission. Approved for test, Correction requested and
+Rejected for test never grant genuine identity, Requests, Operations, Level 2,
+signing, payment or sensor authority. A deliberate new or corrected test package
+starts with fresh details, photos and exact notice acceptance; its review starts
+pending and does not inherit an older decision. Reopening Account refreshes
+these read-only results even when it is already the current screen.
+
+The two explicit reviewer modules bring the shared runtime ceiling to 448 KiB.
+Restoring the 23 October identity seals raises that ceiling to 456 KiB.
+The requester succulent and operator sprout on Home raise it to 465 KiB.
+Showing one current figure, with the mode switch in the header and dashboard, raises it to 467 KiB.
+Naming the current mode on the dashboard raises it to 468 KiB.
+Confirming a change to the other mode raises it to 471 KiB.
+Stating account-closure retention in the draft terms, and the deletion review page, raises it to 476 KiB.
+The unchanged individual image and APK limits remain 8 KiB and 8 MiB. Private
+photo responses use a separate 3 MiB JSON/base64 cap with at most 2 MiB decoded
+JPEG bytes; case details use 256 KiB, and ordinary summaries/decisions 64 KiB.
+Browser, relay and Android enforce the exact route-specific bounds. Hx02 owns
+notice v3 and preserved v1/v2 bytes; Hx11 owns the private audited endpoint and
+activation. See the [client checkpoint](../../../docs/development/PARTICIPANT_IDENTITY_REVIEW.md)
+for executed evidence and remaining limits. Real-data intake remains pending.

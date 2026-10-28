@@ -6,7 +6,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/../harness-env.sh"
 mkdir -p "$CARGO_TARGET_DIR"
 output="$(mktemp -d "$CARGO_TARGET_DIR/native-lifecycle-cleanup.XXXXXXXX")"
 compile_harness "$output" \
-    "$KOTLIN_PRODUCTION/NativeLifecycleCleanup.kt" \
+    "$CODE_ROOT/android/shared/src/main/kotlin/org/nonverba/camera/NativeLifecycleCleanup.kt" \
     "$KOTLIN_PRODUCTION/NativeGnssStatusDiagnostics.kt" \
     "$KOTLIN_PRODUCTION/NativeGnssStatusRegistration.kt" \
     "$HARNESS_DIR/NativeLifecycleCleanupSmoke.kt"

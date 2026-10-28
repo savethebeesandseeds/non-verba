@@ -4,17 +4,26 @@ const fail = () => new Error('The local account service is unavailable. Try agai
 const maximum = 64 * 1024;
 const inventoryPath = '/v1/account/signin-devices';
 const proofPath = inventoryPath + '/prove';
-const responseLimit = request => request?.path === inventoryPath ? 256 * 1024 : maximum;
+const identityPath = '/v1/account/identity/submissions';
+const reviewCase = /^\/v1\/identity\/reviewer\/cases\/[A-Za-z0-9._:-]{1,128}$/;
+const reviewPhoto = /^\/v1\/identity\/reviewer\/cases\/[A-Za-z0-9._:-]{1,128}\/photos\/(?:document_front|face_front)$/;
+const responseLimit = request => request?.method === 'GET' && reviewPhoto.test(request.path) ? 3 * 1024 * 1024
+  : request?.path === inventoryPath || request?.method === 'GET' && reviewCase.test(request.path) ? 256 * 1024 : maximum;
+const wireLimit = request => request?.method === 'GET' && reviewPhoto.test(request.path) ? 3 * 1024 * 1024 + 16384
+  : responseLimit(request) * 6 + 2048;
 
 export function createAccountTransport() {
   const native = window.NonverbaAccount;
   const pending = new Map();
   if (native?.postMessage) native.onmessage = event => {
-    if (typeof event.data !== 'string' || event.data.length > 256 * 1024 * 6 + 2048) return;
+    if (typeof event.data !== 'string' || event.data.length > 3 * 1024 * 1024 + 16384) return;
+    const wireBytes = new TextEncoder().encode(event.data).length;
+    if (wireBytes > 3 * 1024 * 1024 + 16384) return;
     let value;
     try { value = JSON.parse(event.data); } catch { return; }
     const item = pending.get(value?.id);
     if (!item) return;
+    if (wireBytes > item.limit) { item.finish(fail()); return; }
     if (value.error) item.finish(fail()); else item.finish(null, value);
   };
   async function send(request, signal, config = false) {
@@ -31,7 +40,7 @@ export function createAccountTransport() {
           clearTimeout(timer); signal?.removeEventListener('abort', abort);
           if (error) reject(error); else resolve(value);
         }
-        pending.set(id, {finish}); signal?.addEventListener('abort', abort, {once:true});
+        pending.set(id, {finish,limit:wireLimit(request)}); signal?.addEventListener('abort', abort, {once:true});
         try { native.postMessage(JSON.stringify(envelope)); } catch { finish(fail()); }
       });
     }
@@ -51,7 +60,7 @@ export function createAccountTransport() {
         const result = await reader.read();
         if (result.done) break;
         total += result.value.byteLength;
-        if (total > responseLimit(request) * 6 + 2048) { await reader.cancel(); throw fail(); }
+        if (total > wireLimit(request)) { await reader.cancel(); throw fail(); }
         parts.push(result.value);
       }
       const bytes = new Uint8Array(total); let offset = 0;
@@ -73,7 +82,7 @@ export function createAccountTransport() {
       catch { return false; }
     },
     async request({signal, ...request}) {
-      const limit = request.path === proofPath ? 192 * 1024 : 16384;
+      const limit = request.path === identityPath ? 6 * 1024 * 1024 : request.path === proofPath ? 192 * 1024 : 16384;
       if (request.body !== undefined && (typeof request.body !== 'string' || new TextEncoder().encode(request.body).length > limit)) throw fail();
       const value = await send(request, signal);
       if (typeof value?.id !== 'string' || !value.response || !Number.isInteger(value.response.status)

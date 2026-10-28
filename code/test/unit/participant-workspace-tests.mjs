@@ -150,7 +150,7 @@ test('central workflow policy distinguishes basic requests and advanced operatio
     assert.equal(result.required,required,view+' has the correct role prerequisite.');
     assert.equal(result.allowed,required===null);
     assert.equal(result.redirect,required==='basic' ? 'requests' : required==='advanced' ? 'operations' : view);
-    if (required) assert.match(result.reason,required==='advanced' ? /advanced identity verification/i : /complete identity verification/i);
+    if (required) assert.match(result.reason,/start Level [12] identity before/i);
     else assert.equal(result.reason,'');
   }
   for (const input of [undefined,null,false,42,{},'#requester','requester?verified=true','operations/new/../review']) {
@@ -315,7 +315,10 @@ function statusDocument() {
   const summary = element('span',{class:'status-icons','data-status-summary':'requests','data-status-disclosure':'requests-list-link'},role);
   const setup = element('button',{id:'requests-setup-link'});
   const source = element('span',{class:'status-icons','data-status-source':'identity-requests'},setup);
-  element('button',{id:'operations-setup-link'});
+  const setupLabel = element('span',{id:'requests-setup-label'},setup);
+  const operationsSetup = element('button',{id:'operations-setup-link'});
+  const operationsSource = element('span',{class:'status-icons','data-status-source':'identity-operations'},operationsSetup);
+  const operationsLabel = element('span',{id:'operations-setup-label'},operationsSetup);
   const duplicateSource = element('span',{class:'status-icons','data-status-source':'identity-requests'},element('button',{}));
   const value = element('dd',{});
   const success = element('span',{class:'status-icons','data-status-source':'api-good'},value);
@@ -323,7 +326,7 @@ function statusDocument() {
   const row = element('li',{});
   const item = element('button',{'data-attention-kind':'requests','data-attention-item':'local-request'},row);
   const dot = element('span',{class:'status-icons','data-status-source':'attention-requests-local-request','data-status-dot':''},item);
-  return {document,element,control,menu,options,role,summary,setup,source,duplicateSource,success,info,row,item,dot};
+  return {document,element,control,menu,options,role,summary,setup,source,setupLabel,operationsSetup,operationsSource,operationsLabel,duplicateSource,success,info,row,item,dot};
 }
 const renderedKinds = host=>host.children.map(node=>node.dataset.statusKind);
 const descriptions = control=>control.getAttribute('aria-describedby')?.split(/\s+/) || [];
@@ -390,12 +393,65 @@ test('identity warnings require a signed-in account and clear again on sign-out'
   renderRoleSetup(f.document);
   assert.equal(f.setup.hidden,true); assert.equal(f.menu.hidden,true);
   const model=renderRoleSetup(f.document,{},true);
-  assert.equal(model.sources.get('identity-requests').message,'Set up identity verification before posting requests.');
-  assert.equal(model.sources.get('identity-operations').message,'Set up advanced identity verification before accepting operations.');
+  assert.equal(model.sources.get('identity-requests').message,'Start Level 1 identity before posting requests.');
+  assert.equal(model.sources.get('identity-operations').message,'Start Level 2 identity before accepting operations.');
   assert.equal(f.setup.hidden,false); assert.deepEqual(renderedKinds(f.menu),['warning']);
   renderRoleSetup(f.document,{},false);
   assert.equal(f.setup.hidden,true); assert.equal(f.menu.hidden,true);
   assert.deepEqual(descriptions(f.role),[]);
+});
+
+test('identity setup labels and destinations follow pending status and reset without granting workflow authority', () => {
+  const f = statusDocument();
+  const pending = {
+    requests:{status:'awaiting_approval',reason:'Awaiting Level 1 approval before creating a request.'},
+    operations:{status:'awaiting_prerequisite',reason:'Awaiting Level 1 approval before starting Level 2.'}
+  };
+  const present = (prerequisites,signedIn = true) => {
+    const before = JSON.stringify(prerequisites);
+    const model = renderRoleSetup(f.document,{},signedIn,prerequisites);
+    const account = {state:signedIn ? 'signed_in' : 'signed_out',identity_status:{prerequisites}};
+    assert.equal(workflowAccess('requester',account).allowed,false);
+    assert.equal(workflowAccess('operations/new',account).allowed,false);
+    assert.equal(JSON.stringify(prerequisites),before,'Rendering does not alter the supplied prerequisite state.');
+    assert.equal(f.setup.querySelector('[data-status-source="identity-requests"]'),f.source);
+    assert.equal(f.operationsSetup.querySelector('[data-status-source="identity-operations"]'),f.operationsSource);
+    return model;
+  };
+  const awaiting = present(pending);
+  assert.equal(f.setupLabel.textContent,'Awaiting review');
+  assert.equal(f.setup.dataset.navigate,'identity/status'); assert.equal(f.setup.disabled,false);
+  assert.equal(f.operationsLabel.textContent,'Start Level 1 identity first');
+  assert.equal(f.operationsSetup.disabled,true); assert.equal(f.operationsSetup.dataset.navigate,'identity/setup');
+  assert.equal(f.setup.hidden,false); assert.equal(f.operationsSetup.hidden,false);
+  assert.deepEqual(renderedKinds(f.source),['pending']); assert.deepEqual(renderedKinds(f.operationsSource),['warning']);
+  assert.equal(awaiting.sources.get('identity-operations').message,pending.operations.reason);
+
+  present({requests:{status:'unverified'},operations:{status:'unverified'}});
+  assert.equal(f.setupLabel.textContent,'Start Level 1 identity');
+  assert.equal(f.operationsLabel.textContent,'Start Level 1 identity first');
+  assert.equal(f.setup.dataset.navigate,'identity/setup'); assert.equal(f.operationsSetup.dataset.navigate,'identity/setup');
+  assert.equal(f.setup.disabled,false); assert.equal(f.operationsSetup.disabled,false);
+  assert.deepEqual(renderedKinds(f.source),['warning']); assert.deepEqual(renderedKinds(f.operationsSource),['warning']);
+
+  for (const state of ['checking','unknown']) {
+    present(pending);
+    present({requests:{status:state},operations:{status:state}});
+    for (const [link,label] of [[f.setup,f.setupLabel],[f.operationsSetup,f.operationsLabel]]) {
+      assert.equal(label.textContent,'Check identity status'); assert.equal(link.disabled,false);
+      assert.equal(link.dataset.navigate,'identity/setup'); assert.equal(link.hidden,false);
+    }
+    assert.deepEqual(renderedKinds(f.source),['unknown']); assert.deepEqual(renderedKinds(f.operationsSource),['unknown']);
+  }
+
+  present(pending);
+  const signedOut = present({},false);
+  assert.equal(f.setup.hidden,true); assert.equal(f.operationsSetup.hidden,true);
+  assert.equal(f.setup.disabled,false); assert.equal(f.operationsSetup.disabled,false);
+  assert.equal(f.setup.dataset.navigate,'identity/setup'); assert.equal(f.operationsSetup.dataset.navigate,'identity/setup');
+  assert.equal(f.setupLabel.textContent,'Start Level 1 identity'); assert.equal(f.operationsLabel.textContent,'Start Level 1 identity first');
+  assert.equal(f.source.hidden,true); assert.equal(f.operationsSource.hidden,true); assert.equal(f.menu.hidden,true);
+  assert.equal(signedOut.sources.size,0); assert.deepEqual(descriptions(f.role),[]);
 });
 
 test('notification origins use dots while summaries use bells and success/info never propagate', () => {

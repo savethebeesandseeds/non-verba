@@ -112,6 +112,40 @@ mixed-context package or automatic migration of earlier dispute records.
 No historical profile is guessed. An unsupported extension never rewrites
 protocol-1 or protocol-2 records, conditional proofs or accrued rights.
 
+## Inclusion pin and counterfactual comparison
+
+`show-inclusion` reports the version-1 annex already bound to a case. The record
+names catalog `nv-dispute-priors-5-v1`, its digest, both signed profile digests,
+the Contract digest, the case hash, and the case scope. It creates no signature.
+A later catalog revision needs a new annex. It cannot rewrite those profile hashes.
+
+`counterfactual-comparison` is deterministic sensitivity. It rewrites one retained
+analysis into a hypothetical point move and a withheld citation. It does not
+show that a prior changed an explanation.
+
+`compare-readings` diffs three readings already retained on the package. The
+[one disagreement](../../code/disputes/fixtures/one-disagreement/README.md) is the
+first such case: a working install, one operator completion claim, and the
+balanced signed profiles. Its three pipeline readings use the mock backend.
+The check sheet records whether the prior move stays on its two dimensions,
+whether withholding the claim adds uncertainty without a new fact, whether a
+party swap exchanges the attributed emphasis, and whether an irrelevant name
+leaves the explanation stable. A spilled prior move fails the clean-move rule
+and that failure is kept. None of this calls a model or establishes competence.
+
+A later reading can use a replaceable completion preset. The current preset is
+one headless Grok prompt per stage, with tools and subagents disallowed, and it
+runs only when its config sets `approved` to true. One such call, retained in
+[grok-single.json](../../code/disputes/fixtures/one-disagreement/grok-single.json), exceeded the signed specification's token limits and was
+not published as analysis. That call is not the pinned local runtime, not a
+tool-using agent session, and not evidence of competence.
+
+The point move is not a new signed profile. The withheld reference is not fault,
+notice, or consent. The comparison itself is not notice, a response, silence,
+consent, or a settlement. It must name a claim that is already in the case scope.
+Financial authority remains **NONE** and settlement policy remains
+**UNSPECIFIED**. The core financial projection is left unchanged.
+
 ## Case, evidence and analysis
 
 Each case revision retains the supplied Assignment bundle, its locally observed

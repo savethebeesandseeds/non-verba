@@ -234,3 +234,11 @@ extend these notes while preserving the distinction between an implemented
 calculation, an observed result, a proposed institution and an authorized rule.
 
 Return to [all notes](../README.md) or [all documentation](../../README.md).
+
+## Membership contract
+
+Reserved 28 October 2026. This heading is the place for a frozen membership
+eligibility and recovery contract. No contract is frozen. No enrollment
+mechanism is selected. Login, a face match, and an Assignment role are not
+membership. Identity key control stays with Identity. This note does not
+enable duplicate voting and does not assume an identity-proof method.

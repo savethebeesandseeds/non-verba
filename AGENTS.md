@@ -4,6 +4,13 @@
 
 - Keep changes limited to the requested outcome. A source cleanup is not a disk
   cleanup, backup, toolchain migration, or container rebuild.
+- Keep one participant preview at the documented port, running a fresh unmodified
+  snapshot of the main working tree through the managed launcher. Do not maintain
+  a hand-patched or older preview client alongside main. Resolve service
+  compatibility in the maintained source/service contract; preserve unavailable-feature guards.
+- Use only `http://127.0.0.1:4173/` as the local participant app URL. Serve the
+  application there directly; old document URLs redirect to `/`. Keep the local
+  annotation CSP exception server-only and production/package HTML strict.
 - Inspect Git status before edits. Preserve other sessions' changes and never
   stage unrelated work. This repository owns the public applications, protocols
   and reference tools. The sibling `private-source/code/server/` is the

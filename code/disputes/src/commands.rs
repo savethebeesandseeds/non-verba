@@ -36,17 +36,27 @@ const HELP: &str = r#"Case and local analysis commands (all output paths must be
   draft-challenge <package.json> <trust.json> <R|O|M> <id> <INPUT|ATTRIBUTION|PROCEDURE|INTERPRETATION|RUNTIME_SPECIFICATION> <text-file> <new-body.json> [attempt-hash]
   append-challenge <package.json> <trust.json> <signed-challenge.json> <new-package.json>
   mock-responses <new-script.json>
-  run-analysis <package.json> <trust.json> <single|diagnostic> <unavailable|mock|local> <new-package.json> <script-or-admin-config.json|none> <cancel-file|none>
+  run-analysis <package.json> <trust.json> <single|diagnostic> <unavailable|mock|local|grok> <new-package.json> <script-or-admin-config.json|none> <cancel-file|none>
   inspect-analysis <package.json> <independent-trust.json>
   report-analysis <package.json> <independent-trust.json> <new-report.txt>
   export-analysis <package.json> <independent-trust.json> <new-export.json>
   replay-analysis <export.json> <independent-trust.json>
   import-analysis <export.json> <independent-trust.json> <new-package.json>
+  show-inclusion <package.json> <independent-trust.json>
+  counterfactual-comparison <package.json> <independent-trust.json> <claim-id> <R|O> <from-dimension> <to-dimension> <points> <withheld-ref> <new-record.json>
+  compare-readings <package.json> <independent-trust.json> <claim-id> <baseline-attempt> <prior-attempt> <fact-attempt> <new-record.json>
 
 Use the signing commands for evidence/challenge authorship before appending.
 Drafts are editable; published revisions and exports use new immutable files.
 A later revision keeps old attempts, derives their staleness and consumes another
 evidence round. An answer is a signed claim added as evidence; silence is not fault.
+show-inclusion prints the signed catalog, both profile hashes, the Contract digest,
+and the case scope already bound to the package. It creates no signature.
+counterfactual-comparison is deterministic sensitivity: it rewrites one retained
+analysis. It is not an explanation. compare-readings diffs three retained
+five-dimension readings already stored on the package and copies their completion
+backend. Different backends become MIXED. Neither command is notice,
+a response, silence, consent, or a settlement.
 The fixed diagnostic schedule retains three seeds including failures, with no retry
 until a preferred result. The output's sibling .attempts directory journals completed
 attempts and the run intent. An interrupted incomplete journal is not a valid export.
@@ -335,6 +345,56 @@ pub fn dispatch(args: &[String]) -> Result<bool, String> {
             save(&a[2], &archive.package)?;
             print(&report)?;
         }
+        ("show-inclusion", 2) => {
+            let trust = read(&a[1])?;
+            let package = verified_package(&a[0], &trust)?;
+            let case = package.cases.last().ok_or("COUNTERFACTUAL_CASE: no case")?;
+            print(&nonverba_disputes::counterfactual::inclusion(
+                case,
+                &package.context,
+                &trust,
+            )?)?;
+        }
+        ("counterfactual-comparison", 9) => {
+            let trust = read(&a[1])?;
+            let package = verified_package(&a[0], &trust)?;
+            let points = a[6]
+                .parse::<u16>()
+                .map_err(|_| "COUNTERFACTUAL_PRIOR: points must be an integer")?;
+            let record = nonverba_disputes::counterfactual::compare(
+                &package,
+                &trust,
+                &a[2],
+                nonverba_disputes::counterfactual::PriorShift {
+                    role: role(&a[3])?,
+                    from_dimension: a[4].clone(),
+                    to_dimension: a[5].clone(),
+                    points,
+                },
+                &a[7],
+            )?;
+            save(&a[8], &record)?;
+            print(&record)?;
+        }
+        ("compare-readings", 7) => {
+            let trust = read(&a[1])?;
+            let package = verified_package(&a[0], &trust)?;
+            let index = |value: &str| {
+                value
+                    .parse::<usize>()
+                    .map_err(|_| "COUNTERFACTUAL_ATTEMPT: index must be an integer".to_owned())
+            };
+            let record = nonverba_disputes::counterfactual::compare_retained_attempts(
+                &package,
+                &trust,
+                &a[2],
+                index(&a[3])?,
+                index(&a[4])?,
+                index(&a[5])?,
+            )?;
+            save(&a[6], &record)?;
+            print(&record)?;
+        }
         _ => return Ok(false),
     }
     Ok(true)
@@ -366,7 +426,11 @@ fn run(a: &[String]) -> Result<(), String> {
             runtime::LlamaCppBackend::new(read(&a[5])?, token.clone())
                 .map_err(|e| e.to_string())?,
         ),
-        _ => return Err("BACKEND: unavailable, mock or local".into()),
+        "grok" => Box::new(
+            nonverba_disputes::completion::GrokHeadlessBackend::new(read(&a[5])?, token.clone())
+                .map_err(|e| e.to_string())?,
+        ),
+        _ => return Err("BACKEND: unavailable, mock, local or grok".into()),
     };
     let journal = format!("{}.attempts", a[4]);
     fs::create_dir(&journal).map_err(|e| format!("JOURNAL_NEW_DIRECTORY: {e}"))?;

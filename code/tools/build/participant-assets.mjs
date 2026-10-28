@@ -15,7 +15,17 @@ const insist = (condition, message) => { if (!condition) throw new Error(message
 // Centered signup, password guidance and bundled versioned account terms: 272 KiB.
 // Terms review gate and fixed username prefix: 280 KiB, same fourteen sources.
 // Eight-code recovery grid and deliberate browser/native text export: 296 KiB.
-export const PARTICIPANT_SHELL_BUDGET = 296 * 1024;
+// Compact identity levels and three bounded stamp images: 320 KiB.
+// Identity details, bounded phone-image preparation and private intake client: 384 KiB.
+// Account-bound identity state and explicit saved-password enhancement: 400 KiB.
+// Separate bounded synthetic reviewer client/view and current notice: 448 KiB.
+// Restored 23 October identity seals: 456 KiB.
+// Requester and operator home figures: 465 KiB.
+// One current figure plus the header and dashboard mode switch: 467 KiB.
+// The dashboard names the current mode: 468 KiB.
+// Confirming a change to the other mode: 471 KiB.
+// Account-closure retention in the draft terms and deletion review: 476 KiB.
+export const PARTICIPANT_SHELL_BUDGET = 476 * 1024;
 export const PARTICIPANT_IMAGE_BUDGET = 8 * 1024;
 // The real-capture closure intentionally uses a new generation. Keep the older
 // illustration stage intact instead of deleting unknown or retained outputs.
@@ -25,17 +35,28 @@ export const PARTICIPANT_SHELL_SOURCES = Object.freeze({
   'participant/participant.css': 'web/apps/non-verba/src/participant.css',
   'participant/participant.js': 'web/apps/non-verba/src/participant.js',
   'participant/onboarding-ui.js': 'web/apps/non-verba/src/onboarding-ui.js',
+  'participant/identity-state.js': 'web/apps/non-verba/src/identity-state.js',
+  'participant/identity-review-client.js': 'web/apps/non-verba/src/identity-review-client.js',
+  'participant/identity-review-ui.js': 'web/apps/non-verba/src/identity-review-ui.js',
+  'participant/password-manager-sign-in.js': 'web/apps/non-verba/src/password-manager-sign-in.js',
   'participant/onboarding-account.js': 'web/apps/non-verba/src/onboarding-account.js',
   'participant/account-terms.js': 'web/apps/non-verba/src/account-terms.js',
+  'participant/identity-intake-notice.js': 'web/apps/non-verba/src/identity-intake-notice.js',
   'participant/account-transport.js': 'web/apps/non-verba/src/account-transport.js',
   'participant/recovery-export.js': 'web/apps/non-verba/src/recovery-export.js',
   'participant/identity/enrollment-camera.js': 'web/shared/identity/enrollment-camera.js',
   'participant/identity/identity-capture.js': 'web/shared/identity/identity-capture.js',
+  'participant/identity/identity-camera-tool.js': 'web/shared/identity/identity-camera-tool.js',
+  'participant/identity/identity-capture-proof.js': 'web/shared/identity/identity-capture-proof.js',
   'participant/identity/device-attestation.js': 'web/shared/identity/device-attestation.js',
   'participant/identity/browser-attestation-keys.js': 'web/shared/identity/browser-attestation-keys.js',
   'participant/branding/sprout.svg': 'web/site/branding/sprout.svg',
   'participant/branding/home-sprout.webp': 'web/apps/non-verba/assets/branding/home-sprout.webp',
+  'participant/branding/home-succulent.webp': 'web/apps/non-verba/assets/branding/home-succulent.webp',
   'participant/branding/waajacu.webp': 'web/apps/non-verba/assets/branding/waajacu.webp',
+  'participant/identity/level-1.webp': 'web/apps/non-verba/assets/identity/level-1.webp',
+  'participant/identity/level-2.webp': 'web/apps/non-verba/assets/identity/level-2.webp',
+  'participant/identity/unverified.webp': 'web/apps/non-verba/assets/identity/unverified.webp',
 });
 
 export async function assertUnlinkedDirectory(path) {
@@ -101,7 +122,7 @@ export function assertParticipantAssetNames(assets) {
   for (const name of Object.keys(PARTICIPANT_SHELL_SOURCES)) insist(assets.has(name), 'Missing participant shell asset: ' + name);
   for (const name of ['LICENSE.txt', 'SOURCE.txt']) insist(assets.has('nonverba-license/' + name), 'Missing participant notice: ' + name);
   const shellBytes = Object.keys(PARTICIPANT_SHELL_SOURCES).reduce((total, name) => total + assets.get(name).length, 0);
-  insist(shellBytes <= PARTICIPANT_SHELL_BUDGET, 'Participant runtime exceeds reviewed 296KiB account-client budget.');
+  insist(shellBytes <= PARTICIPANT_SHELL_BUDGET, 'Participant runtime exceeds reviewed 476KiB account-client budget.');
   return shellBytes;
 }
 

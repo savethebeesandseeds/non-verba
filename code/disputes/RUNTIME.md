@@ -5,6 +5,15 @@ server. It launches no process, downloads nothing, reads no signing vault and
 dispatches no tool/model action. The Assignment verifier remains a separate
 library. A runtime or model declaration is never payment authority.
 
+A completion is selected through the `Backend` trait. `unavailable`, `mock` and
+`local` remain the existing choices. `grok` is one replaceable preset in
+`completion`: it runs `grok` once per stage with `--max-turns 1`, effort `low`
+or `minimal`, web search disabled, and workspace tools and subagents disallowed.
+The config must set `approved` to true or no process starts. Default tests use
+a stand-in process and do not call Grok. A `GROK_HEADLESS` attempt is an
+unverified runner claim. It is not eligible as the pinned local analysis, and
+it grants no settlement authority. Replacing Grok is another `Backend`.
+
 The supported API source pin is
 `14a9d09f75683c94c2c4f229efe54670d4209089`. The adapter checks exact local server
 binary and GGUF SHA-256 values, the server's reported build/template/model path,

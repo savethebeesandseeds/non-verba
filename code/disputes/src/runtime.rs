@@ -1227,7 +1227,11 @@ impl Backend for LlamaCppBackend {
     }
 }
 
-fn admission(prompt: &str, spec: &AnalysisSpecificationV1, seed: u32) -> Result<(), RuntimeError> {
+pub(crate) fn admission(
+    prompt: &str,
+    spec: &AnalysisSpecificationV1,
+    seed: u32,
+) -> Result<(), RuntimeError> {
     spec.validate().map_err(spec_error)?;
     if !spec.seeds.contains(&seed) {
         return Err(RuntimeError::new(

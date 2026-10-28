@@ -26,47 +26,51 @@
     <symbol viewBox="0 0 24 24" id="status-info"><circle cx="12" cy="12" r="9"/><path d="M12 10v7m0-10v.1"/></symbol>
     <symbol viewBox="0 0 24 24" id="devices"><rect x="2" y="3" width="14" height="12" rx="1"/><path d="M5 20h8m-4-5v5"/><rect x="16" y="9" width="6" height="12" rx="1"/></symbol>
     <symbol viewBox="0 0 24 24" id="sign-out"><path d="M10 4H4v16h6m-2-8h13m-4-4 4 4-4 4"/></symbol>
+    <symbol viewBox="0 0 24 24" id="forward"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
     <symbol viewBox="0 0 24 24" id="trash"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol viewBox="0 0 24 24" id="sun"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/><path d="M12 1.5v5m0 11v5M1.5 12h5m11 0h5M4.6 4.6l3 3m8.8 8.8 3 3M19.4 4.6l-3 3M4.6 19.4l3-3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="moon"><path fill="currentColor" stroke="none" d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
   </svg>
-  <span id="new-request-prerequisite" class="visually-hidden">Identity verification is required to create requests.</span>
-  <span id="new-operation-prerequisite" class="visually-hidden">Advanced identity verification is required to create or accept operations.</span>
+  <span id="new-request-prerequisite" class="visually-hidden">Start Level 1 identity before creating a request.</span>
+  <span id="new-operation-prerequisite" class="visually-hidden">Start Level 2 identity before creating or accepting an operation.</span>
   <div class="shell">
     <header class="brand" aria-label="Non-verba">
       <button id="navigation-toggle" class="icon-button" type="button" aria-label="Open navigation" aria-controls="navigation-panel" aria-expanded="false" aria-haspopup="dialog"><span class="navigation-icon" aria-hidden="true"></span><span class="status-icons menu-status" data-status-summary="dashboard" aria-hidden="true" hidden></span></button>
-      <div class="brand-identity"><img src="branding/sprout.svg" width="34" height="34" alt=""><span class="brand-name">Facta, <em>non verba.</em></span></div>
+      <div class="brand-identity"><button id="mode-switch" class="mode-switch" type="button" aria-label="Switch to Operator" aria-haspopup="dialog" aria-controls="mode-confirm"><img id="brand-mark" src="branding/home-succulent.webp" width="34" height="34" alt=""></button><span class="brand-name">Facta, <em>non verba.</em></span></div>
       <button id="options-toggle" class="icon-button" type="button" aria-label="Open options" aria-controls="options-panel" aria-expanded="false" aria-haspopup="dialog"><span class="options-icon" aria-hidden="true"><span></span><span></span><span></span></span><span class="status-icons menu-status" data-status-summary="settings" data-status-align="left" aria-hidden="true" hidden></span></button>
     </header>
     <dialog id="navigation-panel" class="side-panel" aria-labelledby="navigation-title" data-status-node="dashboard">
       <div class="panel-heading"><h2 id="navigation-title">Dashboard</h2></div>
       <nav aria-label="Workspace">
-        <section class="navigation-section" aria-labelledby="requests-list-link" data-status-node="requests" data-status-parent="dashboard">
+        <section class="navigation-section" aria-labelledby="requests-list-link" data-status-node="requests" data-status-parent="dashboard" data-workspace-mode="requester">
           <div class="navigation-section-heading">
             <button id="requests-list-link" type="button" data-section="requests" aria-expanded="false" aria-controls="navigation-requests" autofocus>Requests<span class="status-icons section-status" data-status-summary="requests" data-status-disclosure="requests-list-link" aria-hidden="true" hidden></span></button>
             <button id="new-request" class="icon-button new-action" type="button" data-navigate="requester" aria-label="New request" aria-describedby="new-request-prerequisite" title="New request" disabled><svg class="action-icon" aria-hidden="true"><use href="#feather"/></svg></button>
           </div>
           <div id="navigation-requests" hidden>
-            <button id="requests-setup-link" class="text-link" type="button" data-navigate="identity/setup" hidden><span class="status-icons" data-status-source="identity-requests" aria-hidden="true" hidden></span>Set up identity verification</button>
+            <button id="requests-setup-link" class="text-link" type="button" data-navigate="identity/setup" hidden><span class="status-icons" data-status-source="identity-requests" aria-hidden="true" hidden></span><span id="requests-setup-label">Start Level 1 identity</span></button>
             <ul class="navigation-list"><li id="navigation-request-row" hidden><button id="navigation-request-draft" type="button" data-attention-kind="requests" data-attention-item="local-request" data-navigate="requester"><svg class="row-icon" aria-hidden="true"><use href="#feather"/></svg><span id="navigation-request-title"></span><span class="status-icons" data-status-source="attention-requests-local-request" data-status-dot aria-hidden="true" hidden></span></button></li></ul>
             <p id="navigation-requests-empty" class="list-empty"><svg class="row-icon" aria-hidden="true"><use href="#empty"/></svg>No request drafts.</p>
           </div>
         </section>
-        <section class="navigation-section" aria-labelledby="operations-list-link" data-status-node="operations" data-status-parent="dashboard">
+        <section class="navigation-section" aria-labelledby="operations-list-link" data-status-node="operations" data-status-parent="dashboard" data-workspace-mode="operator" hidden>
           <div class="navigation-section-heading">
             <button id="operations-list-link" type="button" data-section="operations" aria-expanded="false" aria-controls="navigation-operations">Operations<span class="status-icons section-status" data-status-summary="operations" data-status-disclosure="operations-list-link" aria-hidden="true" hidden></span></button>
             <button id="new-operation" class="icon-button new-action" type="button" data-navigate="operations/new" aria-label="New operation" aria-describedby="new-operation-prerequisite" title="New operation" disabled><svg class="action-icon" aria-hidden="true"><use href="#hammer"/></svg></button>
           </div>
           <div id="navigation-operations" hidden>
-            <button id="operations-setup-link" class="text-link" type="button" data-navigate="identity/setup" hidden><span class="status-icons" data-status-source="identity-operations" aria-hidden="true" hidden></span>Set up advanced identity verification</button>
+            <button id="operations-setup-link" class="text-link" type="button" data-navigate="identity/setup" hidden><span class="status-icons" data-status-source="identity-operations" aria-hidden="true" hidden></span><span id="operations-setup-label">Start Level 1 identity first</span></button>
             <ul class="navigation-list"><li id="navigation-operation-row" hidden><button id="navigation-operation-draft" type="button" data-attention-kind="operations" data-attention-item="local-operation" data-navigate="operations/new"><svg class="row-icon" aria-hidden="true"><use href="#hammer"/></svg><span id="navigation-operation-title"></span><span class="status-icons" data-status-source="attention-operations-local-operation" data-status-dot aria-hidden="true" hidden></span></button></li></ul>
             <p id="navigation-operations-empty" class="list-empty"><svg class="row-icon" aria-hidden="true"><use href="#empty"/></svg>No operation drafts.</p>
           </div>
         </section>
       </nav>
+      <div class="dashboard-mode-row"><button id="dashboard-mode-switch" class="mode-switch" type="button" aria-label="Change to Operator mode" aria-haspopup="dialog" aria-controls="mode-confirm"><img id="dashboard-mode-mark" src="branding/home-sprout.webp" width="28" height="28" alt=""><span id="dashboard-mode-name">Change to Operator mode</span></button></div>
     </dialog>
     <dialog id="options-panel" class="side-panel options-panel" aria-labelledby="options-title" data-status-node="settings">
-      <div class="panel-heading"><h2 id="options-title" tabindex="-1" autofocus>Settings</h2></div>
+      <div class="panel-heading"><h2 id="options-title" tabindex="-1" autofocus>Settings</h2><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme follows the system. Switch theme."><svg class="theme-icon" aria-hidden="true"><use href="#sun"/></svg></button></div>
       <dl class="account-details">
-        <div data-status-node="account" data-status-parent="settings"><dt>Account</dt><dd><span id="account-summary" hidden></span><button id="account-setup-link" class="text-link" type="button" data-navigate="account/sign-in"><span class="status-icons" data-status-source="settings-account" aria-hidden="true" hidden></span><span id="account-link-label">Sign in</span></button></dd></div>
+        <div data-status-node="account" data-status-parent="settings"><dt>Account</dt><dd><span id="account-summary" hidden></span><div class="account-menu-entry"><button id="account-setup-link" class="text-link" type="button" data-navigate="account/sign-in"><span class="status-icons" data-status-source="settings-account" aria-hidden="true" hidden></span><span id="account-link-label">Sign in</span></button></div></dd></div>
         <div data-status-node="api-access" data-status-parent="settings"><dt>Services</dt><dd class="api-access-details">
           <dl class="service-status-list" aria-label="Service status">
             <div data-status-node="network" data-status-parent="api-access"><dt>Network</dt><dd class="status-line"><span class="status-icons" data-status-source="settings-network" aria-hidden="true" hidden></span><span id="network-label">Unconfirmed</span></dd></div>
@@ -82,16 +86,31 @@
         <p>Version 0.7.0 · AGPL-3.0-only</p>
       </section>
     </dialog>
+    <dialog id="mode-confirm" class="mode-confirm" aria-labelledby="mode-confirm-title" aria-describedby="mode-confirm-note">
+      <div class="mode-shift" aria-hidden="true"><img id="mode-from" src="branding/home-succulent.webp" width="48" height="48" alt=""><svg class="row-icon mode-arrow"><use href="#forward"/></svg><img id="mode-to" src="branding/home-sprout.webp" width="48" height="48" alt=""></div>
+      <div class="mode-copy">
+        <h2 id="mode-confirm-title">Change to Operator mode?</h2>
+        <p id="mode-confirm-note">A requester asks for the work.<br>An operator does the work.</p>
+      </div>
+      <div class="mode-confirm-actions">
+        <button id="mode-confirm-cancel" class="secondary" type="button">Not now</button>
+        <button id="mode-confirm-accept" class="primary" type="button" autofocus>Change</button>
+      </div>
+    </dialog>
     <main id="workspace">
       <div class="workspace-heading">
         <div id="view-navigation"></div>
         <p id="view-eyebrow" class="eyebrow" hidden></p>
         <h1 id="view-title" tabindex="-1">Home</h1>
+        <div id="account-earned-stamps" class="earned-stamps account-heading-stamps" role="group" aria-label="Identity" hidden><img data-identity-unverified src="identity/unverified.webp" width="112" height="112" alt="No identity on record" hidden><span data-identity-unverified-text class="visually-hidden" hidden>No identity on record</span><img data-identity-earned="1" src="identity/level-1.webp" width="112" height="112" alt="Level 1 identity on record" hidden><img data-identity-earned="2" src="identity/level-2.webp" width="112" height="112" alt="Level 2 identity on record" hidden><span id="account-identity-status" class="account-stamp-status" hidden>Awaiting review</span></div>
+        <div id="identity-step-level" class="identity-step-level" hidden><img id="identity-step-stamp" src="identity/level-1.webp" width="128" height="128" alt=""><span id="identity-step-label" class="visually-hidden">Level 1 identity · Not started</span></div>
         <p id="view-description" class="introduction" hidden></p>
       </div>
 
       <section id="home-screen" class="screen" data-view="home" aria-label="Non-verba home" tabindex="-1">
-        <img id="home-logo" src="branding/home-sprout.webp" width="96" height="96" alt="Non-verba">
+        <div id="home-figure"><img id="home-logo" src="branding/home-succulent.webp" width="96" height="96" alt=""><p id="home-mode-hint">Requester</p></div>
+        <p id="home-other-draft" hidden></p>
+        <button id="home-sign-in" class="primary" type="button" data-navigate="account/sign-in">Sign in</button>
       </section>
 
       <section id="api-access-screen" class="screen" data-view="services/api" aria-label="API key management preview" hidden>
@@ -110,17 +129,18 @@
 
       <section id="api-documentation-screen" class="screen" data-view="services/docs" aria-label="API and MCP documentation" hidden></section>
 
-      <section id="onboarding-screen" class="screen onboarding" aria-label="Account and identity journey" hidden>
-        <p class="example-notice" id="onboarding-notice">Local development · Checking email delivery. Document and face photos stay only in this open page and are not uploaded. Identity is not verified.</p>
+      <section id="onboarding-screen" class="screen onboarding" aria-label="Account" hidden>
         <p id="onboarding-message" class="errors" role="alert" tabindex="-1" hidden></p>
-        <div id="mock-email-controls" hidden><button id="account-mock-email" class="secondary" type="button">Open mock email</button><article id="mock-mailbox" class="paper mock-mailbox" hidden><span class="tag">Mock email · nothing sent</span><h2>Your confirmation code</h2><p>This test message is available only for your pending development account operation.</p><label for="mock-confirmation-code">One-time test code</label><input id="mock-confirmation-code" data-secret readonly autocomplete="off" spellcheck="false"><button id="mock-use-code" class="text-link" type="button">Use this mock code</button></article></div>
+        <div id="mock-email-controls" hidden><button id="account-mock-email" class="text-link" type="button">Email preview</button><article id="mock-mailbox" class="paper mock-mailbox" hidden><span class="tag">Test email · not sent</span><h2>Email code</h2><label for="mock-confirmation-code">Code</label><input id="mock-confirmation-code" data-secret readonly autocomplete="off" spellcheck="false"><button id="mock-use-code" class="text-link" type="button">Use code</button></article></div>
         <div id="camera-stage" class="capture-stage" hidden><video id="enrollment-video" autoplay playsinline muted aria-label="Live camera preview"></video><div id="camera-frame" class="camera-frame" aria-hidden="true"></div><p id="camera-status" role="status">Camera active</p><div class="onboarding-actions"><button id="camera-shutter" class="primary" type="button">Take photo</button><button id="camera-stop" class="secondary" type="button">Stop camera</button></div></div>
         <div data-onboarding-view="identity/setup" id="identity-setup-screen" hidden>
-          <ol class="journey-steps" aria-label="Setup sequence"><li>1 · Account</li><li>2 · Document and photo</li><li>3 · Review</li></ol>
-          <p>Create and confirm your account, then sign in before setting up identity verification.</p>
-          <p id="account-service-status" class="small-note" role="status">Checking the local account service…</p><button id="account-connect" class="text-link" type="button">Check connection</button>
-          <div class="paper"><h2 id="onboarding-account-title">Start with an account</h2><p id="onboarding-account-summary">An email and password account on the local development service.</p><div class="onboarding-actions" id="account-entry-actions"><button id="create-account" class="primary" type="button" data-navigate="account/create" disabled>Create account</button><button id="onboarding-sign-in" class="secondary" type="button" data-navigate="account/sign-in" disabled>Sign in</button></div><button id="onboarding-confirm" class="primary" type="button" data-navigate="account/confirm" hidden>Continue account confirmation</button></div>
-          <div class="onboarding-block"><label for="enrollment-role">Set up for</label><select id="enrollment-role"><option value="requester">Posting requests</option><option value="operator">Accepting operations</option></select><p class="small-note">Capture a document front and one frontal photo, then review them. This does not post a request, accept work or verify identity.</p><button id="enrollment-begin" class="primary" type="button" disabled>Continue to document and photo</button><p class="small-note">Photos and your session stay only in this open page. Closing or reloading clears them. No identity reviewer or upload destination is connected yet.</p></div>
+          <div class="identity-account"><div><h2 id="onboarding-account-title">Account</h2><p id="onboarding-account-summary">Sign in to continue.</p></div><div class="onboarding-actions" id="account-entry-actions"><button id="onboarding-sign-in" class="primary" type="button" data-navigate="account/sign-in" disabled>Sign in</button><button id="create-account" class="text-link" type="button" data-navigate="account/create" disabled>Create account</button></div><button id="onboarding-confirm" class="text-link" type="button" data-navigate="account/confirm" hidden>Confirm email</button></div>
+          <div class="identity-connection"><p id="account-service-status" class="reach" role="status" data-status-kind="pending"><svg class="status-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#status-pending"/></svg><span>Connecting…</span></p><button id="account-connect" class="text-link" type="button">Retry connection</button></div>
+          <div id="identity-levels" class="identity-levels" aria-label="Identity">
+            <div id="identity-level-1" class="identity-level-row"><img src="identity/level-1.webp" width="48" height="48" alt=""><div><h2>Level 1 identity</h2><p>Requests</p></div><span class="identity-level-state">Not started</span><div class="identity-pipeline-action"><button id="enrollment-begin" class="secondary" type="button" disabled>Start Level 1 identity</button></div></div>
+            <div id="identity-level-2" class="identity-level-row"><img src="identity/level-2.webp" width="48" height="48" alt=""><div><h2>Level 2 identity</h2><p>Operations</p></div><span id="identity-level-2-prerequisite" class="identity-level-state">Start Level 1 identity first</span><div class="identity-pipeline-action"><button id="enrollment-level-2" class="secondary" type="button" aria-describedby="identity-level-2-prerequisite" disabled>Start Level 2 identity</button></div></div>
+            <p id="identity-photo-limit" class="small-note">A document photo and a face photo are kept with this account. They are not confirmed with the issuer.</p>
+          </div>
         </div>
         <div data-onboarding-view="account/create" hidden>
           <form id="account-create-form" autocomplete="off" novalidate>
@@ -140,30 +160,34 @@
           <button id="account-devices-sign-in" class="text-link" type="button" data-navigate="account/sign-in" hidden>Sign in</button>
         </div>
         <div data-onboarding-view="account/sign-in" hidden>
+          <p id="sign-in-service-status" class="reach" role="status" hidden><svg class="status-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#status-error"/></svg><span>Server unreachable</span></p>
           <div id="account-session-entry" hidden>
             <dl class="account-profile" aria-label="Account details">
-              <div><dt>Email</dt><dd id="account-detail-email"></dd></div>
               <div><dt>Username</dt><dd id="account-detail-username"></dd></div>
+              <div><dt>Email</dt><dd id="account-detail-email"></dd></div>
             </dl>
+            <p id="account-synthetic-review-status" class="small-note" role="status" hidden></p>
           </div>
           <div id="account-page-actions" class="account-actions" hidden>
             <button id="account-devices-link" class="text-link" type="button" data-navigate="account/devices" hidden><svg class="account-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#devices"/></svg><span>Devices</span></button>
-            <button id="account-session-continue" class="text-link" type="button" hidden><span id="account-identity-warning" class="status-icons" aria-hidden="true" hidden><svg class="status-icon" data-status-kind="warning" viewBox="0 0 24 24" stroke="currentColor" fill="none" focusable="false"><use href="#warning"/></svg></span><span>Identity verification</span></button>
-            <span id="account-identity-needed" class="visually-hidden" hidden>Identity verification is required.</span>
+            <button id="account-reviewer-link" class="text-link" type="button" data-navigate="reviewer/cases" hidden>Review test submissions</button>
+            <button id="account-session-continue" class="text-link" type="button" hidden><span id="account-identity-warning" class="status-icons" aria-hidden="true" hidden><svg class="status-icon" data-status-kind="warning" viewBox="0 0 24 24" stroke="currentColor" fill="none" focusable="false"><use href="#warning"/></svg></span><span>Level 1 identity</span></button>
+            <span id="account-identity-needed" class="visually-hidden" hidden>Start Level 1 identity. It is not confirmed with the issuer.</span>
             <button id="account-sign-out" class="text-link" type="button" hidden><svg class="account-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#sign-out"/></svg><span>Sign out</span></button>
             <button id="account-delete-link" class="text-link danger-link" type="button" data-navigate="account/delete" hidden><svg class="account-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#trash"/></svg><span id="account-delete-label">Delete account</span></button>
             <button id="account-discard-session" class="text-link" type="button" hidden>Forget this local session</button>
           </div>
-          <form id="account-email-form" autocomplete="off" novalidate><div class="field"><label id="sign-in-identifier-label" for="sign-in-email">Email or username</label><input id="sign-in-email" type="text" inputmode="text" maxlength="254" autocomplete="username" autocapitalize="none" spellcheck="false"></div><button id="account-email-submit" class="primary" type="submit">Continue</button></form>
-          <button id="sign-in-create-account" class="text-link" type="button">Create account</button>
+          <form id="account-email-form" autocomplete="on" novalidate><div class="field"><label id="sign-in-identifier-label" for="sign-in-email">Email or username</label><input id="sign-in-email" name="username" type="text" inputmode="text" maxlength="254" autocomplete="username" autocapitalize="none" spellcheck="false"></div><button id="account-email-submit" class="primary" type="submit">Continue</button></form>
           <div id="sign-in-email-context" class="context-line" hidden><span id="sign-in-selected-email"></span></div>
+          <p id="sign-in-missing-status" class="reach" role="status" data-status-kind="info" hidden><svg class="status-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#status-info"/></svg><span></span></p>
+          <button id="sign-in-create-account" class="text-link" type="button">Create account</button>
           <form id="account-email-confirm-form" autocomplete="off" novalidate hidden>
             <div class="field"><label for="sign-in-email-code">Email code</label><div id="sign-in-code-entry" class="code-entry"><div class="code-slots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><input id="sign-in-email-code" data-secret type="text" maxlength="8" pattern="[0-9A-Fa-f]{8}" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-describedby="sign-in-code-hint"></div><p id="sign-in-code-hint" class="small-note">8 characters · 0–9 and A–F</p></div>
             <button id="account-email-confirm-submit" class="primary" type="submit">Continue</button>
           </form>
           <details id="sign-in-email-preview" class="email-preview" hidden><summary>Email preview</summary><div><p class="small-note">Preview only · no email sent</p><output id="sign-in-preview-code" aria-label="Preview email code"></output><div class="preview-actions"><button id="sign-in-preview-use" class="text-link" type="button" hidden>Use code</button><button id="sign-in-preview-copy" class="text-link" type="button" hidden>Copy code</button></div><p id="sign-in-copy-status" class="small-note" role="status" aria-live="polite" hidden></p><label for="sign-in-copy-fallback" class="visually-hidden">Email code to copy</label><input id="sign-in-copy-fallback" data-secret readonly autocomplete="off" spellcheck="false" hidden></div></details>
-          <form id="account-sign-in-form" autocomplete="off" novalidate hidden><div class="field"><label for="sign-in-password">Password</label><input id="sign-in-password" type="password" maxlength="1024" autocomplete="current-password"></div><button id="account-sign-in-submit" class="primary" type="submit">Sign in</button></form>
-          <button id="sign-in-recover" class="text-link" type="button" hidden>Forgot password</button><p id="sign-in-service-status" class="small-note" role="status" hidden></p>
+          <form id="account-sign-in-form" autocomplete="on" novalidate hidden><div class="field"><label for="sign-in-password">Password</label><input id="sign-in-password" name="password" type="password" maxlength="1024" autocomplete="current-password"></div><button id="account-sign-in-submit" class="primary" type="submit">Sign in</button></form>
+          <button id="sign-in-recover" class="text-link" type="button" hidden>Forgot password</button>
         </div>
         <div data-onboarding-view="account/confirm" hidden>
           <article class="paper"><h2>Confirmation pending</h2><p id="confirmation-email"></p><p id="confirmation-delivery">Email delivery is not configured. The app cannot retrieve your confirmation code.</p><p id="account-operation-state" class="small-note" role="status"></p><button id="account-enrollment-status" class="text-link" type="button">Check this enrollment</button></article>
@@ -179,42 +203,58 @@
         </div>
         <div data-onboarding-view="account/delete" hidden>
           <form id="account-delete-form" autocomplete="off" novalidate>
-            <article class="paper"><h2>Delete this test account?</h2><p id="delete-account-email"></p><p>You will be signed out, and the account's sessions, keys and recovery code will stop working. You can register the same email again to restart setup.</p><p class="small-note">Historical records and backups remain. This closes the test account; it does not erase those records.</p></article>
+            <article class="paper"><h2>Delete account?</h2><p id="delete-account-email"></p><p>You will be signed out. Your sessions, keys and recovery codes will stop working.</p><p class="small-note">The account record stays for a retention period. Read the retention terms before deleting this account.</p></article>
             <div class="field"><label for="delete-confirm-email">Type your account email</label><input id="delete-confirm-email" type="email" data-secret maxlength="254" autocomplete="off" spellcheck="false"></div>
             <div class="field"><label for="delete-password">Current password</label><input id="delete-password" type="password" maxlength="1024" autocomplete="current-password"></div>
-            <label class="check-choice"><input id="delete-deliberate" type="checkbox"><span>Delete this signed-in test account and release its email for a fresh test.</span></label>
-            <button id="account-delete-submit" class="primary destructive" type="submit" disabled>Delete test account</button>
+            <div class="account-terms-choice"><div class="account-terms-agreement"><input id="delete-deliberate" type="checkbox" aria-labelledby="delete-retention-label delete-retention-link" aria-controls="delete-retention-document"><span><label id="delete-retention-label" for="delete-deliberate">I understand the </label><button id="delete-retention-link" class="text-link" type="button" data-navigate="account/delete-retention">retention terms</button>.</span></div></div>
+            <button id="account-delete-submit" class="primary destructive" type="submit" disabled>Delete account</button>
           </form>
           <article id="account-deletion-pending" class="paper" hidden><h2 id="account-deletion-title">Deletion not yet confirmed</h2><p id="account-deletion-state">Check the original deletion result.</p><button id="account-delete-status" class="secondary" type="button">Check original deletion</button><p class="small-note">These operation details stay only in this open page.</p></article>
-          <article id="account-deleted" class="paper" hidden><h2>Test account deleted</h2><p>You are signed out. Register the same email again to restart account and identity setup with a new account.</p><p class="small-note">Historical records and backups remain; they are not part of the new account.</p><button id="account-delete-create" class="primary" type="button" data-navigate="account/create">Create a new test account</button></article>
+          <article id="account-deleted" class="paper" hidden><h2>Account deleted</h2><p>You are signed out. The account record stays for the retention period.</p><button id="account-delete-create" class="primary" type="button" data-navigate="account/create">Create account</button></article>
           <button id="account-delete-cancel" class="text-link" type="button" data-navigate="identity/setup">Back to setup</button>
         </div>
+        <div data-onboarding-view="account/delete-retention" hidden><p id="delete-retention-version" class="small-note"></p><div id="delete-retention-document" class="account-terms-document"></div><div class="account-terms-confirmation"><label class="check-choice"><input id="delete-retention-accept" type="checkbox"><span>I understand the retention terms and want to delete this account.</span></label></div></div>
         <div data-onboarding-view="identity/document" hidden>
-          <p class="eyebrow">Identity setup · 1 of 3</p><p>Place the front of your document inside the frame, with every corner visible and no glare. Check that the text is readable before continuing.</p>
-          <label class="check-choice"><input id="enrollment-processing" type="checkbox"><span>Use my document front and frontal photo for this identity setup. Keep them only in this open page for my review, without uploading or saving them.</span></label>
-          <div id="document-camera-slot"></div><div class="onboarding-actions"><button id="document-camera-start" class="secondary" type="button" disabled>Scan document with camera</button><div id="document-file-choice" class="field"><label for="document-file">Or choose a document image</label><input id="document-file" type="file" accept="image/jpeg,image/png" disabled><p class="small-note">JPEG or PNG · up to 8 MiB. A camera photo avoids sharing metadata from an existing file.</p></div></div>
-          <figure id="document-selection" class="capture-selection" hidden><img id="selected-document" alt="Selected document front"><figcaption>Document front · held in this page</figcaption><button id="document-remove" class="text-link" type="button">Remove document</button></figure>
+          <p class="capture-step-count">1 of 3</p>
+          <fieldset id="identity-details" class="identity-details"><legend class="visually-hidden">Identity details</legend>
+            <div class="field identity-name"><label for="identity-full-name">Full name</label><input id="identity-full-name" autocomplete="name" maxlength="200" required></div>
+            <div class="field"><label for="identity-birth-city">City of birth</label><input id="identity-birth-city" autocomplete="off" maxlength="120" required></div>
+            <div class="field"><label for="identity-nationality">Nationality</label><input id="identity-nationality" autocomplete="off" maxlength="120" required></div>
+            <div class="field"><label for="identity-age">Age</label><input id="identity-age" type="number" inputmode="numeric" min="1" max="130" step="1" required></div>
+            <div class="field"><label for="identity-document-type">Document type</label><select id="identity-document-type" required><option value="">Select</option><option value="passport">Passport</option><option value="national_id">National ID</option><option value="driving_licence">Driver’s licence</option><option value="residence_permit">Residence permit</option></select></div>
+          </fieldset>
+          <div id="document-camera-slot"></div><div class="onboarding-actions"><button id="document-camera-start" class="secondary" type="button" disabled>Scan document with camera</button><div id="document-file-choice" class="field"><label for="document-file">Document photo</label><input id="document-file" type="file" accept="image/jpeg,image/png" disabled><p class="small-note">JPEG or PNG. Large photos are resized automatically.</p></div></div>
+          <figure id="document-selection" class="capture-selection" hidden><img id="selected-document" alt="Selected document front"><figcaption>Document front · held in this page</figcaption><button id="document-remove" class="text-link" type="button"><svg class="account-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#trash"/></svg><span>Try again</span></button></figure>
           <button id="document-next" class="primary" type="button" data-navigate="identity/face" disabled>Continue to face photo</button>
         </div>
         <div data-onboarding-view="identity/face" hidden>
-          <p class="eyebrow">Identity setup · 2 of 3</p><p>Start the front camera, then follow the directions at your own pace and return to face forward. Only the final photo is taken. Movement and liveness are not checked.</p>
-          <div id="face-camera-slot"></div><button id="face-camera-start" class="secondary" type="button">Start face camera</button>
-          <div class="face-guide" id="face-guide" data-direction="up"><svg viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="60" rx="32" ry="43"/><g class="guide-features"><circle cx="48" cy="52" r="2"/><circle cx="72" cy="52" r="2"/><path d="M50 76q10 7 20 0"/></g></svg><p id="guidance-prompt" aria-live="polite"></p><p id="guidance-position" class="small-note"></p><button id="guidance-next" class="secondary" type="button">Next guidance step</button></div>
-          <button id="guidance-skip" class="text-link" type="button">Skip movement guidance and face forward</button><figure id="face-selection" class="capture-selection" hidden><img id="selected-face" alt="Selected frontal photo"><figcaption>Frontal photo · held in this page</figcaption><button id="face-remove" class="text-link" type="button">Remove photo</button></figure>
-          <button id="face-next" class="primary" type="button" data-navigate="identity/review" disabled>Review document and photo</button>
+          <p class="capture-step-count">2 of 3</p>
+          <div id="face-capture" class="face-capture" data-capture-state="idle">
+            <div id="face-placeholder" class="face-placeholder" aria-hidden="true"><svg viewBox="0 0 240 240" focusable="false"><ellipse cx="120" cy="103" rx="58" ry="78"/><path d="M27 228c9-30 40-43 65-48m56 0c25 5 56 18 65 48"/></svg></div>
+            <div id="face-camera-slot"></div><button id="face-camera-start" class="primary" type="button">Start camera</button>
+            <figure id="face-selection" class="capture-selection" hidden><img id="selected-face" alt="Your selected face photo"><figcaption class="visually-hidden">Face photo</figcaption><button id="face-remove" class="secondary" type="button">Retake photo</button></figure>
+          </div>
+          <p class="small-note face-capture-note">A single photo. Liveness is not checked.</p>
+          <button id="face-next" class="primary" type="button" hidden disabled>Continue</button>
         </div>
         <div data-onboarding-view="identity/review" hidden>
-          <p class="eyebrow">Identity setup · 3 of 3</p><div class="review-media"><figure><img id="review-document" width="320" height="180" alt="Selected document front"><figcaption>Document front</figcaption><button id="retake-document" class="text-link" type="button">Replace document</button></figure><figure><img id="review-face" width="180" height="180" alt="Selected frontal photo"><figcaption>Frontal photo</figcaption><button id="retake-face" class="text-link" type="button">Retake photo</button></figure></div>
-          <p class="small-note">Check that the document is readable and your face is clear. These two images stay only in this open page. There is no upload or identity decision yet.</p>
-          <div class="onboarding-actions"><button id="enrollment-review" class="primary" type="button">Confirm these photos</button><button id="enrollment-finish" class="primary" type="button" disabled>Finish capture</button></div><p id="review-state" class="small-note" aria-live="polite"></p>
+          <p class="capture-step-count">3 of 3</p>
+          <details id="identity-review-edit" class="identity-review-edit"><summary>Review or change details</summary><dl id="identity-review-details" class="account-profile"></dl><button id="identity-details-edit" class="text-link" type="button" data-navigate="identity/document">Edit details</button><div class="review-media"><figure><img id="review-document" width="320" height="180" alt="Selected document front"><figcaption>Document front</figcaption><button id="retake-document" class="text-link" type="button">Replace document</button></figure><figure><img id="review-face" width="180" height="180" alt="Selected frontal photo"><figcaption>Frontal photo</figcaption><button id="retake-face" class="text-link" type="button">Retake photo</button></figure></div></details>
+          <div id="identity-notice-choice" class="account-terms-choice"><div class="account-terms-agreement"><input id="identity-notice-reviewed" type="checkbox" aria-labelledby="identity-notice-label identity-notice-link" aria-controls="identity-notice-text" disabled><span><label id="identity-notice-label" for="identity-notice-reviewed">I agree to the </label><button id="identity-notice-link" class="text-link" type="button">identity review notice</button>.</span></div></div>
+          <p id="identity-processing-note" class="small-note">Test submissions are stored privately and remain pending while document checks and account validation are developed.</p>
+          <button id="enrollment-finish" class="primary" type="button" disabled>Submit Level 1 identity</button><p id="review-state" class="small-note" role="status" aria-live="polite" hidden></p>
         </div>
+        <div data-onboarding-view="identity/notice" hidden><p id="identity-notice-version" class="small-note"></p><div id="identity-notice-text" class="identity-notice"></div><div class="account-terms-confirmation"><label class="check-choice"><input id="identity-notice-accept" type="checkbox" disabled><span>I agree to the identity review notice.</span></label></div></div>
         <div data-onboarding-view="identity/status" hidden>
-          <article class="paper"><span class="tag">Capture complete · not submitted</span><h2 id="enrollment-status-title">Photos reviewed</h2><p id="enrollment-status-description" aria-live="polite">Your document front and frontal photo are ready in this open page. No identity service has received them.</p><dl class="facts"><div><dt>Identity</dt><dd>Not verified · verification service not connected</dd></div><div><dt>Movement</dt><dd>Not checked · guidance only</dd></div><div><dt>Storage</dt><dd>Memory only · closing or reloading clears the photos</dd></div></dl></article>
+          <p id="enrollment-test-review-status" class="small-note" role="status" hidden></p>
+          <button id="enrollment-new-test" class="secondary" type="button" hidden>Submit new test details</button>
           <div class="onboarding-actions"><button id="enrollment-reopen" class="secondary" type="button" data-navigate="identity/review">Review photos</button><button id="enrollment-delete" class="text-link" type="button">Discard photos</button></div>
+          <p id="enrollment-status-description" class="small-note" aria-live="polite">Photos stay in this page. They have not been submitted. They are not confirmed with the issuer. Closing or reloading clears them.</p>
         </div>
-        <button id="enrollment-cancel" class="text-link" type="button" hidden>Cancel enrollment</button>
+        <aside id="identity-demo-notes" class="identity-demo-notes" hidden><p class="small-note">Development intake · test details and images only.</p><p class="small-note" id="onboarding-notice">Photos stay in this page. Nothing is uploaded. These photos are not confirmed with the issuer. Closing or reloading clears them.</p></aside>
       </section>
 
+      <section id="reviewer-screen" class="screen onboarding" data-view="reviewer/cases" aria-label="Test identity review" hidden></section>
       <section id="requests-screen" class="screen" data-view="requests" aria-label="Request drafts" hidden>
         <button id="list-new-request" class="new-action" type="button" data-navigate="requester" aria-describedby="new-request-prerequisite" disabled><svg class="action-icon" aria-hidden="true"><use href="#feather"/></svg><span>New request</span></button>
         <ul class="draft-list"><li id="request-list-row" hidden><button id="request-list-draft" type="button" data-attention-kind="requests" data-attention-item="local-request" data-navigate="requester"><span id="request-list-title"></span><span class="status-icons" data-status-source="attention-requests-local-request" data-status-dot aria-hidden="true" hidden></span></button></li></ul>

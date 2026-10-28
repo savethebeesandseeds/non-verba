@@ -1,0 +1,122 @@
+{
+  "fixture": "nonverba-identity-capture-v1",
+  "synthetic_only": true,
+  "description": "Invented 8x8 blank image and fixed synthetic P256 test key. Never use this key for participants or devices.",
+  "jpeg_base64": "/9j/4AAQSkZJRgABAgAAAQABAAD/wAARCAAIAAgDAREAAhEBAxEB/9sAQwAIBgYHBgUIBwcHCQkICgwUDQwLCwwZEhMPFB0aHx4dGhwcICQuJyAiLCMcHCg3KSwwMTQ0NB8nOT04MjwuMzQy/9sAQwEJCQkMCwwYDQ0YMiEcITIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5/oA//9k=",
+  "cases": [
+    {
+      "source": "browser-camera",
+      "original": {
+        "version": 1,
+        "purpose": "identity-capture",
+        "challenge_id": "Hx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8",
+        "nonce": "ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA",
+        "account_id": "account:fixture",
+        "principal_id": "principal:fixture",
+        "current_session_id": "session:fixture",
+        "recovery_generation": 0,
+        "kind": "document_front",
+        "source": "browser-camera",
+        "public_spki_sha256": "4594166938c50c723ab41ca2fce9f0396be9850fb383ab0d1f5c457e8a04930d",
+        "issued_at_ms": 2000000000000,
+        "capture_expires_at_ms": 2000000120000,
+        "submit_expires_at_ms": 2000000900000
+      },
+      "proof": {
+        "payload": {
+          "request": {
+            "version": 1,
+            "purpose": "identity-capture",
+            "challenge_id": "Hx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8",
+            "nonce": "ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA",
+            "account_id": "account:fixture",
+            "principal_id": "principal:fixture",
+            "current_session_id": "session:fixture",
+            "recovery_generation": 0,
+            "kind": "document_front",
+            "source": "browser-camera",
+            "public_spki_sha256": "4594166938c50c723ab41ca2fce9f0396be9850fb383ab0d1f5c457e8a04930d",
+            "issued_at_ms": 2000000000000,
+            "capture_expires_at_ms": 2000000120000,
+            "submit_expires_at_ms": 2000000900000
+          },
+          "image_sha256": "b0220d52525c8fd6bccede07bc086da14255962125137a88fc9ea085cc44e046",
+          "image_bytes": 629,
+          "width": 8,
+          "height": 8,
+          "captured_at_ms": 2000000001000,
+          "lens_facing": "back",
+          "acquisition": null
+        },
+        "public_spki_der_b64": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEk9b/WCXni9g1NNNucema6FANDfzoF2a7hWNrhNVijmHHvskduKCgO3/wzW0Nns+I5KYEhqPeG5b/1b+FCTTf7Q==",
+        "signature_b64": "xtT5bx0KSo64xuknUywfnt+HN2FYDqXDrqWS+DRwn+xJARHv9uNrAtFZx4dO2EkV7xQhJ4lr/WUDfZ1g/anv5Q=="
+      },
+      "verifier_time_ms": 2000000002000,
+      "signing_bytes_base64": "Tk9OVkVSQkE6SURFTlRJVFlfQ0FQVFVSRTp2MQp7ImFjcXVpc2l0aW9uIjpudWxsLCJjYXB0dXJlZF9hdF9tcyI6MjAwMDAwMDAwMTAwMCwiaGVpZ2h0Ijo4LCJpbWFnZV9ieXRlcyI6NjI5LCJpbWFnZV9zaGEyNTYiOiJiMDIyMGQ1MjUyNWM4ZmQ2YmNjZWRlMDdiYzA4NmRhMTQyNTU5NjIxMjUxMzdhODhmYzllYTA4NWNjNDRlMDQ2IiwibGVuc19mYWNpbmciOiJiYWNrIiwicmVxdWVzdCI6eyJhY2NvdW50X2lkIjoiYWNjb3VudDpmaXh0dXJlIiwiY2FwdHVyZV9leHBpcmVzX2F0X21zIjoyMDAwMDAwMTIwMDAwLCJjaGFsbGVuZ2VfaWQiOiJIeDhmSHg4Zkh4OGZIeDhmSHg4Zkh4OGZIeDhmSHg4Zkh4OGZIeDhmSHg4IiwiY3VycmVudF9zZXNzaW9uX2lkIjoic2Vzc2lvbjpmaXh0dXJlIiwiaXNzdWVkX2F0X21zIjoyMDAwMDAwMDAwMDAwLCJraW5kIjoiZG9jdW1lbnRfZnJvbnQiLCJub25jZSI6IklDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0EiLCJwcmluY2lwYWxfaWQiOiJwcmluY2lwYWw6Zml4dHVyZSIsInB1YmxpY19zcGtpX3NoYTI1NiI6IjQ1OTQxNjY5MzhjNTBjNzIzYWI0MWNhMmZjZTlmMDM5NmJlOTg1MGZiMzgzYWIwZDFmNWM0NTdlOGEwNDkzMGQiLCJwdXJwb3NlIjoiaWRlbnRpdHktY2FwdHVyZSIsInJlY292ZXJ5X2dlbmVyYXRpb24iOjAsInNvdXJjZSI6ImJyb3dzZXItY2FtZXJhIiwic3VibWl0X2V4cGlyZXNfYXRfbXMiOjIwMDAwMDA5MDAwMDAsInZlcnNpb24iOjF9LCJ3aWR0aCI6OH0=",
+      "signing_sha256": "25e90c66d354cdf18f4e21faa129bb0f1c4c2519b8abe389e15ef8122449f2a2"
+    },
+    {
+      "source": "native-camera2",
+      "original": {
+        "version": 1,
+        "purpose": "identity-capture",
+        "challenge_id": "Hx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8",
+        "nonce": "ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA",
+        "account_id": "account:fixture",
+        "principal_id": "principal:fixture",
+        "current_session_id": "session:fixture",
+        "recovery_generation": 0,
+        "kind": "document_front",
+        "source": "native-camera2",
+        "public_spki_sha256": "4594166938c50c723ab41ca2fce9f0396be9850fb383ab0d1f5c457e8a04930d",
+        "issued_at_ms": 2000000000000,
+        "capture_expires_at_ms": 2000000120000,
+        "submit_expires_at_ms": 2000000900000
+      },
+      "proof": {
+        "payload": {
+          "request": {
+            "version": 1,
+            "purpose": "identity-capture",
+            "challenge_id": "Hx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8",
+            "nonce": "ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA",
+            "account_id": "account:fixture",
+            "principal_id": "principal:fixture",
+            "current_session_id": "session:fixture",
+            "recovery_generation": 0,
+            "kind": "document_front",
+            "source": "native-camera2",
+            "public_spki_sha256": "4594166938c50c723ab41ca2fce9f0396be9850fb383ab0d1f5c457e8a04930d",
+            "issued_at_ms": 2000000000000,
+            "capture_expires_at_ms": 2000000120000,
+            "submit_expires_at_ms": 2000000900000
+          },
+          "image_sha256": "b0220d52525c8fd6bccede07bc086da14255962125137a88fc9ea085cc44e046",
+          "image_bytes": 629,
+          "width": 8,
+          "height": 8,
+          "captured_at_ms": 2000000001000,
+          "lens_facing": "back",
+          "acquisition": {
+            "version": 1,
+            "timestamp_source": "realtime",
+            "request_elapsed_realtime_ns": "9007199254741000",
+            "image_received_elapsed_realtime_ns": "9007199254741020",
+            "result_received_elapsed_realtime_ns": "9007199254741021",
+            "sensor_timestamp_ns": "9007199254741010",
+            "image_timestamp_ns": "9007199254741010",
+            "zsl_requested_disabled": true,
+            "test_pattern_requested_disabled": true,
+            "zsl_result_enabled": null,
+            "test_pattern_result_mode": 0
+          }
+        },
+        "public_spki_der_b64": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEk9b/WCXni9g1NNNucema6FANDfzoF2a7hWNrhNVijmHHvskduKCgO3/wzW0Nns+I5KYEhqPeG5b/1b+FCTTf7Q==",
+        "signature_b64": "gJCBMUu/k1djqQV5V64jz5VoIRyZoLaM1taOWXKbSP9OQkwAvomC0cTImMMG0ofgLodbFHBYN4BYOlTkFZNxtw=="
+      },
+      "verifier_time_ms": 2000000002000,
+      "signing_bytes_base64": "Tk9OVkVSQkE6SURFTlRJVFlfQ0FQVFVSRTp2MQp7ImFjcXVpc2l0aW9uIjp7ImltYWdlX3JlY2VpdmVkX2VsYXBzZWRfcmVhbHRpbWVfbnMiOiI5MDA3MTk5MjU0NzQxMDIwIiwiaW1hZ2VfdGltZXN0YW1wX25zIjoiOTAwNzE5OTI1NDc0MTAxMCIsInJlcXVlc3RfZWxhcHNlZF9yZWFsdGltZV9ucyI6IjkwMDcxOTkyNTQ3NDEwMDAiLCJyZXN1bHRfcmVjZWl2ZWRfZWxhcHNlZF9yZWFsdGltZV9ucyI6IjkwMDcxOTkyNTQ3NDEwMjEiLCJzZW5zb3JfdGltZXN0YW1wX25zIjoiOTAwNzE5OTI1NDc0MTAxMCIsInRlc3RfcGF0dGVybl9yZXF1ZXN0ZWRfZGlzYWJsZWQiOnRydWUsInRlc3RfcGF0dGVybl9yZXN1bHRfbW9kZSI6MCwidGltZXN0YW1wX3NvdXJjZSI6InJlYWx0aW1lIiwidmVyc2lvbiI6MSwienNsX3JlcXVlc3RlZF9kaXNhYmxlZCI6dHJ1ZSwienNsX3Jlc3VsdF9lbmFibGVkIjpudWxsfSwiY2FwdHVyZWRfYXRfbXMiOjIwMDAwMDAwMDEwMDAsImhlaWdodCI6OCwiaW1hZ2VfYnl0ZXMiOjYyOSwiaW1hZ2Vfc2hhMjU2IjoiYjAyMjBkNTI1MjVjOGZkNmJjY2VkZTA3YmMwODZkYTE0MjU1OTYyMTI1MTM3YTg4ZmM5ZWEwODVjYzQ0ZTA0NiIsImxlbnNfZmFjaW5nIjoiYmFjayIsInJlcXVlc3QiOnsiYWNjb3VudF9pZCI6ImFjY291bnQ6Zml4dHVyZSIsImNhcHR1cmVfZXhwaXJlc19hdF9tcyI6MjAwMDAwMDEyMDAwMCwiY2hhbGxlbmdlX2lkIjoiSHg4Zkh4OGZIeDhmSHg4Zkh4OGZIeDhmSHg4Zkh4OGZIeDhmSHg4Zkh4OCIsImN1cnJlbnRfc2Vzc2lvbl9pZCI6InNlc3Npb246Zml4dHVyZSIsImlzc3VlZF9hdF9tcyI6MjAwMDAwMDAwMDAwMCwia2luZCI6ImRvY3VtZW50X2Zyb250Iiwibm9uY2UiOiJJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBIiwicHJpbmNpcGFsX2lkIjoicHJpbmNpcGFsOmZpeHR1cmUiLCJwdWJsaWNfc3BraV9zaGEyNTYiOiI0NTk0MTY2OTM4YzUwYzcyM2FiNDFjYTJmY2U5ZjAzOTZiZTk4NTBmYjM4M2FiMGQxZjVjNDU3ZThhMDQ5MzBkIiwicHVycG9zZSI6ImlkZW50aXR5LWNhcHR1cmUiLCJyZWNvdmVyeV9nZW5lcmF0aW9uIjowLCJzb3VyY2UiOiJuYXRpdmUtY2FtZXJhMiIsInN1Ym1pdF9leHBpcmVzX2F0X21zIjoyMDAwMDAwOTAwMDAwLCJ2ZXJzaW9uIjoxfSwid2lkdGgiOjh9",
+      "signing_sha256": "fbfbd18ecb9ea40e836fd8011be97505ddbb3551d4ae207055d9a27741070fb7"
+    }
+  ]
+}

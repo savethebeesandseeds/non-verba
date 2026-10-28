@@ -3,7 +3,9 @@
 //! Ancillary records never become inputs to its financial reducer.
 pub mod binding;
 pub mod case;
+pub mod completion;
 pub mod consent;
+pub mod counterfactual;
 pub mod pipeline;
 pub mod preflight;
 pub mod report;

@@ -296,3 +296,12 @@ the original behavior tests and adds real-binary and boundary regression checks.
 Changes to the formulas, tie rule, work unit, decay semantics or settlement rule
 require versioned specification changes and regression tests. Admission decisions
 and source verification belong in adapters, not scattered around the arithmetic.
+
+## Ballot admission contract
+
+Reserved 28 October 2026. This heading is the place for a frozen ballot
+admission and snapshot-completeness contract. No contract is frozen. No
+operational verifier is selected. Stored completion, sensor evidence, an
+admitted ballot, and a calculation snapshot stay separate. Sensor integrity
+alone proves neither genuine work nor ballot consent. Immutable v1 is
+unchanged by this note. The reference calculator remains a reference.

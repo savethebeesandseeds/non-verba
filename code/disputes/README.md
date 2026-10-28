@@ -37,7 +37,9 @@ and the separate amendment, payment and receipt paths.
 | `preflight` | Pre-cooperation profile/settings comparison, unsigned local acceptance or decline, guarded base/annex signing and exact setup matching |
 | `case` | Core snapshot, shared evidence, revision/history validation and attributed challenges |
 | `runtime` | Pinned local adapter, bounded template/token admission, explicit mock and unavailable backends |
+| `completion` | Replaceable one-shot process completion. The current preset is `grok -p` with one turn, low or minimal effort, and tools disallowed. An unapproved config starts no process |
 | `pipeline` | Two passes, structure/citation validation, fixed schedules, budgets, retention and independent replay |
+| `counterfactual` | Signed inclusion pin, deterministic sensitivity, and a diff of retained readings for one disagreement |
 | `report` | Readable case, consent, claim, financial and interpretation summary from independent verification, followed by the full inspection |
 | `research` | Explicit synthetic candidate-policy manifest; evaluation not implemented |
 | `main` / `commands` | Guided signing and JSON case/analysis commands over the same library functions |
@@ -129,6 +131,11 @@ After separately verified formation:
    budget. `mock-responses` creates a labelled script; `run-analysis` can use that
    script or the unavailable backend now. `local` requires the actual independently
    provisioned server/configuration described in RUNTIME.md. No fallback downloads.
+   `grok` is a separate opt-in completion. Its config names the `grok` program,
+   effort `low` or `minimal`, and `"approved": true`. Without that approval the
+   run starts no process. The preset is one headless prompt, not a tool-using
+   session, and it is not the pinned local runtime. Another provider replaces
+   that preset behind the same `Backend` trait.
 7. Choose `single` for one declared attempt or `diagnostic` for all three seeds.
    Use a new output filename and either an explicit cancel-file path or `none`.
    Creating that file requests cancellation. Both modes consume the same cumulative

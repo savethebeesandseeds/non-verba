@@ -1,0 +1,39 @@
+{
+  "claim_id": "milestone:work",
+  "withheld_ref": "operator-claim",
+  "from_dimension": "effort",
+  "to_dimension": "result",
+  "names": ["Northwind", "Example Cooperative"],
+  "baseline": {
+    "issues": [{
+      "id": "work-description",
+      "description": "The milestone asks for a working install. The cited operator statement says it is finished, and no demonstration is in the shared record.",
+      "evidence_refs": ["agreement", "operator-claim"],
+      "requester_argument": "Requester Northwind contests that the install was shown to work.",
+      "operator_argument": "The operator says the installation is finished.",
+      "uncertainties": ["A signature does not prove the install works."]
+    }],
+    "questions": [],
+    "prior_comparisons": [
+      {"dimension_id": "result", "requester_emphasis": "The usable install is one equal declared factor. A signature does not show that it works.", "operator_emphasis": "The operator statement says the work is finished. That statement is a claim, not an observed demonstration.", "unresolved_tradeoff": "No agreed scalar settlement rule. This reading grants no award.", "evidence_refs": ["agreement"]},
+      {"dimension_id": "effort", "requester_emphasis": "Declared effort is one equal factor. Unshown hours do not replace a working install.", "operator_emphasis": "The operator side does not show hours. Hours would not by themselves prove the install works.", "unresolved_tradeoff": "No agreed scalar settlement rule. This reading grants no award.", "evidence_refs": ["agreement"]},
+      {"dimension_id": "reliance", "requester_emphasis": "Reliance covers costs either party incurred because of the contract. None are itemized here.", "operator_emphasis": "No reserved-cost record is cited for the operator. Reliance stays an open label, not a sum.", "unresolved_tradeoff": "No agreed scalar settlement rule. This reading grants no award.", "evidence_refs": ["agreement"]},
+      {"dimension_id": "responsibility", "requester_emphasis": "Responsibility asks who could have shown the install working. The record does not assign that control.", "operator_emphasis": "The operator could have supplied a demonstration. The file does not show that one was made.", "unresolved_tradeoff": "No agreed scalar settlement rule. This reading grants no award.", "evidence_refs": ["agreement"]},
+      {"dimension_id": "remedy", "requester_emphasis": "A practical correction would be a demonstration of the install. No further unpaid scope is created here.", "operator_emphasis": "A demonstration would address the open result question. It is not ordered by this reading.", "unresolved_tradeoff": "No agreed scalar settlement rule. This reading grants no award.", "evidence_refs": ["agreement"]}
+    ],
+    "alternatives": [{"kind": "CLARIFICATION", "source_offer_ref": null}],
+    "unresolved_reasons": ["No financial award or settlement policy is supplied."]
+  },
+  "prior_move": {
+    "result_requester_emphasis": "More weight on the usable install makes the missing demonstration the main open question. Hours spent answer less of this disagreement.",
+    "effort_requester_emphasis": "Less weight on effort means unshown hours do less to answer the disagreement. The missing demonstration remains the open point.",
+    "tradeoff": "The requester declaration puts more weight on result and less on effort. Signed profiles are unchanged. No settlement formula."
+  },
+  "withheld": {
+    "description": "The milestone asks for a working install. This reading does not use the operator completion statement.",
+    "uncertainty": "operator-claim is absent in this reading. Absence is not fault, notice, or consent.",
+    "reason": "operator-claim was not used in this reading."
+  },
+  "irrelevant_name_argument": "Requester Example Cooperative contests that the install was shown to work.",
+  "spill_remedy_requester_emphasis": "This extra change touches remedy, which the point move did not select."
+}

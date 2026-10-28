@@ -29,6 +29,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewFeature
+import org.nonverba.identity.NativeIdentityCameraBridge
 import java.io.ByteArrayInputStream
 
 /** Shared participant UI with deliberate camera-only enrollment and debug account transport. */
@@ -38,6 +39,8 @@ class ParticipantActivity : Activity() {
     private var accountTransport: AccountTransport? = null
     private var loginDevice: LoginDevice? = null
     private var recoveryExport: RecoveryCodeExport? = null
+    private var identityCamera: NativeIdentityCameraBridge? = null
+    private var nativeCameraPermission: ((Boolean) -> Unit)? = null
     private var resumed = false
     private var visible = false
     private var cameraRequest: PermissionRequest? = null
@@ -74,6 +77,7 @@ class ParticipantActivity : Activity() {
             override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
                 loginDevice?.documentChanged()
                 recoveryExport?.documentChanged()
+                identityCamera?.documentChanged()
                 super.onPageStarted(view, url, favicon)
             }
 
@@ -142,6 +146,7 @@ class ParticipantActivity : Activity() {
             if (BuildConfig.DEBUG) accountTransport = AccountTransport(this, webView, "https://$APP_HOST$DOCUMENT_PATH")
             loginDevice = LoginDevice(this, webView, "https://$APP_HOST$DOCUMENT_PATH", ::foregroundDocument)
             recoveryExport = RecoveryCodeExport(this, webView, "https://$APP_HOST$DOCUMENT_PATH", ::foregroundDocument)
+            identityCamera = NativeIdentityCameraBridge(this, webView, "https://$APP_HOST$DOCUMENT_PATH", ::foregroundDocument, ::requestNativeCameraPermission)
         }
         setContentView(webView)
         ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
@@ -160,6 +165,7 @@ class ParticipantActivity : Activity() {
         visible = true
         accountTransport?.start()
         loginDevice?.start()
+        identityCamera?.start()
         if (BuildConfig.KEEP_SCREEN_AWAKE) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
@@ -172,16 +178,20 @@ class ParticipantActivity : Activity() {
         if (::webView.isInitialized) { webView.onResume(); completeCameraPermission() }
         loginDevice?.resume()
         recoveryExport?.resume()
+        identityCamera?.resume()
     }
 
     override fun onPause() {
         resumed = false
         loginDevice?.pause()
         recoveryExport?.pause()
+        // Identity capture always loses authority on pause, including the first
+        // OS permission overlay. A later grant needs a new deliberate Start.
+        identityCamera?.pause()
         try {
             // The Android permission overlay may pause us. Preserve only that
             // pending prompt; losing the foreground later still cancels it.
-            if (!cameraPermissionInFlight) stopEnrollmentCamera()
+            if (!cameraPermissionInFlight || nativeCameraPermission != null) stopEnrollmentCamera()
             if (::webView.isInitialized) webView.onPause()
         } finally {
             super.onPause()
@@ -195,6 +205,7 @@ class ParticipantActivity : Activity() {
             accountTransport?.stop()
             loginDevice?.stop()
             recoveryExport?.stop()
+            identityCamera?.stop()
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } finally {
             super.onStop()
@@ -210,6 +221,8 @@ class ParticipantActivity : Activity() {
             loginDevice = null
             recoveryExport?.close()
             recoveryExport = null
+            identityCamera?.close()
+            identityCamera = null
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             removeBackCallback?.invoke()
             removeBackCallback = null
@@ -253,6 +266,11 @@ class ParticipantActivity : Activity() {
 
     private fun completeCameraPermission() {
         if (!resumed || cameraPermissionInFlight) return
+        nativeCameraPermission?.let { callback ->
+            nativeCameraPermission = null
+            callback(foregroundDocument() && checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+            return
+        }
         val request = cameraRequest ?: return
         cameraRequest = null
         if (foregroundDocument() && isCameraOrigin(request.origin) && request.resources.size == 1 &&
@@ -262,6 +280,7 @@ class ParticipantActivity : Activity() {
     }
 
     private fun stopEnrollmentCamera() {
+        nativeCameraPermission?.let { callback -> nativeCameraPermission = null; callback(false) }
         val request = cameraRequest
         cameraRequest = null
         request?.deny()
@@ -270,6 +289,16 @@ class ParticipantActivity : Activity() {
                 "document.querySelectorAll('video').forEach(v=>{v.pause();" +
                 "if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}});", null
         )
+    }
+
+    private fun requestNativeCameraPermission(callback: (Boolean) -> Unit) {
+        if (!foregroundDocument() || cameraPermissionInFlight || cameraRequest != null || nativeCameraPermission != null) {
+            callback(false); return
+        }
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) { callback(true); return }
+        nativeCameraPermission = callback
+        cameraPermissionInFlight = true
+        requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION)
     }
 
     // Views and Back history stay inside the shared UI. Bundled URLs carry no app state.
@@ -315,11 +344,18 @@ class ParticipantActivity : Activity() {
         private val ASSET_PATHS = setOf(
             DOCUMENT_PATH, "/assets/participant/participant.css",
             "/assets/participant/participant.js", "/assets/participant/branding/sprout.svg",
-            "/assets/participant/branding/home-sprout.webp", "/assets/participant/branding/waajacu.webp",
+            "/assets/participant/branding/home-sprout.webp", "/assets/participant/branding/home-succulent.webp",
+            "/assets/participant/branding/waajacu.webp",
+            "/assets/participant/identity/level-1.webp", "/assets/participant/identity/level-2.webp",
+            "/assets/participant/identity/unverified.webp",
             "/assets/participant/onboarding-ui.js", "/assets/participant/onboarding-account.js", "/assets/participant/account-transport.js",
             "/assets/participant/account-terms.js",
+            "/assets/participant/identity-intake-notice.js",
+            "/assets/participant/identity-state.js", "/assets/participant/password-manager-sign-in.js",
+            "/assets/participant/identity-review-client.js", "/assets/participant/identity-review-ui.js",
             "/assets/participant/recovery-export.js",
             "/assets/participant/identity/enrollment-camera.js", "/assets/participant/identity/identity-capture.js",
+            "/assets/participant/identity/identity-camera-tool.js", "/assets/participant/identity/identity-capture-proof.js",
             "/assets/participant/identity/device-attestation.js",
             "/assets/participant/identity/browser-attestation-keys.js"
         )

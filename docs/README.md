@@ -43,6 +43,7 @@ complete. They are proposed work, not deployed features or adopted policy.
 | Dispute resolution and settlement authority | [Open settlement decisions](requests/DISPUTE_PRIORS_DECISIONS.md), [operational and legal research](notes/research/DISPUTE_RESOLUTION_NOTES.md#open-operational-and-legal-questions), [dispute lifecycle](requests/DISPUTE_LIFECYCLE.md) |
 | Priors and the reasoning system | [Derivation, inclusion, processing and evaluation](notes/research/DISPUTE_PRIORS_NOTES.md#four-research-stages) |
 | Material incidents and insurance | [Incident handling and future insurance institution](notes/research/INCIDENT_HANDLING_AND_INSURANCE.md) |
+| Identity validation language and liability | [Owner direction and current copy gap](notes/legal/IDENTITY_VALIDATION_AND_LIABILITY.md) |
 | Sensor quality and failure reporting | [Quality proposals](notes/sensors/SENSOR_QUALITY_NOTES.md#proposed-quality-contract), [current status and remaining limits](sensors/STATUS.md), [live camera physical gates](sensors/CAMERA_SESSIONS.md#remaining-physical-gates) |
 
 ## Validation and historical records

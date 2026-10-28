@@ -13,8 +13,16 @@ const quality = 0.85, maximum = 8 * 1024;
 const targets = Object.freeze([
   {source:'web/site/branding/individual/01-sprout.png', width:1254, height:1254, edge:160,
     destination:'web/apps/non-verba/assets/branding/home-sprout.webp'},
+  {source:'web/site/branding/individual/23-succulent.png', width:1254, height:1254, edge:160,
+    destination:'web/apps/non-verba/assets/branding/home-succulent.webp'},
   {source:'web/site/branding/waajacu-favicon.png', width:868, height:848, edge:48,
     destination:'web/apps/non-verba/assets/branding/waajacu.webp'},
+  {source:'web/apps/non-verba/assets/identity/originals/level-1.png', width:1254, height:1254, edge:128, quality:0.78,
+    destination:'web/apps/non-verba/assets/identity/level-1.webp'},
+  {source:'web/apps/non-verba/assets/identity/originals/level-2.png', width:1254, height:1254, edge:128, quality:0.78,
+    destination:'web/apps/non-verba/assets/identity/level-2.webp'},
+  {source:'web/apps/non-verba/assets/identity/originals/unverified.png', width:1254, height:1254, edge:128, quality:0.78,
+    destination:'web/apps/non-verba/assets/identity/unverified.webp'},
 ]);
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 
@@ -34,6 +42,7 @@ try {
   await page.route('**/*', route => route.abort());
   const outputs = [];
   for (const spec of targets) {
+    const targetQuality = spec.quality ?? quality;
     const original = await readBoundedParticipantFile(resolve(root, spec.source), 2 * 1024 * 1024);
     const data = await page.evaluate(async ({source, width, height, edge, quality}) => {
       const image = new Image(); image.src = source; await image.decode();
@@ -48,11 +57,11 @@ try {
       // Contain the complete original, centered; leave its transparency intact.
       context.drawImage(image, (edge - drawnWidth) / 2, (edge - drawnHeight) / 2, drawnWidth, drawnHeight);
       return canvas.toDataURL('image/webp', quality);
-    }, {...spec, quality, source:'data:image/png;base64,' + original.toString('base64')});
+    }, {...spec, quality:targetQuality, source:'data:image/png;base64,' + original.toString('base64')});
     if (!data.startsWith('data:image/webp;base64,')) throw new Error('Chromium did not encode the requested WebP format.');
     const bytes = Buffer.from(data.slice('data:image/webp;base64,'.length), 'base64');
     if (bytes.length < 20 || bytes.length > maximum || bytes.toString('ascii', 0, 4) !== 'RIFF'
-        || bytes.toString('ascii', 8, 12) !== 'WEBP') throw new Error('Prepared participant artwork exceeds its 8KiB limit or is not WebP.');
+        || bytes.toString('ascii', 8, 12) !== 'WEBP') throw new Error('Invalid or oversized participant artwork: ' + spec.destination + ' (' + bytes.length + ' bytes).');
     const destination = resolve(root, spec.destination);
     let previous;
     try { previous = await readBoundedParticipantFile(destination, maximum); }
@@ -65,7 +74,7 @@ try {
       await writeFile(destination, bytes, {flag:previous ? 'w' : 'wx', mode:0o644});
     }
     outputs.push({source:spec.source, source_sha256:digest(original), destination:spec.destination,
-      original_width:spec.width, original_height:spec.height, edge:spec.edge, format:'image/webp', quality,
+      original_width:spec.width, original_height:spec.height, edge:spec.edge, format:'image/webp', quality:targetQuality,
       fit:'contain', transparent_background:true, bytes:bytes.length, sha256:digest(bytes), changed:!matches});
   }
   console.log(JSON.stringify({recipe:'Chromium canvas; high-quality smoothing; complete original contained in transparent square',

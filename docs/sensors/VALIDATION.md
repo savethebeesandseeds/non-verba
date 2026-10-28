@@ -1907,3 +1907,11 @@ No production signing, sensor policy or acceptance logic changed. Remaining:
 independent physical requester acceptance (deferred for lack of a second device),
 very noisy environments, native failure-display and other physical lifecycle
 cases, and the previously recorded PowerShell transport-fixture runtime limit.
+
+## Physical matrix
+
+Reserved 28 October 2026. This heading is the place for retained physical logs
+and verifier outputs from a frozen substitution and interruption matrix. No
+matrix has been run. No artifacts, verifier results, or close (supported,
+negative, or inconclusive) are recorded. Component checks above remain
+separate from physical usefulness.

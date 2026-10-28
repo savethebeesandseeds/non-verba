@@ -541,7 +541,13 @@ pub struct Consumption {
 fn error_token_charge(error: &crate::runtime::RuntimeError, spec: &AnalysisSpecificationV1) -> u64 {
     match (error.input_tokens, error.output_tokens) {
         (Some(input), Some(output)) => u64::from(input) + u64::from(output),
-        _ if error.code == "MODEL_UNAVAILABLE" => 0,
+        _ if matches!(
+            error.code.as_str(),
+            "MODEL_UNAVAILABLE" | "APPROVAL_REQUIRED"
+        ) =>
+        {
+            0
+        }
         _ => u64::from(spec.context_tokens).max(
             u64::from(error.input_tokens.unwrap_or(0))
                 + u64::from(error.output_tokens.unwrap_or(0)),
@@ -644,6 +650,18 @@ pub struct PackageInspection {
     pub budget_exhausted: bool,
     pub financial_authority: &'static str,
     pub settlement_policy_status: &'static str,
+}
+
+fn hosted_completion_kind(kind: &str) -> bool {
+    !kind.is_empty()
+        && kind.len() <= 32
+        && kind
+            .bytes()
+            .all(|byte| byte.is_ascii_uppercase() || byte.is_ascii_digit() || byte == b'_')
+        && !matches!(
+            kind,
+            "MOCK" | "LOCAL_LLAMA_CPP" | "MIXED" | "UNKNOWN" | "UNSPECIFIED" | "NO_COMPLETION"
+        )
 }
 
 fn as_value<T: Serialize>(value: &T) -> Result<Value, String> {
@@ -1347,9 +1365,6 @@ fn validate_completion(
     {
         return Err("RUNTIME_PROVENANCE: invalid binding or unsupported attestation claim".into());
     }
-    if !matches!(p.kind.as_str(), "MOCK" | "LOCAL_LLAMA_CPP") {
-        return Err("RUNTIME_PROVENANCE: unknown backend".into());
-    }
     if p.kind == "MOCK"
         && (p.artifacts_hash_checked
             || p.formatted_prompt_sha256.is_some()
@@ -1364,6 +1379,16 @@ fn validate_completion(
             || p.formatted_prompt_sha256.is_none())
     {
         return Err("RUNTIME_PROVENANCE: missing local artifact claim".into());
+    }
+    if p.kind != "MOCK" && p.kind != "LOCAL_LLAMA_CPP" {
+        if !hosted_completion_kind(&p.kind)
+            || p.artifacts_hash_checked
+            || p.formatted_prompt_sha256.is_some()
+        {
+            return Err(
+                "RUNTIME_PROVENANCE: hosted completion claimed a local or unknown backend".into(),
+            );
+        }
     }
     if let Some(hash) = &p.formatted_prompt_sha256 {
         encoding::validate_digest(hash)?;
@@ -1579,7 +1604,10 @@ pub fn run_schedule(
                         attempt.reason = Some(error.to_string());
                         attempt.execution_status = if error.code == "CANCELLED" {
                             ExecutionStatus::Cancelled
-                        } else if error.code == "MODEL_UNAVAILABLE" {
+                        } else if matches!(
+                            error.code.as_str(),
+                            "MODEL_UNAVAILABLE" | "APPROVAL_REQUIRED"
+                        ) {
                             ExecutionStatus::NotRun
                         } else {
                             ExecutionStatus::Failed

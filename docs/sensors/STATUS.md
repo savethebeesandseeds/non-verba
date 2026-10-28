@@ -494,3 +494,12 @@ The owner has one available device, so physical requester/operator trials are
 deferred until a second device is available. Very noisy environments, native
 failure-display on the phone and the remaining physical lifecycle matrix remain
 open. See [the validation record](VALIDATION.md#audio-concurrent-acceptance-and-lifecycle--8-october-2026).
+
+## Physical acceptance contract
+
+Reserved 28 October 2026. This heading is the place for a frozen physical
+acceptance contract. No contract is frozen. No profiles, devices, transport,
+test matrix, or close thresholds are selected here. The blocked one-device
+limit remains. A second device is still required before any physical run.
+Supported, negative, and inconclusive closes are allowed once a contract
+exists. This note does not claim physical assurance or usefulness.

@@ -32,8 +32,12 @@ companion has no automatic bridge from analysis into a core Action.
 The [dispute lifecycle specification](DISPUTE_LIFECYCLE.md) defines a proposed
 review and negotiation interface around these boundaries. General closure,
 reopening, escalation and Non Verba accountability remain unselected. The core
-already supports signed dispute-opening events; explicitly connecting the
-companion case to opening and notice evidence remains to be specified. Existing
+already supports signed dispute-opening events. Raising a claim, delivering
+notice, reading it, responding, and staying silent are distinct in the
+[lifecycle specification](DISPUTE_LIFECYCLE.md#notice-response-and-silence).
+Silence, technical failure, and missing material are not consent or fault. No
+response timetable or delivery service is adopted. Connecting a companion case
+to one exact opening event and its notice evidence remains unspecified. Existing
 `OPEN`/`UNDER_REVIEW` case records grant no closure or escalation authority.
 
 The aim remains an affordable, explainable settlement procedure, potentially

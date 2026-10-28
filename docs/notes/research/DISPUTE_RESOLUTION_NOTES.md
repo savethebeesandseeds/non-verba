@@ -314,3 +314,13 @@ describes the existing independently authorized release path. This reorganizatio
 changes no code, signed terms, retained review artifact or financial authority.
 
 Return to [research](../README.md#research) or [all notes](../README.md).
+
+## Evaluation criteria
+
+Reserved 28 October 2026. This heading is the place for frozen procedure
+evaluation criteria covering comprehension, evidence access, selective
+presentation, delay, and false accusations. No criteria are frozen. Data seen
+at this stage is intended to be synthetic cases only. Close rules are not
+adopted. A lost dispute is not recorded here as deception. Failures and
+uncertainty would be retained if a later review runs. This note does not
+start a participant study.

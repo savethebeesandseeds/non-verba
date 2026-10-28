@@ -22,6 +22,7 @@ before updating progress. These local links require the sibling private checkout
 | `cooperation/` | Developing the operators union and connecting its calculations to membership and collective decisions |
 | `assignments/` | Explaining the Assignment Contract and the participant experience |
 | `sensors/` | Exploring evidence quality and fair handling of sensing failures |
+| `legal/` | Owner direction on identity-validation language and liability posture |
 
 ## Research
 
@@ -124,6 +125,16 @@ adopting an institutional or voting mechanism for the unfinished parts.
 
 These are explanatory drafting documents. The specifications and implementation
 records remain in [the Assignment documentation](../requests/README.md).
+
+## Legal notes
+
+- [Identity validation and liability](legal/IDENTITY_VALIDATION_AND_LIABILITY.md)
+  records the 27 October 2026 owner direction: no "verified" or "real" claim
+  without an issuing-body check; diplomas and certificates stay user-uploaded
+  and unverified; "validating" may name an ID-photo and face-photo account
+  step without guaranteeing authenticity; a badge, rank, or trust cue used in
+  a transaction is outside mere content hosting. The note also records the
+  current participant copy gap. It adopts no notice and changes no agreement.
 
 ## Sensor proposals
 

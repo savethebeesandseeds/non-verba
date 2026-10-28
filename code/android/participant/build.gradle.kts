@@ -53,11 +53,18 @@ val verifyParticipantAssets by tasks.registering {
         val required = setOf(
             "participant/index.html", "participant/participant.css",
             "participant/participant.js", "participant/branding/sprout.svg",
-            "participant/branding/home-sprout.webp", "participant/branding/waajacu.webp",
+            "participant/branding/home-sprout.webp", "participant/branding/home-succulent.webp",
+            "participant/branding/waajacu.webp",
+            "participant/identity/level-1.webp", "participant/identity/level-2.webp",
+            "participant/identity/unverified.webp",
             "participant/onboarding-ui.js", "participant/onboarding-account.js", "participant/account-transport.js",
             "participant/account-terms.js",
+            "participant/identity-intake-notice.js",
+            "participant/identity-state.js", "participant/password-manager-sign-in.js",
+            "participant/identity-review-client.js", "participant/identity-review-ui.js",
             "participant/recovery-export.js",
             "participant/identity/enrollment-camera.js", "participant/identity/identity-capture.js",
+            "participant/identity/identity-camera-tool.js", "participant/identity/identity-capture-proof.js",
             "participant/identity/device-attestation.js",
             "participant/identity/browser-attestation-keys.js"
         )
@@ -70,8 +77,8 @@ val verifyParticipantAssets by tasks.registering {
         check(actual.filterNot { it.startsWith("nonverba-license/") }.toSet() == required) {
             "Participant assets differ from the reviewed account, capture and attestation files; developer tools and generated models must remain outside this APK."
         }
-        check(required.sumOf { root.resolve(it).length() } <= 296 * 1024) {
-            "Participant runtime exceeds the reviewed 296 KiB account and recovery-code export budget."
+        check(required.sumOf { root.resolve(it).length() } <= 476 * 1024) {
+            "Participant runtime exceeds the reviewed 476 KiB account and synthetic review budget."
         }
         check(required.filter { it.endsWith(".svg") || it.endsWith(".webp") }
             .all { root.resolve(it).length() <= 8 * 1024 }) {

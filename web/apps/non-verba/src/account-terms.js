@@ -40,8 +40,8 @@ const content = {
     },
     {
       "paragraphs": [
-        "You may stop using the account. Signing out is separate from closing it or deleting data. A development test-account deletion closes that test account; it does not promise to purge attributed history, already shared records or backups. Retained data must be explained in the applicable Privacy Notice.",
-        "Access restrictions and account closure do not by themselves cancel separate agreements or change another party's rights. The operator's security, suspension, complaint and review procedures must be specified before public adoption."
+        "You may stop using the account. Signing out leaves the account open. Closing the account signs you out and stops its sessions, keys and recovery codes. The account record stays for a retention period, together with the information kept for that account, so the account can still be found if information about it is required. The same email can be used for a new account, and that new account receives its own record.",
+        "Access restrictions and account closure do not by themselves cancel separate agreements or change another party's rights. The length of the retention period, and the operator's security, suspension, complaint and review procedures, must be specified before public adoption."
       ],
       "title": "Leaving, closure and restrictions"
     },
@@ -61,7 +61,7 @@ const content = {
   ],
   "status": "draft",
   "title": "Account Terms and Conditions (Draft)",
-  "version": "0.1.0-draft.1"
+  "version": "0.1.0-draft.2"
 };
 
 for (const section of content.sections) {
@@ -75,6 +75,6 @@ Object.freeze(content);
 // The digest and transport-format fields are outside the content being hashed.
 export const ACCOUNT_TERMS_CONTENT_JSON = JSON.stringify(content);
 export const ACCOUNT_TERMS_CONTENT_FORMAT = 'nonverba-account-terms-jcs-v1';
-export const ACCOUNT_TERMS_CONTENT_SHA256 = '88609610130c0a7a2594399402aea6db298f6218b5c91eaa07783bd97b746db4';
+export const ACCOUNT_TERMS_CONTENT_SHA256 = '6fa35455cdd833e3253f44dbcf7cfb9b61342d2d22fd99a6318996433c7d60a7';
 export const ACCOUNT_TERMS = Object.freeze({...content, contentSha256: ACCOUNT_TERMS_CONTENT_SHA256});
 

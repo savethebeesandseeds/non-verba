@@ -3,5 +3,5 @@
 set -euo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/../harness-env.sh"
 output="$(mktemp -d "$CARGO_TARGET_DIR/main-thread-read.XXXXXXXX")"
-compile_harness "$output" "$KOTLIN_PRODUCTION/NativeMainThreadRead.kt" "$HARNESS_DIR/NativeMainThreadReadSmoke.kt"
+compile_harness "$output" "$CODE_ROOT/android/shared/src/main/kotlin/org/nonverba/camera/NativeMainThreadRead.kt" "$HARNESS_DIR/NativeMainThreadReadSmoke.kt"
 run_harness "$output" org.nonverba.camera.NativeMainThreadReadSmokeKt

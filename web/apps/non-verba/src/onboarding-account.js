@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Platform transport owns cookies. Credentials/tokens stay out of storage,
-// snapshots, app URLs and diagnostics; operation receipts never grant a login.
+// Platform transport owns cookies. localStorage keeps one resume record so a
+// refresh can continue the account session. Snapshots, URLs and diagnostics
+// never include tokens, and operation receipts never grant a login.
 import {ACCOUNT_TERMS_CONTENT_JSON, ACCOUNT_TERMS_CONTENT_SHA256} from './account-terms.js';
+import {IDENTITY_INTAKE_NOTICE,IDENTITY_INTAKE_NOTICE_TEXT,IDENTITY_INTAKE_NOTICE_SHA256} from './identity-intake-notice.js';
+import {createIdentityState, transitionIdentityState, identityBinding, identityPrerequisites} from './identity-state.js';
 const ISSUER = 'http://127.0.0.1:8080/dev-oidc';
 const CLIENT = 'nonverba-dev-apk', REDIRECT = 'http://127.0.0.1:8080/dev-callback';
 const encode = value => new TextEncoder().encode(value);
@@ -41,6 +44,15 @@ function localEmail(value, realEmail = false) {
     && parts[1].split('.').every(label => /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/.test(label)),
   'email_invalid', hint);
   return email;
+}
+function previewEmail(email, realEmail) {
+  const structural = localEmail(email, true);
+  if (realEmail) return structural;
+  try { return localEmail(structural, false); }
+  catch (error) {
+    if (error.code !== 'email_invalid') throw error;
+    fail('contact_preview_only', 'That email is fine. Until email sending is on, create an account with an address ending in .test or .invalid.');
+  }
 }
 export function loginIdentifier(value) {
   const hint = 'Enter your email or username.';
@@ -134,7 +146,15 @@ const SERVER_ERRORS = new Set(['invalid_authorization', 'enrollment_operation_re
   'account_deletion_refused','account_deletion_operation_retry_differs','account_deletion_rate_limited']);
 for (const code of ['username_invalid','username_unavailable','email_entry_required','account_terms_changed','password_strength_required']) SERVER_ERRORS.add(code);
 function success(response, status = 200) {
-  if ([502, 503, 504].includes(response.status)) fail('transport_unavailable', 'The service outcome is unknown. Check its status before retrying.');
+  if ([502, 503, 504].includes(response.status)) {
+    // A named intake refusal is decided before custody. Other 502/503/504
+    // replies can still hide a completed write, so they stay unknown.
+    let code = '';
+    try { const value = json(response); if (typeof value.error === 'string') code = value.error; } catch { /* Keep an unreadable refusal unknown. */ }
+    if (code === 'identity_intake_unavailable') fail(code, 'Level 1 identity is not open for this account.');
+    if (code === 'identity_intake_busy') fail(code, 'Photo intake is busy. Wait a moment and try again.');
+    fail('transport_unavailable', 'The service outcome is unknown. Check its status before retrying.');
+  }
   if (response.status !== status) {
     let code = response.status === 401 ? 'invalid_authorization' : 'service_request_failed';
     try { const value = json(response); if (SERVER_ERRORS.has(value.error)) code = value.error; } catch { /* Never display arbitrary error bodies. */ }
@@ -266,24 +286,27 @@ async function verifyIdToken(token, jwks, nonce) {
   'identity_token_invalid', 'The account service identity token could not be verified.'); return claims;
 }
 
-export function createServiceAccountAdapter({request, device, onChange = () => {}} = {}) {
+export function createServiceAccountAdapter({request, device, onChange = () => {}, storage} = {}) {
   check(typeof request === 'function' && typeof onChange === 'function', 'adapter_configuration_invalid', 'An account service transport is required.');
   let configured = false, configurePromise = null, realEmailEnabled = false, emailDelivery = 'disabled', state = 'signed_out', account = null, session = null;
   let epoch = 0, operation = null, entry = null, releasedCodes = null, refreshPromise = null, sessionOutcome = 'none';
   let feedbackPromise = null, feedbackVersion = 0;
   let deviceStatus = 'unregistered';
+  let identityState = createIdentityState();
   const emptyKeys = keys => ({keys,active_keys:null,pending_keys:null,revoked_keys:null,current_key_bound:null});
   let feedback = {api:'unknown',service:'unknown',...emptyKeys('signin_required')};
   let requestAbort = new AbortController(); const inflight = new Set();
   const snapshot = () => ({development_only: true, scope: 'local_synthetic_account_service', configured, real_email_enabled:realEmailEnabled, email_delivery:emailDelivery, state,
     deletion_pending:operation?.kind === 'deletion' && ['pending','unknown'].includes(operation.state),
     email: account?.email ?? operation?.email ?? null, entry:entry ? entry.mode === 'sign_in'
-      ? {mode:'sign_in',step:'password',identifier:entry.identifier,email:entry.email,username:entry.username}
+      ? {mode:'sign_in',step:entry.step === 'missing' ? 'missing' : 'password',identifier:entry.identifier,email:entry.email,username:entry.username}
       : {mode:'signup',email:entry.email,...(entry.username ? {username:entry.username} : {}),step:entry.step} : null,
     displayName: account?.display_name ?? operation?.display_name ?? null, username:account?.username ?? operation?.username ?? null,
     roles: [...(account?.roles ?? operation?.roles ?? [])], confirmed: account?.confirmed ?? operation?.receipt?.confirmed ?? false,
     recovery_generation: account?.recovery_generation ?? operation?.receipt?.recovery_generation ?? null,
-    genuine_authentication: false, identity_verification: 'pending', device_status:deviceStatus, operation: operation?.kind ?? null,
+    genuine_authentication: false, identity_verification: 'pending',
+    identity_status:{status:identityState.status,submitted_level:identityState.receipt?.level ?? null,prerequisites:identityPrerequisites(identityState)},
+    device_status:deviceStatus, operation: operation?.kind ?? null,
     operation_state: operation?.state ?? null, session_outcome: sessionOutcome, recovery_code_available: releasedCodes !== null, feedback:{...feedback}});
   const notify = () => { const value = snapshot(); onChange(structuredClone(value)); return value; };
   const active = captured => check(captured === epoch, 'stale_operation', 'This account operation was superseded.');
@@ -316,7 +339,20 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
   const post = (path, body, captured, signal) => send({method: 'POST', path, headers: {'content-type': 'application/json'}, body: JSON.stringify(body), signal}, captured);
   const form = (path, body, captured, flow_id) => send({method: 'POST', path,
     headers: {'content-type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams(body).toString(), ...(flow_id ? {flow_id} : {})}, captured);
-  const clearSession = outcome => { session = null; account = null; deviceStatus = 'unregistered'; sessionOutcome = outcome; Object.assign(feedback,emptyKeys('signin_required')); };
+  const sessionKey = 'nonverba-session';
+  const records = () => { try { return storage === undefined ? globalThis.localStorage : storage; } catch { return null; } };
+  const forget = () => { try { records()?.removeItem(sessionKey); } catch {} };
+  const remember = () => { try { records()?.setItem(sessionKey, JSON.stringify({a:session.accessToken,r:session.refreshToken,e:session.expiresAt,p:session.principalId,s:session.sessionId})); } catch {} };
+  const recall = () => {
+    let value; try { value = JSON.parse(records()?.getItem(sessionKey) || 'null'); } catch { forget(); return null; }
+    if (!object(value) || typeof value.a !== 'string' || !value.a || value.a.length > 8192 || typeof value.r !== 'string'
+      || value.r.length < 16 || value.r.length > 128 || !safe(value.e) || !identifier(value.p) || !identifier(value.s)) { forget(); return null; }
+    return {accessToken:value.a,refreshToken:value.r,expiresAt:value.e,principalId:value.p,sessionId:value.s};
+  };
+  const clearSession = outcome => { session = null; account = null; deviceStatus = 'unregistered'; sessionOutcome = outcome;
+    if (outcome === 'none' || outcome === 'revoked') forget();
+    identityState = transitionIdentityState(identityState,{type:outcome === 'unknown' ? 'unknown' : 'signed_out'});
+    Object.assign(feedback,emptyKeys('signin_required')); };
   const unresolvedDeletion = () => check(!(operation?.kind === 'deletion' && ['pending','unknown'].includes(operation.state)),
     'deletion_unconfirmed', 'Check the original account deletion before starting another account action.');
   function deleted(value) {
@@ -371,7 +407,7 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
     const pending = (async () => {
       try {
         const value = tokens(success(await form('/dev-oidc/token', {grant_type: 'refresh_token', client_id: CLIENT, refresh_token: prior.refreshToken}, captured)));
-        active(captured); session = {...prior, accessToken: value.access_token, refreshToken: value.refresh_token, expiresAt: now() + value.expires_in};
+        active(captured); session = {...prior, accessToken: value.access_token, refreshToken: value.refresh_token, expiresAt: now() + value.expires_in}; remember();
       } catch (error) {
         if (captured === epoch) { clearSession(error.code === 'transport_unavailable' ? 'unknown' : 'none');
           state = error.code === 'transport_unavailable' ? 'outcome_unknown' : 'signed_out'; notify(); }
@@ -400,16 +436,20 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
         && (expectedEmail === undefined || value.email === expectedEmail)
         && (expectedUsername === undefined || value.username === expectedUsername), 'account_changed', 'The service returned a different account session.');
       expectedBinding(value, expected); active(captured); cancelled(signal);
-      account = structuredClone(value); if (sentAccess === session.accessToken) session.expiresAt = value.session.access_expires_at;
+      account = structuredClone(value); if (sentAccess === session.accessToken) session.expiresAt = value.session.access_expires_at; remember();
       if (!quiet) {
         feedback.current_key_bound = value.session.device_bound;
         if (feedback.keys === 'signin_required') feedback.keys = 'unknown';
       }
-      state = 'signed_in'; sessionOutcome = 'active'; notify(); return structuredClone(value);
+      state = 'signed_in'; sessionOutcome = 'active';
+      identityState = transitionIdentityState(identityState,{type:'account',context:value});
+      await readIdentityStatus(value,captured,signal);
+      notify(); return structuredClone(value);
     } catch (error) {
       if (captured === epoch && !['operation_aborted', 'stale_operation'].includes(error.code)) {
         if (error.code === 'invalid_authorization') { clearSession('none'); state = 'signed_out'; }
-        else { account = null; state = 'outcome_unknown'; sessionOutcome = 'unknown'; Object.assign(feedback,emptyKeys('unknown')); }
+        else { account = null; state = 'outcome_unknown'; sessionOutcome = 'unknown';
+          identityState = transitionIdentityState(identityState,{type:'unknown'}); Object.assign(feedback,emptyKeys('unknown')); }
         notify();
       }
       throw error;
@@ -418,6 +458,42 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
   const authenticated = (method,path,body,captured = epoch,signal) => send({method,path,
     headers:{authorization:`Bearer ${session.accessToken}`,...(body === undefined ? {} : {'content-type':'application/json'})},
     ...(body === undefined ? {} : {body:JSON.stringify(body)}),signal},captured);
+  const identityReceipt = value => exact(value,['submission_id','operation_id','status','identity_verification','level','created_at'])
+    && identifier(value.submission_id) && identifier(value.operation_id)
+    && value.status === 'received' && value.identity_verification === 'pending' && value.level === 1 && safe(value.created_at);
+  async function readIdentityStatus(owner,captured,signal) {
+    identityState = transitionIdentityState(identityState,{type:'begin'});
+    const request = identityState.request;
+    try {
+      const value = success(await authenticated('GET','/v1/account/identity/status',undefined,captured,signal));
+      active(captured); cancelled(signal); check(currentOwner(owner),'stale_operation','This identity status check was superseded.');
+      check(exact(value,['account_id','principal_id','recovery_generation','current_session_id','level_1'])
+        && ['account_id','principal_id','recovery_generation','current_session_id'].every(field=>value[field] === owner[field])
+        && exact(value.level_1,['status','receipt'])
+        && (value.level_1.status === 'not_submitted' && value.level_1.receipt === null
+          || value.level_1.status === 'received' && identityReceipt(value.level_1.receipt)));
+      identityState = transitionIdentityState(identityState,{type:'resolved',request,receipt:value.level_1.receipt});
+    } catch (error) {
+      const prior = identityState;
+      identityState = transitionIdentityState(identityState,{type:'failed',request});
+      if (identityState !== prior) notify();
+      if (['stale_operation','operation_aborted','account_changed','invalid_authorization'].includes(error.code)) throw error;
+    }
+  }
+  async function readIdentityNotice({signal,expected} = {}, captured = epoch, owner) {
+    const current = owner || await readAccount({signal,expected},captured);
+    cancelled(signal); active(captured); check(currentOwner(current),'account_changed','The account session changed while loading the notice.');
+    const value = success(await authenticated('GET','/v1/account/identity/notice',undefined,captured,signal));
+    check(exact(value,['notice_id','version','sha256','text','available','level','max_image_bytes','media_type'])
+      && value.notice_id === IDENTITY_INTAKE_NOTICE.notice_id && value.version === IDENTITY_INTAKE_NOTICE.version && /^[a-f0-9]{64}$/.test(value.sha256)
+      && typeof value.text === 'string' && encode(value.text).length > 0 && encode(value.text).length <= 16384
+      && typeof value.available === 'boolean' && value.level === 1 && value.max_image_bytes === 2*1024*1024 && value.media_type === 'image/jpeg');
+    const digest = [...await sha(value.text)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+    check(digest === value.sha256 && digest === IDENTITY_INTAKE_NOTICE_SHA256 && value.text === IDENTITY_INTAKE_NOTICE_TEXT,
+    'identity_notice_invalid','The storage notice could not be verified.');
+    cancelled(signal); active(captured); check(currentOwner(current),'account_changed','The account session changed while loading the notice.');
+    return structuredClone(value);
+  }
   const attestation = (value,platform) => {
     if (!object(value) || value.state_scope !== 'at-key-generation') return false;
     if (value.status === 'unverified') return exact(value,['status','reason','state_scope'])
@@ -543,13 +619,19 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
     try { return await pending; } finally { if (feedbackPromise?.promise === pending) feedbackPromise = null; }
   }
   return Object.freeze({snapshot, configure, checkStatus,
-    beginSignIn({identifier} = {}) {
+    async beginSignIn({identifier} = {}) {
       unresolvedDeletion();
-      const selector = loginIdentifier(identifier);
-      check(!session,'account_active','Use the current account or sign out first.');
-      fence();
-      entry = {mode:'sign_in',step:'password',identifier:selector.email ?? `@${selector.username}`,
-        email:selector.email ?? null,username:selector.username ?? null};
+      const selector = loginIdentifier(identifier), active = 'Use the current account or sign out first.';
+      check(!session,'account_active',active);
+      const base = {mode:'sign_in',identifier:selector.email ?? `@${selector.username}`,email:selector.email ?? null,username:selector.username ?? null};
+      if (!configured && configurePromise) try { await configure(); }
+      catch (error) { if (!['transport_unavailable','service_response_invalid'].includes(error.code)) throw error; }
+      const captured = fence();
+      check(!session,'account_active',active);
+      if (!configured) { entry = {...base,step:'password'}; return notify(); }
+      const value = success(await post('/v1/accounts/presence', selector, captured));
+      check(exact(value,['exists','development_only']) && value.development_only === true && typeof value.exists === 'boolean');
+      entry = {...base,step:value.exists ? 'password' : 'missing'};
       return notify();
     },
     async startEntry({identifier:login,email} = {}) {
@@ -557,7 +639,7 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
       check(login === undefined || email === undefined,'identifier_invalid','Enter one email or username.');
       const selector = login === undefined ? {email:localEmail(email,true)} : loginIdentifier(login);
       const started = epoch; await configure(); active(started);
-      if (selector.email !== undefined) selector.email = localEmail(selector.email,realEmailEnabled);
+      if (selector.email !== undefined) selector.email = previewEmail(selector.email,realEmailEnabled);
       check(!session,'account_active','Use the current account or sign out first.');
       const captured = fence();
       if (!(entry?.step === 'code' && (selector.username !== undefined
@@ -619,10 +701,16 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
       check(operation === null || operation.kind === 'enrollment' && operation.reference === reference,
         'operation_changed', 'The pending account review changed. Reopen the original operation.');
       operation ??= {...metadata,entryProof:structuredClone(entryProof),kind:'enrollment',id:`enroll:${random()}`,secret:random(),reference,state:'pending',receipt:null,nextCodes:null};
+      operation.nextCodes ??= newRecoveryCodes();
       state = 'pending_confirmation'; notify();
       try {
-        const value = success(await post('/v1/accounts/enrollments', {operation_id: operation.id, operation_secret: operation.secret,
-          ...metadata,password,entry_proof:operation.entryProof,registration_sha256:reference,deliberate:true}, captured),202);
+        const response = await post('/v1/accounts/enrollments', {operation_id: operation.id, operation_secret: operation.secret,
+          ...metadata,password,entry_proof:operation.entryProof,registration_sha256:reference,recovery_codes:operation.nextCodes,deliberate:true}, captured);
+        if (response.status === 200) {
+          operation.receipt = receipt(success(response)); operation.state = 'confirmed';
+          releasedCodes = operation.nextCodes; operation.nextCodes = null; state = 'confirmed'; return notify();
+        }
+        const value = success(response, 202);
         check(value.status === 'pending' && value.scope === 'local_synthetic_account_enrollment'); return notify();
       } catch (error) {
         // These closed server errors are pre-insert refusals. Keep the confirmed
@@ -691,7 +779,15 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
         if (captured === epoch) { clearSession('unknown'); state = 'outcome_unknown'; notify(); } throw error;
       }
     },
-    discardSession() { fence(); entry = null; clearSession('local_only'); state = 'signed_out'; return notify(); },
+    discardSession(keep) { fence(); entry = null; if (keep !== true) forget(); clearSession('local_only'); state = 'signed_out'; return notify(); },
+    async restore() {
+      if (session) return notify();
+      const saved = recall(); if (!saved) return notify();
+      const captured = epoch; session = saved;
+      try { await readAccount({}, captured); }
+      catch (error) { if (captured === epoch && !['transport_unavailable','operation_aborted','stale_operation'].includes(error.code)) forget(); }
+      return notify();
+    },
     cancel() {
       const uncertain = [...inflight].some(value => value.method !== 'GET');
       if (uncertain && operation) operation.state = 'unknown';
@@ -761,6 +857,83 @@ export function createServiceAccountAdapter({request, device, onChange = () => {
         {operation_id:operation.id,operation_secret:operation.secret},captured)));
     },
     getAccount: options => readAccount(options),
+    // This bounded channel never exposes the private bearer or treats R/O as
+    // reviewer authority. The separate review API rechecks permission per read/write.
+    reviewOwner: () => state === 'signed_in' && account ? Object.fromEntries(
+      ['account_id','principal_id','recovery_generation','current_session_id'].map(key=>[key,account[key]])) : null,
+    async reviewRequest({method,path,body,signal,expected} = {}) {
+      const casePath = '/v1/identity/reviewer/cases/[A-Za-z0-9._:-]{1,128}';
+      const allowed = method === 'GET' && (['/v1/account/identity/review/status','/v1/identity/reviewer/context','/v1/identity/reviewer/cases'].includes(path)
+        || new RegExp(`^${casePath}(?:/photos/(?:document_front|face_front)|/operations/[A-Za-z0-9._:-]{1,128})?$`).test(path))
+        || method === 'POST' && new RegExp(`^${casePath}/decisions$`).test(path);
+      check(allowed && exact(expected,['account_id','principal_id','recovery_generation','current_session_id'])
+        && (method === 'POST' ? object(body) : body === undefined), 'identity_review_request_invalid','This review action is unavailable.');
+      const captured = epoch, current = await readAccount({signal,expected},captured);
+      const response = await authenticated(method,path,body,captured,signal);
+      cancelled(signal); active(captured);
+      check(currentOwner(current),'account_changed','The reviewer session changed during this action.');
+      return response;
+    },
+    async issueIdentityCaptureChallenge(body,{signal,expected} = {}) {
+      const captured = epoch, current = await readAccount({signal,expected},captured);
+      check(exact(body,['expected','kind','source','public_spki_der_b64'])
+        && exact(body.expected,['account_id','principal_id','session_id','recovery_generation'])
+        && ['document_front','face_front'].includes(body.kind) && ['native-camera2','browser-camera'].includes(body.source)
+        && typeof body.public_spki_der_b64 === 'string' && body.public_spki_der_b64.length <= 172
+        && body.expected.account_id === current.account_id && body.expected.principal_id === current.principal_id
+        && body.expected.session_id === current.current_session_id && body.expected.recovery_generation === current.recovery_generation,
+      'account_changed','The account session changed before camera authorization.');
+      const value = success(await authenticated('POST','/v1/account/identity/capture-challenges',body,captured,signal));
+      cancelled(signal); active(captured); check(currentOwner(current),'account_changed','The account session changed during camera authorization.');
+      return structuredClone(value);
+    },
+    getIdentityNotice: options => readIdentityNotice(options),
+    async submitIdentity(body,{signal,expected} = {}) {
+      let writeStarted = false;
+      try {
+        const captured = epoch, current = await readAccount({signal,expected},captured);
+        // Leaving the Account entry deliberately fences its cached data. Re-read
+        // the pinned notice under this current owner immediately before intake.
+        const notice = await readIdentityNotice({signal,expected},captured,current);
+        check(notice.available === true && body?.notice?.notice_id === notice.notice_id
+          && body.notice.version === notice.version && body.notice.sha256 === notice.sha256
+          && body.notice.acknowledged === true,'identity_notice_required',notice.available
+          ? 'Read the current storage notice before submitting.' : 'Identity submission is unavailable.');
+        check(body.expected?.account_id === current.account_id && body.expected.principal_id === current.principal_id
+          && body.expected.session_id === current.current_session_id && body.expected.recovery_generation === current.recovery_generation,
+        'account_changed','The account session changed before submission.');
+        writeStarted = true;
+        const response = await authenticated('POST','/v1/account/identity/submissions',body,captured,signal);
+        if (response.status >= 400 && response.status < 500) {
+          fail('identity_intake_rejected','The identity details were not accepted. Check the form and try again.');
+        }
+        const value = success(response);
+        check(exact(value,['submission_id','operation_id','status','identity_verification','level','created_at'])
+          && identifier(value.submission_id) && value.operation_id === body.operation_id && value.status === 'received'
+          && value.identity_verification === 'pending' && value.level === 1 && safe(value.created_at));
+        cancelled(signal); active(captured); check(currentOwner(current),'account_changed','The account session changed during submission.');
+        identityState = transitionIdentityState(identityState,{type:'received',binding:identityBinding(current),receipt:value});
+        notify();
+        return structuredClone(value);
+      } catch (error) {
+        if (!writeStarted || error.code === 'identity_intake_unavailable' || error.code === 'identity_intake_busy') error.definitely_not_submitted = true;
+        throw error;
+      }
+    },
+    async identitySubmissionStatus(operationId,{signal,expected} = {}) {
+      check(typeof operationId === 'string' && /^identity:[A-Za-z0-9_-]{43}$/.test(operationId),'identity_operation_invalid','Choose an original identity submission.');
+      const captured = epoch, current = await readAccount({signal,expected},captured);
+      const response = await authenticated('GET',`/v1/account/identity/operations/${operationId}`,undefined,captured,signal);
+      active(captured); cancelled(signal); check(currentOwner(current),'account_changed','The account session changed while checking the submission.');
+      if (response.status === 404) return null;
+      const value = success(response);
+      check(exact(value,['submission_id','operation_id','status','identity_verification','level','created_at'])
+        && identifier(value.submission_id) && value.operation_id === operationId && value.status === 'received'
+        && value.identity_verification === 'pending' && value.level === 1 && safe(value.created_at));
+      identityState = transitionIdentityState(identityState,{type:'received',binding:identityBinding(current),receipt:value});
+      notify();
+      return structuredClone(value);
+    },
     async devices({signal} = {}) {
       const captured = epoch, current = await readAccount({signal},captured);
       const response = await authenticated('GET','/v1/account/signin-devices',undefined,captured,signal);

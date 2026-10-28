@@ -8,7 +8,22 @@ const CLIENT = 'nonverba-dev-apk';
 const CALLBACK = UPSTREAM + '/dev-callback';
 const REQUEST_LIMIT = 16 * 1024, RESPONSE_LIMIT = 64 * 1024;
 const DEVICES = '/v1/account/signin-devices', PROVE = DEVICES + '/prove';
-const responseLimit = input => input.path === DEVICES ? 256 * 1024 : RESPONSE_LIMIT;
+const IDENTITY = '/v1/account/identity', IDENTITY_SUBMIT = IDENTITY + '/submissions', IDENTITY_CHALLENGE = IDENTITY + '/capture-challenges', IDENTITY_LIMIT = 6 * 1024 * 1024;
+const identityOperation = path => new RegExp('^' + IDENTITY + '/operations/identity:[A-Za-z0-9_-]{43}$').test(path);
+const REVIEWER = '/v1/identity/reviewer', REVIEW_ID = '[A-Za-z0-9._:-]{1,128}';
+const reviewerCase = path => new RegExp('^' + REVIEWER + '/cases/' + REVIEW_ID + '$').test(path);
+const reviewerPhoto = path => new RegExp('^' + REVIEWER + '/cases/' + REVIEW_ID + '/photos/(document_front|face_front)$').test(path);
+const reviewerDecision = path => new RegExp('^' + REVIEWER + '/cases/' + REVIEW_ID + '/decisions$').test(path);
+const reviewerOperation = path => new RegExp('^' + REVIEWER + '/cases/' + REVIEW_ID + '/operations/' + REVIEW_ID + '$').test(path);
+const reviewRead = path => [REVIEWER + '/context', REVIEWER + '/cases', IDENTITY + '/review/status'].includes(path)
+  || reviewerCase(path) || reviewerPhoto(path) || reviewerOperation(path);
+const REVIEW_DETAIL_LIMIT = 256 * 1024, REVIEW_PHOTO_LIMIT = 3 * 1024 * 1024;
+const responseLimit = input => reviewerPhoto(input.path) ? REVIEW_PHOTO_LIMIT
+  : input.path === DEVICES || reviewerCase(input.path) ? REVIEW_DETAIL_LIMIT : RESPONSE_LIMIT;
+// Base64 photo JSON needs bounded framing/escaping, not a sixfold media budget.
+// Case histories retain the existing device envelope's Unicode escape allowance.
+const serializedResponseLimit = input => reviewerPhoto(input.path) ? REVIEW_PHOTO_LIMIT + REQUEST_LIMIT
+  : input.path === DEVICES || reviewerCase(input.path) ? REVIEW_DETAIL_LIMIT * 6 + 2048 : RESPONSE_LIMIT;
 const FLOW_LIFETIME = 5 * 60 * 1000, MAX_FLOWS = 64;
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const flowId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{43}$/.test(value)
@@ -17,8 +32,8 @@ const opaque = /^[A-Za-z0-9._~-]{16,256}$/;
 const jsonPaths = new Set(['/v1/accounts/enrollments', '/v1/accounts/enrollments/status',
   '/v1/accounts/enrollments/confirm', '/v1/accounts/recovery/start',
   '/v1/accounts/recovery/status', '/v1/accounts/recovery/finish', '/v1/accounts/mock-mail',
-  '/v1/accounts/entry/start', '/v1/accounts/entry/confirm',
-  '/v1/account/deletion', '/v1/account/deletion/status', DEVICES + '/challenge', PROVE, '/v1/account/sessions/revoke']);
+  '/v1/accounts/entry/start', '/v1/accounts/entry/confirm', '/v1/accounts/presence',
+  '/v1/account/deletion', '/v1/account/deletion/status', DEVICES + '/challenge', PROVE, '/v1/account/sessions/revoke', IDENTITY_SUBMIT, IDENTITY_CHALLENGE]);
 const discovery = '/dev-oidc/.well-known/openid-configuration';
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const insist = (condition, message = 'account_transport_invalid') => { if (!condition) throw new Error(message); };
@@ -51,7 +66,8 @@ export function validateAccountTransport(wire) {
   insist(url.origin === UPSTREAM && !url.username && !url.password && !url.hash);
   const auth = path === '/dev-oidc/authorize';
   const authenticated = path === '/v1/account/context' || path === '/v1/account/devices' || path === '/v1/auth/session' || path === '/v1/account/deletion'
-    || [DEVICES, DEVICES + '/challenge', PROVE, '/v1/account/sessions/revoke'].includes(path);
+    || [DEVICES, DEVICES + '/challenge', PROVE, '/v1/account/sessions/revoke', IDENTITY + '/notice', IDENTITY + '/status', IDENTITY_SUBMIT, IDENTITY_CHALLENGE].includes(path)
+    || identityOperation(path) || reviewRead(path) || reviewerDecision(path);
   if (authenticated) insist(/^Bearer [A-Za-z0-9._~-]{1,8192}$/.test(headers.Authorization || ''));
   else insist(headers.Authorization === undefined);
   if (auth) insist(flowId(input.flow_id));
@@ -65,14 +81,64 @@ export function validateAccountTransport(wire) {
       insist(query.response_type === 'code' && query.client_id === CLIENT && query.redirect_uri === CALLBACK
         && query.scope === 'openid' && opaque.test(query.state) && opaque.test(query.nonce)
         && /^[A-Za-z0-9_-]{43}$/.test(query.code_challenge) && query.code_challenge_method === 'S256');
-    } else insist(!url.search && [discovery, '/dev-oidc/jwks', '/v1/accounts/capabilities', '/v1/accounts/terms', '/readyz', '/v1/account/context', '/v1/account/devices', DEVICES].includes(path));
+    } else insist(!url.search && (!reviewRead(path) || input.path === path)
+      && ([discovery, '/dev-oidc/jwks', '/v1/accounts/capabilities', '/v1/accounts/terms', '/readyz', '/v1/account/context', '/v1/account/devices', DEVICES, IDENTITY + '/notice', IDENTITY + '/status'].includes(path) || identityOperation(path) || reviewRead(path)));
   } else if (input.method === 'DELETE') {
     insist(path === '/v1/auth/session' && !url.search && input.body === undefined && headers['Content-Type'] === undefined);
   } else if (input.method === 'POST') {
-    insist(!url.search && typeof input.body === 'string' && Buffer.byteLength(input.body) <= (path === PROVE ? 192 * 1024 : REQUEST_LIMIT));
-    if (jsonPaths.has(path)) {
+    insist(!url.search && typeof input.body === 'string' && Buffer.byteLength(input.body) <= (path === IDENTITY_SUBMIT ? IDENTITY_LIMIT : path === PROVE ? 192 * 1024 : REQUEST_LIMIT));
+    if (jsonPaths.has(path) || reviewerDecision(path)) {
       insist(headers['Content-Type'] === 'application/json');
       const body = JSON.parse(input.body); insist(object(body));
+      if (reviewerDecision(path)) {
+        const fields = ['operation_id','submission_sha256','receipt_sha256','expected_revision','action','reason'];
+        insist(input.path === path && keys(body,fields,fields)
+          && typeof body.operation_id === 'string' && new RegExp('^' + REVIEW_ID + '$').test(body.operation_id) && !['.','..'].includes(body.operation_id)
+          && typeof body.submission_sha256 === 'string' && /^[a-f0-9]{64}$/.test(body.submission_sha256)
+          && typeof body.receipt_sha256 === 'string' && /^[a-f0-9]{64}$/.test(body.receipt_sha256)
+          && Number.isSafeInteger(body.expected_revision) && body.expected_revision >= 0
+          && ['approved','rejected','needs_correction'].includes(body.action)
+          && typeof body.reason === 'string' && body.reason === body.reason.trim()
+          && [...body.reason].length >= 1 && [...body.reason].length <= 500 && !/[\p{Cc}\p{Cs}]/u.test(body.reason));
+      }
+      if (path === IDENTITY_CHALLENGE) {
+        const context = ['account_id','principal_id','session_id','recovery_generation'];
+        insist(keys(body,['expected','kind','source','public_spki_der_b64'],['expected','kind','source','public_spki_der_b64'])
+          && keys(body.expected,context,context)
+          && context.slice(0,3).every(k => typeof body.expected[k] === 'string' && /^[A-Za-z0-9._:-]{1,128}$/.test(body.expected[k]))
+          && Number.isSafeInteger(body.expected.recovery_generation) && body.expected.recovery_generation >= 0
+          && ['document_front','face_front'].includes(body.kind) && ['native-camera2','browser-camera'].includes(body.source)
+          && typeof body.public_spki_der_b64 === 'string' && body.public_spki_der_b64.length > 0 && body.public_spki_der_b64.length <= 172
+          && /^[A-Za-z0-9+/]+={0,2}$/.test(body.public_spki_der_b64)
+          && Buffer.from(body.public_spki_der_b64,'base64').length <= 128
+          && Buffer.from(body.public_spki_der_b64,'base64').toString('base64') === body.public_spki_der_b64);
+      }
+      if (path === IDENTITY_SUBMIT) {
+        const fields = ['operation_id','level','expected','details','document_front','face_front','notice'];
+        const details = ['document_type','full_name','birth_city','nationality','age'];
+        const text = (value,max) => typeof value === 'string' && value.trim().length > 0 && [...value].length <= max && !/[\x00-\x1f\x7f]/.test(value);
+        // The service owns protocol and signature verification. This transport
+        // accepts only the bounded detached envelope, never arbitrary destinations.
+        const proof = value => keys(value,['payload','public_spki_der_b64','signature_b64'],['payload','public_spki_der_b64','signature_b64'])
+          && object(value.payload) && Buffer.byteLength(JSON.stringify(value)) <= 16 * 1024
+          && typeof value.public_spki_der_b64 === 'string' && value.public_spki_der_b64.length <= 172
+          && typeof value.signature_b64 === 'string' && value.signature_b64.length === 88;
+        const image = value => keys(value,['media_type','base64','capture_proof'],['media_type','base64']) && value.media_type === 'image/jpeg'
+          && typeof value.base64 === 'string' && value.base64.length <= 2796204 && value.base64.length > 0
+          && /^[A-Za-z0-9+/]+={0,2}$/.test(value.base64) && Buffer.from(value.base64,'base64').toString('base64') === value.base64
+          && Buffer.from(value.base64,'base64').length <= 2 * 1024 * 1024
+          && (!Object.hasOwn(value,'capture_proof') || proof(value.capture_proof));
+        insist(keys(body,fields,fields) && /^identity:[A-Za-z0-9_-]{43}$/.test(body.operation_id || '') && flowId(body.operation_id.slice(9))
+          && body.level === 1 && keys(body.expected,['account_id','principal_id','session_id','recovery_generation'],['account_id','principal_id','session_id','recovery_generation'])
+          && ['account_id','principal_id','session_id'].every(k => text(body.expected[k],128))
+          && Number.isSafeInteger(body.expected.recovery_generation) && body.expected.recovery_generation >= 0
+          && keys(body.details,details,details) && ['passport','national_id','driving_licence','residence_permit'].includes(body.details.document_type)
+          && text(body.details.full_name,200) && text(body.details.birth_city,120) && text(body.details.nationality,120)
+          && Number.isInteger(body.details.age) && body.details.age >= 1 && body.details.age <= 130
+          && image(body.document_front) && image(body.face_front)
+          && keys(body.notice,['notice_id','version','sha256','acknowledged'],['notice_id','version','sha256','acknowledged'])
+          && body.notice.notice_id === 'identity-intake' && [1,2,3].includes(body.notice.version) && /^[0-9a-f]{64}$/.test(body.notice.sha256 || '') && body.notice.acknowledged === true);
+      }
       if (path === DEVICES + '/challenge') {
         insist(keys(body,['operation_id','platform','name'],['operation_id','platform','name'])
           && /^signin-device:[A-Za-z0-9_-]{43}$/.test(body.operation_id || '') && flowId(body.operation_id.slice(14))
@@ -92,6 +158,12 @@ export function validateAccountTransport(wire) {
       if (path === '/v1/account/sessions/revoke') insist(keys(body,['operation_id','session_id','deliberate'],['operation_id','session_id','deliberate'])
         && typeof body.operation_id === 'string' && /^revoke:[A-Za-z0-9_-]{43}$/.test(body.operation_id)
         && typeof body.session_id === 'string' && /^[A-Za-z0-9._:-]{1,128}$/.test(body.session_id) && body.deliberate === true);
+      if (path === '/v1/accounts/presence') {
+        insist(keys(body, ['email', 'username']) && Object.hasOwn(body, 'email') !== Object.hasOwn(body, 'username'));
+        if (Object.hasOwn(body, 'email')) insist(typeof body.email === 'string' && body.email.length > 0 && body.email.length <= 254
+          && !/[\x00-\x20\x7f-\uffff]/.test(body.email));
+        else insist(typeof body.username === 'string' && /^[a-z][a-z0-9_]{2,29}$/.test(body.username));
+      }
       if (path.startsWith('/v1/accounts/entry/')) {
         const starting = path === '/v1/accounts/entry/start';
         const fields = starting ? ['operation_id','operation_secret','email','username'] : ['operation_id','operation_secret','confirmation_token'];
@@ -167,7 +239,7 @@ function send(response, status, value) {
 async function readWire(request) {
   const chunks = []; let length = 0;
   for await (const chunk of request) {
-    length += chunk.length; insist(length <= 208 * 1024);
+    length += chunk.length; insist(length <= IDENTITY_LIMIT + 16 * 1024);
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
@@ -223,7 +295,7 @@ export function createParticipantAccountRelay({enabled = process.env.NONVERBA_AC
       const authorizationFlow = candidate ? {cookie:candidate.cookie, expires:candidate.expires} : null;
       if (authorizationPost) discardFlow(wire.request.flow_id);
       const input = validateAccountTransport(wire);
-      insist(Buffer.byteLength(JSON.stringify(wire)) <= (input.path === PROVE ? 208 * 1024 : REQUEST_LIMIT));
+      insist(Buffer.byteLength(JSON.stringify(wire)) <= (input.path === IDENTITY_SUBMIT ? IDENTITY_LIMIT + REQUEST_LIMIT : input.path === PROVE ? 208 * 1024 : REQUEST_LIMIT));
       const auth = input.path.split('?', 1)[0] === '/dev-oidc/authorize';
       if (auth && input.method === 'POST') {
         const flow = authorizationFlow;
@@ -269,7 +341,7 @@ export function createParticipantAccountRelay({enabled = process.env.NONVERBA_AC
         headers.location = target.href;
       }
       const result = {id, response:{status:upstream.status, headers, body:upstream.body}};
-      insist(Buffer.byteLength(JSON.stringify(result)) <= (input.path === DEVICES ? 256 * 1024 * 6 + 2048 : RESPONSE_LIMIT), 'account_response_too_large');
+      insist(Buffer.byteLength(JSON.stringify(result)) <= serializedResponseLimit(input), 'account_response_too_large');
       send(response, 200, result);
     } catch {
       if (reservation && flows.get(reservation.id) === reservation.entry) discardFlow(reservation.id);

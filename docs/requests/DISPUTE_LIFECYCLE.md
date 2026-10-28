@@ -35,6 +35,29 @@ evidence; specifying that connection remains future work, not inventing a new
 signed-opening capability. Existing event and acknowledgment records retain
 their own meanings.
 
+## Notice, response, and silence
+
+Recorded 28 October 2026. These acts stay distinct. One of them does not stand
+in for another.
+
+| Act | What the record can show | What it does not establish |
+| --- | --- | --- |
+| Raising a claim | A participant attributes a scoped claim. A core `DisputeOpened` event or a signed submission can be that act. | The other party's consent, receipt of notice, the claim's truth, or a settlement |
+| Delivering notice | A notice record is handed to a channel the parties have actually provided. | That the recipient read it or accepted it. No delivery service is selected here |
+| Reading notice | The recipient's own attributed record says they read that exact notice. | Consent, a response, or fault |
+| Responding | A signed submission or challenge answers that claim. | Agreement, unless it is the exact authorization path for a supported effect |
+| Staying silent | No response is retained. | Consent, refusal, fault, or forfeiture |
+
+Silence, inactivity, refusal, technical failure, and missing material are not
+consent and are not proof of fault. A failed or absent transport record is a
+technical failure or missing material. It is not a response and it is not
+agreement.
+
+This record adopts no response timetable and no service responsibility for
+delivering, reading, or answering notice. The companion case still has no
+binding from its identity to an exact signed opening event and the notice
+evidence. Escalation, remedies, and payment remain unspecified.
+
 ## Review and negotiation interface
 
 The following is a **process design**, not a new wire schema or signing API.
@@ -123,3 +146,12 @@ Sources: [case records](../../code/disputes/src/case.rs),
 [exact authorizations and scope versions](../../code/requests/src/actions.rs),
 [effect and entitlement checks](../../code/requests/src/bundle.rs),
 and [open settlement decisions](DISPUTE_PRIORS_DECISIONS.md).
+
+## Opening event binding contract
+
+Reserved 28 October 2026. This heading is the place for a frozen contract that
+names the exact signed DisputeOpened event, the notice evidence that belongs
+to it, and the separation from delivery, reading, response, and silence. No
+contract is frozen. No timetable and no delivery service are selected. Binding
+a companion case to one opening remains unspecified. This note adds no payment
+authority and does not treat silence as consent.

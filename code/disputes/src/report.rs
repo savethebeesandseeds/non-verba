@@ -426,12 +426,22 @@ fn render_attempts(
     for (index, attempt) in inspection.attempts.iter().enumerate() {
         let kind = attempt["execution_kind"].as_str().unwrap_or("UNKNOWN");
         let origin = match kind {
-            "MOCK" => "SYNTHETIC MOCK — development output; not a real local-model result",
+            "MOCK" => "SYNTHETIC MOCK — development output; not a real local-model result".into(),
             "LOCAL_LLAMA_CPP" => {
-                "LOCAL LLAMA.CPP — unverified runner claim, not execution attestation"
+                "LOCAL LLAMA.CPP — unverified runner claim, not execution attestation".into()
             }
-            "MIXED" => "MIXED EXECUTION ORIGINS — inspect each stage; no single real-local claim",
-            _ => "NO COMPLETED EXECUTION ORIGIN — no successful local execution established",
+            "MIXED" => {
+                "MIXED EXECUTION ORIGINS — inspect each stage; no single real-local claim".into()
+            }
+            "GROK_HEADLESS" => {
+                "GROK HEADLESS — one-shot completion; unverified runner claim, not a local execution or a settlement".into()
+            }
+            "NO_COMPLETION" | "UNKNOWN" | "UNSPECIFIED" => {
+                "NO COMPLETED EXECUTION ORIGIN — no successful local execution established".into()
+            }
+            other => format!(
+                "{other} — hosted completion; unverified runner claim, not a local execution or a settlement"
+            ),
         };
         out.push_str(&format!("\nAttempt {}: {origin}\n", index + 1));
         field(

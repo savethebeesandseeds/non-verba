@@ -376,3 +376,12 @@ facial identity, liveness or deployed account-wide protection. Record those limi
 
 Resolve these without making operators repeat checks unnecessarily or weakening
 the deliberate, enforceable boundary between work and private life.
+
+## Genuine contract
+
+Reserved 28 October 2026. This heading is the place for a genuine role-aware
+authentication contract. No contract is frozen. Account login, identity
+assurance, and work or sensor authority stay separate until that contract
+says otherwise. Close criteria for genuine versus synthetic authentication
+are not stated. This note selects no face requirement, liveness method, or
+false-match threshold, and it does not claim genuine authentication.

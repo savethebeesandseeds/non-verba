@@ -17,6 +17,7 @@ pub mod camera_set;
 pub mod camera_set_evidence;
 pub mod evidence_session;
 pub mod face_identity;
+pub mod identity_capture;
 pub mod key_enrollment;
 pub mod live_session;
 pub mod location;

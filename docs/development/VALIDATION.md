@@ -1937,3 +1937,750 @@ the legal register records the flow change and pending notice coverage. Email
 delivery remains mocked in the live local proof. No APK build/export, physical
 Android action, hardware-attestation or completed identity-verification claim
 is made.
+
+## Compact identity stamps and Account copy — 23 October 2026
+
+Owner-selected sage Level 1 and mahogany Level 2 stamps now appear as small
+identity targets: 48px on setup and 40px on the document/photo/review steps.
+Adjacent text identifies Requests/Operations and explicitly says Not verified.
+The capture indicator follows the immutable bound role after preparation begins.
+Account and its Settings entry include 32px earned-stamp strips controlled by
+the same workflow-access policy as the corresponding protected actions. The
+current validated pending-only service contract unlocks neither, so these
+strips remain hidden. No new local verified flags or service authority were
+accepted; confirmed email, photo review, device proof and restored history
+cannot grant a stamp or enable work.
+
+Settings now links directly to Identity verification, including before sign-in;
+signed-out photo preparation remains disabled. Account/identity copy uses short
+literal headings and labels, without internal prompts, promotional questions
+or repeated status blocks. Photo consent still precedes collection; page-only
+storage and clearing on close/reload are explained before capture. Unsubmitted,
+unverified and unchecked-liveness states, terms review, recovery factors,
+unknown sign-out and deletion consequences remain explicit. The final photo
+screen has one discard action. No exact Account Terms bytes, version, digest,
+acceptance record, backend policy or actual identity status changed.
+
+All 111 focused account/relay/workspace/package unit cases, 13 shell Chromium
+groups and 18 account/capture Chromium groups passed in managed Debian. Final
+package checks also passed after the copy cleanup. Coverage includes exact
+browser/APK asset closure and production/review CSP separation; pending/forged
+claims, photo review, history and authority loss cannot earn badges; Settings
+navigation/Back, bound-role indicators, decode/size, keyboard targets and
+320px/200% text remain covered. A stale pending-confirmation wording assertion
+was updated without changing its proof/state checks. Independent review caught
+and verified restoration of the pre-capture photo-lifetime notice; visual QA
+also removed duplicate final-screen copy and discard controls.
+
+The approved transparent PNG masters are preserved outside the runtime closure.
+The managed branding recipe prepares 128px WebPs at quality 0.78, exactly 6320
+and 7096 bytes; its subsequent --check matched both. The individual 8 KiB image
+guard remains. The seventeen-asset runtime is 317252 bytes within the explicit
+320 KiB feature bound, replacing the previous fifteen-asset 296 KiB bound for
+these two stamp assets and compact interface. Native changes only extend the
+exact static-asset allowlist and matching size check; no interface, permission,
+dependency, APK build/export or physical-device action was added.
+
+Normal and enlarged-text setup plus synthetic photo-step screenshots were
+visually inspected. A new review tab shows the updated identity menu while the
+owner's existing signed-in tab remains untouched. No real credentials, photos
+or user account mutations were used to review this change. The private progress
+record covers this presentation milestone only; authoritative verification and
+connected-work service enforcement remain open.
+
+## Sequential identity pipelines and unverified stamp — 23 October 2026
+
+The owner's follow-up replaces the level selector with fixed Level 1 and
+Level 2 entry points. Level 1 binds the requester capture role; Level 2 binds
+the operator role and requires canonical Level 1 eligibility before any
+dispatch, after current-account revalidation, throughout capture and on
+restored navigation. Eligibility loss cancels an advanced capture. Disabled
+controls are backed by handler/route checks; DOM changes, history flags and
+local photo review cannot satisfy the prerequisite. The pending-only account
+contract still grants no verified level, so Level 2 remains locked. This adds
+no verification service or advanced identity decision.
+
+Signed-in pending accounts now show a small gray Unverified stamp and caption
+in Account and Settings, instead of an empty badge area. Signed-out views show
+no account stamp. Earned Level 1/2 remain policy-gated, and Level 2 additionally
+requires Level 1. The gray artwork has no checkmark or level number. Its
+1254px transparent master is preserved; the exact managed 128px/0.78 WebP is
+5858 bytes. The recipe --check passed with the earlier four artwork targets
+unchanged. All eighteen runtime assets total 325590 bytes inside the retained
+320 KiB bound, with every image below the retained 8 KiB limit.
+
+Demo/availability and page-lifetime notes now sit below the identity actions.
+The document processing choice still explains page-only use before collection;
+photos remain unsubmitted and clear on close/reload, discard or authority loss.
+Exact terms, recovery factors, device/person-verification separation and
+unknown sign-out/deletion handling are unchanged. No backend or account state,
+permission, native interface, dependency, APK or physical device was changed.
+
+All 111 focused public unit cases, 13 shell browser groups and 18 account/capture
+groups passed in managed Debian. They cover gray-badge session loss, absent
+selector, fixed Level 1 binding, native disabled behavior, programmatic/DOM-
+enabled Level 2 refusal with no service/camera/photo mutation, forged history,
+reviewed photos without promotion, footer ordering and 320px/200% text. All
+photo regressions use the eligible Level 1 preparation path. Independent review
+found no additional bypass or reentrancy issue. Normal and enlarged pipeline
+screens plus synthetic gray Account proof were visually inspected. The live
+review tab was refreshed to the new menu without changing the owner's separate
+signed-in tab, entering credentials or mutating user accounts. The private
+presentation milestone and legal register reflect the refinement; actual
+verification authority and server-side work eligibility remain open.
+
+## Identity details and gated private intake — 23 October 2026
+
+The shared Account view now places the current identity stamp beside its heading,
+orders username before email and keeps compact actions at the bottom. Signed-in
+identity entry opens the Level 1 document form directly. The capture header uses
+a faint decorative target-level stamp; no target stamp is an earned verification.
+The form collects document type, full name, city of birth, nationality and age.
+Review shows those values alongside both processed photos.
+
+The bounded image adapter accepts JPEG/PNG phone photos up to 32 MiB and
+64 megapixels, preserves orientation, and emits JPEGs of at most 2 MiB each.
+Maximum output edges are 2400 pixels for documents and 1280 for faces. It removes
+nonessential metadata before and between scans while preserving encoded image
+bytes. Actual Chromium checks exercised a 48 MP JPEG, EXIF orientation, PNG
+conversion and the encoder's ICC block. The private intake independently rejects
+hidden metadata, including an authenticated caller bypassing client preparation.
+
+Hx02 supplied the exact 3509-byte synthetic Identity Intake Notice, version 1,
+SHA-256 `e758daf9412756dd37ea43c79a7ebec21745109fa0dc9e9125fd029adbde8a27`.
+The bundled client pins the full text and digest, opens a complete notice view,
+requires deliberate agreement at its end, and submits only on a separate action.
+Photo/field changes invalidate review and agreement. A fresh notice check before
+writing preserves authentication fences and handles availability changes. Account
+Terms and historical acceptance bytes are unchanged.
+
+The authenticated private service binds intake to the current account, principal,
+session and recovery generation. Synthetic tests verify durable image readback,
+exact notice acceptance, concurrent idempotency, replay/conflict, cross-account
+and stale/revoked-session denial, and receipt lookup. Only an acknowledged receipt
+produces Saved status. Interrupted writes keep the original operation for status
+checks, without automatic resubmission or an invented verification result.
+
+Executed checks in the existing managed Linux environments:
+
+- All 156 focused public unit/package/workspace/account/relay/capture/camera cases
+  passed, including definite pre-write failures versus unknown writes and the
+  Account-to-Level-1 notice-reset regression.
+- The shell Chromium suite passed all 13 groups. Android participant assembly and
+  lint passed using the documented pipeline; no phone action or APK export ran.
+- Private checks passed 3 image/notice units, 3 durable database/object-storage
+  groups, 6 OpenAPI checks, strict all-target Clippy and formatting. Six live guard
+  groups and readiness/readback checks passed after the gated service reload;
+  private tables remain inaccessible to the ordinary viewer.
+- Nineteen runtime assets total 360593 bytes within the explicitly reviewed
+  384 KiB intake-client budget. Individual images retain their 8 KiB bound and
+  the APK retains its 8 MiB bound. Native asset lists and debug-only closed
+  transport paths include the notice and bounded intake request; production CSP,
+  network isolation and release asset exclusions remain intact.
+
+The live service reports intake unavailable and refuses uploads before reading
+photo payloads. Durable storage was tested with synthetic fixtures only. Real-ID
+collection remains closed pending the custody, retention, reviewer access,
+delete/backup and adoption decisions in the
+[Hx02 notice contract](IDENTITY_INTAKE_NOTICE_REVIEW.md). No real identity data was
+uploaded, identity approved or work eligibility granted. These results establish
+the scoped software behavior, not compliance or production readiness.
+
+The final account/capture Chromium suite passed all 20 groups against the same
+360593-byte runtime. Its new groups cover durable-receipt UI fixtures, unknown
+POST outcomes with status-only recovery, known rejection, unavailable/changed
+notice, forged verified receipts and actual 48 MP JPEG/PNG normalization. Existing
+account, recovery, session/deletion, camera lifecycle, stale-result, keyboard and
+320px/200% text cases remain green. Normal Account, direct Level 1, saved synthetic
+receipt and enlarged form/notice screenshots were reviewed. Intercepted service
+fixtures establish browser behavior; separate private service tests establish the
+storage boundary. Neither substitutes for phone-camera acceptance or real-person
+identity review.
+
+## Identity controls in Account — 23 October 2026
+
+The follow-up layout review removes the identity-verification link and status
+badge from Settings for both signed-out and signed-in accounts. Settings retains
+only Sign in or Account in that section. The current stamp and identity entry
+remain on the Account page. The form starts with Full name across the full row,
+then City of birth/Nationality, then Age/Document type. Narrow layouts stack in
+the same DOM and keyboard order. The global Discard photos link is removed;
+individual replacement controls and the existing status action are unchanged.
+
+All 43 focused package/workspace cases, 13 shell Chromium groups and 20
+account/capture Chromium groups passed in the existing managed container. The
+browser cases assert absent Settings controls in both account states, retained
+Account status, form reading/keyboard/visual order, and 320px/200% text layout.
+A selected document and filled details clear on visible Back to Account; existing
+browser-Back/late-permission cases still prove stale capture cannot return.
+Normal Settings, normal form and enlarged form screenshots were reviewed.
+
+Nineteen runtime assets now total 359432 bytes under the unchanged 384 KiB bound.
+This refinement changes shared presentation only; no Android build, phone action,
+backend reload or storage/authority change was needed. Hx02's completed notice
+review was checked: its canonical version, exact text and digest already match
+the integrated draft. No agreement or retention decision changed.
+
+## Direct face photo capture — 23 October 2026
+
+The participant Face photo screen now uses a single frontal-still flow. Start
+camera opens one preview with an oval positioning guide; Take photo is enabled
+when the live frame is ready. Capture stops the sensor before encoding and shows
+the selected photo, Retake photo and Review details. Retake from either capture
+or review clears the old image and review/notice agreement, then opens the camera
+for a new deliberate still. Stop camera returns to the idle card. Focus follows
+Start, Take and Review after controls become enabled.
+
+The five-position movement menu and skip link are removed from the participant
+interface. It selects the existing frontal-only capture mode without collecting
+movement frames or asserting liveness, matching the same one-photo custody and
+pending-review contract. Shared optional guidance APIs remain for other consumers.
+The capture lease, account/session validation, image preparation, foreground,
+cancellation, late-result and sensor-cleanup fences remain in place. Route/epoch
+checks precede permission acquisition, including after an interrupted retake.
+A delayed review-retake account check cannot open the camera after Back has
+returned to the Face photo screen.
+
+The Account stamp is 112px, with a 96px size on narrow screens. A wrapping heading
+layout reserves space for the title and badge, including enlarged text; the existing
+128px prepared artwork and individual image bound are unchanged.
+
+All 83 focused package/workspace/capture/camera tests and 13 shell plus 20
+account/capture Chromium groups passed. Browser cases cover idle/live/selected
+states, frame-ready capture, Stop/Take keyboard focus, immediate retake and old
+URL cleanup, a single still rather than movement recording, stale permission and
+navigation, pending identity authority, and 320px/200% text without badge overlap
+or horizontal overflow. Normal Account and idle/live/selected face views plus
+enlarged-text proofs were visually reviewed. Nineteen runtime assets total
+360641 bytes under the unchanged 384 KiB budget. No Android build, phone-camera
+acceptance, new identity decision, backend or notice/retention change is claimed.
+
+## Compact identity submission — 23 October 2026
+
+Continue from the selected face photo now performs the deliberate exact-revision
+review and opens Submit identity. The final step omits the repeated photo
+confirmation and keeps fields, photos and editing inside a closed Review or
+change details disclosure. Opening or closing that disclosure changes no review
+or agreement. Missing metadata in restored history returns directly to the
+document form, with continuation disabled and selected media retained.
+
+The final checkbox, associated label and notice link open the complete pinned
+document without agreeing. Available Submit before agreement opens that same
+document without posting. Only the checkbox at the document end accepts it,
+returns through Back and checks the final choice. Changes to metadata or either
+photo clear review and notice agreement. Unavailable intake shows one status
+instead of a disabled Submit. Unknown submissions hide editing/agreement and
+offer only status lookup for the original operation.
+
+All 83 focused package/workspace/capture/camera checks and 13 shell plus 20
+account/capture Chromium groups passed on the final source. Browser cases cover
+checkbox click, Space, associated label, link and Submit; full canonical text
+and agreement ordering; Back without acceptance or upload; metadata/photo
+invalidation; delayed-retake cancellation; incomplete metadata through Back and
+restored status routes; unavailable/invalid notices; original-operation lookup;
+and disclosure/notice keyboard access at 320px with 200% text. Compact,
+unavailable, expanded and enlarged-text views were visually reviewed using
+synthetic fixtures. The 19 runtime assets total 362500 bytes under the unchanged
+384 KiB limit. Both repository whitespace checks passed.
+
+The local preview serves the updated source. The private progress dashboard was
+refreshed through its documented managed-container procedure. This shared UI
+refinement changes no notice or Account Terms bytes/version/digest, stored data,
+backend, identity award, custody gate or adoption decision. No new APK build or
+physical-camera acceptance is claimed.
+
+## Home arrival and test-intake guidance — 23 October 2026
+
+The shared participant Home now gives a bounded arrival cue: the character
+rises/settles over 900ms, followed by three 1400ms navigation-button background
+pulses. The menu icon stays visible. Initial visible entry and a fresh sign-in
+start the sequence; ordinary Home revisits and status probes do not replay it.
+Menu focus, opening a panel, leaving Home, hidden/page-exit state and a reduced
+motion preference stop or suppress it. A 6500ms fallback bounds the sequence.
+It changes no focus, menu state, status authority or sensor permissions.
+
+Document Try again has a trash icon, revokes the selected preview, preserves
+entered fields and returns focus to the enabled camera action without sensor
+acquisition. The final review disclosure precedes notice agreement in both DOM
+and keyboard order. Its pending-status copy distinguishes private test intake
+from document checks and account validation that are still being developed.
+
+All 83 focused package/workspace/capture/camera checks, 20 account/capture and
+14 shell Chromium groups passed on the final 365720-byte, 19-asset runtime under
+the unchanged 384 KiB bound. Browser checks cover the natural animation sequence,
+fixed durations/repeat count, bounded cancellation and initially hidden/reduced
+motion cases; fresh sign-in and unchanged status updates; retry URL cleanup,
+focus and no automatic camera; review ordering; exact notice/receipt/unknown
+write guards; and 320px/200% text. Animation frames, document retry and final
+review views were visually checked with synthetic/anonymous fixtures only.
+The participant preview was refreshed while preserving the existing user tabs.
+
+The owner explicitly chose test-data submissions under unchanged synthetic-only
+notice v1. Hx10 owns the client changes above; Hx11 owns review, completion,
+service admission/activation and live service evidence. Hx02 owns notice/custody
+records and the pending real-user proposal. At this UI checkpoint, prepared
+default-off test-policy changes were handed to Hx11 before any runtime policy,
+account selection, reload or activation. No real-ID scope, successor notice,
+reviewer, processing-time promise or identity award is established here.
+No new APK build or physical-camera acceptance is claimed.
+
+Hx11 subsequently completed the [selected test-only service activation](SERVICE_IDENTITY_INTAKE_CHECKPOINT.md).
+Exactly two existing confirmed synthetic accounts, including the current client
+review account, were selected. Nine focused policy/image and retained
+database/object-store cases, startup/readiness/lint checks and eleven enabled
+live groups passed for the activated v1 scope. Synthetic submission, exact retry,
+conflicting retry refusal, original receipt lookup, private exact-byte readback
+and unchanged pending identity/work context were verified. Hx11's checkpoint
+owns the service evidence and its limits; no client uploads of real user photos
+or credentials were performed here.
+
+The participant preview retains the tested 365720-byte v1 runtime from
+`/tmp/nonverba-unified-source/de2bed58e1c74b5082105ff96ffe2d6a`.
+Separately ongoing camera-proof and v2 notice/parser source changes were found
+in the shared checkout after these checks. They were preserved and left out of
+the served snapshot. The successful client and server results above describe
+the verified v1 runtime, rather than a clean-check or deployment claim for that
+later working tree.
+
+## Identity camera tool and independent proof verification — 23 October 2026
+
+The owner requested the hardened camera path for identity-document and frontal
+photos. The current source now shares the actual native Camera2 controller
+between the developer and participant profiles. Identity requires rear/front
+respectively, acquires no location, normalizes a bounded metadata-free JPEG
+before signing, uses a separate account capture key, and preserves those exact
+bytes through review and intake. The browser signs its normalized photo with a
+separate nonextractable document key and reports only observed/unknown lens
+information. File import remains unverified. The
+[tool contract](IDENTITY_CAMERA_TOOL.md) records the wire format and assurance
+limits; private account challenge/storage implementation remains private.
+
+Executed checks in the existing managed Linux containers:
+
+- **178 focused Node cases passed**, covering capture, proof and exact-byte
+  workflow, notices/history, account/relay, asset/catalog and APK inspection
+  boundaries. Rust-generated native/browser proofs and an actual JCA-generated
+  proof were independently verified by WebCrypto against exact transcripts and
+  JPEGs. **8 core Rust cases passed**, with only the explicitly opt-in synthetic
+  fixture generator ignored. Public-core library Clippy passed with warnings
+  denied. Private checks passed **5 unit and 7 retained synthetic database/object
+  cases**, plus private-library Clippy with warnings denied. They cover original
+  authority/context, proof mutation, retry/replay, expiry, both-photo rollback
+  and atomic consumption, quotas, historical v1 retry and viewer denial.
+- **20 Chromium workflow groups passed** against exact packaged client bytes,
+  intercepted account HTTP/OIDC and synthetic browser camera frames. The new
+  cases verify no image/hash in challenge requests, proof-bearing final JPEGs,
+  no sensor/result when challenge policy is unavailable, and no media upload
+  when availability disappears after capture. Screenshots were retained and the
+  compact submission page was visually checked. No real service, mailbox,
+  physical camera or identity data was used by this browser run.
+- The final production Kotlin protocol/JPEG/lens/document-access/queue harness
+  passed real JCA signature and refusal checks. An independently retained JCA
+  fixture is verified by both Rust and WebCrypto. The five moved-helper runners
+  also passed **744 deterministic checks** across timing, session/recording,
+  diagnostics, cleanup and main-thread guards. They do not emulate Camera2 or an
+  Android permission dialog. Review found and fixed a permission-pause race:
+  identity authority now always revokes on pause; only scoped cancellation is
+  accepted while paused. If a camera-permission dialog pauses the Activity, the
+  attempt cancels and its grant requires a fresh deliberate Start. The signing worker permits one
+  running and one queued JPEG; excess work refuses with cleanup.
+- The documented **all-target Android build passed** developer native output
+  for arm64-v8a/x86_64, assembly and lint for both apps. Developer APK inspection
+  passed schema 2, retained signer, package/current-Linux-source checks with no
+  errors or gaps. A subsequent inspector change permits only the explicit
+  reviewed shared camera classes while still refusing developer host/JNI/sensor
+  classes and unknown classes; **20 package cases passed**, followed by a
+  participant build/lint and schema-1 package inspection. Its APK is **2,825,994
+  bytes**, runtime **390,277 bytes**, within the unchanged 8 MiB/384 KiB bounds.
+  It has no JNI/model/WASM payload and adds no location or microphone permission.
+  The inspector's legacy `developer_class_prefix_excluded` result denotes the
+  excluded developer classes with this explicit shared-controller exception.
+
+Initial checks exposed a stale source assertion (158/159 passed) and a browser
+fixture that requested capture while policy was deliberately unavailable. The
+assertion was updated for the new native bridge, and the fixture now tests that
+refusal plus a separate pre-write availability loss. The product gate was not
+relaxed and no timeout was increased to hide the failure.
+
+The combined source snapshot was
+`/tmp/nonverba-unified-source/5703a70d9df84f5ba6795c9c3abbec35`, base
+`44dfbb0c413cc450d78065cf92874e1f77b20c11`, dirty source, archive SHA-256
+`8b2cb4953937d3f110bb87a9c004fdc6bfcbf93f7e444689ddcae85df81e992b`.
+The focused package-tool continuation used
+`/tmp/nonverba-unified-source/50e3135fc9af4e6f9e9fadd64922e145`; recursive source
+comparison confirmed identical shared web, participant UI, native app/shared/
+participant and core source before its build. Existing snapshots were not
+patched in place. Selected authentic logs, reports and synthetic screenshots
+remain private. Private test outcomes above are supported by their execution
+transcript and authored private checkpoint, not a fabricated raw-log export.
+
+The synthetic-only notice successor v2 is 4694 UTF-8 bytes, SHA-256
+`d39fa9049feb18fc7db8d2ce0731fecba738b3c10fadce09130521c3a270fbca`;
+v1 remains exactly preserved, with Account Terms unchanged. No live migration,
+API/worker reload, protected policy change, preview replacement, APK export,
+phone installation or personal capture was performed. The selected v1 runtime
+and preview described above remain separate from this validated source.
+Physical front/rear selection, orientation and permission/lifecycle acceptance
+remain untested. A valid proof establishes byte/context integrity and possession
+of the selected key; it supplies no trusted native/browser origin, uncompromised
+device, document authenticity, liveness or identity award.
+
+## Account-aware Home cue — 23 October 2026
+
+The Home arrival now directs its menu cue to Options while signed out and
+Navigation while signed in. Only the selected button pulses after the character
+settles. The stronger peak uses `#7c4334`, sampled from the canonical character's
+book, a cream glyph and an eight-pixel red-brown halo at 28% opacity. The icon
+stays visible. Existing 900ms character motion, three 1400ms pulses, 6500ms safety
+bound, focus/panel/navigation/lifecycle cancellation, reduced-motion suppression
+and ordinary-revisit/status-update no-replay behavior remain.
+
+The retained v1 preview snapshot
+`/tmp/nonverba-unified-source/de2bed58e1c74b5082105ff96ffe2d6a` received only
+`participant.js` and `participant.css`, plus the two browser test scripts.
+All 83 focused participant package/workspace/capture/camera checks, 20 account
+and 14 shell Chromium groups passed. The 19 runtime assets total 366117 bytes,
+within the unchanged 384 KiB limit. Anonymous/synthetic midpoint screenshots
+were visually checked for both targets, with no simultaneous pulse. Tests also
+cover target-focus cancellation and the existing timing, lifecycle, reduced
+motion and no-replay guards.
+
+The account report confirms notice version 1 and no camera-proof assets.
+Browser fixtures retain the separate v2 challenge/proof cases, selecting the
+availability scenario from the collected asset closure; this run exercises the
+retained v1 runtime. Only the owned participant preview was restarted. User tabs,
+the selected v1 live service, protected policy and migrations were preserved.
+Camera-proof/v2 source remains separate and undeployed. No APK build, phone
+installation, physical-camera acceptance or real-ID submission was performed.
+
+The owner subsequently found the red-brown cue too harsh. The shared pulse now
+uses warm beige `#dfc2a4`, sampled from the canonical monk's robe at (580,760),
+with the sage icon retained and an eight-pixel `#c19664` tan halo at 16% opacity.
+The color-only follow-up passed all 14 shell Chromium groups on the retained v1
+snapshot; the 19 assets total 366125 bytes. Its natural Options midpoint was
+visually reviewed. Auth-selected targeting, timing, cancellation, reduced motion
+and no-replay checks passed unchanged. The earlier account and unit suites were
+not repeated for this stylesheet refinement. The preview was refreshed with
+only this stylesheet; the v1 service and separate v2 source boundary remain.
+
+## Account identity state and saved-password sign-in — 23 October 2026
+
+The account adapter now owns a separate immutable identity submission state
+machine. Generic pending verification, photographs, roles and device proof do
+not establish a received submission. Exact authenticated receipts and the
+current-account status read distinguish unverified, checking, awaiting approval
+and unavailable states. Every observation is fenced by account, principal,
+recovery generation and session. Status tokens prevent a delayed empty result
+from replacing a newer receipt or account. Cancellation settles its matching
+request to unavailable and notifies the UI; it cannot leave Checking stuck or
+erase a newer accepted result. No client status is stored as authority.
+
+The account's gray stamp carries an Awaiting approval overlay for a received
+Level 1 submission. Requests show the waiting clock; Operations retain their
+Level 1 prerequisite warning. Neither family unlocks. Done is a green primary
+button and clears local capture state. Account identity actions reopen the
+read-only saved status. An unresolved original write retains its original
+status-check path even when the account also has a known submission.
+
+Identifier Continue progressively uses an origin-bound PasswordCredential only
+on that explicit action and only for a matching canonical identifier. It calls
+the existing sign-in adapter. Unsupported, cancelled, refused or mismatched
+results retain the password step. No visible password field was added to the
+identifier step, and no hidden password bait, passive manager request,
+credential store or credential logging was introduced. Browser/third-party
+manager support is variable. All executed manager checks use synthetic stubs,
+with the native manager API disabled in ordinary browser fixtures.
+
+Across focused runs in the managed Linux source candidate, 142 Node checks
+passed: 78 state/helper/workspace/relay/package checks and 64 account-adapter
+checks. These include strict DTOs, current-owner binding, malformed/foreign/
+unsupported receipts, 401 clearing, historical receipt discovery, direct POST
+and original-operation receipts, overlapping reads and current-session/recovery
+changes. The cancellation regression covers explicit abort and entry reset,
+with and without a newer accepted receipt. Source package checks caught a
+missing native allowlist entry and the first native build caught its remaining
+384 KiB guard. Both were corrected; a new parity assertion requires the native
+and browser budgets to agree at 400 KiB. Per-image and APK bounds remain 8 KiB
+and 8 MiB. Participant assembly and lint then passed on the final frozen source.
+The managed build retained its signer and created no export or phone install.
+
+The combined source candidate is
+`/tmp/nonverba-unified-source/e57dbffd626643e68779da7f24111ace`.
+Its 23 runtime assets total 406205 bytes. The source-only camera-proof/v2 path
+remains separate from the selected v1 preview. The isolated v1 UI candidate is
+`/tmp/nonverba-v1-status-source-SvcnSj`: its 21 runtime assets total 381715 bytes,
+with the exact v1 notice and no camera-tool/proof assets. It copies only the
+explicit retained v1 runtime catalog, required notices, builder/preview helpers
+and browser harness; known v2 camera-only source hunks are excluded from the
+shared account/UI changes. No generated-output or cache tree was copied.
+
+Hx11 owns the [status service and v1 release evidence](SERVICE_IDENTITY_INTAKE_CHECKPOINT.md).
+The authenticated summary is live under its explicit v1 build selector. It
+preserves notice v1, the same two-account synthetic intake policy and migrations
+1–18. Fourteen live status checks and twelve v1 submission checks passed there,
+including receipt restoration across fresh sign-ins. No approval authority or
+real-ID intake was selected by this client work.
+
+Final Chromium runs passed 22 account/capture and 14 shell groups on each frozen
+candidate. The v1 reports confirm notice version 1 and no camera-proof assets;
+the v2 reports confirm version 2 and its separate proof assets. Cases include
+synthetic saved-password selection and fallback, late chooser results after
+navigation/input changes, restored pending status, foreign/stale/malformed
+observations, unknown original writes and narrow layouts with 200% text.
+The browser fixtures exercise intercepted account HTTP, not the live backend.
+Hx11's live service checks above retain their separate scope.
+
+The green Done button, Awaiting approval stamp overlay and waiting navigation
+icon were visually reviewed at normal size and at 320px with 200% text. The
+managed browser's font configuration resolves system UI and serif fallbacks to
+Liberation Mono; these captures do not establish Windows font rendering or
+physical-device acceptance. No real password manager or physical camera was
+used in these checks.
+
+Only the owned participant preview process was replaced with the validated
+isolated v1 candidate. HTTP checks confirmed the noindex review entry, new state
+model and saved-password helper, exact v1 notice digest and a 404 for the v2
+camera-tool asset. An initial verification assertion used a nonexistent notice
+version export; it was corrected to inspect the exported notice object and hash
+the exact notice text. User tabs and drafts were left untouched. The combined
+v2 source remains undeployed, and the existing managed container and service
+data were preserved.
+
+## Silent saved-password retrieval — 23 October 2026
+
+The owner observed an extra browser account chooser in the initial shortcut.
+That implementation used optional mediation, which allows a browser prompt.
+The helper now requests only `mediation: 'silent'` on explicit Continue. It uses
+an exact matching password if the browser can release one without user
+mediation; otherwise it returns to the existing password step without an
+interactive retry. A username-only autofill does not expose a password, and
+this does not provide arbitrary access to a third-party password vault. The
+browser may still display its own automatic sign-in status indicator. See the
+[published mediation contract](https://www.w3.org/TR/credential-management-1/#mediation-requirements).
+
+All eight focused helper cases passed in managed Linux. The browser fixture
+requires silent mediation on the direct shortcut and on null, refused and
+mismatched fallbacks. Existing account matching, cancellation, navigation,
+identifier-change and signup-bypass guards remain. Runtime catalog checks pass
+at 381798 bytes for the 21-asset v1 preview and 406288 bytes for the separate
+23-asset v2 source, within the unchanged 400 KiB bound. No visible or hidden
+password field was added to the identifier form, and no real password manager
+or user credential was accessed during validation.
+
+All 22 v1 account/capture Chromium groups then passed, including the explicit
+no-interactive-retry assertions. Only the owned v1 participant preview process
+was restarted. Its served helper was checked for silent mediation and absence
+of optional mediation; its v1 notice remained exact. User tabs were not reloaded.
+The account adapter, backend and capture routes were unchanged. Earlier shell,
+v2 browser and Android build/lint results remain historical; those broader
+checks were not repeated for this helper-only correction.
+
+## One preview from main — 23 October 2026
+
+The owner requested one preview matching main after the retained v1 client
+caused version confusion. The older owned participant process was stopped.
+The authoritative `code/dev.ps1 -Snapshot -Action Exec` launcher copied the
+unmodified main working tree and started its `serve:participant` command in the
+same managed container, at the same port and URL. The new source snapshot is
+`/tmp/nonverba-unified-source/b7f27cf4b6c2466d8851069f294fbafc` with 1605 reviewed
+namespace files. Runtime source files received no selective patches. The
+existing snapshot transport keeps toolchains and services in managed Debian;
+it is not a separately maintained UI version.
+
+README and repository instructions now require a single preview from a fresh
+main working-tree snapshot after edits. The review entry shares the ordinary
+application assets; its only HTML differences support local annotations and
+noindex. No new port, tab, container or service-policy selection was introduced.
+
+Main contains the current v2 synthetic notice and challenge/proof camera client.
+The selected live service remains v1 with its existing policy and migrations.
+Sign-in and own retained submission-status reads remain compatible. New camera
+capture and submission require the current service contract and remain
+unavailable against that older service. The preview does not replace notice
+bytes, reinterpret agreement or fall back to the older capture client. This
+source alignment does not activate v2 service intake or real-data collection.
+
+HTTP verification matched all 31 canonical catalog assets byte-for-byte,
+including the generated source notice under the launcher's three whitelisted
+source-provenance values. Every response uses no-store. The review entry matched
+the exact expected CSP/noindex transformation, and process inspection found one
+participant server at the new main snapshot. Its 23 runtime assets total 406288
+bytes within 400 KiB. An initial verification attempt omitted source-provenance
+environment values when regenerating the source notice; supplying exactly the
+launcher values resolved that harness mismatch without changing runtime files.
+
+All 22 main-source account/capture Chromium groups passed. The existing
+availability group now also serves exact historical public v1 notice bytes and
+a 404 capture-challenge response to the current client. It confirms no camera
+permission/media call, selected image/object URL, identity POST, legacy capture
+retry or v1 notice acceptance, while authenticated account status remains
+unverified. Silent-password and saved pending-status journeys also pass. These
+are intercepted protocol fixtures; no live identity upload or user credential
+was used. Runtime files were unchanged during verification. No shell suite,
+Android build, export or phone acceptance was repeated for this launch change.
+
+## Root-only local application URL — 23 October 2026
+
+The owner selected `http://127.0.0.1:4173/` as the sole local participant document
+URL. The server now serves the application directly at root. Former index/review
+document paths redirect to `/` without copying their queries; root queries are
+also canonicalized. GET and HEAD share that behavior while unsupported write
+methods retain their refusal. No alternate HTML page version is served.
+
+Root-relative styles, modules, branding and identity images resolve through the
+same closed participant catalog, with exact resource bytes. Existing prefixed
+resource paths remain compatible. No base tag or product HTML rewrite is added.
+Only the existing local annotation CSP/noindex transformation is applied to the
+in-memory root HTML; strict package HTML and Android document paths remain
+unchanged. The server's startup message, README, container guide and repository
+instructions now direct local use to the root URL.
+
+All 21 focused participant package/routing groups passed in fresh main snapshot
+`/tmp/nonverba-unified-source/bfea678b99f242b2aee4403163c71ce4`. They verify direct
+root GET/HEAD, fixed legacy/query redirects, exact root/prefixed resource bytes,
+no-store/security headers, unknown-page and write-method refusal, strict APK
+HTML and exclusion of local annotation markup. The owned prior process was
+replaced with that tested server. The user's existing tab was navigated to root
+and its URL and Home state confirmed; no additional tab was opened. Runtime
+assets and Android document paths are unchanged. No APK build or service-policy
+change was needed.
+
+A fresh headless browser against the live root server loaded the stylesheet,
+module-driven Home and all nine static images. Home, Options, Sign in and Back
+retained the exact root URL with no page errors or failed local assets. Root
+returned 200 without a Location header and the former HTML aliases redirected
+to root. No form was submitted and no credential or camera was used; the test
+context was closed. The first smoke assertion incorrectly required an opaque
+body background, while source applies that color to the root element. Correcting
+that harness assertion required no application change. No broader account,
+capture or Android suite was repeated for this server-routing change.
+
+## Pending identity wording and Level 2 prerequisite — 23 October 2026
+
+The owner requested copy matching the received, awaiting-approval state. The
+Requests setup action now says Awaiting Level 1 approval and opens saved status.
+Operations instead displays an inactive Level 1 approval required statement,
+without link styling. It cannot start Level 2 while Level 1 is pending. Before
+submission its Level 1 prerequisite action remains available. The existing
+authenticated state model and authoritative workflow gates are unchanged.
+
+A received status page now uses Awaiting approval for its heading and accessible
+level description, with: Your details have been received. Level 1 approval is
+pending. It retains the green Done action. No active reviewer, approval time or
+completed identity check is asserted. An uncertain original submission retains
+Identity submission and Submission unconfirmed rather than borrowing the
+account's saved receipt presentation. Notice bytes, agreement and service
+admission are unchanged.
+
+All 45 focused workspace/package checks passed in the fresh main-source
+snapshot `/tmp/nonverba-unified-source/78bf0e148e8548a295fc274daef7cae6`. The
+transition regression covers pending, unverified, checking, unavailable and
+signed-out labels, destinations and disabled-state reset while preserving icon
+hosts, input prerequisite records and workflow denial. Package checks retain
+the root URL, closed asset catalog, 400 KiB bound and local-CSP isolation.
+
+All 22 account/capture Chromium groups then passed on that frozen main source.
+They cover the received title/body and accessible label, saved-status navigation
+without sensor access or resubmission, inactive Operations while waiting,
+unverified Level 1 entry, and unchanged original-operation uncertainty. Normal
+and 320px/200% screenshots of the status and expanded menu sections were visually
+reviewed without clipping; the previously recorded container-font fallback
+limitation remains. Its 23 runtime assets total 407313 bytes within 400 KiB.
+
+Only the owned root app server was replaced with that tested snapshot. HTTP
+checks confirmed direct root HTML and the updated script/style bytes, with old
+document URLs still redirecting to root. Existing user tabs were left loaded so
+their session state was preserved. No service change, identity upload, APK build
+or physical-device acceptance was performed for this presentation update.
+
+## Synthetic reviewer client and aligned service journey — 23 October 2026
+
+The owner authorized a small audited synthetic review pipeline through Hx02.
+Hx10 added the reviewer interface to the existing shared participant app; Hx11
+owns the private decision service and selected activation, and Hx02 owns review
+policy and exact notice version 3. Ordinary accounts receive no reviewer entry.
+Fresh positive server permission, a separate current reviewer binding and exact
+case/revision/hash pins control each read and deliberate decision. The interface
+loads only the selected case, renders retained notice/details literally, and
+releases media on departure, backgrounding, logout or authority loss.
+
+Approve for test, Request correction and Reject for test each require a reason.
+A conflict requires explicit reload. A lost decision reply keeps its original
+immutable operation for GET lookup only; a historical result never supplies a
+current case or subject outcome. The subject's separate authoritative read
+displays the three synthetic outcomes without changing pending genuine identity
+assurance or enabling Requests, Operations, Level 2, signing, payment or sensors.
+A completed test outcome can start a fresh package with empty details, new media
+and new notice agreement. Missing, invalid or stale responses remain unavailable.
+
+All 163 focused state/client/relay/package checks and all 27 account/capture
+Chromium groups passed on unmodified main-source snapshot
+`/tmp/nonverba-unified-source/79c81afff1d744a9b1ce558f5f329e4b`, based on
+`44dfbb0c413cc450d78065cf92874e1f77b20c11` with current working changes. The five
+added browser groups cover ordinary-account denial, all three decisions and own
+status labels, fresh correction, unknown operation lookup, revision conflict and
+late media/sign-out fencing. These browser service responses are controlled
+synthetic fixtures. Normal and 320px/200%-text reviewer views were inspected;
+the existing container font fallback limits typography assessment.
+
+Participant assembly and lint passed in the same managed snapshot. The build
+record is `android-build-2026-10-23T17-31-27-231Z-83ff80b0b1c8.json` in its private
+QA output. No APK export, independent APK inspection, phone installation or
+physical-camera acceptance was performed for this checkpoint. Closed asset and
+native/relay parity checks retain strict package CSP and route/body boundaries.
+The reviewed runtime ceiling is 448 KiB; the image and APK ceilings are unchanged.
+The 25 runtime assets total 454917 bytes. The running root app matched all 24
+non-HTML runtime assets byte for byte with no-store. Root returned 200; the old
+review-document URL returned 308 to `/`. No second app version is served.
+
+The first actual-service check exposed an older custody reader requiring this
+client's generated operation-token format. The published retained receipt uses
+an opaque 1–128-character identifier. Both receipt readers now accept that exact
+grammar while preserving closed fields, owner/session binding, pending
+verification, exact own-write receipts and original-operation retry rules.
+Regression checks reject invalid identifier characters and length. This required
+no fixture rewrite, older notice substitution, admission change or backend edit.
+
+Actual aligned-service acceptance completed in linked normal-UI phases. The
+first subject session submitted invented details and two synthetic Chromium
+camera captures under exact notice v3 through the current challenge/proof
+client. It selected no image file and used no real ID/face or physical camera.
+A subsequent reviewer session selected that current package by its exact
+submission, subject, receipt and both hashes, viewed retained details/notice and
+both photos, and deliberately recorded one approval for test. The immutable
+decision pins were kept only in protected private evidence.
+
+The final isolated subject session used normal password/PKCE forms and a new
+server session, then matched the same subject, current submission, complete
+receipt, both hashes and recorded decision/revision. Its report passed with all
+three match flags true, Approved for test visible, work creation still disabled,
+no earned identity stamp, root URL unchanged, media released and session signed
+out. No new intake or decision was made for that final read. The successful
+reviewer write and its cleanup were completed before the isolated read; earlier
+failed helper attempts are retained as failures. A premature Account-menu
+transition could cancel the foreground password action. Waiting for that
+action's own completion fixed the private helper without a product change or
+authentication bypass.
+
+The same snapshot retains sanitized reports
+`identity-review-client-live-20261023-5d52a9b06f8e4526bc3c470b13d5973b.json`,
+`identity-review-client-live-20261023-review-current-pending-5f347d9eb6e943e1b68422a219e24875.json`
+and `identity-review-client-live-20261023-subject-read-fcc9d3f865bf4f5390e62697378a872e.json`
+for the accepted intake, completed reviewer phase and passing fresh read. The
+first two reports remain whole-run failures at their later procedural stages;
+the acceptance claim links their completed phases by exact private pins. This
+actual UI exercise covers approval only. Other decisions and race/replay cases
+retain their controlled browser and Hx11 service-matrix scopes.
+
+See [the client checkpoint](PARTICIPANT_IDENTITY_REVIEW.md) and
+[Hx11's closed service contract](SERVICE_SYNTHETIC_IDENTITY_REVIEW_CHECKPOINT.md).
+Real-data intake, legal adoption, custody/retention decisions, actual reviewer
+appointments and genuine identity/work authority remain outside this test slice.
+
+## APK roundtrip
+
+Reserved 28 October 2026. This heading is the place for retained artifacts and
+verifier results from one real-device signed Assignment and evidence
+round-trip. No round-trip has been run. No originals, receipts, or verifier
+results are stored here. Work creation stays locked. This note does not
+promote synthetic approval to real authority.

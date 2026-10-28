@@ -1,0 +1,25 @@
+Identity Intake Notice
+Synthetic Development Draft - version 2
+
+This development intake is only for invented identity details and synthetic document and face images. Do not submit real personal information, a real identity document or a real person's photograph. This is a draft notice for a private development exercise, not an adopted public Privacy Notice or authorization to retain real identity data.
+
+Purpose and information submitted
+The exercise tests private account-bound intake, durable submission receipts and pending-review handling. Your submission contains document type, full name, city of birth, nationality and age in years, plus one document-front image and one frontal face image. The service also records the account binding, operation and content identifiers, this exact notice and acknowledgment, and submission receipt/status metadata. It does not need your password or recovery codes in the identity payload.
+
+Photos and separate processing
+Before submission, both selected photos must be re-encoded as bounded JPEG images. A camera proof signs those final JPEG bytes after preparation; the signed photo must not be re-encoded afterward. Re-encoding does not anonymize visible information. The intake includes no movement video, audio, automatic text extraction, face features, face recognition or liveness result, and gives no permission to add those uses. Camera or file-processing permission is separate from agreement to submit and retain the reviewed package.
+
+Camera proof and its limits
+Starting the camera requests an account-bound challenge using the selected photo kind, capture method and a separate signing public key. This sends no photo or photo hash. A camera photo includes the original challenge, public key, signature, final image hash and size, dimensions, claimed capture time and reported lens. Native capture also reports camera timestamp and acquisition checks. The service checks and retains these records with the synthetic intake; abandoned challenge records can remain as account-bound operation metadata. A capture challenge is valid for two minutes and its photo must be submitted within fifteen minutes of issue. These validity windows are not storage expiry promises. Browser proofs are best-effort software-key claims. Neither a valid signature nor native acquisition metadata proves an uncompromised device, an authentic document, a live person or a correct identity. Imported document files have no camera proof. This tool requests no location, microphone, passkey setup or browser fingerprint traits.
+
+Your review and submission choice
+Review the completed fields, both processed photos and this full notice before deliberately acknowledging it and submitting. Opening this notice, preparing photos or agreeing to Account Terms does not submit identity data. Changes to the reviewed package or notice require fresh review. You can cancel before sending. Once a request has been sent, cancellation or an interrupted reply does not prove that the service saved nothing; the original operation must be checked.
+
+Private development custody and access
+Submitting sends the reviewed synthetic package to the selected authenticated private development service, which retains it beyond this page's lifetime. Access must be limited to the submitting account through the service and specifically authorized development administration. The package is not a public profile, another account's record or ordinary task evidence. The production legal controller/custodian, contact route, reviewers and their authority have not been selected; this notice promises no active human review.
+
+Retention, deletion and backups
+No retention period or automatic expiry is selected by this draft. Submitted synthetic records can remain after leaving the page, signing out or closing a test account. Local photo cleanup does not delete service copies. A deletion claim must identify the supported operation, affected media and metadata, retained history and backup/restore treatment, and its confirmed outcome. No immediate purge, backup erasure or deletion deadline is promised here.
+
+Pending status and limits
+A storage receipt means that the synthetic package was received, not that identity, age, nationality or document authenticity was verified. Submission remains pending review and awards no Level 1 or Level 2 verification, work eligibility, signing authority or sensor permission. Before any real-data intake, the owner must resolve the responsible organization, purposes and applicable requirements, necessary fields and eligible users, access and reviewers, retention, deletion and backups, rights/contact channels and adoption of suitable notices.
