@@ -25,7 +25,16 @@ const insist = (condition, message) => { if (!condition) throw new Error(message
 // The dashboard names the current mode: 468 KiB.
 // Confirming a change to the other mode: 471 KiB.
 // Account-closure retention in the draft terms and deletion review: 476 KiB.
-export const PARTICIPANT_SHELL_BUDGET = 476 * 1024;
+// Opening the home feed from the swipe hint: 480 KiB.
+// Sentences and sampled charts in the home feed: 487 KiB.
+// A five-second sign-in recheck while the server is unreachable: 488 KiB.
+// One page for each feed post, then a stop page: 489 KiB.
+// One queue for the visit, walked down and back up: 491 KiB.
+// Phone vault password commit on the sign-in form: 493 KiB.
+// The Operator choice stays for the visit when storage is unavailable: 494 KiB.
+// A landing-page swipe and skipping the mode confirmation: 497 KiB.
+// The landing figure follows that swipe: 499 KiB.
+export const PARTICIPANT_SHELL_BUDGET = 499 * 1024;
 export const PARTICIPANT_IMAGE_BUDGET = 8 * 1024;
 // The real-capture closure intentionally uses a new generation. Keep the older
 // illustration stage intact instead of deleting unknown or retained outputs.
@@ -122,7 +131,7 @@ export function assertParticipantAssetNames(assets) {
   for (const name of Object.keys(PARTICIPANT_SHELL_SOURCES)) insist(assets.has(name), 'Missing participant shell asset: ' + name);
   for (const name of ['LICENSE.txt', 'SOURCE.txt']) insist(assets.has('nonverba-license/' + name), 'Missing participant notice: ' + name);
   const shellBytes = Object.keys(PARTICIPANT_SHELL_SOURCES).reduce((total, name) => total + assets.get(name).length, 0);
-  insist(shellBytes <= PARTICIPANT_SHELL_BUDGET, 'Participant runtime exceeds reviewed 476KiB account-client budget.');
+  insist(shellBytes <= PARTICIPANT_SHELL_BUDGET, 'Participant runtime exceeds reviewed 499KiB account-client budget.');
   return shellBytes;
 }
 

@@ -188,7 +188,7 @@ test('Android accepts one plain participant document and exactly the shared runt
     Object.keys(PARTICIPANT_SHELL_SOURCES).sort(), 'Gradle must inspect the same exact runtime closure.');
   const runtimeBudget = /required\.sumOf \{ root\.resolve\(it\)\.length\(\) \} <= (\d+) \* 1024/.exec(gradle);
   assert.equal(Number(runtimeBudget?.[1]) * 1024,PARTICIPANT_SHELL_BUDGET,'Native and browser runtime budgets must agree.');
-  assert.match(host, /domStorageEnabled = false/, 'Real identity capture and account credentials stay out of DOM storage.');
+  assert.match(host, /domStorageEnabled = true/, 'The phone keeps the same local session resume record as the browser.');
   for (const restriction of [/blockNetworkLoads = true/, /allowFileAccess = false/,
     /allowContentAccess = false/, /setGeolocationEnabled\(false\)/]) assert.match(host, restriction);
 });
@@ -226,6 +226,9 @@ test('native enrollment camera is exact-origin, camera-only and stopped on lifec
     assert.match(host, new RegExp('override fun '+lifecycle+'\\(\\)[\\s\\S]{0,130}stopEnrollmentCamera\\(\\)'));
   }
   assert.match(host, /override fun onPause\(\)[\s\S]{0,400}identityCamera\?\.pause\(\)/);
+  const paused = /override fun onPause\(\)[\s\S]*?\n    override fun onStop\(\)/.exec(host)?.[0] || '';
+  assert.doesNotMatch(paused, /webView\.onPause\(\)/, 'A password vault pauses the activity; pausing the WebView there drops its fill.');
+  assert.match(host, /override fun onStop\(\)[\s\S]{0,500}webView\.onPause\(\)/);
   assert.match(host, /if \(!cameraPermissionInFlight \|\| nativeCameraPermission != null\) stopEnrollmentCamera\(\)/);
   assert.match(host, /nonverba:camera-stop/);
   assert.match(host, /v\.srcObject\.getTracks\(\)\.forEach\(t=>t\.stop\(\)\)/);
@@ -259,6 +262,13 @@ test('account networking is debug-only, fixed loopback and keeps WebView resourc
   assert.match(transport, /"\/v1\/accounts\/mock-mail"/);
   const nativePostPaths = /"POST" -> path in setOf\(([\s\S]*?)\) \|\| REVIEW_DECISION\.matches\(path\)\n\s*"DELETE"/.exec(transport)?.[1];
   assert.ok(nativePostPaths, 'Native account transport must retain a closed POST path set.');
+  const relay = await readFile(new URL('../../tools/preview/participant-account-relay.mjs', import.meta.url), 'utf8');
+  const relayAccountPaths = /const jsonPaths = new Set\(\[([\s\S]*?)\]\)/.exec(relay)?.[1] || '';
+  const nativePosts = [...nativePostPaths.matchAll(/"([^"]+)"/g)].map(match => match[1]);
+  for (const path of [...relayAccountPaths.matchAll(/'(\/v1\/[^']+)'/g)].map(match => match[1])) {
+    assert.equal(nativePosts.filter(item => item === path).length, 1,
+      'The phone must accept the same account route the browser relay accepts: ' + path);
+  }
   for (const path of ['/v1/account/deletion', '/v1/account/deletion/status']) {
     assert.equal([...nativePostPaths.matchAll(/"([^"]+)"/g)].filter(match => match[1] === path).length, 1,
       'Account deletion and its operation-secret status must each have one exact native POST entry.');
@@ -420,7 +430,7 @@ test('shell budget totals all reviewed sources and does not count required licen
   assert.ok((await collectParticipantAssets(root, {})).get('nonverba-license/LICENSE.txt').length > PARTICIPANT_SHELL_BUDGET);
   await writeFile(join(root, 'web/apps/non-verba/src/participant.css'), Buffer.alloc(PARTICIPANT_SHELL_BUDGET / 2 + 1, 0x78));
   await writeFile(join(root, 'web/apps/non-verba/src/participant.js'), Buffer.alloc(PARTICIPANT_SHELL_BUDGET / 2 + 1, 0x78));
-  await assert.rejects(collectParticipantAssets(root, {}), /448KiB account-client budget/);
+  await assert.rejects(collectParticipantAssets(root, {}), new RegExp(`${PARTICIPANT_SHELL_BUDGET / 1024}KiB account-client budget`));
 });
 
 test('participant inputs reject file links, hardlinks, missing files and linked parent directories', async t => {

@@ -77,8 +77,8 @@ val verifyParticipantAssets by tasks.registering {
         check(actual.filterNot { it.startsWith("nonverba-license/") }.toSet() == required) {
             "Participant assets differ from the reviewed account, capture and attestation files; developer tools and generated models must remain outside this APK."
         }
-        check(required.sumOf { root.resolve(it).length() } <= 476 * 1024) {
-            "Participant runtime exceeds the reviewed 476 KiB account and synthetic review budget."
+        check(required.sumOf { root.resolve(it).length() } <= 499 * 1024) {
+            "Participant runtime exceeds the reviewed 499 KiB account and synthetic review budget."
         }
         check(required.filter { it.endsWith(".svg") || it.endsWith(".webp") }
             .all { root.resolve(it).length() <= 8 * 1024 }) {

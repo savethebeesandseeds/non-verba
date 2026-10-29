@@ -1,10 +1,17 @@
 # Non Verba workstreams
 
-Updated 27 October 2026 so Hero 4 builds inclusion and the counterfactual
-reasoning engine on the signed catalog, and leaves corpus derivation as later
-refinement. The 22 October note added reusable attestation-tool hardening
-alongside sensor tools in Hero 1. The 16 October cross-Hero audit retained all eleven
-Heroes, with the domain boundaries and handoffs below. Their numbers are
+Updated 29 October 2026 to separate the private database from the domain
+database on Hero 12. The domain database holds publishable market facts and is
+the only training source for the temporal fusion transformer. That model is
+the basis for the domain kernel. The private database keeps personal and
+sensitive records, and those rows stay there. A hole stays out of the forecast.
+Content generation is the first use. Retraining and sampling are not chosen.
+The 28 October note added Hero 12 for a dual-perspective feed. Legal stewardship
+stays on Hero 2. The 27 October note keeps Hero 4 on inclusion and the
+counterfactual reasoning engine, with corpus derivation as later refinement.
+The 22 October note added reusable attestation-tool hardening alongside sensor
+tools in Hero 1. The 16 October cross-Hero audit retained all eleven Heroes
+then recorded, with the domain boundaries and handoffs below. Their numbers are
 stable identifiers; task ownership, priority and implementation order still need
 to be agreed as Goals are divided into Milestones.
 
@@ -44,6 +51,7 @@ hardening, research, integration and institutional development.
 | 9 | [Governance and launch readiness](../../GOVERNANCE.md) | Translate draft principles into accountable institutions, service responsibilities, sustainable economics and reviewed terms for a chosen pilot scope and jurisdiction. Complete independent security, privacy and release review. |
 | 10 | [APK buildout](../../code/android/README.md) | Build out the existing Android APK into the complete phone experience: navigation, integrated participant workflows, native permissions and lifecycle, protected local storage, service connectivity and offline behavior. Validate device compatibility, packaging, signing, distribution and updates. |
 | 11 | [Server side services](../development/REGISTRATION_PIPELINES.md#what-is-still-missing-and-why-it-matters) | Implement account/device sessions, enrollment and profile services, discovery and task coordination, notifications, authenticated evidence exchange, durable acceptance records, dispute and material-incident records, and collective participation/ballot/calculation records. Define service access controls, retention, backups, recovery, monitoring and deployment; integrate payment or coverage providers under separately agreed authority. |
+| 12 | Content generation | Name the domain kernel and use it first for the feed. The kernel is the market record: wants, capacities, quotes, and places. Each record carries a shared header and one content embedding. A temporal fusion transformer reads a panel of those records. An observed empty period is a zero. A missing value is a hole. The transformer holds state across a hole, does not attend it, and skips it in the loss. The private database and the domain database are separate. The domain database holds publishable market facts and is the only training source for that transformer. The private database keeps personal and sensitive records. Retraining and sampling are not chosen. The feed follows the current Requester or Operator mode. A signed-in account can open it without an identity stamp. Each post is one page and one idea: a sentence, or one bar, one pie, or one line. After that buffer, a page says everything listed has been seen. The feed does not loop. Its order is chosen once; down advances and up returns through the same posts. Scrolling up from the first page returns Home, and a refresh returns Home. Posts have color and a reserved icon. Operators do not browse individual offers here. The local preview and the debug phone show labeled samples. Those samples are not the kernel. A deployed feed stays empty until a real sample exists. No user posts, faces, profiles, individual branding, or synthetic engagement. |
 
 ## Boundaries between workstreams
 
@@ -56,7 +64,15 @@ Hero 8 defines operation identities, transport and agent interfaces, retries,
 idempotency, synchronization, cancellation, recovery and acceptance semantics.
 Hero 11 implements the selected hosted records, atomic transactions, exchange,
 access enforcement and operating recovery. Shared protocol, policy and
-verification logic remains in the existing Rust packages.
+verification logic remains in the existing Rust packages. The same backend
+keeps two databases. The private database holds accounts and sensitive work
+fields. The domain database holds publishable market facts and is the only
+training source for the temporal fusion transformer. The trained model is the
+basis for the domain kernel. Hero 11 hosts both databases and does not copy a
+private row into the domain database. Hero 12 defines what a domain row may
+contain. Hero 2 defines what stays sensitive. The feed, and any later
+interface that serves the kernel, read the domain database. The domain
+database is not created yet.
 
 These responsibilities remain separate even when one feature needs all four
 Heroes. A local component, development APK, browser store or preview server does
@@ -188,6 +204,69 @@ these boundaries do not adopt a settlement policy or grant the engine authority.
 Security, privacy, accessibility, usability and independent verification apply
 across all workstreams.
 
+### Domain kernel
+
+The domain kernel is the market record. A want is work someone wants done. A
+capacity is work someone can do. A quote is a price attached to a want or a
+capacity. A place is where that fact sits. Hero 12 names the kernel. Content
+generation is its first use: the feed for the mode already selected. Later uses
+include evaluating the market state. Those later uses have no Hero yet.
+
+Each record carries a shared header and one content embedding made only from
+its publishable fields. The header has time, place, want or capacity, a quote
+when a price was named, and a kind of work when it is known. A panel groups
+records by place and kind of work over a fixed period. The candidate temporal
+fusion transformer reads each cell's counts, a quote summary, and one pooled
+embedding as a single input. It forecasts one market number at a time. An
+observed empty period is a zero. A period or field that was not observed is a
+hole. A hole holds that transformer's state, is not an attention key, and is
+left out of the loss. An observed zero still advances. Non-finite placeholders
+are not how a hole is marked. Its source is kept with the private backend. The
+service does not call it yet.
+
+The private database and the domain database are separate stores in that one
+backend. The private database holds accounts and the sensitive fields of a
+Request, a Capacity, a Quote, and an Assignment: the person, contact, identity,
+a street address, a payment destination, and the words a person wrote. The
+domain database holds publishable market facts only: the period, a published
+place, want or capacity, kind of work, a quote amount with no person attached,
+and one embedding made only from those fields. That database is the only
+training source for the transformer. The trained model is the basis for the
+domain kernel. The feed, and any later interface that serves the kernel, read
+the domain database. Copying a private row into the domain database breaks
+this boundary. The domain database is not created yet. No second container is
+added. Retraining and sampling are not chosen. Hero 3 still owns what a
+Request, an Offer, a quote, and an Assignment mean. Hero 11 hosts both
+databases and keeps the private one separate. Hero 2 defines what stays
+sensitive. The labeled feed cards are not the kernel.
+
+### Feed content and the records it reads
+
+Hero 12 computes the feed for the mode already selected. Requester mode states
+how many requests a branch has in a place. Operator mode states the requests
+and the operators together. Switching mode switches the feed. A signed-in
+account can open it. An identity stamp is not required. The feed will sample
+the domain kernel and does not list individual offers. That sample is not
+chosen. The first chart set is a bar and a pie of requests and operators, and a line of request
+counts. Each chart is its own page and does not repeat the sentence. After
+the posts in the buffer, a page says everything listed has been seen. The
+feed does not loop. The order is chosen once for the visit. One scroll or swipe
+moves one post, and the page slides to it. Down advances through that order
+and up returns through the same posts. There is no Close control.
+Scrolling up from the first page returns Home, and a refresh returns Home. Posts have color and an empty
+icon reserved for a later catalog. No time
+window is chosen, so a sentence does not say "this week" and does not apply a
+count cutoff. Matching notifies candidates selected from a skill map of
+capability likes and outcome records. A like is interest only. Competence
+remains identity binding, evidence of an outcome, and a compounding decaying
+reputation. Place means a location. The transaction layer stays free. On the
+local preview and the debug phone, four labeled samples exercise the sentence
+and the charts and are marked as not platform activity. A release package, and
+any other host, stays absent when there is nothing to count.
+User-authored posts, faces, profiles, individual branding, and synthetic
+engagement are outside this Hero. The feed grants no identity stamp and does
+not unlock Requests or Operations.
+
 Validation has distinct responsibilities:
 
 | Hero | Validation responsibility |
@@ -200,6 +279,7 @@ Validation has distinct responsibilities:
 | 10 | Android permissions, lifecycle, device behavior, accessibility and updates. |
 | 11 | Hosted transactions, access enforcement, retention, backup and restore. |
 | 9 | Independent review remit, institutional adoption and any agreed launch decision. |
+| 12 | Deployed feed items trace to counted activity, the two views describe the same counts, and local preview samples are labeled as not platform activity. No user-authored posts or synthetic engagement. |
 
 Joint validation should identify the contributing Heroes and record each scoped
 result without duplicating a completion claim or treating a component check as

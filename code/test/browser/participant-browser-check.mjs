@@ -523,7 +523,7 @@ async function focusStaysInPanel(name) {
 async function noAuthority() {
   const state = await page.evaluate(() => ({
     forbiddenCalls:window.__participantForbiddenCalls,
-    storage:Object.keys(localStorage).filter(key => key !== 'nonverba-mode' && key !== 'nonverba-theme'),
+    storage:Object.keys(localStorage).filter(key => key !== 'nonverba-mode' && key !== 'nonverba-mode-prompt' && key !== 'nonverba-theme'),
     mode:localStorage.getItem('nonverba-mode'), theme:localStorage.getItem('nonverba-theme'),
     sessionStorage:sessionStorage.length, cookies:document.cookie,
     bridge:['NativeVault','NativeLocation','NativeCamera','NativeAudio'].filter(key => key in window),
@@ -840,7 +840,7 @@ try {
     for (const name of ['setItem','removeItem','clear']) {
       const original = Storage.prototype[name];
       Storage.prototype[name] = function (...args) {
-        if (name !== 'clear' && (args[0] === 'nonverba-mode' || args[0] === 'nonverba-theme')) return original.apply(this, args);
+        if (name !== 'clear' && (args[0] === 'nonverba-mode' || args[0] === 'nonverba-mode-prompt' || args[0] === 'nonverba-theme')) return original.apply(this, args);
         note('storage.' + name); return original.apply(this, args);
       };
     }
@@ -928,8 +928,10 @@ try {
     assert.equal(await page.locator('.preview-strip, .preview-label, #requester-choice, #operator-choice').count(), 0);
     assert.equal(await page.locator('#home-request-list, #home-operation-list, #preview-details').count(), 0);
     const homeSignIn = page.locator('#home-sign-in');
-    assert.equal(await page.locator('#home-screen a, #home-screen button, #home-screen form').count(), 1,
-      'Home offers sign-in beneath the current mode artwork.');
+    assert.equal(await page.locator('#home-screen button:visible').count(), 1,
+      'Signed-out Home offers sign-in.');
+    assert.equal(await page.locator('#home-feed-hint').isHidden(), true, 'The feed waits for a signed-in account.');
+    assert.equal(await page.locator('#home-feed-hint').getAttribute('type'), 'button');
     assert.equal(await page.locator('#home-screen img').count(), 1, 'Home shows one mode artwork.');
     assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Requester');
     assert.equal((await homeSignIn.innerText()).trim(), 'Sign in');
@@ -943,6 +945,21 @@ try {
     await page.locator('#view-back').click();
     await page.locator('#home-screen').waitFor({state:'visible'});
     assert.equal(await page.locator('#home-screen').getAttribute('tabindex'), '-1');
+    assert.equal(await page.locator('#home-feed').isHidden(), true);
+    assert.equal(await page.locator('#home-feed-list').getAttribute('data-feed-source'), 'empty', 'A packaged feed stays empty without the debug account bridge.');
+    assert.equal((await page.locator('#home-feed-list').textContent()).replace(/\s+/g, ' ').trim(), 'Nothing is listed yet.');
+    const debugFeed = await context.newPage();
+    debugFeed.on('pageerror', error => errors.push(error.message));
+    try {
+      await debugFeed.addInitScript(() => { self.NonverbaAccount = {}; });
+      await debugFeed.goto(entry);
+      await debugFeed.waitForFunction(() => document.getElementById('home-feed-list')?.dataset.feedSource === 'sample');
+      assert.equal(await debugFeed.locator('#home-feed-list').getAttribute('data-feed-source'), 'sample');
+      assert.equal(await debugFeed.locator('.feed-sample').count(), 4);
+      assert.equal(await debugFeed.locator('#home-feed-sample-note').textContent(), 'Samples. These are not platform activity.');
+    } finally { await debugFeed.close(); }
+    assert.equal(await page.locator('#home-feed-close').count(), 0);
+    assert.equal(await page.locator('#home-feed-reading').count(), 0);
     const credit = page.locator('a#app-credit, #app-credit a');
     assert.equal(await credit.getAttribute('href'), 'https://waajacu.com/');
     assert.equal((await credit.innerText()).trim(), 'by waajacu');
@@ -965,6 +982,8 @@ try {
     await promptArrived;
     assert.equal((await page.locator('#mode-confirm-title').innerText()).trim(), 'Change to Operator mode?');
     assert.equal((await page.locator('#mode-confirm-note').innerText()).trim(), 'A requester asks for the work.\nAn operator does the work.');
+    assert.equal(await page.locator('#mode-confirm-skip').isChecked(), false);
+    assert.equal((await page.locator('#mode-confirm .check-choice').innerText()).trim(), "Don't ask again");
     assert.match(await page.locator('#mode-from').getAttribute('src'), /home-succulent\.webp$/);
     assert.match(await page.locator('#mode-to').getAttribute('src'), /home-sprout\.webp$/);
     await page.locator('#mode-confirm-cancel').click();
@@ -986,6 +1005,34 @@ try {
     await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-succulent.webp'));
     assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Requester');
     await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    await page.evaluate(() => {
+      const storage = localStorage, getItem = storage.getItem, setItem = storage.setItem;
+      storage.getItem = function (key) {
+        if (key === 'nonverba-mode') throw new DOMException('Storage is disabled.', 'SecurityError');
+        return getItem.call(this, key);
+      };
+      storage.setItem = function (key, value) {
+        if (key === 'nonverba-mode') throw new DOMException('Storage is disabled.', 'SecurityError');
+        return setItem.call(this, key, value);
+      };
+      window.__restoreModeStorage = () => { delete storage.getItem; delete storage.setItem; };
+    });
+    try {
+      await page.locator('#mode-switch').click();
+      await page.locator('#mode-confirm-accept').click();
+      await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-sprout.webp'));
+      assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Operator', 'A phone without DOM storage still changes to Operator.');
+      await page.locator('#mode-switch').click();
+      await page.locator('#mode-confirm').waitFor({state:'visible'});
+      const box = await page.locator('#mode-confirm-accept').boundingBox();
+      await page.locator('#mode-confirm').evaluate((dialog, point) => {
+        dialog.dispatchEvent(new MouseEvent('click', {bubbles:true, clientX:point.x, clientY:point.y}));
+      }, {x: box.x + box.width / 2, y: box.y + box.height / 2});
+      await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-succulent.webp'));
+      assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Requester');
+    } finally {
+      await page.evaluate(() => { window.__restoreModeStorage?.(); delete window.__restoreModeStorage; });
+    }
     await page.emulateMedia({reducedMotion:'reduce'});
     await openPanel('navigation');
     assert.equal(await page.locator('#home-link, #navigation-close, #options-close').count(), 0);
@@ -1083,6 +1130,172 @@ try {
     await stableUrl();
     await focusStaysInPanel('navigation');
     await page.keyboard.press('Escape');
+    await page.locator('#navigation-panel').waitFor({state:'hidden'});
+    const swipeHome = async (dx, dy) => {
+      const box = await page.locator('#home-figure').boundingBox();
+      const x = box.x + box.width / 2, y = box.y + box.height / 2;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x + dx, y + dy, {steps: 8});
+      await page.mouse.up();
+    };
+    const modeHint = async () => (await page.locator('#home-mode-hint').innerText()).trim();
+    assert.equal(await modeHint(), 'Requester');
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    const slide = await page.evaluate(() => new Promise(resolve => {
+      const screen = document.getElementById('home-screen');
+      const figure = document.getElementById('home-figure');
+      const dialog = document.getElementById('mode-confirm');
+      const fire = (type, x) => screen.dispatchEvent(new PointerEvent(type, {bubbles:true, pointerId:8, pointerType:'touch', isPrimary:true, clientX:x, clientY:240}));
+      let follow = '';
+      const observer = new MutationObserver(() => {
+        if (!dialog.open) return;
+        observer.disconnect();
+        resolve({follow, committed:figure.style.transform, open:true, immediate:false});
+      });
+      observer.observe(dialog, {attributes:true, attributeFilter:['open']});
+      fire('pointerdown', 40);
+      fire('pointermove', 120);
+      follow = figure.style.transform;
+      fire('pointerup', 200);
+      screen.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));
+      if (dialog.open) { observer.disconnect(); resolve({follow, committed:figure.style.transform, open:true, immediate:true}); }
+      else setTimeout(() => { observer.disconnect(); resolve({follow, committed:figure.style.transform, open:dialog.open, immediate:false}); }, 900);
+    }));
+    assert.equal(slide.follow, 'translateX(80px)', 'The landing figure follows a sideways swipe.');
+    assert.equal(slide.committed, 'translateX(200px)', 'A committed swipe keeps sliding the landing figure aside.');
+    assert.equal(slide.immediate, false, 'The slide finishes before the confirmation opens.');
+    assert.equal(slide.open, true);
+    await page.locator('#mode-confirm-cancel').click();
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    await page.waitForFunction(() => getComputedStyle(document.getElementById('home-figure')).transform === 'none');
+    assert.equal(await modeHint(), 'Requester');
+    await page.emulateMedia({reducedMotion:'reduce'});
+    const reduced = await page.evaluate(() => {
+      const screen = document.getElementById('home-screen');
+      const figure = document.getElementById('home-figure');
+      const fire = (type, x) => screen.dispatchEvent(new PointerEvent(type, {bubbles:true, pointerId:9, pointerType:'touch', isPrimary:true, clientX:x, clientY:240}));
+      fire('pointerdown', 40);
+      fire('pointermove', 160);
+      const shift = figure.style.transform;
+      fire('pointerup', 70);
+      return {shift, open:document.getElementById('mode-confirm').open};
+    });
+    assert.equal(reduced.shift, '', 'Reduced motion does not move the landing figure.');
+    assert.equal(reduced.open, false);
+    await page.locator('#home-figure').click();
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'A tap on the landing page does not change mode.');
+    await swipeHome(36, 0);
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'A short sideways move does not change mode.');
+    await swipeHome(16, -120);
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'A vertical move does not change mode.');
+    const upper = await page.evaluate(() => {
+      const workspace = document.getElementById('workspace').getBoundingClientRect();
+      const figure = document.getElementById('home-figure').getBoundingClientRect();
+      const screen = document.getElementById('home-screen').getBoundingClientRect();
+      return {
+        covers: screen.top <= workspace.top + 1 && screen.bottom >= workspace.bottom - 1
+          && screen.left <= workspace.left + 1 && screen.right >= workspace.right - 1,
+        x: workspace.left + workspace.width / 2,
+        y: workspace.top + 36,
+        clear: workspace.top + 36 < figure.top - 8
+      };
+    });
+    assert.equal(upper.covers, true, 'The landing screen fills the central area.');
+    assert.equal(upper.clear, true, 'The upper landing area sits above the artwork.');
+    await page.mouse.move(upper.x, upper.y);
+    await page.mouse.down();
+    await page.mouse.move(upper.x + 140, upper.y, {steps: 8});
+    await page.mouse.up();
+    await page.locator('#mode-confirm').waitFor({state:'visible'});
+    assert.equal(await currentView(), 'home', 'A sideways swipe across the upper landing area asks before it changes mode.');
+    await page.locator('#mode-confirm-cancel').click();
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    await page.evaluate(() => document.body.classList.add('feed-open'));
+    await swipeHome(140, 0);
+    await page.evaluate(() => document.body.classList.remove('feed-open'));
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'The open feed keeps a sideways swipe from changing mode.');
+    const signIn = await page.locator('#home-sign-in').boundingBox();
+    await page.mouse.move(signIn.x + 12, signIn.y + signIn.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(signIn.x + 160, signIn.y + signIn.height / 2, {steps: 8});
+    await page.mouse.up();
+    await page.locator('#mode-confirm').waitFor({state:'visible'});
+    assert.equal(await currentView(), 'home', 'A sideways swipe on Sign in stays on the landing page.');
+    await page.locator('#mode-confirm-cancel').click();
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    await swipeHome(140, 8);
+    await page.locator('#mode-confirm').waitFor({state:'visible'});
+    assert.equal(await modeHint(), 'Requester', 'The sideways swipe asks before it changes mode.');
+    assert.equal(await currentView(), 'home');
+    const skipBox = await page.locator('#mode-confirm-skip').boundingBox();
+    await page.locator('#mode-confirm').evaluate((dialog, point) => {
+      dialog.dispatchEvent(new MouseEvent('click', {bubbles:true, clientX:point.x, clientY:point.y}));
+    }, {x: skipBox.x + skipBox.width / 2, y: skipBox.y + skipBox.height / 2});
+    assert.equal(await page.locator('#mode-confirm-skip').isChecked(), true, 'A dialog-target tap still toggles the checkbox.');
+    await page.locator('#mode-confirm-cancel').click();
+    await page.locator('#mode-confirm').waitFor({state:'hidden'});
+    assert.equal(await page.evaluate(() => localStorage.getItem('nonverba-mode-prompt')), null, 'Not now leaves the confirmation in place.');
+    await page.locator('#mode-switch').click();
+    await page.locator('#mode-confirm').waitFor({state:'visible'});
+    assert.equal(await page.locator('#mode-confirm-skip').isChecked(), false);
+    await page.locator('#mode-confirm-skip').check();
+    await page.locator('#mode-confirm-accept').click();
+    await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-sprout.webp'));
+    assert.equal(await page.evaluate(() => localStorage.getItem('nonverba-mode-prompt')), 'skip');
+    await swipeHome(-140, 4);
+    await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-succulent.webp'));
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'A saved choice skips the confirmation.');
+    await page.evaluate(() => localStorage.removeItem('nonverba-mode-prompt'));
+    await visit('#requests');
+    await page.evaluate(() => {
+      const screen = document.getElementById('home-screen');
+      screen.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true, clientX:40, clientY:220, pointerId:1, pointerType:'touch', isPrimary:true}));
+      screen.dispatchEvent(new PointerEvent('pointerup', {bubbles:true, clientX:220, clientY:220, pointerId:1, pointerType:'touch', isPrimary:true}));
+    });
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'A sideways swipe off the landing page does not change mode.');
+    await visit('#home');
+    await openPanel('navigation');
+    await page.evaluate(() => {
+      const screen = document.getElementById('home-screen');
+      screen.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true, clientX:40, clientY:220, pointerId:1, pointerType:'touch', isPrimary:true}));
+      screen.dispatchEvent(new PointerEvent('pointerup', {bubbles:true, clientX:220, clientY:220, pointerId:1, pointerType:'touch', isPrimary:true}));
+    });
+    assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'An open dashboard ignores a landing-page swipe.');
+    await page.keyboard.press('Escape');
+    await page.locator('#navigation-panel').waitFor({state:'hidden'});
+    await page.reload();
+    await page.locator('#home-screen').waitFor({state:'visible'});
+    await page.evaluate(() => localStorage.removeItem('nonverba-mode-prompt'));
+    await page.evaluate(() => {
+      const storage = localStorage, getItem = storage.getItem, setItem = storage.setItem;
+      storage.getItem = function (key) {
+        if (key === 'nonverba-mode-prompt') throw new DOMException('Storage is disabled.', 'SecurityError');
+        return getItem.call(this, key);
+      };
+      storage.setItem = function (key, value) {
+        if (key === 'nonverba-mode-prompt') throw new DOMException('Storage is disabled.', 'SecurityError');
+        return setItem.call(this, key, value);
+      };
+      window.__restorePromptStorage = () => { delete storage.getItem; delete storage.setItem; };
+    });
+    try {
+      await page.locator('#mode-switch').click();
+      await page.locator('#mode-confirm').waitFor({state:'visible'});
+      await page.locator('#mode-confirm-skip').check();
+      await page.locator('#mode-confirm-accept').click();
+      await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-sprout.webp'));
+      await page.locator('#mode-switch').click();
+      await page.waitForFunction(() => document.getElementById('home-logo').getAttribute('src').endsWith('home-succulent.webp'));
+      assert.equal(await page.locator('#mode-confirm').isVisible(), false, 'A phone without DOM storage still skips the confirmation for this visit.');
+    } finally {
+      await page.evaluate(() => { window.__restorePromptStorage?.(); delete window.__restorePromptStorage; });
+    }
+    await page.locator('#mode-switch').click();
+    await page.locator('#mode-confirm').waitFor({state:'visible'});
+    await page.locator('#mode-confirm-cancel').click();
+    await page.evaluate(() => { localStorage.removeItem('nonverba-mode-prompt'); localStorage.removeItem('nonverba-mode'); });
+    assert.equal(await modeHint(), 'Requester');
     await openPanel('navigation'); await dismissOutside('navigation');
     await openPanel('navigation');
     for (const selector of ['#new-request','#new-operation']) {

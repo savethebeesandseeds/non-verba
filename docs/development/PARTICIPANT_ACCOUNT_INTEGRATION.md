@@ -84,6 +84,12 @@ off and sensors/file access remain denied. INTERNET and numeric-loopback
 cleartext are debug-only. Release keeps no account bridge or network permission;
 production endpoints, transport and credential custody require separate work.
 
+The native route list stays aligned with the preview relay. Both accept
+`POST /v1/accounts/presence`. That check is how a missing account offers account
+creation instead of a generic continuation error. A route the relay allows and
+the native list omits fails closed as an invalid transport; that is a product
+defect, not an adapter difference.
+
 Fourteen selected runtime files total 155,640/196,608 bytes. The exact collector,
 Gradle/native maps and inspector agree. No added UI library/model is selected;
 the individual image limit remains 8 KiB and APK limit 8 MiB. The browser permits

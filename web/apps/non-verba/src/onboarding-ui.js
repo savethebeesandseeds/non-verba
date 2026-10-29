@@ -35,8 +35,8 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
   if (typeof workflowAccess !== 'function') throw new Error('The participant workflow access policy is required.');
   const $ = selector => root.querySelector(selector);
   const screen = $('#onboarding-screen');
-  let route = 'home', busy = false, viewEpoch = 0, actionNavigation = false, connecting = true, cameraKind = null;
-  let signupMode = false, captureRole = 'requester';
+  let route = 'home', busy = false, viewEpoch = 0, actionNavigation = false, connecting = true, cameraKind = null, signInRecheck = 0, signInRechecking = false;
+  let signupMode = false, captureRole = 'requester', passwordStepReady = false;
   let cameraFocusPending = false;
   let identityNotice = null, identityEntryEpoch = -1;
   let account, workflow, reviewer, reviewerView;
@@ -215,6 +215,15 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     if (signedIn && document.activeElement === homeSignIn) $('#home-screen').focus({preventScroll:true});
     let resume = false; try { resume = connecting && !!localStorage.getItem('nonverba-session'); } catch {}
     homeSignIn.hidden = signedIn || resume;
+    const homeFeedHint = $('#home-feed-hint');
+    if (!signedIn && document.activeElement === homeFeedHint) $('#home-screen').focus({preventScroll:true});
+    homeFeedHint.hidden = !signedIn;
+    if (!signedIn) {
+      document.body.classList.remove('feed-open');
+      $('#home-feed').hidden = true;
+      homeFeedHint.setAttribute('aria-expanded','false');
+      $('#home-figure')?.removeAttribute('aria-hidden');
+    }
     const apiLink = $('#configure-api-access');
     if (!signedIn && document.activeElement === apiLink) $('#account-setup-link').focus();
     apiLink.hidden = !signedIn;
@@ -232,7 +241,7 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
       $('#account-devices-message').textContent = route === 'account/devices' ? 'Sign in to view your devices.' : '';
     }
     $('#settings-budgets').hidden = !signedIn;
-    if (!signedIn && value.binding) { stopCamera(); workflow.cancel(); return; }
+    if (!signedIn && value.binding) { stopCamera(); workflow.cancel(); scheduleSignInRecheck(); return; }
     $('#account-summary').hidden = !signedIn && state.session_outcome !== 'unknown';
     $('#account-summary').textContent = signedIn ? state.email || '' : state.session_outcome === 'unknown' ? 'Sign-out unconfirmed.' : '';
     $('#account-link-label').textContent = signedIn ? 'Account' : 'Sign in';
@@ -288,10 +297,15 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     $('#sign-in-create-account').hidden = signedIn || signupMode || (!!entry && !missingAccount);
     $('#sign-in-create-account').className = missingAccount ? 'primary' : 'text-link';
     $('#sign-in-create-account').disabled = busy;
-    $('#sign-in-email-context').hidden = signedIn || signupMode || !entry;
-    $('#sign-in-selected-email').textContent = entry?.identifier || entry?.email || (entry?.username ? `@${entry.username}` : '');
+    const shownId = entry?.identifier || entry?.email || (entry?.username ? `@${entry.username}` : '');
+    $('#sign-in-email-context').hidden = signedIn || signupMode || !entry || entry?.step === 'password';
+    $('#sign-in-selected-email').textContent = shownId;
     $('#account-email-confirm-form').hidden = signedIn || entry?.step !== 'code';
-    $('#account-sign-in-form').hidden = signedIn || entry?.step !== 'password';
+    const showPassword = !signedIn && entry?.step === 'password';
+    $('#account-sign-in-form').hidden = !showPassword;
+    // Write the confirmed identifier once. Later paints must not touch the password field.
+    if (showPassword) { if (!passwordStepReady) { passwordStepReady = true; $('#sign-in-account').value = shownId; } }
+    else if (passwordStepReady) { passwordStepReady = false; $('#sign-in-account').value = ''; }
     $('#sign-in-recover').hidden = signedIn || entry?.step !== 'password';
     $('#sign-in-recover').disabled = busy;
     $('#sign-in-email-preview').hidden = signedIn || entry?.step !== 'code' || state.email_delivery !== 'mock';
@@ -521,6 +535,7 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     renderCode();
     onAccountState(state);
     if (['account/create','account/terms'].includes(route) && state.configured && !termsAttempted) void loadTerms();
+    scheduleSignInRecheck();
     if (route === 'identity/setup' && signedIn && !earned[1] && !busy && !document.hidden && identityEntryEpoch !== viewEpoch) {
       identityEntryEpoch = viewEpoch;
       queueMicrotask(() => { if (route === 'identity/setup' && !document.hidden && account.snapshot().state === 'signed_in') void beginCapture('requester'); });
@@ -700,13 +715,15 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
   function form(id, action, validate = () => true) {
     $(id).addEventListener('submit', event => { event.preventDefault();
       if (busy || !validate()) return;
+      const node = $(id);
       // Copy only for the duration of this action; clear all secret controls even on errors.
-      const values = Object.fromEntries([...$(id).querySelectorAll('input')].map(input => [input.id,input.type === 'checkbox' ? input.checked : input.value]));
+      const values = Object.fromEntries([...node.querySelectorAll('input')].map(input => [input.id,input.type === 'checkbox' ? input.checked : input.value]));
       clearSecrets({preserveTerms:id === '#account-create-form'});
-      for (const input of $(id).querySelectorAll('input[type="checkbox"]')) if (input.id !== 'account-create-reviewed') input.checked = false;
+      for (const input of node.querySelectorAll('input[type="checkbox"]')) if (input.id !== 'account-create-reviewed') input.checked = false;
       run((go, announce) => action(values, go, announce));
     });
   }
+  const focusSignIn = target => { if (target?.isConnected) target.focus(); };
   form('#account-create-form', async (values, go) => {
     workflow.cancel();
     const entry = account.snapshot().entry;
@@ -724,10 +741,10 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     await go(account.snapshot().state === 'confirmed' ? 'account/ready' : 'account/confirm');
   },validateSignup);
   const entryError = error => new Error(['email_invalid','username_invalid','identifier_invalid'].includes(error.code) ? 'Enter a valid email or username.'
-    : error.code === 'confirmation_invalid' ? 'Enter all 8 code characters.' : 'Could not continue. Try again or go Back.');
+    : error.code === 'confirmation_invalid' ? 'Enter all 8 code characters.' : 'Could not continue. Go back and try again.');
   const signInError = error => new Error(['email_invalid','username_invalid','identifier_invalid'].includes(error.code) ? 'Enter a valid email or username.'
     : error.code === 'password_invalid' ? 'Enter your password.' : error.code === 'invalid_authorization'
-    ? 'Check your email or username and password.' : 'Sign-in unavailable. Try again.');
+    ? 'Check your email or username and password.' : 'Could not sign in. Go back and try again.');
   form('#account-email-form', async (values,go) => {
     workflow.cancel();
     if (!signupMode) {
@@ -755,7 +772,7 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     if (route !== 'account/sign-in') return;
     const step = account.snapshot().entry?.step;
     enterEmailStep(step === 'code' ? 'code' : step === 'missing' ? 'missing' : 'password'); message('');
-    (step === 'missing' ? $('#sign-in-create-account') : step === 'code' ? codeInput : $('#sign-in-password')).focus();
+    focusSignIn(step === 'missing' ? $('#sign-in-create-account') : step === 'code' ? codeInput : $('#sign-in-password'));
   });
   $('#sign-in-create-account').addEventListener('click',() => {
     if (busy || route !== 'account/sign-in' || account.snapshot().state === 'signed_in') return;
@@ -770,7 +787,7 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     catch (error) { throw entryError(error); }
     message('');
     if (account.snapshot().entry?.step === 'enrollment') await go('account/create',true);
-    else { signupMode = false; update(); $('#sign-in-password').focus(); }
+    else { signupMode = false; update(); focusSignIn($('#sign-in-password')); }
   });
   for (const event of ['input','focus','blur','keyup','select']) codeInput.addEventListener(event, () => {
     if (event === 'input') codeInput.value = codeInput.value.replace(/[^0-9a-f]/gi,'').slice(0,8).toUpperCase();
@@ -949,10 +966,27 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
   $('#account-discard-session').addEventListener('click', async () => {
     stopCamera(); workflow.cancel(); clearSecrets(); account.discardSession(); await navigate('account/sign-in'); message('Local session removed. Server sign-out and stopped work remain unconfirmed.');
   });
-  async function connect() {
-    connecting = true; update();
+  async function connect(quiet) {
+    if (!quiet) { connecting = true; update(); }
     try { if (!await transport.available()) throw new Error('Local account service unavailable.'); await account.configure(); await account.restore(); }
-    finally { connecting = false; update(); }
+    finally { if (!quiet) connecting = false; update(); }
+  }
+  function scheduleSignInRecheck() {
+    const state = account.snapshot();
+    const waiting = !document.hidden && route === 'account/sign-in' && state.state !== 'signed_in' && !state.configured && !connecting && !signInRechecking;
+    if (!waiting) { if (signInRecheck) { clearTimeout(signInRecheck); signInRecheck = 0; } return; }
+    if (signInRecheck) return;
+    signInRecheck = setTimeout(() => {
+      signInRecheck = 0;
+      const current = account.snapshot();
+      if (document.hidden || route !== 'account/sign-in' || current.state === 'signed_in' || current.configured) return;
+      const identifier = current.entry?.step === 'password' ? current.entry.identifier : '';
+      signInRechecking = true;
+      connect(true).then(() => {
+        const next = account.snapshot();
+        if (identifier && route === 'account/sign-in' && next.configured && next.entry?.identifier === identifier) return account.beginSignIn({identifier});
+      }).catch(() => {}).finally(() => { signInRechecking = false; scheduleSignInRecheck(); });
+    }, 5000);
   }
   function checkStatus(quiet = false) {
     if (statusCheckPromise) return statusCheckPromise;
@@ -1145,7 +1179,7 @@ export function startOnboarding(root, {navigate, closeTerms = () => navigate('ac
     setSettingsOpen($('#options-panel').open);
   });
   window.addEventListener('nonverba:camera-stop', background);
-  window.addEventListener('pagehide', () => { reviewer.clear({preserveOperation:false}); reviewerView.clear(); setSettingsOpen(false); stopCamera(); workflow.cancel(); clearSecrets(); account.cancel(); account.discardSession(true); });
+  window.addEventListener('pagehide', () => { if (signInRecheck) { clearTimeout(signInRecheck); signInRecheck = 0; } reviewer.clear({preserveOperation:false}); reviewerView.clear(); setSettingsOpen(false); stopCamera(); workflow.cancel(); clearSecrets(); account.cancel(); account.discardSession(true); });
   update();
   connect().catch(() => {});
   return Object.freeze({guard,render,setSettingsOpen,restoreEmailStep});

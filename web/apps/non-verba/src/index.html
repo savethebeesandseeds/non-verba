@@ -92,6 +92,7 @@
         <h2 id="mode-confirm-title">Change to Operator mode?</h2>
         <p id="mode-confirm-note">A requester asks for the work.<br>An operator does the work.</p>
       </div>
+      <label class="check-choice"><input id="mode-confirm-skip" type="checkbox"><span>Don't ask again</span></label>
       <div class="mode-confirm-actions">
         <button id="mode-confirm-cancel" class="secondary" type="button">Not now</button>
         <button id="mode-confirm-accept" class="primary" type="button" autofocus>Change</button>
@@ -111,6 +112,10 @@
         <div id="home-figure"><img id="home-logo" src="branding/home-succulent.webp" width="96" height="96" alt=""><p id="home-mode-hint">Requester</p></div>
         <p id="home-other-draft" hidden></p>
         <button id="home-sign-in" class="primary" type="button" data-navigate="account/sign-in">Sign in</button>
+        <button id="home-feed-hint" type="button" hidden aria-expanded="false" aria-controls="home-feed">Swipe up</button>
+      </section>
+      <section id="home-feed" hidden aria-label="Feed" tabindex="-1">
+        <div class="home-feed-sheet"><div id="home-feed-list"><p>Nothing is listed yet.</p></div></div>
       </section>
 
       <section id="api-access-screen" class="screen" data-view="services/api" aria-label="API key management preview" hidden>
@@ -186,7 +191,7 @@
             <button id="account-email-confirm-submit" class="primary" type="submit">Continue</button>
           </form>
           <details id="sign-in-email-preview" class="email-preview" hidden><summary>Email preview</summary><div><p class="small-note">Preview only · no email sent</p><output id="sign-in-preview-code" aria-label="Preview email code"></output><div class="preview-actions"><button id="sign-in-preview-use" class="text-link" type="button" hidden>Use code</button><button id="sign-in-preview-copy" class="text-link" type="button" hidden>Copy code</button></div><p id="sign-in-copy-status" class="small-note" role="status" aria-live="polite" hidden></p><label for="sign-in-copy-fallback" class="visually-hidden">Email code to copy</label><input id="sign-in-copy-fallback" data-secret readonly autocomplete="off" spellcheck="false" hidden></div></details>
-          <form id="account-sign-in-form" autocomplete="on" novalidate hidden><div class="field"><label for="sign-in-password">Password</label><input id="sign-in-password" name="password" type="password" maxlength="1024" autocomplete="current-password"></div><button id="account-sign-in-submit" class="primary" type="submit">Sign in</button></form>
+          <form id="account-sign-in-form" autocomplete="on" novalidate hidden><input id="sign-in-account" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" tabindex="-1" aria-label="Email or username"><div class="field"><label for="sign-in-password">Password</label><input id="sign-in-password" name="password" type="password" maxlength="1024" autocomplete="current-password"></div><button id="account-sign-in-submit" class="primary" type="submit">Sign in</button></form>
           <button id="sign-in-recover" class="text-link" type="button" hidden>Forgot password</button>
         </div>
         <div data-onboarding-view="account/confirm" hidden>

@@ -145,7 +145,7 @@ internal class AccountTransport(
             "GET" -> path in setOf("/v1/accounts/capabilities", "/v1/accounts/terms", "/v1/account/context", "/v1/account/devices", DEVICES, "/readyz", "/dev-oidc/jwks",
                 "/dev-oidc/.well-known/openid-configuration", "$IDENTITY/notice", "$IDENTITY/status") || IDENTITY_OPERATION.matches(path) || reviewRead(path) || path.startsWith("/dev-oidc/authorize?")
             "POST" -> path in setOf("/v1/accounts/enrollments", "/v1/accounts/enrollments/status",
-                "/v1/accounts/entry/start", "/v1/accounts/entry/confirm",
+                "/v1/accounts/entry/start", "/v1/accounts/entry/confirm", "/v1/accounts/presence",
                 "/v1/accounts/enrollments/confirm", "/v1/accounts/recovery/start",
                 "/v1/accounts/recovery/status", "/v1/accounts/recovery/finish",
                 "/v1/accounts/mock-mail", "/v1/account/deletion", "/v1/account/deletion/status",

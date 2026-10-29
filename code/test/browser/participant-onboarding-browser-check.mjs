@@ -957,7 +957,7 @@ async function noSensitiveSideEffects() {
   await stableUrl();
 }
 async function retained() {
-  const entries = await page.evaluate(() => Object.entries(localStorage).filter(([key]) => !['nonverba-session','nonverba-mode','nonverba-theme'].includes(key)));
+  const entries = await page.evaluate(() => Object.entries(localStorage).filter(([key]) => !['nonverba-session','nonverba-mode','nonverba-mode-prompt','nonverba-theme'].includes(key)));
   assert.deepEqual(entries, [], 'Passwords, selected image bytes, image URLs and other records stay out of local storage.');
   const saved = await page.evaluate(() => localStorage.getItem('nonverba-session'));
   if (saved) {
@@ -973,7 +973,7 @@ async function layout(label) {
     const panel = document.querySelector('#reviewer-screen:not([hidden])') || document.querySelector('[data-onboarding-view]:not([hidden])');
     return {viewport:document.documentElement.scrollWidth <= innerWidth + 1,
       panel:panel.scrollWidth <= panel.clientWidth + 1,
-      labelled:[...panel.querySelectorAll('input:not([type="hidden"]),select,textarea')].every(input => input.labels?.length > 0)};
+      labelled:[...panel.querySelectorAll('input:not([type="hidden"]),select,textarea')].every(input => input.labels?.length > 0 || input.getAttribute('aria-label'))};
   });
   assert.deepEqual(state, {viewport:true, panel:true, labelled:true}, 'Readable, labelled onboarding: ' + label);
   for (const element of await page.locator('[data-onboarding-view]:visible button:visible,#reviewer-screen:visible button:visible').all()) {
@@ -1091,6 +1091,9 @@ async function emailEntry(identifier=EMAIL, expected='password', capture=false) 
     assert.equal(await page.locator('#view-title').textContent(),'Sign in');
     assert.doesNotMatch(await page.locator('#view-description').textContent(),/account found|existing account|code|confirm.*email/i);
     assert.deepEqual(await page.locator('#account-sign-in-form label').allTextContents(),['Password']);
+    assert.equal(await page.locator('#sign-in-account').inputValue(),shown);
+    assert.equal(await page.locator('#sign-in-account').evaluate(element => element.readOnly),false);
+    assert.equal(await page.locator('#account-sign-in-form input[name="username"]').getAttribute('autocomplete'),'username');
     assert.equal((await page.locator('#sign-in-selected-email').textContent()).trim(),shown);
     if (capture) { await layout('320px / 200% password'); await screenshot('password-sign-in-large-text'); }
   }
@@ -1656,7 +1659,7 @@ try {
     }
     const setItem = Storage.prototype.setItem;
     Storage.prototype.setItem = function (...args) {
-      if (args[0] === 'nonverba-session' || args[0] === 'nonverba-mode' || args[0] === 'nonverba-theme') return setItem.apply(this, args);
+      if (args[0] === 'nonverba-session' || args[0] === 'nonverba-mode' || args[0] === 'nonverba-mode-prompt' || args[0] === 'nonverba-theme') return setItem.apply(this, args);
       note('Storage.setItem'); return setItem.apply(this, args);
     };
     window.__captureTracks = [];
@@ -2108,6 +2111,71 @@ try {
     await page.evaluate(()=>window.dispatchEvent(new Event('online')));
     assert.equal(await page.locator('body').getAttribute('data-home-attention'),'off',
       'An ordinary network status refresh cannot replay the consumed signed-in arrival cue.');
+    assert.equal(await page.locator('#home-feed-hint').isHidden(), false, 'A signed-in Home offers the feed without an identity stamp.');
+    await page.locator('#home-feed-hint').click();
+    await page.locator('.feed-sentence').first().waitFor({state:'visible'});
+    assert.equal(await page.locator('#home-feed-title, #home-feed-view').count(), 0);
+    assert.equal(await page.locator('#app-credit').isHidden(), true, 'The landing credit stays off the open feed.');
+    assert.equal(await page.locator('#home-figure').evaluate(element => getComputedStyle(element).opacity), '0');
+    assert.equal(await page.locator('#home-figure').getAttribute('aria-hidden'), 'true');
+    assert.equal(await page.locator('#home-feed-list').getAttribute('data-feed-source'), 'sample');
+    assert.equal((await page.locator('#home-feed-sample-note').innerText()).trim(), 'Samples. These are not platform activity.');
+    assert.equal(await page.locator('.feed-sample').count(), 4);
+    assert.deepEqual(await page.locator('.feed-card').evaluateAll(cards => cards.map(card => card.querySelectorAll('.feed-chart').length)), [0, 1, 1, 1]);
+    assert.equal(await page.locator('.feed-card .feed-sentence').count(), 1, 'A chart post does not also carry the sentence.');
+    assert.match(await page.locator('.feed-sentence').first().innerText(), /^\d+ requests for .+ in .+\.$/);
+    assert.deepEqual(await page.locator('.feed-card').evaluateAll(cards => cards.map(card => ((card.getAttribute('aria-label') || card.querySelector('.feed-sentence')?.textContent || '').match(/for (.+) in /) || [])[1]).sort()), ['Fourth sample', 'Sample branch', 'Second sample', 'Third sample']);
+    const feedOrder = await page.locator('.feed-card, .feed-end').evaluateAll(nodes => nodes.map(node => (node.getAttribute('aria-label') || node.innerText).replace(/\s+/g, ' ').trim()));
+    const feedAt = () => page.locator('#home-feed-list').evaluate(list => {
+      const index = Number(list.dataset.feedIndex);
+      const child = list.children[index];
+      return {index, text:(child?.getAttribute('aria-label') || child?.innerText || '').replace(/\s+/g, ' ').trim()};
+    });
+    assert.deepEqual(await feedAt(), {index:0, text:feedOrder[0]});
+    assert.match((await page.locator('.feed-end').innerText()).replace(/\s+/g, ' '), /You have seen everything listed here/);
+    assert.equal(await page.locator('#home-feed-close').count(), 0);
+    assert.equal(await page.locator('.feed-icon').count(), 5);
+    assert.equal(await page.locator('.feed-card, .feed-end').evaluateAll(nodes => nodes.every(node => node.scrollHeight <= node.clientHeight + 1 && node.clientHeight > 0)), true);
+    const moveFeed = async (index, delta) => {
+      await page.waitForTimeout(120);
+      await page.mouse.wheel(0, delta);
+      await page.waitForFunction(expected => document.getElementById('home-feed-list').dataset.feedIndex === String(expected), index);
+      assert.deepEqual(await feedAt(), {index, text:feedOrder[index]}, 'Down and up walk the same queue.');
+    };
+    await page.evaluate(() => {
+      const notch = (deltaY, deltaMode = 0) => document.dispatchEvent(new WheelEvent('wheel', {deltaY, deltaMode, bubbles:true, cancelable:true}));
+      notch(4); notch(8); notch(10); notch(100); notch(400);
+    });
+    await page.waitForFunction(() => document.getElementById('home-feed-list').dataset.feedIndex === '1');
+    assert.deepEqual(await feedAt(), {index:1, text:feedOrder[1]}, 'Small wheel movements add up to one step.');
+    await page.waitForTimeout(120);
+    await page.evaluate(() => document.dispatchEvent(new WheelEvent('wheel', {deltaY:1, deltaMode:1, bubbles:true, cancelable:true})));
+    await page.waitForFunction(() => document.getElementById('home-feed-list').dataset.feedIndex === '2');
+    assert.deepEqual(await feedAt(), {index:2, text:feedOrder[2]}, 'A mouse notch moves one post without moving the pointer.');
+    await page.evaluate(() => {
+      [46, 44, 38, 26, 16, 8, 4, 2, 1].forEach(deltaY => document.dispatchEvent(new WheelEvent('wheel', {deltaY, bubbles:true, cancelable:true})));
+    });
+    assert.equal(await page.locator('#home-feed-list').getAttribute('data-feed-index'), '2', 'A smooth-scroll tail stays on the same post.');
+    await page.locator('#home-feed').hover();
+    await moveFeed(3, 500);
+    await moveFeed(2, -120);
+    await moveFeed(1, -120);
+    await moveFeed(0, -120);
+    await page.waitForTimeout(120);
+    await page.mouse.wheel(0, -120);
+    await page.locator('#home-feed').waitFor({state:'hidden'});
+    await page.locator('#mode-switch').click();
+    await page.locator('#mode-confirm-accept').click();
+    await page.locator('#home-feed-hint').click();
+    await page.locator('.feed-sentence').first().waitFor({state:'visible'});
+    assert.match(await page.locator('.feed-sentence').first().innerText(), /operator/);
+    assert.equal(await page.locator('#app-credit').isHidden(), true);
+    await page.locator('#home-feed').hover();
+    await page.mouse.wheel(0, -120);
+    await page.locator('#home-feed').waitFor({state:'hidden'});
+    await page.locator('#mode-switch').click();
+    await page.locator('#mode-confirm-accept').click();
+    assert.equal((await page.locator('#home-mode-hint').innerText()).trim(), 'Requester');
     await page.emulateMedia({reducedMotion:'reduce'});
     assert.equal(await page.locator('#sign-in-password').inputValue(),'');
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),false);
@@ -2232,6 +2300,17 @@ try {
     await signIn();
   });
 
+  await check('a password already placed in the field is used for sign-in', async () => {
+    await signOut(); await emailEntry();
+    const sameField = await page.locator('#sign-in-password').evaluate((input, password) => {
+      const field = input;
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, password);
+      return field === document.getElementById('sign-in-password') && field.value === password;
+    }, PASSWORD);
+    assert.equal(sameField, true, 'The password step keeps the field the keyboard vault fills.');
+    await submitForm('account-sign-in-form'); await view('home');
+  });
+
   await check('username and email sign-in require only a password and disclose no account or contact before authentication', async () => {
     await signOut(); await signInPage();
     const username=service.enrollmentUsername, shown='@'+username;
@@ -2267,7 +2346,7 @@ try {
     await privatePasswordStep(shown);
     const beforeDeviceProof=service.signinProofs.length;
     service.mode='username-context-mismatch';
-    await fillSignIn(shown); await submitForm('account-sign-in-form'); await alertShown(/^Sign-in unavailable\. Try again\.$/);
+    await fillSignIn(shown); await submitForm('account-sign-in-form'); await alertShown(/^Could not sign in\. Go back and try again\.$/);
     await privatePasswordStep(shown);
     assert.equal(service.signinProofs.length,beforeDeviceProof,'A mismatched authenticated username is rejected before device proof or contact disclosure.');
     service.mode='normal';
@@ -2602,17 +2681,17 @@ try {
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true);
     const count = path => service.journal.filter(item=>item.path===path).length;
     let before = count('/dev-oidc/token'); service.mode = 'wrong-state';
-    await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Sign-in unavailable\. Try again\.$/);
+    await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Could not sign in\. Go back and try again\.$/);
     assert.equal(count('/dev-oidc/token'),before,'A mismatched callback state must stop before token exchange.');
     before = count('/v1/account/context'); service.mode = 'wrong-nonce';
-    await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Sign-in unavailable\. Try again\.$/);
+    await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Could not sign in\. Go back and try again\.$/);
     assert.equal(count('/v1/account/context'),before,'An invalid signed ID-token nonce must stop before current context.');
     service.mode = 'context-denial';
     await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Check your email or username and password\.$/);
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true,'Tokens alone must not establish current account authority.');
     await settingsAccess(false);
     service.mode = 'unsafe-counter';
-    await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Sign-in unavailable\. Try again\.$/);
+    await fillSignIn(); await submitForm('account-sign-in-form'); await alertShown(/^Could not sign in\. Go back and try again\.$/);
     assert.equal(await page.locator('#enrollment-begin').isDisabled(),true,'An out-of-range context counter cannot mint authority.');
     service.mode = 'normal';
     const gate = service.delay('/v1/account/context');

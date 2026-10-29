@@ -262,17 +262,30 @@ const workspaceModes = {
   requester:{mark:'branding/home-succulent.webp', next:'operator', label:'Switch to Operator', name:'Requester mode', hint:'Requester'},
   operator:{mark:'branding/home-sprout.webp', next:'requester', label:'Switch to Requester', name:'Operator mode', hint:'Operator'}
 };
+let workspaceModeMemory = '';
 function storedWorkspaceMode() {
   try {
     const value = localStorage.getItem('nonverba-mode');
     return value === 'requester' || value === 'operator' ? value : '';
-  } catch { return ''; }
+  } catch { return workspaceModeMemory; }
 }
 function activeWorkspaceMode() {
   return storedWorkspaceMode() || 'requester';
 }
 function rememberWorkspaceMode(mode) {
-  try { localStorage.setItem('nonverba-mode', mode); } catch {}
+  workspaceModeMemory = mode === 'requester' || mode === 'operator' ? mode : '';
+  try { localStorage.setItem('nonverba-mode', mode); }
+  catch { /* This visit keeps the choice when the phone has no DOM storage. */ }
+}
+let modePromptMemory = '';
+function modePromptSkipped() {
+  try { return localStorage.getItem('nonverba-mode-prompt') === 'skip'; }
+  catch { return modePromptMemory === 'skip'; }
+}
+function rememberModePrompt() {
+  modePromptMemory = 'skip';
+  try { localStorage.setItem('nonverba-mode-prompt', 'skip'); }
+  catch { /* This visit keeps the choice when the phone has no DOM storage. */ }
 }
 function routeWorkspaceMode(route) {
   const role = String(route || '').split('/')[0];
@@ -289,8 +302,8 @@ function paintWorkspaceMode() {
     if (image && image.getAttribute('src') !== src) image.setAttribute('src', src);
   }
   document.getElementById('mode-switch')?.setAttribute('aria-label', choice.label);
-  const homeHint = document.getElementById('home-mode-hint');
-  if (homeHint && homeHint.textContent !== choice.hint) homeHint.textContent = choice.hint;
+  const hint = document.getElementById('home-mode-hint');
+  if (hint && hint.textContent !== choice.hint) hint.textContent = choice.hint;
   const dashboardSwitch = document.getElementById('dashboard-mode-switch');
   const dashboardName = document.getElementById('dashboard-mode-name');
   const confirmTitle = document.getElementById('mode-confirm-title');
@@ -306,6 +319,7 @@ function paintWorkspaceMode() {
     else button.removeAttribute('autofocus');
   }
   for (const section of document.querySelectorAll('[data-workspace-mode]')) section.hidden = section.dataset.workspaceMode !== mode;
+  paintFeed();
 }
 
 async function startPreview() {
@@ -313,7 +327,7 @@ async function startPreview() {
   const $ = (selector) => document.querySelector(selector);
   const workspace = createWorkspace();
   let currentRoute = '';
-  let modeMotion = false;
+  let modeMotion = false, modeSwipeHandoff = false;
   let currentPanel = null;
   let afterPanelClose = null;
   let workflowAccountState = null;
@@ -692,6 +706,13 @@ async function startPreview() {
     if (route !== currentRoute) { showKeyOptions(false); keyOptions.reset(); keyName.setCustomValidity(''); }
     currentRoute = route;
     document.body.classList.toggle('home-view', route === 'home');
+    if (route !== 'home') {
+      document.body.classList.remove('feed-open');
+      const homeFeed = $('#home-feed');
+      if (homeFeed) homeFeed.hidden = true;
+      $('#home-feed-hint')?.setAttribute('aria-expanded', 'false');
+      $('#home-figure')?.removeAttribute('aria-hidden');
+    }
     document.body.classList.toggle('services-view', role === 'services');
     document.body.classList.toggle('compact-account-view', ['account/sign-in','account/create','account/terms','account/delete-retention'].includes(route));
     document.body.classList.toggle('compact-identity-view', role === 'identity');
@@ -811,6 +832,8 @@ async function startPreview() {
     note.textContent = waiting ? (other === 'request' ? 'A request draft is waiting.' : 'An operation draft is waiting.') : '';
     note.hidden = !waiting;
     if (modeMotion && !reducedMotion.matches) {
+      const figure = $('#home-figure');
+      if (figure) { figure.style.transform = ''; figure.classList.remove('mode-swipe-settle'); }
       document.body.classList.remove('mode-changed');
       void document.body.offsetWidth;
       document.body.classList.add('mode-changed');
@@ -830,6 +853,8 @@ async function startPreview() {
   function openModePrompt() {
     const dialog = $('#mode-confirm');
     if (!dialog || dialog.open) return;
+    const skip = $('#mode-confirm-skip');
+    if (skip) skip.checked = false;
     if (!reducedMotion.matches) {
       dialog.classList.remove('mode-prompt-arrive');
       void dialog.offsetWidth;
@@ -839,19 +864,95 @@ async function startPreview() {
   }
   function acceptModePrompt() {
     const dialog = $('#mode-confirm');
+    const skip = Boolean($('#mode-confirm-skip')?.checked);
+    modeSwipeHandoff = true;
     if (dialog?.open) dialog.close();
+    else modeSwipeHandoff = false;
+    if (skip) rememberModePrompt();
     switchWorkspaceMode();
   }
-  for (const id of ['mode-switch', 'dashboard-mode-switch']) $('#' + id).addEventListener('click', openModePrompt);
+  function requestModeChange() {
+    if (modePromptSkipped()) switchWorkspaceMode();
+    else openModePrompt();
+  }
+  for (const id of ['mode-switch', 'dashboard-mode-switch']) $('#' + id).addEventListener('click', requestModeChange);
   $('#mode-confirm-cancel').addEventListener('click', () => $('#mode-confirm').close());
   $('#mode-confirm-accept').addEventListener('click', acceptModePrompt);
   $('#mode-confirm').addEventListener('click', (event) => {
     const dialog = event.currentTarget;
     if (event.target !== dialog) return;
+    // Some phone WebViews report the dialog as the click target for a control inside it.
+    const hit = document.elementFromPoint(event.clientX, event.clientY);
+    const skipBox = document.getElementById('mode-confirm-skip');
+    if (skipBox && (hit === skipBox || skipBox.closest('label')?.contains(hit))) { skipBox.checked = !skipBox.checked; return; }
+    if (hit?.closest?.('#mode-confirm-accept')) { acceptModePrompt(); return; }
+    if (hit?.closest?.('#mode-confirm-cancel')) { dialog.close(); return; }
     const bounds = dialog.getBoundingClientRect();
     if (event.clientX < bounds.left || event.clientX > bounds.right
         || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
   });
+  $('#mode-confirm').addEventListener('close', () => {
+    if (modeSwipeHandoff) { modeSwipeHandoff = false; return; }
+    const figure = $('#home-figure');
+    if (!figure?.style.transform) return;
+    figure.classList.add('mode-swipe-settle');
+    figure.style.transform = '';
+  });
+  document.getElementById('home-screen')?.addEventListener('dragstart', event => event.preventDefault());
+  const homeFigure = document.getElementById('home-figure');
+  let modeSwipe = null, modeSwipeGen = 0;
+  const modeSwipeHome = () => document.body.classList.contains('home-view')
+    && !document.body.classList.contains('panel-open')
+    && !document.body.classList.contains('feed-open')
+    && !document.querySelector('dialog[open]');
+  const placeFigure = (x, settle) => {
+    if (!homeFigure || reducedMotion.matches) return;
+    homeFigure.classList.toggle('mode-swipe-settle', !!settle);
+    if (settle) void homeFigure.offsetWidth;
+    const shift = Math.max(-200, Math.min(200, x || 0));
+    homeFigure.style.transform = shift ? 'translateX(' + shift + 'px)' : '';
+  };
+  document.addEventListener('pointerdown', event => {
+    modeSwipe = null;
+    if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    if (!modeSwipeHome() || !event.target?.closest?.('#home-screen')) return;
+    modeSwipeGen += 1;
+    modeSwipe = {id: event.pointerId, x: event.clientX, y: event.clientY};
+    placeFigure(0, false);
+  }, {passive:true});
+  document.addEventListener('pointermove', event => {
+    if (!modeSwipe || event.pointerId !== modeSwipe.id || !modeSwipeHome()) return;
+    placeFigure(event.clientX - modeSwipe.x, false);
+  }, {passive:true});
+  document.addEventListener('pointerup', event => {
+    const start = modeSwipe, gen = modeSwipeGen;
+    modeSwipe = null;
+    if (!start || event.pointerId !== start.id) return;
+    const dx = event.clientX - start.x, dy = event.clientY - start.y;
+    const commit = modeSwipeHome() && Math.abs(dx) >= 88 && Math.abs(dx) > Math.abs(dy) * 1.4;
+    if (!commit) { placeFigure(0, true); return; }
+    const swallow = click => { document.removeEventListener('click', swallow, true); click.preventDefault(); click.stopPropagation(); };
+    document.addEventListener('click', swallow, true);
+    const drop = () => document.removeEventListener('click', swallow, true);
+    document.addEventListener('pointerdown', drop, {capture:true, once:true});
+    setTimeout(drop, 700);
+    if (reducedMotion.matches || !homeFigure) { requestModeChange(); return; }
+    placeFigure(Math.sign(dx) * 200, true);
+    let finished = false;
+    const finish = ev => {
+      if (finished || gen !== modeSwipeGen || (ev && (ev.target !== homeFigure || ev.propertyName !== 'transform'))) return;
+      finished = true;
+      homeFigure.removeEventListener('transitionend', finish);
+      requestModeChange();
+    };
+    homeFigure.addEventListener('transitionend', finish);
+    setTimeout(finish, 320);
+  }, {passive:true});
+  document.addEventListener('pointercancel', event => {
+    if (modeSwipe?.id !== event.pointerId) return;
+    modeSwipe = null;
+    placeFigure(0, true);
+  }, {passive:true});
 
   document.addEventListener('click', (event) => {
     const link = event.composedPath().find(node => node.matches?.('button[data-navigate]'));
@@ -932,22 +1033,261 @@ function installTheme() {
       button.querySelector('use')?.setAttribute('href', '#' + (theme === 'dark' ? 'moon' : 'sun'));
     }
   };
-  paint(stored());
-  media.addEventListener('change', () => { if (stored() === 'system') paint('system'); });
+  let choice = stored();
+  paint(choice);
+  media.addEventListener('change', () => { if (choice === 'system') paint('system'); });
   document.getElementById('theme-toggle')?.addEventListener('click', () => {
-    const choice = stored();
     const system = systemTheme();
-    const next = choice === 'system' ? (system === 'dark' ? 'light' : 'dark') : choice === system ? 'system' : system;
+    const next = choice === 'system' || choice === system ? (system === 'dark' ? 'light' : 'dark') : system;
     try {
       if (next === 'system') localStorage.removeItem(key);
       else localStorage.setItem(key, next);
     } catch { /* the choice still applies for this visit */ }
+    choice = next;
     paint(next);
   });
+}
+
+const feedSampleRows = Object.freeze([
+  {branch:'Sample branch', place:'Sample place', requests:3, operators:1, series:[1,2,3]},
+  {branch:'Second sample', place:'Sample place', requests:1, operators:4, series:[4,2,1]},
+  {branch:'Third sample', place:'Other sample place', requests:6, operators:2, series:[2,4,6]},
+  {branch:'Fourth sample', place:'Sample place', requests:2, operators:2, series:[2,2,2]}
+]);
+function feedActivity() { return []; }
+let feedIndex = 0, feedQueueKey = '', feedQueueOrder = [];
+function feedOrdered(rows) {
+  const key = rows.map(row => row.branch + '\0' + row.place + '\0' + row.requests).join('\n');
+  if (key !== feedQueueKey) {
+    feedQueueKey = key;
+    const order = rows.map((_, index) => index);
+    for (let index = order.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(Math.random() * (index + 1));
+      [order[index], order[swap]] = [order[swap], order[index]];
+    }
+    feedQueueOrder = order;
+  }
+  return feedQueueOrder.map(index => rows[index]);
+}
+function feedPlace(instant) {
+  const pages = document.getElementById('home-feed-list');
+  if (!pages) return;
+  pages.dataset.feedIndex = String(feedIndex);
+  if (instant) pages.classList.add('feed-jump');
+  pages.style.setProperty('--feed-at', feedIndex);
+  if (instant) { void pages.offsetWidth; pages.classList.remove('feed-jump'); }
+}
+function feedSource() {
+  const activity = feedActivity();
+  if (activity.length) return {sample:false, rows:activity};
+  const host = location.hostname;
+  if (host === '127.0.0.1' || host === 'localhost' || host === '[::1]' || self.NonverbaAccount) return {sample:true, rows:feedSampleRows};
+  return {sample:false, rows:[]};
+}
+function feedSentence(row, mode) {
+  const requests = row.requests + ' request' + (row.requests === 1 ? '' : 's');
+  const where = ' for ' + row.branch + ' in ' + row.place + '.';
+  if (mode !== 'operator') return requests + where;
+  return requests + ' and ' + row.operators + ' operator' + (row.operators === 1 ? '' : 's') + where;
+}
+function feedKind(index) {
+  return ['sentence', 'bar', 'pie', 'line'][index % 4];
+}
+function feedIcon() {
+  const icon = document.createElement('span');
+  icon.className = 'feed-icon';
+  icon.dataset.feedIcon = '';
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
+}
+function feedSvg(name, attrs) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', name);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+  return node;
+}
+function feedChart(row, kind) {
+  const svg = feedSvg('svg', {viewBox: kind === 'pie' ? '0 0 40 40' : kind === 'line' ? '0 0 72 44' : '0 0 80 56', class:'feed-chart', 'aria-hidden':'true'});
+  if (kind === 'bar') {
+    const max = Math.max(row.requests, row.operators, 1);
+    const bar = (x, value, pale) => {
+      const height = Math.round(value / max * 48);
+      svg.append(feedSvg('rect', {x, y:56 - height, width:16, height, fill:'currentColor', opacity:pale ? '.4' : '1'}));
+    };
+    bar(14, row.requests, false); bar(46, row.operators, true);
+  } else if (kind === 'pie') {
+    const total = Math.max(row.requests + row.operators, 1), dash = (row.requests / total * 100).toFixed(1);
+    const ring = pale => feedSvg('circle', {cx:20, cy:20, r:15.9, fill:'none', stroke:'currentColor', 'stroke-width':8, opacity:pale ? '.35' : '1'});
+    svg.append(ring(true));
+    const arc = ring(false);
+    arc.setAttribute('stroke-dasharray', dash + ' ' + (100 - Number(dash)).toFixed(1));
+    arc.setAttribute('transform', 'rotate(-90 20 20)');
+    svg.append(arc);
+  } else {
+    const series = row.series?.length > 1 ? row.series : [row.requests];
+    const max = Math.max(...series, 1), step = series.length === 1 ? 0 : 72 / (series.length - 1);
+    svg.append(feedSvg('polyline', {points:series.map((value, index) => (index * step).toFixed(1) + ',' + (40 - value / max * 36).toFixed(1)).join(' '), fill:'none', stroke:'currentColor', 'stroke-width':2}));
+  }
+  return svg;
+}
+function paintFeed() {
+  const list = document.getElementById('home-feed-list');
+  if (!list) return;
+  const source = feedSource(), mode = activeWorkspaceMode();
+  list.replaceChildren();
+  list.dataset.feedSource = source.rows.length ? (source.sample ? 'sample' : 'activity') : 'empty';
+  if (!source.rows.length) {
+    const empty = document.createElement('p');
+    empty.textContent = 'Nothing is listed yet.';
+    list.append(empty);
+    return;
+  }
+  feedOrdered(source.rows).forEach((row, index) => {
+    const card = document.createElement('article');
+    const kind = feedKind(index);
+    const text = feedSentence(row, mode);
+    card.className = 'feed-card';
+    card.dataset.feedKind = kind;
+    card.dataset.feedTone = String(index % 4);
+    card.append(feedIcon());
+    if (source.sample) {
+      const mark = document.createElement('p');
+      mark.className = 'feed-sample';
+      mark.textContent = 'Sample';
+      card.append(mark);
+    }
+    if (kind === 'sentence') {
+      const sentence = document.createElement('p');
+      sentence.className = 'feed-sentence';
+      sentence.textContent = text;
+      card.append(sentence);
+    } else {
+      card.setAttribute('aria-label', text);
+      card.append(feedChart(row, kind));
+      const caption = document.createElement('p');
+      caption.className = 'feed-caption';
+      caption.textContent = kind === 'line' ? 'Request counts.' : 'Requests, then operators.';
+      card.append(caption);
+    }
+    list.append(card);
+  });
+  const end = document.createElement('article');
+  end.className = 'feed-end';
+  end.append(feedIcon());
+  const copy = document.createElement('p');
+  copy.className = 'feed-end-copy';
+  copy.textContent = 'You have seen everything listed here. Thank you for looking.';
+  end.append(copy);
+  if (source.sample) {
+    const note = document.createElement('p');
+    note.id = 'home-feed-sample-note';
+    note.textContent = 'Samples. These are not platform activity.';
+    end.append(note);
+  }
+  list.append(end);
+  if (document.body.classList.contains('feed-open')) {
+    feedIndex = Math.min(feedIndex, list.children.length - 1);
+    feedPlace(true);
+  }
+}
+function installFeed() {
+  const hint = document.getElementById('home-feed-hint');
+  const feed = document.getElementById('home-feed');
+  const sheet = feed?.querySelector('.home-feed-sheet');
+  if (!hint || !feed || !sheet) return;
+  const opened = () => document.body.classList.contains('feed-open');
+  const atHome = () => document.body.classList.contains('home-view') && !document.querySelector('dialog[open]');
+  const show = open => {
+    if (open === opened() || (open && (!atHome() || hint.hidden))) return;
+    hint.setAttribute('aria-expanded', open ? 'true' : 'false');
+    const figure = document.getElementById('home-figure');
+    if (figure) { if (open) figure.setAttribute('aria-hidden', 'true'); else figure.removeAttribute('aria-hidden'); }
+    if (open) {
+      feedIndex = 0;
+      feedPlace(true);
+      feed.hidden = false;
+      void sheet.offsetWidth;
+      document.body.classList.add('feed-open');
+      feed.focus({preventScroll:true});
+    } else {
+      document.body.classList.remove('feed-open');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) feed.hidden = true;
+    }
+  };
+  const step = direction => {
+    const count = document.getElementById('home-feed-list')?.children.length || 0;
+    const next = feedIndex + direction;
+    if (next < 0) { show(false); return; }
+    if (!count || next >= count) return;
+    feedIndex = next;
+    feedPlace();
+  };
+  sheet.addEventListener('transitionend', event => {
+    if (event.target === sheet && event.propertyName === 'top' && !opened()) feed.hidden = true;
+  });
+  hint.addEventListener('click', () => { paintFeed(); show(true); });
+  document.addEventListener('keydown', event => {
+    if (!opened() || document.querySelector('dialog[open]')) return;
+    if (event.key === 'Escape') show(false);
+    else if (event.repeat) return;
+    else if (event.key === 'ArrowDown' || event.key === 'PageDown') { event.preventDefault(); step(1); }
+    else if (event.key === 'ArrowUp' || event.key === 'PageUp') { event.preventDefault(); step(-1); }
+  });
+  let touchX = 0, touchY = 0, touchList = false, wheelAt = 0, wheelBig = 0, wheelUsed = false, wheelSum = 0;
+  const wheelDelta = event => event.deltaMode === 1 ? event.deltaY * 100 : event.deltaMode === 2 ? Math.sign(event.deltaY) * 100 : event.deltaY;
+  const onWheel = event => {
+    if (!atHome() || event.ctrlKey) return;
+    const delta = wheelDelta(event), now = Date.now();
+    if (now - wheelAt > 120) { wheelUsed = false; wheelSum = 0; }
+    wheelAt = now;
+    // A notch is a few large deltas, then a tail of small ones.
+    if (Math.abs(delta) >= 50) {
+      wheelSum = 0;
+      if (now - wheelBig < 48) { wheelBig = now; return; }
+      wheelBig = now;
+      wheelUsed = true;
+      if (!opened()) { if (delta > 0) show(true); return; }
+      if (delta < 0 && feedIndex === 0) { show(false); return; }
+      step(delta > 0 ? 1 : -1);
+      return;
+    }
+    if (wheelUsed || now - wheelBig < 2000) return;
+    wheelSum += delta;
+    if (!opened()) { if (wheelSum > 40) { wheelUsed = true; wheelSum = 0; show(true); } return; }
+    if (wheelSum < 0 && feedIndex === 0) { if (wheelSum > -48) return; wheelUsed = true; wheelSum = 0; show(false); return; }
+    if (Math.abs(wheelSum) < 40) return;
+    wheelUsed = true;
+    const direction = wheelSum > 0 ? 1 : -1;
+    wheelSum = 0;
+    step(direction);
+  };
+  window.addEventListener('wheel', onWheel, {capture:true, passive:true});
+  document.addEventListener('touchstart', event => {
+    touchX = event.changedTouches[0]?.clientX || 0;
+    touchY = event.changedTouches[0]?.clientY || 0;
+    touchList = opened() && !!event.target?.closest?.('#home-feed');
+  }, {passive:true});
+  document.addEventListener('touchmove', event => {
+    if (touchList && atHome()) event.preventDefault();
+  }, {passive:false});
+  document.addEventListener('touchend', event => {
+    if (!atHome()) return;
+    const end = event.changedTouches[0];
+    const dx = (end?.clientX || touchX) - touchX;
+    const delta = touchY - (end?.clientY || touchY);
+    if (!opened()) {
+      if (Math.abs(dx) >= 88 && Math.abs(dx) > Math.abs(delta) * 1.4) return;
+      if (delta > 56) show(true);
+      return;
+    }
+    if (!touchList) return;
+    if (delta > 56) step(1);
+    else if (delta < -72) step(-1);
+  }, {passive:true});
 }
 
 if (typeof document !== 'undefined') {
   installTheme();
   paintWorkspaceMode();
+  installFeed();
   startPreview();
 }

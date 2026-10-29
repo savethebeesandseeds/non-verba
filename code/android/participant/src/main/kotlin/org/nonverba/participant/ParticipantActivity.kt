@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.CookieManager
@@ -50,15 +51,16 @@ class ParticipantActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         webView = WebView(this)
+        webView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES
         webView.setBackgroundColor(Color.rgb(246, 244, 232))
         WebView.setWebContentsDebuggingEnabled(false)
         CookieManager.getInstance().setAcceptCookie(false)
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, false)
         webView.settings.apply {
             javaScriptEnabled = true
-            // Bundled synthetic fixtures only; the shared adapter restricts its
-            // localStorage prefix. Credentials and session tokens are not stored.
-            domStorageEnabled = false
+            // Same resume record as the browser: localStorage nonverba-session.
+            // Passwords, recovery codes and photos stay out of that record.
+            domStorageEnabled = true
             allowFileAccess = false
             allowContentAccess = false
             blockNetworkLoads = true
@@ -163,6 +165,8 @@ class ParticipantActivity : Activity() {
     override fun onStart() {
         super.onStart()
         visible = true
+        // Resume before a returning vault delivers its fill.
+        if (::webView.isInitialized) webView.onResume()
         accountTransport?.start()
         loginDevice?.start()
         identityCamera?.start()
@@ -192,7 +196,8 @@ class ParticipantActivity : Activity() {
             // The Android permission overlay may pause us. Preserve only that
             // pending prompt; losing the foreground later still cancels it.
             if (!cameraPermissionInFlight || nativeCameraPermission != null) stopEnrollmentCamera()
-            if (::webView.isInitialized) webView.onPause()
+            // A password vault pauses this activity while it commits the fill.
+            // Pausing the WebView here drops that password.
         } finally {
             super.onPause()
         }
@@ -202,6 +207,7 @@ class ParticipantActivity : Activity() {
         visible = false
         try {
             stopEnrollmentCamera()
+            if (::webView.isInitialized) webView.onPause()
             accountTransport?.stop()
             loginDevice?.stop()
             recoveryExport?.stop()

@@ -29,6 +29,18 @@ platform adapters; keep protocol rules in the shared Rust authority. Browser
 checks exercise shared behavior, while Android still needs its host, lifecycle,
 permission and native-adapter checks.
 
+The browser preview and the installed APK must give the same result for the
+same shared account action. The debug Android transport accepts every account
+route the shared client and the preview relay already accept, including
+`POST /v1/accounts/presence`, which distinguishes a missing account from an
+existing one. Leaving a route out of that native list is a product bug: the
+phone can only show a generic failure while the browser shows the real outcome.
+Platform adapters cover permissions, camera capture, and the USB loopback.
+They do not change account results, wording, or navigation. The debug phone
+shows the same labeled feed samples as the local preview. Each card says
+Sample, and the sheet says they are not platform activity. A package without
+the debug account bridge stays on "Nothing is listed yet."
+
 A source edit reaches an installed phone only after rebuilding and installing
 the APK. The browser preview also needs a fresh source snapshot after edits. Run
 one preview from the unmodified main working tree; do not patch a retained
@@ -696,9 +708,11 @@ retains its development-only availability and existing confirmation flow.
 adapter's bounded refresh and principal/session binding checks, before opening
 identity setup. Failure cannot grant authority. Confirmed server sign-out clears
 the details and returns to a fresh sign-in entry. An uncertain result retains
-the separate local-forget action without claiming server revocation. Tokens and
-passwords remain memory-only; no remembered email, localStorage credential,
-device-login database or cross-reload restore is added.
+the separate local-forget action without claiming server revocation. Passwords,
+email and recovery codes stay out of storage. Closing the page keeps one
+localStorage resume record, nonverba-session, with the access token, refresh
+token, expiry, principal id and session id. A fresh open restores that account.
+Sign-out removes the record. The phone uses the same record.
 The signup entry contract retains bounded operation-owned POST start/confirm
 requests and no login authority. A password failure never chooses signup.
 The service generates eight hexadecimal code characters. Eight visible slots
@@ -976,6 +990,15 @@ Showing one current figure, with the mode switch in the header and dashboard, ra
 Naming the current mode on the dashboard raises it to 468 KiB.
 Confirming a change to the other mode raises it to 471 KiB.
 Stating account-closure retention in the draft terms, and the deletion review page, raises it to 476 KiB.
+Opening the home feed from the swipe hint raises it to 480 KiB.
+Sentences and sampled charts in the home feed raise it to 487 KiB.
+A five-second sign-in recheck while the server is unreachable raises it to 488 KiB.
+One page for each feed post, and a stop page after that buffer, raises it to 489 KiB.
+Walking that feed as one queue, down and back up through the same posts, raises it to 491 KiB.
+Capturing a password supplied by the phone vault raises it to 493 KiB.
+Keeping the Operator or Requester choice for the visit when storage is unavailable raises it to 494 KiB.
+A sideways swipe on the landing page, and a choice not to ask again, raises it to 497 KiB.
+The landing figure following that swipe raises it to 499 KiB.
 The unchanged individual image and APK limits remain 8 KiB and 8 MiB. Private
 photo responses use a separate 3 MiB JSON/base64 cap with at most 2 MiB decoded
 JPEG bytes; case details use 256 KiB, and ordinary summaries/decisions 64 KiB.

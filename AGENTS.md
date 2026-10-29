@@ -11,6 +11,11 @@
 - Use only `http://127.0.0.1:4173/` as the local participant app URL. Serve the
   application there directly; old document URLs redirect to `/`. Keep the local
   annotation CSP exception server-only and production/package HTML strict.
+- Keep the participant browser and the participant APK on one UI and one account
+  outcome. The debug native transport must allow every account route the shared
+  client and the preview relay allow. A route missing from the phone is a product
+  bug, not a platform difference. Adapters cover only what the page cannot do
+  itself, such as permissions, camera capture, and the USB loopback.
 - Inspect Git status before edits. Preserve other sessions' changes and never
   stage unrelated work. This repository owns the public applications, protocols
   and reference tools. The sibling `private-source/code/server/` is the

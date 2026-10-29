@@ -278,10 +278,10 @@ async function verifyIdToken(token, jwks, nonce) {
   try {
     const publicKey = await globalThis.crypto.subtle.importKey('jwk', {kty: 'EC', crv: 'P-256', x: key.x, y: key.y}, {name: 'ECDSA', namedCurve: 'P-256'}, false, ['verify']);
     valid = await globalThis.crypto.subtle.verify({name: 'ECDSA', hash: 'SHA-256'}, publicKey, unb64(pieces[2], 64), encode(`${pieces[0]}.${pieces[1]}`));
-  } catch { /* Invalid keys/signatures never establish identity. */ }
+  } catch { /* Unverified signatures are refused. */ }
   check(valid && object(claims) && claims.iss === ISSUER && claims.aud === CLIENT && claims.kind === 'id'
     && claims.nonce === nonce && identifier(claims.sub) && identifier(claims.sid) && identifier(claims.jti)
-    && safe(claims.iat) && safe(claims.exp) && claims.iat <= now() && claims.exp > now()
+    && safe(claims.iat) && safe(claims.exp) && claims.iat<=now()+180 && now()<claims.exp+180
     && claims.exp > claims.iat && claims.exp - claims.iat <= 300,
   'identity_token_invalid', 'The account service identity token could not be verified.'); return claims;
 }
